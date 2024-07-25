@@ -108,12 +108,7 @@ public class CommandPlot extends BaseCommand {
             for (int z = startY; z < endY; z += chunkSize) {
                 chunkBounds.setBounds(x, z, chunkSize, chunkSize);
                 if (regionPolygon.intersects(chunkBounds)) {
-                    if (CityDatabase.getClaim(new Location(player.getWorld(), x, 0, z)) == null
-                            || !Objects.equals(
-                            Objects.requireNonNull(
-                                            CityDatabase.getClaim(new Location(player.getWorld(), x, 0, z)))
-                                    .getCityName(),
-                            HCDatabase.getHomeCityToCityname(player.getUniqueId().toString()))) {
+                    if (CityDatabase.getClaim(new Location(player.getWorld(), x, 0, z)) == null || !Objects.equals(Objects.requireNonNull(CityDatabase.getClaim(new Location(player.getWorld(), x, 0, z))).getCityName(), HCDatabase.getHomeCityToCityname(player.getUniqueId().toString()))) {
                         plugin.sendMessage(player, "messages.error.plot.intersectsExistingClaim");
                         return;
                     }

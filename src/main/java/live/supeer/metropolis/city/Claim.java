@@ -17,6 +17,7 @@ public class Claim {
     private final String cityName;
     private final long claimDate;
     private final boolean outpost;
+    private final City city;
 
     public Claim(DbRow data) {
         this.claimId = data.getInt("claimId");
@@ -28,5 +29,10 @@ public class Claim {
         this.cityName = data.getString("cityName");
         this.claimDate = data.getInt("claimDate");
         this.outpost = data.get("outpost");
+        if (CityDatabase.getCity(cityName).isPresent()) {
+            this.city = CityDatabase.getCity(cityName).get();
+        } else {
+            this.city = null;
+        }
     }
 }

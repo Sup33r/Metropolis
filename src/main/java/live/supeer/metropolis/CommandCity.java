@@ -1143,6 +1143,11 @@ public class CommandCity extends BaseCommand {
                         player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
                 return;
             }
+            Claim claim = CityDatabase.getClaim(player.getLocation());
+            if (claim == null || !claim.getCity().equals(city)) {
+                plugin.sendMessage(player, "messages.error.city.set.spawn.outsideCity", "%cityname%", city.getCityName());
+                return;
+            }
             Database.addLogEntry(
                     city,
                     "{ \"type\": \"set\", \"subtype\": \"spawn\", \"from\": "
