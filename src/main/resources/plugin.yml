@@ -1,0 +1,4 @@
+name: Metropolis
+version: '${project.version}'
+main: live.supeer.metropolis.Metropolis
+api-version: '1.21'
