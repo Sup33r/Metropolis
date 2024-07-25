@@ -1,0 +1,337 @@
+messages:
+  months:
+    january: "January"
+    february: "February"
+    march: "March"
+    april: "April"
+    may: "May"
+    june: "June"
+    july: "July"
+    august: "August"
+    september: "September"
+    october: "October"
+    november: "November"
+    december: "December"
+  days:
+    yesterday: "Yesterday"
+    today: "Today"
+  block:
+    enabled: "§aBlock data mode is now enabled. Right-click with a stick or a dirt block to get the block data."
+    disabled: "§cBlock data mode is now disabled."
+  teleport: "§aTeleporting you to §2%to%§a..."
+  list:
+    goes: "§2--- §aCity teleport points (page §l%startPage% §r§aof §l%totalPages%§r§a) §2---"
+  syntax:
+    city:
+      go: "§7Syntax: /city go §nname\n§7Syntax: /city go §nname§r §7delete\n§7Syntax: /city go §nname§r §7set displayname §ndisplayname\n§7Syntax: /city go §nname§r §7set displayname -\n§7/city go §nname§r §7set accesslevel §naccesslevel\n§7/city go §nname§r §7set accesslevel -"
+      buy:
+        bonus: "§7Syntax: /city buy bonus §namount"
+        district: "§7Syntax: /city buy district §nname"
+        go: "§7Syntax: /city buy go §nname"
+        outpost: "§7Syntax: /city buy outpost"
+      set:
+        spawn: "§7Syntax: /city set spawn"
+        tax: "§7Syntax: /city set tax §npercent"
+        enter: "§7Syntax: /city set enter §nmessage"
+        exit: "§7Syntax: /city set exit §nmessage"
+        maxplotspermember: "§7Syntax: /city set maxplotspermember §namount"
+        motd: "§7Syntax: /city set motd §nmessage"
+        name: "§7Syntax: /city set name §ncityname"
+      bank:
+        deposit: "§7Syntax: /city bank +§namount§r§7 §ncity"
+        withdraw: "§7Syntax: /city bank -§namount§r§7 §nreason"
+        bank: "§7Syntax: /city bank"
+    plot:
+      toggle: "§7Syntax: /plot toggle §nanimals\n§7Syntax: /plot toggle §nmeeting\n§7Syntax: /plot toggle §nmobs\n§7Syntax: /plot toggle §npvp"
+      set:
+        rent: "§7Syntax: /plot set rent §nrent\n§7Syntax: /plot set rent -"
+        set: "§7Syntax: /plot set type §nchurch\n§7Syntax: /plot set type §nfarm\n§7Syntax: /plot set type §nshop\n§7Syntax: /plot set type §nvacation\n§7Syntax: /plot set type -\n§7Syntax: /plot set owner §nplayer\n§7Syntax: /plot set owner -\n§7Syntax: /plot set rent §nrent\n§7Syntax: /plot set rent -\n§7Syntax: /plot set name §nname\n§7Syntax: /plot set name -"
+        type: "§7Syntax: /plot set type §nchurch\n§7Syntax: /plot set type §nfarm\n§7Syntax: /plot set type §nshop\n§7Syntax: /plot set type §nvacation"
+        typeAdmin: "§7Syntax: /plot set type §njail"
+        owner: "§7Syntax: /plot set owner §nplayer\n§7Syntax: /plot set owner -"
+      expand: "§7Syntax: /plot expand §namount§r§7 §nup/down"
+      tp: "§7Syntax: /plot tp §nID"
+      market: "§7Syntax: /plot market §nprice\n§7Syntax: /plot market §n-"
+      perm: "§7Syntax: /plot perm §nplayer§r§7 +/-§nchange\n§7Syntax: /plot perm members +/-§nchange\n§7Syntax: /plot perm outsiders +/-§nchange"
+  error:
+    player:
+      notFound: "§cPlayer not found."
+      notInCity: "§cPlayer is not a member of any city."
+    city:
+      go:
+        alreadyAccessLevel: "§e%cityname% §7| §cThe teleport point already has the specified access level."
+        accessLevelTooHigh: "§e%cityname% §7| §cYou cannot set the access level of teleport points higher than your own rank."
+        invalidAccessLevel: "§e%cityname% §7| §cThe specified access level is invalid."
+        sameDisplayname: "§e%cityname% §7| §cThe teleport point display name is already %name%."
+        invalidDisplayname: "§e%cityname% §7| §cThe teleport point display name must not exceed 30 characters."
+        invalidName: "§e%cityname% §7| §cTeleport points must not start with a number, be longer than 20 characters, or contain any special characters."
+        outsideCity: "§e%cityname% §7| §cYou cannot create a teleport point outside the city."
+        alreadyExists: "§e%cityname% §7| §cThere is already a teleport point with this name in this city."
+      messageTooLong: "§e%cityname% §7| §cThe message must not exceed %count% characters."
+      invite:
+        self: "§e%cityname% §7| §cYou cannot invite yourself to a city."
+        alreadyInvited: "§e%cityname% §7| §cThe player is already invited to the city."
+      closed: "§e%cityname% §7| §cThe city is closed to the public."
+      permissionDenied: "§e%cityname% §7| §cAccess denied."
+      cityExists: "§cThe specified city already exists."
+      nameLength: "§cThe city name must be between 1-16 characters long."
+      maxCityCount: "§cYou cannot be a member of more than 3 cities."
+      claimExists: "§cThis land is already claimed."
+      tooCloseToOtherCity: "§cThis land is too close to another city."
+      alreadyInCity: "§cYou are already a member of a city."
+      notInCity: "§cYou are not a member of the city."
+      leave:
+        mayor: "§e%cityname% §7| §cYou cannot leave the city as mayor. Consider deleting the city with /city delete §ncityname§r§c, or swapping roles with another member using the command /city rank §nplayer§r§c swap."
+      missing:
+        balance:
+          goCost: "§e%cityname% §7| §cThe city cannot afford the 5,000 minemynt cost to buy a teleport point for a city."
+          cityCost: "§cYou cannot afford the 500,000 minemynt cost of a city."
+    permissionDenied: "§cAccess denied."
+    plot:
+      expand:
+        invalidHeight: "§cYou must change the height by a positive integer, excluding 0."
+      market:
+        noChange: "§e%cityname% §7| §cThe plot is already for sale at the specified value."
+      set:
+        rent:
+          tooHigh: "§e%cityname% §7| §cThe rent must not exceed 100,000 minemynt."
+        name:
+          alreadyName: "§e%cityname% §7| §cThe plot is already named §4%name%§c."
+          tooLong: "§e%cityname% §7| §cThe plot name must not exceed 16 characters."
+        type:
+          alreadyType: "§e%cityname% §7| §cThe plot is already of type §4%type%§c."
+          alreadyNoType: "§e%cityname% §7| §cThe plot already has no type."
+          invalidType: "§e%cityname% §7| §cPlot type not found. Use /plot set type to see all types."
+        owner:
+          notForSale: "§e%cityname% §7| §cThe plot is not for sale."
+          notOwner: "§e%cityname% §7| §cYou are not the owner of the plot."
+          alreadyNoOwner: "§e%cityname% §7| §cThe plot already has no owner."
+          alreadyOwner: "§e%cityname% §7| §cThe player is already the owner of the plot."
+          notInCity: "§e%cityname% §7| §cThe player must be a member of the city to own the plot. Consider using /plot set type vacation instead."
+      tooSmall: "§cYour selection is too small."
+      tooLowY: "§cYour selection is too low. Use /plot expand to increase the height."
+      intersectsExistingPlot: "§cYour selection intersects an existing plot."
+      intersectsExistingClaim: "§cYour selection is partially or completely outside your city."
+      tooHighExpand: "§cThe specified value is too high."
+      tooLowExpand: "§cThe specified value is too low."
+      notFound: "§cPlot not found."
+      notInPlot: "§cYou are not on a plot."
+      perm:
+        notFound: "§cPermission flag not found. Use /plot perm to see all permissions."
+        noChange: "§cThere are no changes to make."
+    missing:
+      claimCost: "§e%cityname% §7| §cThe city cannot afford the %cost% minemynt cost of a city."
+      spawn: "§cThere is no saved spawn point in your city."
+      goCost: "§e%cityname% §7| §cYou cannot afford the 5,000 minemynt cost to buy a city teleport point."
+      blockHistory: "§cYou have no saved block history."
+      go: "§e%cityname% §7| §cThe specified teleport point was not found."
+      goes: "§cThere are no city teleport points in your city."
+      page: "§cPage not found."
+      onlinePlayer: "§cPlayer not found. §oIs the player online?§r"
+      balance: "§e%cityname% §7| §cThe city must have at least 100,000 minemynt in the city treasury."
+      playerBalance: "§e%cityname% §7| §cYou do not have enough minemynt in your wallet."
+      homeCity: "§cYou are not a member of any city."
+      membership: "§cYou are not a member of the city."
+      city: "§cThe city does not exist."
+      reasonLength: "§e%cityname% §7| §cThe reason is not sufficient. Clarify, specify!"
+      plot: "§cPlease make a selection first."
+  save:
+    membership: "§aYour home city is now %cityname%."
+  plot:
+    help:
+      header: "§2--- §aHelp: /plot §2---"
+      buy: "§2/plot buy"
+      leave: "§2/plot leave"
+      market: "§2/plot market §a§nprice\n§2/plot market -"
+      perm: "§2/plot perm §a§nplayer§r§2 +/-§a§nchange\n§2/plot perm members +/-§a§nchange\n§2/plot perm outsiders +/-§a§nchange"
+      set:
+        rent: "§2/plot set rent §a§nrent\n§2/plot set rent -"
+        name: "§2/plot set name §a§nname\n§2/plot set name -"
+        type: "§2/plot set type §a§ntype\n§2/plot set type -"
+        owner: "§2/plot set owner §a§nplayer\n§2/plot set owner -"
+      share: "§2/plot share §a§nplayer"
+      toggle:
+        animals: "§2/plot toggle animals"
+        mobs: "§2/plot toggle mobs"
+        meeting: "§2/plot toggle meeting"
+        pvp: "§2/plot toggle pvp"
+      type:
+        church: "§2/plot type church"
+        farm: "§2/plot type farm"
+        shop: "§2/plot type shop"
+        vacation: "§2/plot type vacation"
+        none: "§2/plot type -"
+      update: "§2/plot update"
+    buy:
+      success: "§e%cityname% §7| §aYou have bought plot %plotname% for %price% minemynt."
+    toggle:
+      pvp:
+        success: "§e%cityname% §7| §aPVP is now %status% on the plot."
+      animals:
+        success: "§e%cityname% §7| §aAnimals are now %status% on the plot."
+      monsters:
+        success: "§e%cityname% §7| §aMonsters are now %status% on the plot."
+      meeting:
+        success: "§e%cityname% §7| §aMeetings are now %status% on the plot."
+      keepexp:
+        success: "§e%cityname% §7| §aXP %status% now on death on the plot."
+      keepinv:
+        success: "§e%cityname% §7| §aItems %status% now on death on the plot."
+      locked:
+        success: "§e%cityname% §7| §aThe plot is now %status%."
+      k-marked:
+        success: "§e%cityname% §7| §aThe plot's K-marking %status%."
+    set:
+      plot:
+        expand:
+          max: "§aThe selection has been expanded from bedrock to sky."
+          up:
+            amount: "§aThe selection has been expanded by %amount% blocks upwards."
+            max: "§aThe selection has been expanded to 319 on the y-axis."
+          down:
+            amount: "§aThe selection has been expanded by %amount% blocks downwards."
+            max: "§aThe selection has been expanded to -64 on the y-axis."
+      rent:
+        success: "§e%cityname% §7| §aThe plot's rent is now %rent% minemynt."
+        removed: "§e%cityname% §7| §aThe plot's rent has been removed."
+      name:
+        success: "§e%cityname% §7| §aThe plot's name is now %name%."
+      type:
+        success: "§e%cityname% §7| §aThe plot's type is now %type%."
+        removed: "§e%cityname% §7| §aThe plot's type has been removed."
+      owner:
+        success: "§e%cityname% §7| §aThe plot's owner is now %player%."
+        removed: "§e%cityname% §7| §aThe plot's owner has been removed."
+    player:
+      header: ""
+    list:
+      header: "§2--- §aPlot: %plot% §2---"
+      id: "§2ID: §a#%id%"
+      city: "§2Belongs to city: §a%cityname%"
+      owner: "§2Owner: §a%owner%"
+      pvp: "§2PVP: %status%"
+      animals: "§2Animals: %status%"
+      monsters: "§2Monsters: %status%"
+      locked: "§2Locked: %status%"
+      k-marked: "§2K-marked: %status%"
+      middle: "§2Midpoint: §a([%world%]%x%, %y%, %z%)"
+      players: "§2Players on the plot: §a%players%"
+      lose:
+        items: "§2Lose items on death: %status%"
+        xp: "§2Lose XP on death: %status%"
+      perm:
+        header: "§2--- §aPlot permissions: %plot% §2---"
+        outsiders: "§2Outsiders: §a%perms%"
+        members: "§2City members: §a%perms%"
+        players: "§2Player %player%: §a%perms%"
+        permsrow:
+          1: "§7a = animal, b = block, c = container, e = enderpearl"
+          2: "§7f = frame, g = go, h = home, j = jukebox"
+          3: "§7r = repair (anvil), s = switch, t = teleport, v = villager"
+  city:
+    ban:
+      none: "§e%cityname% §7| §cThere are no banned players in the city."
+      header: "§4--- §cBanned players in the city: %cityname% §4---"
+      notBanned: "§e%cityname% §7| §cThe player in question is not banned from the city."
+    spawn:
+      closed: "§e%cityname% §7| §cYou cannot teleport to the city because it is closed."
+    online:
+      total: "§a§lTotal members online: §2%online%."
+      members: "§a§lMembers online:"
+      admins: "§a§lCity staff online:"
+      header: "§2--- §aCity members online: %cityname% (§2%online%§a of §2%membercount%§a) §2---"
+      none: "§e%cityname% §7| §cNo players are online at the moment."
+    members:
+      header: "§2--- §aCity members: %cityname% (§2%membercount%§a of §2%membercount%§a) §2---"
+    leave:
+      success: "§e%cityname% §7| §aYou have left the city."
+      message: "§e%cityname% §7| §e%player% left the city."
+    helpop:
+      sent: "§e%cityname% §7| §aYour message has been sent to the city staff."
+      noStaffOnline: "§e%cityname% §7| §cNo city staff are online at the moment."
+      receive: "§e%cityname% §7| §a%player% needs help: §a%message%"
+    blockhistory:
+      noData: "§cNo block data found on the specified block."
+      header: "§2--- §aBlock history: %location% (page %page%/%totalpages%) §2---"
+    go:
+      changedAccessLevel: "§e%cityname% §7| §aYou have changed the access level for the teleport point %name% to §2%accesslevel%§a."
+      changedName: "§e%cityname% §7| §aThe name of the city teleport point %name% has been changed."
+      changedDisplayname: "§e%cityname% §7| §aThe display name of the city teleport point %name% has been changed."
+      created: "§e%cityname% §7| §aYou have created the teleport point %name% for 5,000 minemynt."
+    invite:
+      invited: "§e%cityname% §7| §e%player% has been invited to the city by %inviter%."
+      inviteMessage: "§e%cityname% §7| §aYou have been invited to the city by %inviter%.\n§aType /city join %cityname% to join."
+    enter: "§e%cityname% §7|§b %enter%"
+    exit: "§e%cityname% §7|§b %exit%"
+    motd: "§e%cityname% §7|§e %motd%"
+    balance: "§e%cityname% §7|§a City treasury: %balance% minemynt."
+    price: "§2--- §aCity price list §2--- \n§2New city: §a%city% minemynt\n§2Claim land: §a%chunk% minemynt\n§2Bonus land: §a%bonus% minemynt\n§2City teleport point: §a%go% minemynt\n§2Outpost: §a%outpost% minemynt"
+    markings:
+      new: "§aA new selection has been started at the point ([%world%]%x%, %y%, %z%)."
+      add: "§aPoint %number% with coordinates ([%world%]%x%, %y%, %z%) has been added."
+      finish: "§aYou have made a selection. Use \n§a/plot new [§2name§a]\n§a to create a new plot, or \n §a/city buy district §2name\n§a to create a district."
+      finished: "§cYou already have an ongoing selection."
+      sameBlock: "§cYou cannot mark the same block twice."
+      differentWorlds: "§cYou cannot mark blocks in different worlds."
+      none: "§cYou must start a selection before you can add more points."
+    scoreboard:
+      plots: "§2§lNumber of plots:"
+      members: "§2§lNumber of members:"
+      nature: "§2§lUndeveloped land"
+      pvp_on: "§4§lPVP enabled"
+      place: "§2§lPlace:"
+      placeK: "§2§lK-marked place:"
+      type: "§2§lType:"
+      owner: "§2§lOwner:"
+      price: "§2§lFor sale:"
+    successful:
+      delete:
+        citygo: "§e%cityname% §7|§a The city teleport point %name% was removed."
+      remove:
+        enterMessage: "§e%cityname% §7|§a The city entry message was removed."
+      join:
+        self: "§e%cityname% §7| You joined the city."
+        others: "§e%cityname% §7| §b%playername% joined the city."
+      withdraw: "§e%cityname% §7|§a You withdrew %amount% minemynt from the city treasury."
+      deposit: "§e%cityname% §7|§a You deposited %amount% minemynt into the city treasury."
+      creation:
+        others: "§b%playername% created the city %cityname%."
+        self: "§aYou created the city %cityname%."
+      claim: "§e%cityname% §7|§a Land claimed for %amount% minemynt."
+      set:
+        spawn: "§e%cityname% §7|§a The city spawn point was changed."
+        enter:
+          removed: "§e%cityname% §7|§a The city entry message was removed."
+          set: "§e%cityname% §7|§a The city entry message was changed."
+        exit:
+          removed: "§e%cityname% §7|§a The city exit message was removed."
+          set: "§e%cityname% §7|§a The city exit message was changed."
+        motd:
+          removed: "§e%cityname% §7|§a The daily message (MOTD) was removed."
+          set: "§e%cityname% §7|§a The daily message (MOTD) was changed."
+        plot:
+          delete: "§e%cityname% §7|§a The plot %plot% was removed."
+          market:
+            remove: "§e%cityname% §7|§a The plot was taken off the market."
+            set: "§e%cityname% §7|§a The plot was put on the market for %amount% minemynt."
+            change: "§e%cityname% §7|§a The plot price was changed from %from% to %to% minemynt."
+          perm:
+            change:
+              members: "§e%cityname% §7|§a Permissions for members on the plot were changed to %perms%."
+              outsiders: "§e%cityname% §7|§a Permissions for non-members on the plot were changed to %perms%."
+              player: "§e%cityname% §7|§a Permissions for %player% on the plot were changed to %perms%."
+            remove:
+              all: "§e%cityname% §7|§a All permissions on the plot were reset."
+              members: "§e%cityname% §7|§a Permissions for members on the plot were revoked."
+              outsiders: "§e%cityname% §7|§a Permissions for non-members on the plot were revoked."
+              player: "§e%cityname% §7|§a Permissions for %player% on the plot were revoked."
+          leave: "§e%cityname% §7|§a You left plot %plotname%."
+          tp: "§e%cityname% §7|§a You were teleported to the plot %plotname%."
+          new: "§e%cityname% §7|§a You created a plot named %plotname%."
+          expand:
+            down:
+              set: "§aThe selection's lower y has been lowered to %y%."
+              max: "§aThe selection's lower y has been set to -64."
+            up:
+              set: "§aThe selection's upper y has been raised to %y%."
+              max: "§aThe selection's upper y has been set to 319."
