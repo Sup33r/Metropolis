@@ -1,0 +1,19 @@
+sql:
+  host:
+  port:
+  database:
+  username:
+  password:
+
+settings:
+  cooldownTime:
+    invite: 180
+  city:
+    creationcost: 500000
+    startingbalance: 200000
+    gocost: 5000
+    startingtax: 2
+    claimcost: 500
+    bonuscost: 800
+    citygocost: 10000
+    outpostcost: 15000

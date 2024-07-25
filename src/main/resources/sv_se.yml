@@ -1,0 +1,339 @@
+messages:
+  months:
+    january: "januari"
+    february: "februari"
+    march: "mars"
+    april: "april"
+    may: "maj"
+    june: "juni"
+    july: "juli"
+    august: "augusti"
+    september: "september"
+    october: "oktober"
+    november: "november"
+    december: "december"
+  days:
+    yesterday: "i går"
+    today: "i dag"
+  block:
+    enabled: "§aBlockdataläget är nu aktiverat. Högerklicka med en pinne eller ett jordblock för att få fram blockdatan."
+    disabled: "§cBlockdataläget är nu inaktiverat."
+  teleport: "§aTeleporterar dig till §2%to%§a..."
+  list:
+    goes: "§2--- §aStadsteleporteringspunkter (sida §l%startPage% §r§aav §l%totalPages%§r§a) §2---"
+  syntax:
+    city:
+      go: "§7Syntax: /city go §nnamn\n§7Syntax: /city go §nnamn§r §7delete\n§7Syntax: /city go §nnamn§r §7set displayname §nvisningsnamn\n§7Syntax: /city go §nnamn§r §7set displayname -\n§7/city go §nnamn§r §7set accesslevel §nåtkomstnivå\n§7/city go §nnamn§r §7set accesslevel -"
+      buy:
+        bonus: "§7Syntax: /city buy bonus §nantal"
+        district: "§7Syntax: /city buy district §nnamn"
+        go: "§7Syntax: /city buy go §nnamn"
+        outpost: "§7Syntax: /city buy outpost"
+      set:
+        spawn: "§7Syntax: /city set spawn"
+        tax: "§7Syntax: /city set tax §nprocent"
+        enter: "§7Syntax: /city set enter §nmeddelande"
+        exit: "§7Syntax: /city set exit §nmeddelande"
+        maxplotspermember: "§7Syntax: /city set maxplotspermember §nantal"
+        motd: "§7Syntax: /city set motd §nmeddelande"
+        name: "§7Syntax: /city set name §nstadsnamn"
+      bank:
+        deposit: "§7Syntax: /city bank +§nbelopp§r§7 §nstad"
+        withdraw: "§7Syntax: /city bank -§nbelopp§r§7 §nanledning"
+        bank: "§7Syntax: /city bank"
+    plot:
+      toggle: "§7Syntax: /plot toggle §nanimals\n§7Syntax: /plot toggle §nmeeting\n§7Syntax: /plot toggle §nmobs\n§7Syntax: /plot toggle §nk"
+      set:
+        rent: "§7Syntax: /plot set rent §ntomträttsavgäld\n§7Syntax: /plot set rent -"
+        set: "§7Syntax: /plot set type §nchurch\n§7Syntax: /plot set type §nfarm\n§7Syntax: /plot set type §nshop\n§7Syntax: /plot set type §nvacation\n§7Syntax: /plot set type -\n§7Syntax: /plot set owner §nspelare\n§7Syntax: /plot set owner -\n§7Syntax: /plot set rent §ntomträttsavgäld\n§7Syntax: /plot set rent -\n§7Syntax: /plot set name §nnamn\n§7Syntax: /plot set name -"
+        type: "§7Syntax: /plot set type §nchurch\n§7Syntax: /plot set type §nfarm\n§7Syntax: /plot set type §nshop\n§7Syntax: /plot set type §nvacation"
+        typeAdmin: "§7Syntax: /plot set type §njail"
+        owner: "§7Syntax: /plot set owner §nspelare\n§7Syntax: /plot set owner -"
+      expand: "§7Syntax: /plot expand §nantal§r§7 §nup/down"
+      tp: "§7Syntax: /plot tp §nID"
+      market: "§7Syntax: /plot market §npris\n§7Syntax: /plot market §n-"
+      perm: "§7Syntax: /plot perm §nspelare§r§7 +/-§nändring\n§7Syntax: /plot perm members +/-§nändring\n§7Syntax: /plot perm outsiders +/-§nändring"
+  error:
+    player:
+      notFound: "§cSpelaren hittades inte."
+      notInCity: "§cSpelaren är inte medlem i någon stad."
+    city:
+      go:
+        alreadyAccessLevel: "§e%cityname% §7| §cTeleporteringspunkten har redan den angivna åtkomstnivån."
+        accessLevelTooHigh: "§e%cityname% §7| §cDu kan inte ändra åtkomstnivån för teleporteringspunkter till en högre nivå än din egen rank."
+        invalidAccessLevel: "§e%cityname% §7| §cDen angivna åtkomstnivån är ogiltig."
+        sameDisplayname: "§e%cityname% §7| §cVisningsnamnet för teleporteringspunkten är redan %name%."
+        invalidDisplayname: "§e%cityname% §7| §cVisningsnamnet för teleporteringspunkten får inte överstiga 30 tecken."
+        invalidName: "§e%cityname% §7| §cTeleporteringspunkter får inte börja med en siffra, vara längre än 20 tecken, eller innehålla några specialtecken."
+        outsideCity: "§e%cityname% §7| §cDu kan inte skapa en teleporteringspunkt utanför staden."
+        alreadyExists: "§e%cityname% §7| §cDet finns redan en teleporteringspunkt med detta namn i denna stad."
+      messageTooLong: "§e%cityname% §7| §cMeddelandet får inte vara längre än %count% tecken."
+      invite:
+        self: "§e%cityname% §7| §cMan kan inte bjuda in sig själv till en stad."
+        alreadyInvited: "§e%cityname% §7| §cSpelaren är redan inbjuden till staden."
+      closed: "§e%cityname% §7| §cStaden är stängd för allmänheten."
+      permissionDenied: "§e%cityname% §7| §cÅtkomst nekad."
+      cityExists: "§cDen specifierade staden finns redan."
+      nameLength: "§cStadens namn måste vara mellan 1-16 tecken långt."
+      maxCityCount: "§cMan kan inte vara medlem i fler än 3 städer."
+      claimExists: "§cDenna markbit är redan upptagen."
+      tooCloseToOtherCity: "§cDenna markbit är för nära en annan stad."
+      alreadyInCity: "§cDu är redan medlem i en stad."
+      notInCity: "§cDu är inte medlem i staden."
+      leave:
+        mayor: "§e%cityname% §7| §cDu kan inte lämna staden som borgermästare. Överväg att istället ta bort staden med /city delete §nstadsnamn§r§c, eller byta roll med en annan medlem med kommandot /city rank §nspelare§r§c swap."
+      missing:
+        balance:
+          goCost: "§e%cityname% §7| §cStaden har inte råd med 5 000 minemynt som det kostar att köpa en teleporteringspunkt till en stad."
+          cityCost: "§cDu har inte råd med 500 000 minemynt som en stad kostar."
+    permissionDenied: "§cÅtkomst nekad."
+
+    plot:
+      expand:
+        invalidHeight: "§cDu måste ändra höjden med ett positivt heltal, exklusive 0."
+      market:
+        noChange: "§e%cityname% §7| §cTomten är redan till salu för det angivna värdet."
+      set:
+        rent:
+          tooHigh: "§e%cityname% §7| §cTomträttsavgälden får inte vara högre än 100 000 minemynt."
+        name:
+          alreadyName: "§e%cityname% §7| §cTomten har redan namnet §4%name%§c."
+          tooLong: "§e%cityname% §7| §cTomtens namn får inte vara längre än 16 tecken."
+        type:
+          alreadyType: "§e%cityname% §7| §cTomten är redan av typen §4%type%§c."
+          alreadyNoType: "§e%cityname% §7| §cTomten har redan ingen typ."
+          invalidType: "§e%cityname% §7| §cTomttypen hittades inte. Använd /plot set type för att se alla typer."
+        owner:
+          notForSale: "§e%cityname% §7| §cTomten är inte till salu."
+          notOwner: "§e%cityname% §7| §cDu är inte ägare till tomten."
+          alreadyNoOwner: "§e%cityname% §7| §cTomten har redan ingen ägare."
+          alreadyOwner: "§e%cityname% §7| §cSpelaren är redan ägare till tomten."
+          notInCity: "§e%cityname% §7| §cSpelaren måste vara medlem i staden för att kunna äga tomten. Överväg att använda /plot set type vacation istället."
+      tooSmall: "§cDin markering är för liten."
+      tooLowY: "§cDin markering är för låg. Använd /plot expand för att öka höjden."
+      intersectsExistingPlot: "§cDin markering korsar en existerande tomt."
+      intersectsExistingClaim: "§cDin markering är helt, eller delvis utanför din stad."
+      tooHighExpand: "§cDet angivna värdet är för högt."
+      tooLowExpand: "§cDet angivna värdet är för lågt."
+      notFound: "§cTomten hittades inte."
+      notInPlot: "§cDu befinner dig inte på en tomt."
+      perm:
+        notFound: "§cRättighetsflaggan hittades inte. Använd /plot perm för att se alla rättigheter."
+        noChange: "§cDet finns inga ändringar att göra."
+    missing:
+      claimCost: "§e%cityname% §7| §cStaden har inte råd med %cost% minemynt som en stad kostar."
+      spawn: "§cDet finns ingen sparad startpunkt i din stad."
+      goCost: "§e%cityname% §7| §cDu har inte råd med 5 000 minemynt som det kostar att köpa en stadsteleporteringspunkt."
+      blockHistory: "§cDu har ingen sparad blockhistorik."
+      go: "§e%cityname% §7| §cDen specifierade teleporteringspunkten hittades inte."
+      goes: "§cDet finns inga stadsteleporteringspunkter i din stad."
+      page: "§cSidan hittades inte."
+      onlinePlayer: "§cSpelaren hittades inte. §oÄr spelaren online?§r"
+      balance: "§e%cityname% §7| §cStaden måste ha minst 100 000 minemynt i stadskassan."
+      playerBalance: "§e%cityname% §7| §cDu har inte nog med minemynt i din plånbok."
+      homeCity: "§cDu är inte medlem i någon stad."
+      membership: "§cDu är inte medlem i staden."
+      city: "§cStaden finns inte."
+      reasonLength: "§e%cityname% §7| §cAnledningen är inte tillräckligt bra. Tydliggör, precisera!"
+      plot: "§cVänligen gör en markering först."
+  save:
+    membership: "§aDin hemstad är nu %cityname%."
+  plot:
+    help:
+      header: "§2--- §aHjälp: /plot §2---"
+      buy: "§2/plot buy"
+      leave: "§2/plot leave"
+      market: "§2/plot market §a§npris\n§2/plot market -"
+      perm: "§2/plot perm §a§nspelare§r§2 +/-§a§nändring\n§2/plot perm members +/-§a§nändring\n§2/plot perm outsiders +/-§a§nändring"
+      set:
+        rent: "§2/plot set rent §a§ntomträttsavgäld\n§2/plot set rent -"
+        name: "§2/plot set name §a§nnamn\n§2/plot set name -"
+        type: "§2/plot set type §a§ntyp\n§2/plot set type -"
+        owner: "§2/plot set owner §a§nspelare\n§2/plot set owner -"
+      share: "§2/plot share §a§nspelare"
+      toggle:
+        animals: "§2/plot toggle animals"
+        mobs: "§2/plot toggle mobs"
+        meeting: "§2/plot toggle meeting"
+        k: "§2/plot toggle k"
+      type:
+        church: "§2/plot type church"
+        farm: "§2/plot type farm"
+        shop: "§2/plot type shop"
+        vacation: "§2/plot type vacation"
+        none: "§2/plot type -"
+      update: "§2/plot update"
+
+    buy:
+      success: "§e%cityname% §7| §aDu har köpt tomten %plotname% för %price% minemynt."
+    toggle:
+      pvp:
+        success: "§e%cityname% §7| §aPVP är nu %status% på tomten."
+      animals:
+        success: "§e%cityname% §7| §aDjur är nu %status% på tomten."
+      monsters:
+        success: "§e%cityname% §7| §aMonster är nu %status% på tomten."
+      meeting:
+        success: "§e%cityname% §7| §aMöten är nu %status% på tomten."
+      keepexp:
+        success: "§e%cityname% §7| §aXP %status% nu vid dödsfall på tomten."
+      keepinv:
+        success: "§e%cityname% §7| §aFöremål %status% nu vid dödsfall på tomten."
+      locked:
+        success: "§e%cityname% §7| §aTomten är nu %status%."
+      k-marked:
+        success: "§e%cityname% §7| §aTomtens K-märkning %status%."
+    set:
+      plot:
+        expand:
+          max: "§aMarkeringen har expanderats från berggrund till himmel."
+          up:
+            amount: "§aMarkeringen har expanderats med %amount% block uppåt."
+            max: "§aMarkeringen har expanderats till 319 på y-led."
+          down:
+            amount: "§aMarkeringen har expanderats med %amount% block nedåt."
+            max: "§aMarkeringen har expanderats till -64 på y-led."
+      rent:
+        success: "§e%cityname% §7| §aTomtens hyra är nu %rent% minemynt."
+        removed: "§e%cityname% §7| §aTomtens hyra är nu borttagen."
+      name:
+        success: "§e%cityname% §7| §aTomtens namn är nu %name%."
+      type:
+        success: "§e%cityname% §7| §aTomtens typ är nu %type%."
+        removed: "§e%cityname% §7| §aTomtens typ är nu borttagen."
+      owner:
+        success: "§e%cityname% §7| §aTomtens ägare är nu %player%."
+        removed: "§e%cityname% §7| §aTomtens ägare är nu borttagen."
+    player:
+      header: ""
+    list:
+      header: "§2--- §aTomt: %plot% §2---"
+      id: "§2ID: §a#%id%"
+      city: "§2Tillhör stad: §a%cityname%"
+      owner: "§2Ägare: §a%owner%"
+      pvp: "§2PVP: %status%"
+      animals: "§2Djur: %status%"
+      monsters: "§2Monster: %status%"
+      locked: "§2Låst: %status%"
+      k-marked: "§2K-märkt: %status%"
+      middle: "§2Mittpunkt: §a([%world%]%x%, %y%, %z%)"
+      players: "§2Spelare på tomten: §a%players%"
+      lose:
+        items: "§2Förlora föremål vid dödsfall: %status%"
+        xp: "§2Förlora XP vid dödsfall: %status%"
+      perm:
+        header: "§2--- §aTomträttigheter: %plot% §2---"
+        outsiders: "§2Utomstående: §a%perms%"
+        members: "§2Stadsmedlemmar: §a%perms%"
+        players: "§2Spelare %player%: §a%perms%"
+        permsrow:
+          1: "§7a = animal, b = block, c = container, e = enderpearl"
+          2: "§7f = frame, g = go, h = home, j = jukebox"
+          3: "§7r = repair (anvil), s = switch, t = teleport, v = villager"
+  city:
+    ban:
+      none: "§e%cityname% §7| §cDet finns inga bannlysta spelare i staden."
+      header: "§4--- §cBannlysta spelare i staden: %cityname% §4---"
+      notBanned: "§e%cityname% §7| §cSpelaren i fråga är inte bannlyst från staden."
+    spawn:
+      closed: "§e%cityname% §7| §cDu kan inte teleportera till staden eftersom den är stängd."
+    online:
+      total: "§a§lTotalt antal medlemmar online: §2%online%."
+      members: "§a§lMedlemmar online:"
+      admins: "§a§lStadsledning online:"
+      header: "§2--- §aStadsmedlemmar online: %cityname% (§2%online%§a av §2%membercount%§a) §2---"
+      none: "§e%cityname% §7| §cInga spelare är online för tillfället."
+    members:
+      header: "§2--- §aStadsmedlemmar: %cityname% (§2%membercount%§a av §2%membercount%§a) §2---"
+    leave:
+      success: "§e%cityname% §7| §aDu har lämnat staden."
+      message: "§e%cityname% §7| §e%player% lämnade staden."
+    helpop:
+      sent: "§e%cityname% §7| §aDitt meddelande har skickats till stadsledningen."
+      noStaffOnline: "§e%cityname% §7| §cIngen inom stadsledningen är online för tillfället."
+      receive: "§e%cityname% §7| §a%player% behöver hjälp: §a%message%"
+    blockhistory:
+      noData: "§cIngen blockdata hittades på det specificerade blocket."
+      header: "§2--- §aBlockhistorik: %location% (sida %page%/%totalpages%) §2---"
+    go:
+      changedAccessLevel: "§e%cityname% §7| §aDu har ändrat tillgänglighetsnivån för teleporteringspunkten %name% till §2%accesslevel%§a."
+      changedName: "§e%cityname% §7| §aNamnet för stadsteleporteringspunkten %name% ändrades."
+      changedDisplayname: "§e%cityname% §7| §aVisningsnamnet för stadsteleporteringspunkten %name% ändrades."
+      created: "§e%cityname% §7| §aDu har skapat teleporteringspunkten %name% för 5 000 minemynt."
+    invite:
+      invited: "§e%cityname% §7| §e%player% har blivit inbjuden till staden av %inviter%."
+      inviteMessage: "§e%cityname% §7| §aDu har blivit inbjuden till staden av %inviter%.\n§aSkriv /city join %cityname% för att gå med."
+    enter: "§e%cityname% §7|§b %enter%"
+    exit: "§e%cityname% §7|§b %exit%"
+    motd: "§e%cityname% §7|§e %motd%"
+    balance: "§e%cityname% §7|§a Stadskassa: %balance% minemynt."
+    price: "§2--- §aPrislista städer §2--- \n§2Ny stad: §a%city% minemynt\n§2Överta markbit: §a%chunk% minemynt\n§2Bonusmarkbit: §a%bonus% minemynt\n§2Stadsteleporteringspunkt: §a%go% minemynt\n§2Utpost: §a%outpost% minemynt"
+    markings:
+      new: "§aEn ny markering har påbörjats på punkten ([%world%]%x%, %y%, %z%)."
+      add: "§aPunkt %number% med koodinaterna ([%world%]%x%, %y%, %z%) har lagts till."
+      finish: "§aDu har gjort en markering. Använd \n§a/plot new [§2namn§a]\n§a för att skapa en ny tomt, eller \n §a/city buy district §2namn\n§a för att skapa ett område."
+      finished: "§cDu har redan en markering igång."
+      sameBlock: "§cDu kan inte markera samma block två gånger."
+      differentWorlds: "§cDu kan inte markera block i olika världar."
+      none: "§cDu måste starta en markering innan du kan lägga till yttligare punkter."
+    scoreboard:
+      plots: "§2§lAntal tomter:"
+      members: "§2§lAntal medlemmar:"
+      nature: "§2§lIcke detaljplanerad mark"
+      pvp_on: "§4§lPVP aktiverat"
+      place: "§2§lPlats:"
+      placeK: "§2§lK-märkt plats:"
+      type: "§2§lTyp:"
+      owner: "§2§lÄgare:"
+      price: "§2§lTill salu:"
+    successful:
+      delete:
+        citygo: "§e%cityname% §7|§a Stadsteleporteringspunkten %name% togs bort."
+      remove:
+        enterMessage: "§e%cityname% §7|§a Meddelandet vid stadsankomst togs bort."
+      join:
+        self: "§e%cityname% §7| Du gick med i staden."
+        others: "§e%cityname% §7| §b%playername% gick med i staden."
+      withdraw: "§e%cityname% §7|§a Du tog ut %amount% minemynt från stadskassan."
+      deposit: "§e%cityname% §7|§a Du satte in %amount% minemynt i stadskassan."
+      creation:
+        others: "§b%playername% skapade staden %cityname%."
+        self: "§aDu skapade staden %cityname%."
+      claim: "§e%cityname% §7|§a Markbit övertagen för %amount% minemynt."
+      set:
+        spawn: "§e%cityname% §7|§a Stadens startpunkt ändrades."
+        enter:
+          removed: "§e%cityname% §7|§a Meddelandet vid stadsankomst togs bort."
+          set: "§e%cityname% §7|§a Meddelandet vid stadsankomst ändrades."
+        exit:
+          removed: "§e%cityname% §7|§a Meddelandet vid stadsavfärd togs bort."
+          set: "§e%cityname% §7|§a Meddelandet vid stadsavfärd ändrades."
+        motd:
+          removed: "§e%cityname% §7|§a Det dagliga meddelandet (MOTD) togs bort."
+          set: "§e%cityname% §7|§a Det dagliga meddelandet (MOTD) ändrades."
+        plot:
+          delete: "§e%cityname% §7|§a Tomten %plot% togs bort."
+          market:
+            remove: "§e%cityname% §7|§a Tomten drogs tillbaka från marknaden."
+            set: "§e%cityname% §7|§a Tomten lades ut på marknaden för %amount% minemynt."
+            change: "§e%cityname% §7|§a Priset för tomten ändrades från %from% till %to% minemynt."
+          perm:
+            change:
+              members: "§e%cityname% §7|§a Rättigheter för medlemmar på tomten ändrades till %perms%."
+              outsiders: "§e%cityname% §7|§a Rättigheter för icke-medlemmar på tomten ändrades till %perms%."
+              player: "§e%cityname% §7|§a Rättigheter för %player% på tomten ändrades till %perms%."
+            remove:
+              all: "§e%cityname% §7|§a Alla rättigheter på tomten återställdes."
+              members: "§e%cityname% §7|§a Rättigheterna för medlemmar på tomten drogs tillbaka."
+              outsiders: "§e%cityname% §7|§a Rättigheterna för icke-medlemmar på tomten drogs tillbaka."
+              player: "§e%cityname% §7|§a Rättigheterna för %player% på tomten drogs tillbaka."
+          leave: "§e%cityname% §7|§a Du lämnade tomt %plotname%."
+          tp: "§e%cityname% §7|§a Du teleporterades till tomten %plotname%."
+          new: "§e%cityname% §7|§a Du skapade en tomt med namnet %plotname%."
+          expand:
+            down:
+              set: "§aMarkeringens nedre y har sänkts till %y%."
+              max: "§aMarkeringens nedre y har satts till -64."
+            up:
+              set: "§aMarkeringens övre y har höjts till %y%."
+              max: "§aMarkeringens övre y har satts till 319."
