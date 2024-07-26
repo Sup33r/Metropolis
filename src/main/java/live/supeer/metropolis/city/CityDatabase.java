@@ -132,9 +132,9 @@ public class CityDatabase {
         return false;
     }
 
-    public static boolean memberExists(String player, City city) {
+    public static boolean memberExists(String playerUUID, City city) {
         try {
-            var results = DB.getResults("SELECT * FROM `mp_members` WHERE `cityID` = " + city.getCityID() + " AND `playerName` = " + Database.sqlString(player) + ";");
+            var results = DB.getResults("SELECT * FROM `mp_members` WHERE `cityID` = " + city.getCityID() + " AND `playerUUID` = " + Database.sqlString(playerUUID) + ";");
             return !results.isEmpty();
         } catch (SQLException e) {
             e.printStackTrace();

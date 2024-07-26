@@ -56,6 +56,7 @@ public class Database {
                                 `cityTax` int(11) DEFAULT 2,
                                 `citySpawn` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `createDate` bigint(30) DEFAULT NULL,
+                                `latestNameChange` bigint(30) DEFAULT NULL,
                                 `enterMessage` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                 `exitMessage` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                 `motdMessage` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,

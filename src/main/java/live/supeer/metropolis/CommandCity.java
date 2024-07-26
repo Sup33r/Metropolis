@@ -246,8 +246,7 @@ public class CommandCity extends BaseCommand {
                         + " }");
         CityDatabase.setCityRole(city, player.getUniqueId().toString(), "mayor");
         Claim claim =
-                CityDatabase.createClaim(
-                        city, player.getLocation(), false, player.getUniqueId().toString(), player.getName());
+                CityDatabase.createClaim(city, player.getLocation(), false, player.getName(), player.getUniqueId().toString());
         MetropolisListener.playerInCity.put(player.getUniqueId(), city);
         Utilities.sendCityScoreboard(player, city);
         assert claim != null;
@@ -316,8 +315,7 @@ public class CommandCity extends BaseCommand {
             return;
         }
         Claim claim =
-                CityDatabase.createClaim(
-                        city, player.getLocation(), false, player.getUniqueId().toString(), player.getName());
+                CityDatabase.createClaim(city, player.getLocation(), false, player.getName(), player.getUniqueId().toString());
         assert claim != null;
         Database.addLogEntry(
                 city,
@@ -373,7 +371,7 @@ public class CommandCity extends BaseCommand {
             return;
         }
         City city = CityDatabase.getCity(cityname).get();
-        if (CityDatabase.memberExists(player.getName(), city)) {
+        if (CityDatabase.memberExists(player.getUniqueId().toString(), city)) {
             plugin.sendMessage(player, "messages.error.city.alreadyInCity");
             return;
         }
@@ -393,7 +391,7 @@ public class CommandCity extends BaseCommand {
         CityDatabase.newMember(city, player);
         invites.remove(player, city);
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            if (CityDatabase.memberExists(player.getName(), city)) {
+            if (CityDatabase.memberExists(player.getUniqueId().toString(), city)) {
                 if (onlinePlayer == player) {
                     plugin.sendMessage(
                             onlinePlayer, "messages.city.successful.join.self", "%cityname%", city.getCityName());
@@ -1157,6 +1155,51 @@ public class CommandCity extends BaseCommand {
             city.setCitySpawn(player.getLocation());
             plugin.sendMessage(player, "messages.city.successful.set.spawn", "%cityname%", city.getCityName());
         }
+
+        @Subcommand("name")
+        public static void onName(Player player, String name) {
+            if (!player.hasPermission("metropolis.city.set.name")) {
+                plugin.sendMessage(player, "messages.error.permissionDenied");
+                return;
+            }
+            if (HCDatabase.hasHomeCity(player.getUniqueId().toString())) {
+                plugin.sendMessage(player, "messages.error.missing.homeCity");
+                return;
+            }
+            City city = HCDatabase.getHomeCityToCity(player.getUniqueId().toString());
+            assert city != null;
+            String role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
+            if (role == null) {
+                plugin.sendMessage(
+                        player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
+                return;
+            }
+            boolean isMayor = role.equals("mayor");
+            if (!isMayor) {
+                plugin.sendMessage(
+                        player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
+                return;
+            }
+            if (name.length() > 20) {
+                plugin.sendMessage(player, "messages.error.city.nameTooLong");
+                return;
+            }
+            if (CityDatabase.getCity(name).isPresent()) {
+                plugin.sendMessage(player, "messages.error.city.alreadyExists");
+                return;
+            }
+            Database.addLogEntry(
+                    city,
+                    "{ \"type\": \"set\", \"subtype\": \"name\", \"from\": "
+                            + city.getCityName()
+                            + ", \"to\": "
+                            + name
+                            + ", \"player\": "
+                            + player.getUniqueId().toString()
+                            + " }");
+            city.setCityName(name);
+            plugin.sendMessage(player, "messages.city.successful.set.name", "%name%", name);
+        }
     }
 
     @Subcommand("buy")
@@ -1393,7 +1436,7 @@ public class CommandCity extends BaseCommand {
                         || Objects.equals(
                         CityDatabase.getCityRole(city, String.valueOf(player.getUniqueId())), "assistant");
         for (Player online : Bukkit.getOnlinePlayers()) {
-            if (CityDatabase.memberExists(online.getName(), city) && isCityStaff) {
+            if (CityDatabase.memberExists(online.getUniqueId().toString(), city) && isCityStaff) {
                 cityStaffOnline++;
                 plugin.sendMessage(
                         online,
@@ -1426,8 +1469,7 @@ public class CommandCity extends BaseCommand {
             plugin.sendMessage(player, "messages.error.missing.city");
         }
         City city = HCDatabase.getHomeCityToCity(player.getUniqueId().toString());
-        if (!CityDatabase.memberExists(
-                player.getUniqueId().toString(), CityDatabase.getCity(cityname).get())) {
+        if (!CityDatabase.memberExists(player.getUniqueId().toString(), CityDatabase.getCity(cityname).get())) {
             plugin.sendMessage(player, "messages.error.city.notInCity");
             return;
         }
@@ -1449,7 +1491,7 @@ public class CommandCity extends BaseCommand {
                                         + ";")));
         plugin.sendMessage(player, "messages.city.leave.success", "%cityname%", cityname);
         for (Player online : Bukkit.getOnlinePlayers()) {
-            if (CityDatabase.memberExists(online.getName(), city)) {
+            if (CityDatabase.memberExists(online.getUniqueId().toString(), city)) {
                 if (!online.getUniqueId().equals(player.getUniqueId())) {
                     plugin.sendMessage(
                             online,
@@ -1495,7 +1537,7 @@ public class CommandCity extends BaseCommand {
         int totalOnline = 0;
         HashMap<String,String> onlinePlayers = new HashMap<>();
         for (Player online : Bukkit.getOnlinePlayers()) {
-            if (CityDatabase.memberExists(online.getName(), city)) {
+            if (CityDatabase.memberExists(online.getUniqueId().toString(), city)) {
                 onlinePlayers.put(online.getName(),CityDatabase.getCityRole(city,online.getUniqueId().toString()));
             }
         }
@@ -1573,7 +1615,7 @@ public class CommandCity extends BaseCommand {
                 plugin.sendMessage(player, "messages.teleport", "%to%", "startpunkten i " + city.getCityName());
                 return;
             }
-            if (!city.isOpen() && !CityDatabase.memberExists(player.getName(), city)) {
+            if (!city.isOpen() && !CityDatabase.memberExists(player.getUniqueId().toString(), city)) {
                 plugin.sendMessage(player, "messages.city.spawn.closed", "%cityname%", city.getCityName());
                 return;
             }
