@@ -1,5 +1,14 @@
 messages:
+  time:
+    seconds: "sekunder"
+    minutes: "minuter"
+    hours: "timmar"
+    days: "dagar"
+    weeks: "veckor"
+    months: "månader"
+    years: "år"
   months:
+    january: "januari"
     january: "januari"
     february: "februari"
     march: "mars"
@@ -78,7 +87,8 @@ messages:
       maxCityCount: "§cMan kan inte vara medlem i fler än 3 städer."
       claimExists: "§cDenna markbit är redan upptagen."
       tooCloseToOtherCity: "§cDenna markbit är för nära en annan stad."
-      alreadyInCity: "§cDu är redan medlem i en stad."
+      alreadyInACity: "§cDu är redan medlem i en stad."
+      alreadyInCity: "§cDu är redan medlem i staden."
       notInCity: "§cDu är inte medlem i staden."
       leave:
         mayor: "§e%cityname% §7| §cDu kan inte lämna staden som borgermästare. Överväg att istället ta bort staden med /city delete §nstadsnamn§r§c, eller byta roll med en annan medlem med kommandot /city rank §nspelare§r§c swap."
@@ -230,8 +240,11 @@ messages:
           3: "§7r = repair (anvil), s = switch, t = teleport, v = villager"
   city:
     ban:
+      success: "§e%cityname% §7| §aSpelaren %player% har blivit bannlyst från staden i %length%, med anledningen: %reason%."
+      alreadyBanned: "§e%cityname% §7| §cSpelaren  %player% är redan bannlyst från staden."
       none: "§e%cityname% §7| §cDet finns inga bannlysta spelare i staden."
       header: "§4--- §cBannlysta spelare i staden: %cityname% §4---"
+      unbanned: "§e%cityname% §7| §aSpelaren %player%s bannlysning från staden har blivit upphävd."
       notBanned: "§e%cityname% §7| §cSpelaren i fråga är inte bannlyst från staden."
     spawn:
       closed: "§e%cityname% §7| §cDu kan inte teleportera till staden eftersom den är stängd."

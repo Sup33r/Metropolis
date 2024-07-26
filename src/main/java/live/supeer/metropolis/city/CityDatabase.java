@@ -461,9 +461,9 @@ public class CityDatabase {
         return null;
     }
 
-    public static void removeCityBan(City city, String playerUUID) {
+    public static void removeCityBan(City city, Ban ban) {
         try {
-            DB.executeUpdate("DELETE FROM `mp_citybans` WHERE `cityID` = " + city.getCityID() + " AND `playerUUID` = " + Database.sqlString(playerUUID) + ";");
+            DB.executeUpdate("DELETE FROM `mp_citybans` WHERE `cityID` = " + city.getCityID() + " AND `playerUUID` = " + Database.sqlString(ban.getPlayerUUID()) + ";");
         } catch (SQLException e) {
             e.printStackTrace();
         }

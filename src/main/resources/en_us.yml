@@ -1,4 +1,12 @@
 messages:
+  time:
+    seconds: "seconds"
+    minutes: "minutes"
+    hours: "hours"
+    days: "days"
+    weeks: "weeks"
+    months: "months"
+    years: "years"
   months:
     january: "January"
     february: "February"
@@ -78,7 +86,8 @@ messages:
       maxCityCount: "§cYou cannot be a member of more than 3 cities."
       claimExists: "§cThis land is already claimed."
       tooCloseToOtherCity: "§cThis land is too close to another city."
-      alreadyInCity: "§cYou are already a member of a city."
+      alreadyInACity: "§cYou are already a member of a city."
+      alreadyInCity: "§cYou are already a member of the city."
       notInCity: "§cYou are not a member of the city."
       leave:
         mayor: "§e%cityname% §7| §cYou cannot leave the city as mayor. Consider deleting the city with /city delete §ncityname§r§c, or swapping roles with another member using the command /city rank §nplayer§r§c swap."
@@ -230,8 +239,11 @@ messages:
           3: "§7r = repair (anvil), s = switch, t = teleport, v = villager"
   city:
     ban:
+      success: "§e%cityname% §7| §aThe player %player% has been banned from the city for %length%, with the reason: %reason%."
+      alreadyBanned: "§e%cityname% §7| §cThe player %player% is already banned from the city."
       none: "§e%cityname% §7| §cThere are no banned players in the city."
       header: "§4--- §cBanned players in the city: %cityname% §4---"
+      unbanned: "§e%cityname% §7| §aThe player %player% has been unbanned from the city."
       notBanned: "§e%cityname% §7| §cThe player in question is not banned from the city."
     spawn:
       closed: "§e%cityname% §7| §cYou cannot teleport to the city because it is closed."

@@ -14,6 +14,7 @@ public class Member {
     private final String cityName;
     private final String cityRole;
     private final long joinDate;
+    private final City city;
 
     public Member(DbRow data) {
         this.playerName = data.getString("playerName");
@@ -22,5 +23,10 @@ public class Member {
         this.cityName = data.getString("cityName");
         this.cityRole = data.getString("cityRole");
         this.joinDate = data.getInt("joinDate");
+        if (CityDatabase.getCity(cityID).isPresent()) {
+            this.city = CityDatabase.getCity(cityID).get();
+        } else {
+            this.city = null;
+        }
     }
 }

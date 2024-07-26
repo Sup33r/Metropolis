@@ -21,6 +21,8 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Utilities {
     static Metropolis plugin;
@@ -82,6 +84,96 @@ public class Utilities {
                 Double.parseDouble(split[3]),
                 Float.parseFloat(split[4]),
                 Float.parseFloat(split[5]));
+    }
+
+    public static long parseTime(String length) {
+        long time = 0;
+        Matcher matcher = Pattern.compile("(\\d+)([smhdwy])").matcher(length);
+        while (matcher.find()) {
+            int value = Integer.parseInt(matcher.group(1));
+            switch (matcher.group(2)) {
+                case "s":
+                    time += value * 1000L;
+                    break;
+                case "m":
+                    time += value * 60 * 1000L;
+                    break;
+                case "h":
+                    time += value * 60 * 60 * 1000L;
+                    break;
+                case "d":
+                    time += value * 24 * 60 * 60 * 1000L;
+                    break;
+                case "w":
+                    time += value * 7 * 24 * 60 * 60 * 1000L;
+                    break;
+                case "y":
+                    time += value * 365 * 24 * 60 * 60 * 1000L;
+                    break;
+            }
+        }
+        return time;
+    }
+
+    public static long parseTimeToMillis(String length) {
+        long time = 0;
+        Matcher matcher = Pattern.compile("(\\d+)([smhdwy])").matcher(length);
+        while (matcher.find()) {
+            int value = Integer.parseInt(matcher.group(1));
+            switch (matcher.group(2)) {
+                case "s":
+                    time += value * 1000L;
+                    break;
+                case "m":
+                    time += value * 60 * 1000L;
+                    break;
+                case "h":
+                    time += value * 60 * 60 * 1000L;
+                    break;
+                case "d":
+                    time += value * 24 * 60 * 60 * 1000L;
+                    break;
+                case "w":
+                    time += value * 7 * 24 * 60 * 60 * 1000L;
+                    break;
+                case "y":
+                    time += value * 365 * 24 * 60 * 60 * 1000L;
+                    break;
+            }
+        }
+        return time;
+    }
+
+    public static String parseTimeToReadable(String length) {
+        long time = parseTimeToMillis(length);
+        long seconds = time / 1000 % 60;
+        long minutes = time / (60 * 1000) % 60;
+        long hours = time / (60 * 60 * 1000) % 24;
+        long days = time / (24 * 60 * 60 * 1000) % 7;
+        long weeks = time / (7 * 24 * 60 * 60 * 1000) % 52;
+        long years = time / (365 * 24 * 60 * 60 * 1000);
+
+        StringBuilder readableTime = new StringBuilder();
+        if (years > 0) {
+            readableTime.append(years).append(" ").append(plugin.getMessage("messages.time.years")).append(" ");
+        }
+        if (weeks > 0) {
+            readableTime.append(weeks).append(" ").append(plugin.getMessage("messages.time.weeks")).append(" ");
+        }
+        if (days > 0) {
+            readableTime.append(days).append(" ").append(plugin.getMessage("messages.time.days")).append(" ");
+        }
+        if (hours > 0) {
+            readableTime.append(hours).append(" ").append(plugin.getMessage("messages.time.hours")).append(" ");
+        }
+        if (minutes > 0) {
+            readableTime.append(minutes).append(" ").append(plugin.getMessage("messages.time.minutes")).append(" ");
+        }
+        if (seconds > 0) {
+            readableTime.append(seconds).append(" ").append(plugin.getMessage("messages.time.seconds"));
+        }
+
+        return readableTime.toString().trim();
     }
 
     public static boolean isCloseToOtherCity(Player player, Location location, String type) {

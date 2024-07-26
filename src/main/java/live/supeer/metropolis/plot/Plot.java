@@ -4,6 +4,8 @@ import co.aikar.idb.DB;
 import co.aikar.idb.DbRow;
 import live.supeer.metropolis.Database;
 import live.supeer.metropolis.Utilities;
+import live.supeer.metropolis.city.City;
+import live.supeer.metropolis.city.CityDatabase;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -36,6 +38,7 @@ public class Plot {
     private char[] plotFlags;
     private final long plotCreationDate;
     private final Location[] plotPoints;
+    private final City city;
 
     public Plot(DbRow data) {
         this.plotID = data.getInt("plotId");
@@ -50,6 +53,11 @@ public class Plot {
         this.isForSale = data.get("plotIsForSale");
         this.plotPrice = data.getInt("plotPrice");
         this.plotRent = data.getInt("plotRent");
+        if (CityDatabase.getCity(cityID).isPresent()) {
+            this.city = CityDatabase.getCity(cityID).get();
+        } else {
+            this.city = null;
+        }
         this.permsMembers =
                 data.getString("plotPermsMembers") == null
                         ? new char[0]
