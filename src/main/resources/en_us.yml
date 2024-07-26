@@ -95,6 +95,9 @@ messages:
         balance:
           goCost: "§e%cityname% §7| §cThe city cannot afford the 5,000 minemynt cost to buy a teleport point for a city."
           cityCost: "§cYou cannot afford the 500,000 minemynt cost of a city."
+      set:
+        spawn:
+          outsideCity: "§e%cityname% §7| §cYou cannot set the spawn point outside the city."
     permissionDenied: "§cAccess denied."
     plot:
       expand:

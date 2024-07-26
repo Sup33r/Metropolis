@@ -95,6 +95,9 @@ messages:
         balance:
           goCost: "§e%cityname% §7| §cStaden har inte råd med 5 000 minemynt som det kostar att köpa en teleporteringspunkt till en stad."
           cityCost: "§cDu har inte råd med 500 000 minemynt som en stad kostar."
+      set:
+        spawn:
+          outsideCity: "§e%cityname% §7| §cDu kan inte sätta en startpunkt utanför staden."
     permissionDenied: "§cÅtkomst nekad."
     plot:
       expand:
