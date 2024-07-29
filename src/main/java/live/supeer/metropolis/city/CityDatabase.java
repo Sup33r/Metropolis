@@ -143,6 +143,8 @@ public class CityDatabase {
     }
 
 
+
+
     public static int getCityGoCount(City city, String role) {
         if (role == null) {
             try {
@@ -379,6 +381,23 @@ public class CityDatabase {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static int getLatestNameChange(City city) {
+        try {
+            return DB.getFirstRow("SELECT * FROM `mp_cities` WHERE `cityName` = " + Database.sqlString(city.getCityName()) + ";").getInt("latestNameChange");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public static void setLatestNameChange(City city, int timestamp) {
+        try {
+            DB.executeUpdate("UPDATE `mp_cities` SET `latestNameChange` = " + timestamp + " WHERE `cityName` = " + Database.sqlString(city.getCityName()) + ";");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public static boolean hasClaim(int x, int z, World world) {

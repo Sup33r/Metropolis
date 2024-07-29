@@ -82,6 +82,8 @@ messages:
       closed: "§e%cityname% §7| §cThe city is closed to the public."
       permissionDenied: "§e%cityname% §7| §cAccess denied."
       cityExists: "§cThe specified city already exists."
+      nameChange:
+        cooldown: "§e%cityname% §7| §cYou must wait %timeleft% before changing the city name again."
       nameLength: "§cThe city name must be between 1-16 characters long."
       maxCityCount: "§cYou cannot be a member of more than 3 cities."
       claimExists: "§cThis land is already claimed."
@@ -314,6 +316,7 @@ messages:
         self: "§aYou created the city %cityname%."
       claim: "§e%cityname% §7|§a Land claimed for %amount% minemynt."
       set:
+        name: "§e%cityname% §7|§a The city name was changed to %cityname%."
         spawn: "§e%cityname% §7|§a The city spawn point was changed."
         enter:
           removed: "§e%cityname% §7|§a The city entry message was removed."

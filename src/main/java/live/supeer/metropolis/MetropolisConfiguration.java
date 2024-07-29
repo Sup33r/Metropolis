@@ -16,6 +16,7 @@ public class MetropolisConfiguration {
     private final int cityGoCost;
     private final int cityClaimCost;
     private final int inviteCooldown;
+    private final int nameChangeCooldown;
 
     MetropolisConfiguration(Metropolis plugin) {
         plugin.saveDefaultConfig();
@@ -32,5 +33,6 @@ public class MetropolisConfiguration {
         cityStartingTax = plugin.getConfig().getInt("settings.city.startingtax");
         cityGoCost = plugin.getConfig().getInt("settings.city.gocost");
         cityClaimCost = plugin.getConfig().getInt("settings.city.claimcost");
+        nameChangeCooldown = plugin.getConfig().getInt("settings.cooldownTime.namechange");
     }
 }

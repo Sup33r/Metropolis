@@ -1181,13 +1181,27 @@ public class CommandCity extends BaseCommand {
                 return;
             }
             if (name.length() > 20) {
-                plugin.sendMessage(player, "messages.error.city.nameTooLong");
+                plugin.sendMessage(player, "messages.error.city.nameLength");
                 return;
             }
             if (CityDatabase.getCity(name).isPresent()) {
-                plugin.sendMessage(player, "messages.error.city.alreadyExists");
+                plugin.sendMessage(player, "messages.error.city.cityExists");
                 return;
             }
+
+            int latestNameChange = CityDatabase.getLatestNameChange(city);
+            int cooldownTime = plugin.getConfig().getInt("settings.cooldownTime.namechange"); // Time in seconds
+
+            if (latestNameChange != 0) {
+                int currentTime = (int) (System.currentTimeMillis() / 1000); // Convert to seconds
+                int timeSinceLastChange = currentTime - latestNameChange;
+
+                if (timeSinceLastChange < cooldownTime) {
+                    plugin.sendMessage(player, "messages.error.namechange.cooldown", "%timeleft%", Utilities.formatTimeFromSeconds(cooldownTime - timeSinceLastChange));
+                    return;
+                }
+            }
+
             Database.addLogEntry(
                     city,
                     "{ \"type\": \"set\", \"subtype\": \"name\", \"from\": "
@@ -1198,7 +1212,8 @@ public class CommandCity extends BaseCommand {
                             + player.getUniqueId().toString()
                             + " }");
             city.setCityName(name);
-            plugin.sendMessage(player, "messages.city.successful.set.name", "%name%", name);
+            CityDatabase.setLatestNameChange(city, (int) (System.currentTimeMillis() / 1000));
+            plugin.sendMessage(player, "messages.city.successful.set.name", "%cityname%", name);
         }
     }
 
@@ -1681,6 +1696,7 @@ public class CommandCity extends BaseCommand {
                 for (Ban ban : bannedPlayers) {
                     if (ban.getPlayerUUID().equals(Bukkit.getOfflinePlayer(playerName).getUniqueId().toString())) {
                         CityDatabase.removeCityBan(city, ban);
+                        Database.addLogEntry(city, "{ \"type\": \"unban\", \"subtype\": \"city\", \"player\": " + ban.getPlayerUUID() + ", \"placer\": " + player.getUniqueId().toString() + " }");
                         plugin.sendMessage(player, "messages.city.ban.unbanned", "%player%", playerName, "%cityname%", city.getCityName());
                         return;
                     }

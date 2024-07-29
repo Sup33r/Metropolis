@@ -8,6 +8,7 @@ sql:
 settings:
   cooldownTime:
     invite: 180
+    namechange: 43200
   city:
     creationcost: 500000
     startingbalance: 200000

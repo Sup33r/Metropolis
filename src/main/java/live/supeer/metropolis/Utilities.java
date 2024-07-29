@@ -176,6 +176,37 @@ public class Utilities {
         return readableTime.toString().trim();
     }
 
+    public static String formatTimeFromSeconds(int totalSeconds) {
+        int seconds = totalSeconds % 60;
+        int minutes = (totalSeconds / 60) % 60;
+        int hours = (totalSeconds / (60 * 60)) % 24;
+        int days = (totalSeconds / (24 * 60 * 60)) % 7;
+        int weeks = (totalSeconds / (7 * 24 * 60 * 60)) % 52;
+        int years = totalSeconds / (365 * 24 * 60 * 60);
+
+        StringBuilder readableTime = new StringBuilder();
+        if (years > 0) {
+            readableTime.append(years).append(" ").append(plugin.getMessage("messages.time.years")).append(" ");
+        }
+        if (weeks > 0) {
+            readableTime.append(weeks).append(" ").append(plugin.getMessage("messages.time.weeks")).append(" ");
+        }
+        if (days > 0) {
+            readableTime.append(days).append(" ").append(plugin.getMessage("messages.time.days")).append(" ");
+        }
+        if (hours > 0) {
+            readableTime.append(hours).append(" ").append(plugin.getMessage("messages.time.hours")).append(" ");
+        }
+        if (minutes > 0) {
+            readableTime.append(minutes).append(" ").append(plugin.getMessage("messages.time.minutes")).append(" ");
+        }
+        if (seconds > 0) {
+            readableTime.append(seconds).append(" ").append(plugin.getMessage("messages.time.seconds"));
+        }
+
+        return readableTime.toString().trim();
+    }
+
     public static boolean isCloseToOtherCity(Player player, Location location, String type) {
         int centerZ = location.getChunk().getZ();
         int centerX = location.getChunk().getX();
