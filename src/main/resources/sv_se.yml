@@ -85,6 +85,7 @@ messages:
       nameChange:
         cooldown: "§e%cityname% §7| §cDu måste vänta %timeleft% innan du kan ändra stadsnamnet igen."
       nameLength: "§cStadens namn måste vara mellan 1-16 tecken långt."
+      invalidName: "§cStadens namn får inte vara längre än 16 tecken eller innehålla några specialtecken."
       maxCityCount: "§cMan kan inte vara medlem i fler än 3 städer."
       claimExists: "§cDenna markbit är redan upptagen."
       tooCloseToOtherCity: "§cDenna markbit är för nära en annan stad."

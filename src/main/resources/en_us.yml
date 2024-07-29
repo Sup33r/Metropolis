@@ -85,6 +85,7 @@ messages:
       nameChange:
         cooldown: "§e%cityname% §7| §cYou must wait %timeleft% before changing the city name again."
       nameLength: "§cThe city name must be between 1-16 characters long."
+      invalidName: "§cThe city name must not be longer than 16 characters or contain any special characters."
       maxCityCount: "§cYou cannot be a member of more than 3 cities."
       claimExists: "§cThis land is already claimed."
       tooCloseToOtherCity: "§cThis land is too close to another city."

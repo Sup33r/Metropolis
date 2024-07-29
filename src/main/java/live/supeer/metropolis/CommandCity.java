@@ -202,6 +202,10 @@ public class CommandCity extends BaseCommand {
             plugin.sendMessage(player, "messages.error.city.nameLength");
             return;
         }
+        if (!cityName.matches("[A-Za-zÀ-ÖØ-öø-ÿ0-9 ]+")) {
+            plugin.sendMessage(player, "messages.error.city.invalidName");
+            return;
+        }
         if (CityDatabase.getCity(cityName).isPresent()) {
             plugin.sendMessage(player, "messages.error.city.cityExists");
             return;
@@ -1180,8 +1184,12 @@ public class CommandCity extends BaseCommand {
                         player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
                 return;
             }
-            if (name.length() > 20) {
+            if (name.isEmpty() || name.length() > 16) {
                 plugin.sendMessage(player, "messages.error.city.nameLength");
+                return;
+            }
+            if (!name.matches("[A-Za-zÀ-ÖØ-öø-ÿ0-9 ]+")) {
+                plugin.sendMessage(player, "messages.error.city.invalidName");
                 return;
             }
             if (CityDatabase.getCity(name).isPresent()) {

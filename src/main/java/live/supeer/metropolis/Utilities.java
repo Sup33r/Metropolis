@@ -968,6 +968,137 @@ public class Utilities {
             bannerMeta.addPattern(
                     new org.bukkit.block.banner.Pattern(DyeColor.WHITE, PatternType.BORDER));
         }
+        if (Objects.equals(letterLower, "0")) {
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_BOTTOM));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_LEFT));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_TOP));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_RIGHT));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_DOWNLEFT));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.WHITE, PatternType.BORDER));
+
+        }
+        if (Objects.equals(letterLower, "1")) {
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_CENTER));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.SQUARE_TOP_LEFT));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.WHITE, PatternType.CURLY_BORDER));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_BOTTOM));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.WHITE, PatternType.BORDER));
+        }
+        if (Objects.equals(letterLower, "2")) {
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_TOP));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.WHITE, PatternType.RHOMBUS));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_BOTTOM));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_DOWNLEFT));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.WHITE, PatternType.BORDER));
+        }
+        if (Objects.equals(letterLower, "3")) {
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_BOTTOM));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_MIDDLE));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_TOP));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.WHITE, PatternType.CURLY_BORDER));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_RIGHT));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.WHITE, PatternType.BORDER));
+        }
+        if (Objects.equals(letterLower, "4")) {
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_LEFT));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.WHITE, PatternType.HALF_HORIZONTAL_BOTTOM));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_RIGHT));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_MIDDLE));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.WHITE, PatternType.BORDER));
+        }
+        if (Objects.equals(letterLower, "5")) {
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_BOTTOM));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.WHITE, PatternType.RHOMBUS));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_TOP));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_DOWNRIGHT));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.WHITE, PatternType.BORDER));
+        }
+        if (Objects.equals(letterLower, "6")) {
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_BOTTOM));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_RIGHT));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.WHITE, PatternType.HALF_HORIZONTAL));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_MIDDLE));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_TOP));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_LEFT));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.WHITE, PatternType.BORDER));
+        }
+        if (Objects.equals(letterLower, "7")) {
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_DOWNLEFT));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_TOP));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.WHITE, PatternType.BORDER));
+        }
+        if (Objects.equals(letterLower, "8")) {
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_TOP));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_LEFT));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_MIDDLE));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_BOTTOM));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_RIGHT));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.WHITE, PatternType.BORDER));
+        }
+        if (Objects.equals(letterLower, "9")) {
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_LEFT));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.WHITE, PatternType.HALF_HORIZONTAL_BOTTOM));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_MIDDLE));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_TOP));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_RIGHT));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.BLACK, PatternType.STRIPE_BOTTOM));
+            bannerMeta.addPattern(
+                    new org.bukkit.block.banner.Pattern(DyeColor.WHITE, PatternType.BORDER));
+        }
         banner.setItemMeta(bannerMeta);
         return banner;
     }
