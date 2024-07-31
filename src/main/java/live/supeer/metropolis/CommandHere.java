@@ -6,6 +6,7 @@ import co.aikar.commands.annotation.Default;
 
 @CommandAlias("here")
 public class CommandHere extends BaseCommand {
+    static Metropolis plugin;
 
     @Default
     public void onHere() {

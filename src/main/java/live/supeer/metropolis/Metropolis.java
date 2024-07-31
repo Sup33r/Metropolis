@@ -34,6 +34,7 @@ public final class Metropolis extends JavaPlugin {
         CommandCity.plugin = this;
         CommandPlot.plugin = this;
         CommandHomeCity.plugin = this;
+        CommandHere.plugin = this;
         Database.plugin = this;
         HCDatabase.plugin = this;
         CityDatabase.plugin = this;
@@ -57,6 +58,7 @@ public final class Metropolis extends JavaPlugin {
         manager.registerCommand(new CommandHomeCity());
         manager.registerCommand(new CommandCity());
         manager.registerCommand(new CommandPlot());
+        manager.registerCommand(new CommandHere());
         this.getServer().getPluginManager().registerEvents(new CommandHomeCity(), this);
         this.getServer().getPluginManager().registerEvents(new MetropolisListener(), this);
         Database.initialize();
