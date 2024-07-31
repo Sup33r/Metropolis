@@ -902,9 +902,7 @@ public class CommandPlot extends BaseCommand {
                             return;
                         }
                         if (args[0].equals("members")) {
-                            if (Utilities.parsePermChange(plot.getPermsMembers(), args[1], player, "plot")
-                                    == null) {
-                                plugin.sendMessage(player, "messages.error.plot.perm.notFound");
+                            if (Utilities.parsePermChange(plot.getPermsMembers(), args[1], player, "plot") == null) {
                                 return;
                             }
                             Database.addLogEntry(
@@ -937,9 +935,7 @@ public class CommandPlot extends BaseCommand {
                         }
 
                         if (args[0].equals("outsiders")) {
-                            if (Utilities.parsePermChange(plot.getPermsOutsiders(), args[1], player, "plot")
-                                    == null) {
-                                plugin.sendMessage(player, "messages.error.plot.perm.notFound");
+                            if (Utilities.parsePermChange(plot.getPermsOutsiders(), args[1], player, "plot") == null) {
                                 return;
                             }
                             Database.addLogEntry(
