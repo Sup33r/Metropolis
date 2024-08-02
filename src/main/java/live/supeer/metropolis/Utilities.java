@@ -17,6 +17,7 @@ import org.bukkit.inventory.meta.BannerMeta;
 
 import java.awt.*;
 import java.text.NumberFormat;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Locale;
@@ -115,50 +116,60 @@ public class Utilities {
         return time;
     }
 
-    public static long parseTimeToMillis(String length) {
-        long time = 0;
+    public static Duration parseTimeToDuration(String length) {
+        Duration duration = Duration.ZERO;
         Matcher matcher = Pattern.compile("(\\d+)([smhdwy])").matcher(length);
         while (matcher.find()) {
             int value = Integer.parseInt(matcher.group(1));
             switch (matcher.group(2)) {
                 case "s":
-                    time += value * 1000L;
+                    duration = duration.plusSeconds(value);
                     break;
                 case "m":
-                    time += value * 60 * 1000L;
+                    duration = duration.plusMinutes(value);
                     break;
                 case "h":
-                    time += value * 60 * 60 * 1000L;
+                    duration = duration.plusHours(value);
                     break;
                 case "d":
-                    time += value * 24 * 60 * 60 * 1000L;
+                    duration = duration.plusDays(value);
                     break;
                 case "w":
-                    time += value * 7 * 24 * 60 * 60 * 1000L;
+                    duration = duration.plusDays(value * 7L);
                     break;
                 case "y":
-                    time += value * 365 * 24 * 60 * 60 * 1000L;
+                    duration = duration.plusDays(value * 365L);
                     break;
             }
         }
-        return time;
+        return duration;
     }
 
     public static String parseTimeToReadable(String length) {
-        long time = parseTimeToMillis(length);
-        long seconds = time / 1000 % 60;
-        long minutes = time / (60 * 1000) % 60;
-        long hours = time / (60 * 60 * 1000) % 24;
-        long days = time / (24 * 60 * 60 * 1000) % 7;
-        long weeks = time / (7 * 24 * 60 * 60 * 1000) % 52;
-        long years = time / (365 * 24 * 60 * 60 * 1000);
+        Duration duration = parseTimeToDuration(length);
+        long seconds = duration.getSeconds();
+
+        long years = seconds / (365 * 24 * 3600);
+        seconds %= 365 * 24 * 3600;
+
+        long months = seconds / (30 * 24 * 3600);
+        seconds %= 30 * 24 * 3600;
+
+        long days = seconds / (24 * 3600);
+        seconds %= 24 * 3600;
+
+        long hours = seconds / 3600;
+        seconds %= 3600;
+
+        long minutes = seconds / 60;
+        seconds %= 60;
 
         StringBuilder readableTime = new StringBuilder();
         if (years > 0) {
             readableTime.append(years).append(" ").append(plugin.getMessage("messages.time.years")).append(" ");
         }
-        if (weeks > 0) {
-            readableTime.append(weeks).append(" ").append(plugin.getMessage("messages.time.weeks")).append(" ");
+        if (months > 0) {
+            readableTime.append(months).append(" ").append(plugin.getMessage("messages.time.months")).append(" ");
         }
         if (days > 0) {
             readableTime.append(days).append(" ").append(plugin.getMessage("messages.time.days")).append(" ");

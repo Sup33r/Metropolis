@@ -92,6 +92,7 @@ messages:
       alreadyInACity: "§cYou are already a member of a city."
       alreadyInCity: "§cYou are already a member of the city."
       notInCity: "§cYou are not a member of the city."
+      banned: "§cYou are banned from the city."
       leave:
         mayor: "§e%cityname% §7| §cYou cannot leave the city as mayor. Consider deleting the city with /city delete §ncityname§r§c, or swapping roles with another member using the command /city rank §nplayer§r§c swap."
       missing:

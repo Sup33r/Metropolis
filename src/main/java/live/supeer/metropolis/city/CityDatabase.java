@@ -48,6 +48,13 @@ public class CityDatabase {
         }
     }
 
+//    private static void loadCityBans(City rCity) throws SQLException {
+//        var bans = DB.getResults("SELECT * FROM `mp_citybans` WHERE `cityID` = '" + rCity.getCityID() + "';");
+//        for (DbRow ban : bans) {
+//            rCity.addCityBan(new Ban(ban));
+//        }
+//    }
+
     private static void loadClaims(City rCity) throws SQLException {
         String cityName = rCity.getCityName();
         Bukkit.broadcastMessage(cityName);

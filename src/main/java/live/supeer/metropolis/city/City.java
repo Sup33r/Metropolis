@@ -24,6 +24,7 @@ public class City {
     private final List<Member> cityMembers = new ArrayList<>();
     private final List<Claim> cityClaims = new ArrayList<>();
     private final List<Plot> cityPlots = new ArrayList<>();
+//    private final List<Ban> cityBans = new ArrayList<>();
     private int cityBalance;
     private Location citySpawn;
     private final long cityCreationDate;
@@ -141,6 +142,14 @@ public class City {
     public void addCityMember(Member member) {
         cityMembers.add(member);
     }
+
+//    public void addCityBan(Ban ban) {
+//        cityBans.add(ban);
+//    }
+//
+//    public void removeCityBan(Ban ban) {
+//        cityBans.remove(ban);
+//    }
 
     public void addCityClaim(Claim claim) {
         cityClaims.add(claim);

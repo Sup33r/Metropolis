@@ -92,6 +92,7 @@ messages:
       alreadyInACity: "§cDu är redan medlem i en stad."
       alreadyInCity: "§cDu är redan medlem i staden."
       notInCity: "§cDu är inte medlem i staden."
+      banned: "§cDu är bannlyst från staden."
       leave:
         mayor: "§e%cityname% §7| §cDu kan inte lämna staden som borgermästare. Överväg att istället ta bort staden med /city delete §nstadsnamn§r§c, eller byta roll med en annan medlem med kommandot /city rank §nspelare§r§c swap."
       missing:
