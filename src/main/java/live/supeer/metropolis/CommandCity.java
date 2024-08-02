@@ -1700,13 +1700,11 @@ public class CommandCity extends BaseCommand {
             if (CityDatabase.getCityBan(city, playerUUID) == null) {
                 plugin.sendMessage(player, "messages.city.ban.notBanned","%cityname%", city.getCityName());
                 return;
-            }
-            if (CityDatabase.getCityBan(city, playerUUID) == null) {
-                plugin.sendMessage(player, "messages.city.ban.notBanned","%cityname%", city.getCityName());
+            } else {
+                Ban ban = CityDatabase.getCityBan(city, playerUUID);
+                plugin.sendMessage(player, "messages.city.ban.banned", "%player%", playerName, "%cityname%", city.getCityName(), "%reason%", ban.getReason(), "%length%", Utilities.parseTimeToReadable(String.valueOf(ban.getExpiryDate() - ban.getPlaceDate())));
                 return;
             }
-            return;
-
         }
         if (playerName != null && length != null && reason == null) {
             if (length.equals("-")) {

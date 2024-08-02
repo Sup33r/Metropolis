@@ -253,6 +253,7 @@ messages:
       header: "§4--- §cBannlysta spelare i staden: %cityname% §4---"
       unbanned: "§e%cityname% §7| §aSpelaren %player%s bannlysning från staden har blivit upphävd."
       notBanned: "§e%cityname% §7| §cSpelaren i fråga är inte bannlyst från staden."
+      banned: "§e%cityname% §7| §cSpelaren %player% är bannlyst från staden i %length%, med anledningen: %reason%."
     spawn:
       banned: "§e%cityname% §7| §cDu är bannlyst från staden."
       closed: "§e%cityname% §7| §cDu kan inte teleportera till staden eftersom den är stängd."

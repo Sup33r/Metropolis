@@ -253,6 +253,7 @@ messages:
       header: "§4--- §cBanned players in the city: %cityname% §4---"
       unbanned: "§e%cityname% §7| §aThe player %player% has been unbanned from the city."
       notBanned: "§e%cityname% §7| §cThe player in question is not banned from the city."
+      banned: "§e%cityname% §7| §cThe player %player% is banned from the city for %length% with the reason: %reason%."
     spawn:
       banned: "§e%cityname% §7| §cYou are banned from the city."
       closed: "§e%cityname% §7| §cYou cannot teleport to the city because it is closed."
