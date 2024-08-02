@@ -22,7 +22,7 @@ public class Member {
         this.cityID = data.getInt("cityID");
         this.cityName = data.getString("cityName");
         this.cityRole = data.getString("cityRole");
-        this.joinDate = data.getInt("joinDate");
+        this.joinDate = data.getLong("joinDate");
         if (CityDatabase.getCity(cityID).isPresent()) {
             this.city = CityDatabase.getCity(cityID).get();
         } else {

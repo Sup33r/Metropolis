@@ -453,14 +453,15 @@ public class CityDatabase {
         return 0;
     }
 
-    public static void addCityBan(City city, String playerUUID, String reason, Player placer, long placeDate, long expiryDate) {
+    public static void addCityBan(City city, String playerUUID, String reason, Player placer, long placeDate, long length) {
         try {
-            DB.executeUpdate("INSERT INTO `mp_citybans` (`cityID`, `playerUUID`, `placeDate`, `expiryDate`, `reason`, `placeUUID`) VALUES (" + city.getCityID() + ", " + Database.sqlString(playerUUID) + ", " + placeDate + ", " + expiryDate + ", " + Database.sqlString(reason) + ", " + Database.sqlString(placer.getUniqueId().toString()) + ");");
+            DB.executeUpdate("INSERT INTO `mp_citybans` (`cityID`, `playerUUID`, `placeDate`, `length`, `reason`, `placeUUID`) VALUES (" + city.getCityID() + ", " + Database.sqlString(playerUUID) + ", " + placeDate + ", " + length + ", " + Database.sqlString(reason) + ", " + Database.sqlString(placer.getUniqueId().toString()) + ");");
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
     public static List<Ban> getCityBans(City city) {
+        removeExpiredBans(city);
         try {
             var results = DB.getResults("SELECT * FROM `mp_citybans` WHERE `cityID` = " + city.getCityID() + ";");
             if (results.isEmpty()) return null;
@@ -476,6 +477,7 @@ public class CityDatabase {
     }
 
     public static Ban getCityBan(City city, String playerUUID) {
+        removeExpiredBans(city);
         try {
             var results = DB.getResults("SELECT * FROM `mp_citybans` WHERE `cityID` = " + city.getCityID() + " AND `playerUUID` = " + Database.sqlString(playerUUID) + ";");
             if (results.isEmpty()) return null;
@@ -490,6 +492,15 @@ public class CityDatabase {
     public static void removeCityBan(City city, Ban ban) {
         try {
             DB.executeUpdate("DELETE FROM `mp_citybans` WHERE `cityID` = " + city.getCityID() + " AND `playerUUID` = " + Database.sqlString(ban.getPlayerUUID()) + ";");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void removeExpiredBans(City city) {
+        try {
+            long currentTime = System.currentTimeMillis();
+            DB.executeUpdate("DELETE FROM `mp_citybans` WHERE `cityID` = " + city.getCityID() + " AND `placeDate` + `length` < " + currentTime + ";");
         } catch (SQLException e) {
             e.printStackTrace();
         }

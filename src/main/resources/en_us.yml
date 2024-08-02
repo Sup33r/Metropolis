@@ -1,11 +1,19 @@
 messages:
   time:
+    now: "just now"
+    second: "second"
     seconds: "seconds"
+    minute: "minute"
     minutes: "minutes"
+    hour: "hour"
     hours: "hours"
+    day: "day"
     days: "days"
+    week: "week"
     weeks: "weeks"
+    month: "month"
     months: "months"
+    year: "year"
     years: "years"
   months:
     january: "January"
@@ -32,6 +40,7 @@ messages:
   syntax:
     city:
       go: "§7Syntax: /city go §nname\n§7Syntax: /city go §nname§r §7delete\n§7Syntax: /city go §nname§r §7set displayname §ndisplayname\n§7Syntax: /city go §nname§r §7set displayname -\n§7/city go §nname§r §7set accesslevel §naccesslevel\n§7/city go §nname§r §7set accesslevel -"
+      ban: "§7Syntax: /city ban\n§7Syntax: /city ban §nplayer\n§7Syntax: /city ban §nplayer§r §7-\n§7Syntax: /city ban §nplayer length reason"
       buy:
         bonus: "§7Syntax: /city buy bonus §namount"
         district: "§7Syntax: /city buy district §nname"
@@ -94,6 +103,7 @@ messages:
       alreadyInCity: "§cYou are already a member of the city."
       notInCity: "§cYou are not a member of the city."
       banned: "§cYou are banned from the city."
+      banTooLong: "§cThe ban cannot be longer than %maxtime%."
       leave:
         mayor: "§e%cityname% §7| §cYou cannot leave the city as mayor. Consider deleting the city with /city delete §ncityname§r§c, or swapping roles with another member using the command /city rank §nplayer§r§c swap."
       missing:

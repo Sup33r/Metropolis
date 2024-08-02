@@ -1661,7 +1661,7 @@ public class CommandCity extends BaseCommand {
     }
 
     @Subcommand("ban")
-    public static void onBan(Player player, @Optional String playerName, @Optional String length, @Optional String reason) {
+    public static void onBan(Player player, @Optional String playerName, @Optional String args) {
         if (!player.hasPermission("metropolis.city.ban")) {
             plugin.sendMessage(player, "messages.error.permissionDenied");
             return;
@@ -1679,9 +1679,7 @@ public class CommandCity extends BaseCommand {
             return;
         }
         List<Ban> bannedPlayers = CityDatabase.getCityBans(city);
-        if (playerName == null && length == null && reason == null) {
-            //Gör koden för att lista alla bannade spelare
-
+        if (playerName == null && args == null) {
             if (bannedPlayers == null || bannedPlayers.isEmpty()) {
                 plugin.sendMessage(player, "messages.city.ban.none", "%cityname%", city.getCityName());
                 return;
@@ -1694,37 +1692,43 @@ public class CommandCity extends BaseCommand {
             player.sendMessage(bannedPlayersList.delete(bannedPlayersList.length()-4,bannedPlayersList.length())+"");
             return;
         }
-        if (playerName != null && length == null && reason == null) {
-            //Gör koden för att lista en specifik bannad spelare
+        if (playerName != null && args == null) {
             String playerUUID = Bukkit.getOfflinePlayer(playerName).getUniqueId().toString();
             if (CityDatabase.getCityBan(city, playerUUID) == null) {
                 plugin.sendMessage(player, "messages.city.ban.notBanned","%cityname%", city.getCityName());
                 return;
             } else {
                 Ban ban = CityDatabase.getCityBan(city, playerUUID);
-                plugin.sendMessage(player, "messages.city.ban.banned", "%player%", playerName, "%cityname%", city.getCityName(), "%reason%", ban.getReason(), "%length%", Utilities.parseTimeToReadable(String.valueOf(ban.getExpiryDate() - ban.getPlaceDate())));
+                assert ban != null;
+                plugin.sendMessage(player, "messages.city.ban.banned", "%player%", playerName, "%cityname%", city.getCityName(), "%reason%", ban.getReason(), "%length%", Utilities.formatDateDiff(ban.getLength()));
                 return;
             }
         }
-        if (playerName != null && length != null && reason == null) {
-            if (length.equals("-")) {
-                if (bannedPlayers == null) {
-                    plugin.sendMessage(player, "messages.city.ban.none", "%cityname%", city.getCityName());
+        long length = Utilities.parseDateDiff(args, true);
+        boolean isMinus = args != null && args.startsWith("-");
+        String reason = Utilities.removeTimePattern(args);
+        boolean noReason = reason.length() < 2;
+        if (playerName != null && isMinus && noReason) {
+            if (bannedPlayers == null) {
+                plugin.sendMessage(player, "messages.city.ban.none", "%cityname%", city.getCityName());
+                return;
+            }
+            for (Ban ban : bannedPlayers) {
+                if (ban.getPlayerUUID().equals(Bukkit.getOfflinePlayer(playerName).getUniqueId().toString())) {
+                    CityDatabase.removeCityBan(city, ban);
+                    Database.addLogEntry(city, "{ \"type\": \"unban\", \"subtype\": \"city\", \"player\": " + ban.getPlayerUUID() + ", \"placer\": " + player.getUniqueId().toString() + " }");
+                    plugin.sendMessage(player, "messages.city.ban.unbanned", "%player%", playerName, "%cityname%", city.getCityName());
                     return;
                 }
-                for (Ban ban : bannedPlayers) {
-                    if (ban.getPlayerUUID().equals(Bukkit.getOfflinePlayer(playerName).getUniqueId().toString())) {
-                        CityDatabase.removeCityBan(city, ban);
-                        Database.addLogEntry(city, "{ \"type\": \"unban\", \"subtype\": \"city\", \"player\": " + ban.getPlayerUUID() + ", \"placer\": " + player.getUniqueId().toString() + " }");
-                        plugin.sendMessage(player, "messages.city.ban.unbanned", "%player%", playerName, "%cityname%", city.getCityName());
-                        return;
-                    }
-                }
-                plugin.sendMessage(player, "messages.city.ban.notBanned", "%cityname%", city.getCityName());
-                return;
             }
+            plugin.sendMessage(player, "messages.city.ban.notBanned", "%cityname%", city.getCityName());
+            return;
         }
-        if (playerName != null && length != null && reason != null) {
+        if (playerName != null && noReason) {
+            plugin.sendMessage(player, "messages.syntax.city.ban");
+            return;
+        }
+        if (playerName != null && length != -1 && !noReason) {
             if (bannedPlayers != null) {
                 for (Ban ban : bannedPlayers) {
                     if (ban.getPlayerUUID().equals(Bukkit.getOfflinePlayer(playerName).getUniqueId().toString())) {
@@ -1733,12 +1737,15 @@ public class CommandCity extends BaseCommand {
                     }
                 }
             }
-            String playerUUID = Bukkit.getOfflinePlayer(playerName).getUniqueId().toString();
             long placeDate = System.currentTimeMillis();
-            long expiryDate = placeDate + Utilities.parseTime(length);
-
-            CityDatabase.addCityBan(city, playerUUID, reason, player, placeDate, expiryDate);
-            plugin.sendMessage(player, "messages.city.ban.success", "%player%", playerName, "%cityname%", city.getCityName(), "%reason%", reason, "%length%", Utilities.parseTimeToReadable(length));
+            if (length > Metropolis.configuration.getMaxBanTime()) {
+                plugin.sendMessage(player, "messages.error.city.banTooLong", "%maxtime%", Utilities.formatDateDiff(Metropolis.configuration.getMaxBanTime()));
+                return;
+            }
+            String playerUUID = Bukkit.getOfflinePlayer(playerName).getUniqueId().toString();
+            String expiryDate = Utilities.formatDateDiff(length);
+            CityDatabase.addCityBan(city, playerUUID, reason, player, placeDate, length);
+            plugin.sendMessage(player, "messages.city.ban.success", "%player%", playerName, "%cityname%", city.getCityName(), "%reason%", reason, "%length%", expiryDate);
 
             // Log the ban
             Database.addLogEntry(city, "{ \"type\": \"ban\", \"subtype\": \"city\", \"player\": " + playerUUID + ", \"placer\": " + player.getUniqueId().toString() + ", \"reason\": \"" + reason + "\", \"length\": \"" + length + "\" }");

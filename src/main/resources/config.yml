@@ -6,6 +6,7 @@ sql:
   password:
 
 settings:
+  maxBanTime: 315360000000 # 10 years
   cooldownTime:
     invite: 180
     namechange: 43200

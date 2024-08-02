@@ -9,15 +9,15 @@ public class Ban {
     private final City city;
     private final String playerUUID;
     private final long placeDate;
-    private final long expiryDate;
+    private final long length;
     private final String reason;
     private final String placeUUID;
 
     public Ban(DbRow data) {
         this.cityID = data.getInt("cityID");
         this.playerUUID = data.getString("playerUUID");
-        this.placeDate = data.getInt("placeDate");
-        this.expiryDate = data.getInt("expiryDate");
+        this.placeDate = data.getLong("placeDate");
+        this.length = data.getLong("length");
         this.reason = data.getString("reason");
         this.placeUUID = data.getString("placeUUID");
         if (CityDatabase.getCity(cityID).isPresent()) {

@@ -41,7 +41,7 @@ public class City {
         this.originalMayorUUID = data.getString("originalMayorUUID");
         this.cityBalance = data.getInt("cityBalance");
         this.citySpawn = Utilities.stringToLocation(data.getString("citySpawn"));
-        this.cityCreationDate = data.getInt("createDate");
+        this.cityCreationDate = data.getLong("createDate");
         this.enterMessage = data.getString("enterMessage");
         this.exitMessage = data.getString("exitMessage");
         this.motdMessage = data.getString("motdMessage");

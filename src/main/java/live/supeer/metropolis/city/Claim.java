@@ -27,7 +27,7 @@ public class Claim {
         this.xPosition = data.getInt("xPosition");
         this.zPosition = data.getInt("zPosition");
         this.cityName = data.getString("cityName");
-        this.claimDate = data.getInt("claimDate");
+        this.claimDate = data.getLong("claimDate");
         this.outpost = data.get("outpost");
         if (CityDatabase.getCity(cityName).isPresent()) {
             this.city = CityDatabase.getCity(cityName).get();

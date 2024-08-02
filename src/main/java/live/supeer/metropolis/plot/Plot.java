@@ -71,7 +71,7 @@ public class Plot {
                 data.getString("plotFlags") == null
                         ? new char[0]
                         : data.getString("plotFlags").toCharArray();
-        this.plotCreationDate = data.getInt("plotCreationDate");
+        this.plotCreationDate = data.getLong("plotCreationDate");
         this.plotPoints = Utilities.stringToPolygon(data.getString("plotPoints"));
     }
 

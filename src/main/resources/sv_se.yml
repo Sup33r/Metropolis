@@ -1,11 +1,19 @@
 messages:
   time:
+    now: "just nu"
+    second: "sekund"
     seconds: "sekunder"
+    minute: "minut"
     minutes: "minuter"
+    hour: "timme"
     hours: "timmar"
+    day: "dag"
     days: "dagar"
+    week: "vecka"
     weeks: "veckor"
+    month: "månad"
     months: "månader"
+    year: "år"
     years: "år"
   months:
     january: "januari"
@@ -32,6 +40,7 @@ messages:
   syntax:
     city:
       go: "§7Syntax: /city go §nnamn\n§7Syntax: /city go §nnamn§r §7delete\n§7Syntax: /city go §nnamn§r §7set displayname §nvisningsnamn\n§7Syntax: /city go §nnamn§r §7set displayname -\n§7/city go §nnamn§r §7set accesslevel §nåtkomstnivå\n§7/city go §nnamn§r §7set accesslevel -"
+      ban: "§7Syntax: /city ban\n§7Syntax: /city ban §nspelare\n§7Syntax: /city ban §nspelare§r §7-\n§7Syntax: /city ban §nspelare längd anledning"
       buy:
         bonus: "§7Syntax: /city buy bonus §nantal"
         district: "§7Syntax: /city buy district §nnamn"
@@ -94,6 +103,7 @@ messages:
       alreadyInCity: "§cDu är redan medlem i staden."
       notInCity: "§cDu är inte medlem i staden."
       banned: "§cDu är bannlyst från staden."
+      banTooLong: "§cBannlysningen får inte vara längre än %maxtime%."
       leave:
         mayor: "§e%cityname% §7| §cDu kan inte lämna staden som borgermästare. Överväg att istället ta bort staden med /city delete §nstadsnamn§r§c, eller byta roll med en annan medlem med kommandot /city rank §nspelare§r§c swap."
       missing:
