@@ -2791,6 +2791,10 @@ public class CommandPlot extends BaseCommand {
             plugin.sendMessage(player, "messages.error.permissionDenied");
             return;
         }
+        if (CityDatabase.getCityBan(city, player.getUniqueId().toString()) != null) {
+            plugin.sendMessage(player, "messages.error.city.banned");
+            return;
+        }
         String role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
         if (role == null) {
             plugin.sendMessage(
