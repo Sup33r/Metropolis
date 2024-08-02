@@ -465,6 +465,10 @@ public class CommandCity extends BaseCommand {
             plugin.sendMessage(player, "messages.error.city.alreadyInACity");
             return;
         }
+        if (CityDatabase.getCityBan(city, inviteePlayer.getUniqueId().toString()) != null) {
+            plugin.sendMessage(player, "messages.error.city.playerBanned", "%cityname%", city.getCityName());
+            return;
+        }
         if (invites.containsKey(player) && invites.get(player).equals(city)) {
             plugin.sendMessage(
                     player, "messages.error.city.invite.alreadyInvited", "%cityname%", city.getCityName());

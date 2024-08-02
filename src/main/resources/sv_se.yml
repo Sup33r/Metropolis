@@ -79,6 +79,7 @@ messages:
       invite:
         self: "§e%cityname% §7| §cMan kan inte bjuda in sig själv till en stad."
         alreadyInvited: "§e%cityname% §7| §cSpelaren är redan inbjuden till staden."
+        playerBanned: "§e%cityname% §7| §cSpelaren är bannlyst från staden och kan därför inte bli inbjuden."
       closed: "§e%cityname% §7| §cStaden är stängd för allmänheten."
       permissionDenied: "§e%cityname% §7| §cÅtkomst nekad."
       cityExists: "§cDen specifierade staden finns redan."

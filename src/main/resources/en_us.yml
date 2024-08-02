@@ -79,6 +79,7 @@ messages:
       invite:
         self: "§e%cityname% §7| §cYou cannot invite yourself to a city."
         alreadyInvited: "§e%cityname% §7| §cThe player is already invited to the city."
+        playerBanned: "§e%cityname% §7| §cThe player is banned from the city, and therefore cannot be invited."
       closed: "§e%cityname% §7| §cThe city is closed to the public."
       permissionDenied: "§e%cityname% §7| §cAccess denied."
       cityExists: "§cThe specified city already exists."
