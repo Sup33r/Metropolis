@@ -1611,12 +1611,17 @@ public class CommandCity extends BaseCommand {
 
     @Subcommand("spawn")
     public static void onSpawn(Player player,@Optional String cityName) {
+        if (!player.hasPermission("metropolis.city.spawn")) {
+            plugin.sendMessage(player, "messages.error.permissionDenied");
+            return;
+        }
         if (cityName == null) {
             if (HCDatabase.hasHomeCity(player.getUniqueId().toString())) {
                 plugin.sendMessage(player, "messages.error.missing.homecity");
                 return;
             }
             City city = HCDatabase.getHomeCityToCity(player.getUniqueId().toString());
+            assert city != null;
             if (city.getCitySpawn() == null) {
                 plugin.sendMessage(player, "messages.error.missing.spawn");
                 return;
@@ -1624,10 +1629,6 @@ public class CommandCity extends BaseCommand {
             player.teleport(city.getCitySpawn());
             plugin.sendMessage(player, "messages.teleport", "%to%", "startpunkten i " + city.getCityName());
         } else {
-            if (!player.hasPermission("metropolis.city.spawn")) {
-                plugin.sendMessage(player, "messages.error.permissionDenied");
-                return;
-            }
             if (CityDatabase.getCity(cityName).isEmpty()) {
                 plugin.sendMessage(player, "messages.error.missing.city");
                 return;
@@ -1640,6 +1641,10 @@ public class CommandCity extends BaseCommand {
             if (player.hasPermission("metropolis.city.spawn.bypass")) {
                 player.teleport(city.getCitySpawn());
                 plugin.sendMessage(player, "messages.teleport", "%to%", "startpunkten i " + city.getCityName());
+                return;
+            }
+            if (CityDatabase.getCityBan(city, player.getUniqueId().toString()) != null) {
+                plugin.sendMessage(player, "messages.city.spawn.banned", "%cityname%", city.getCityName());
                 return;
             }
             if (!city.isOpen() && !CityDatabase.memberExists(player.getUniqueId().toString(), city)) {

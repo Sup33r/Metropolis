@@ -253,6 +253,7 @@ messages:
       unbanned: "§e%cityname% §7| §aSpelaren %player%s bannlysning från staden har blivit upphävd."
       notBanned: "§e%cityname% §7| §cSpelaren i fråga är inte bannlyst från staden."
     spawn:
+      banned: "§e%cityname% §7| §cDu är bannlyst från staden."
       closed: "§e%cityname% §7| §cDu kan inte teleportera till staden eftersom den är stängd."
     online:
       total: "§a§lTotalt antal medlemmar online: §2%online%."

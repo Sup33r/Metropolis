@@ -253,6 +253,7 @@ messages:
       unbanned: "§e%cityname% §7| §aThe player %player% has been unbanned from the city."
       notBanned: "§e%cityname% §7| §cThe player in question is not banned from the city."
     spawn:
+      banned: "§e%cityname% §7| §cYou are banned from the city."
       closed: "§e%cityname% §7| §cYou cannot teleport to the city because it is closed."
     online:
       total: "§a§lTotal members online: §2%online%."
