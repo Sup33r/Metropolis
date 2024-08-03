@@ -1,6 +1,7 @@
-package live.supeer.metropolis;
+package live.supeer.metropolis.utils;
 
 import fr.mrmicky.fastboard.FastBoard;
+import live.supeer.metropolis.Metropolis;
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.city.CityDatabase;
 import live.supeer.metropolis.homecity.HCDatabase;
@@ -14,7 +15,7 @@ import java.util.*;
 
 
 public class Utilities {
-    static Metropolis plugin;
+    public static Metropolis plugin;
 
     public static String formatLocation(Location location) {
         return "(["

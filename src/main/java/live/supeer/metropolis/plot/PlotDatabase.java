@@ -2,7 +2,7 @@ package live.supeer.metropolis.plot;
 
 import co.aikar.idb.DB;
 import live.supeer.metropolis.Database;
-import live.supeer.metropolis.Utilities;
+import live.supeer.metropolis.utils.Utilities;
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.utils.DateUtil;
 import org.bukkit.Location;

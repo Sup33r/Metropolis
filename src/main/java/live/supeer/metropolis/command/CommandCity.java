@@ -1,9 +1,13 @@
-package live.supeer.metropolis;
+package live.supeer.metropolis.command;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
 import co.aikar.commands.annotation.Optional;
 import co.aikar.idb.DB;
+import live.supeer.metropolis.Database;
+import live.supeer.metropolis.Metropolis;
+import live.supeer.metropolis.MetropolisListener;
+import live.supeer.metropolis.utils.Utilities;
 import live.supeer.metropolis.city.*;
 import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.utils.DateUtil;
@@ -23,7 +27,7 @@ import java.util.regex.Pattern;
 
 @CommandAlias("city|c")
 public class CommandCity extends BaseCommand {
-    static Metropolis plugin;
+    public static Metropolis plugin;
 
     private CoreProtectAPI getCoreProtect() {
         Plugin corePlugin = plugin.getServer().getPluginManager().getPlugin("CoreProtect");

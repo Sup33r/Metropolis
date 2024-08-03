@@ -6,8 +6,13 @@ import com.google.common.collect.ImmutableList;
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.city.CityDatabase;
 import live.supeer.metropolis.city.Member;
+import live.supeer.metropolis.command.CommandCity;
+import live.supeer.metropolis.command.CommandHere;
+import live.supeer.metropolis.command.CommandHomeCity;
+import live.supeer.metropolis.command.CommandPlot;
 import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.utils.DateUtil;
+import live.supeer.metropolis.utils.Utilities;
 import lombok.Getter;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.command.CommandSender;
@@ -40,6 +45,7 @@ public final class Metropolis extends JavaPlugin {
         Database.plugin = this;
         HCDatabase.plugin = this;
         CityDatabase.plugin = this;
+        CityListener.plugin = this;
         City.plugin = this;
         Member.plugin = this;
         MetropolisListener.plugin = this;
@@ -63,6 +69,7 @@ public final class Metropolis extends JavaPlugin {
         manager.registerCommand(new CommandHere());
         this.getServer().getPluginManager().registerEvents(new CommandHomeCity(), this);
         this.getServer().getPluginManager().registerEvents(new MetropolisListener(), this);
+        this.getServer().getPluginManager().registerEvents(new CityListener(), this);
         Database.initialize();
         Database.synchronize();
         manager

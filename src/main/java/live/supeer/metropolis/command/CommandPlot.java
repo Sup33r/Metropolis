@@ -1,7 +1,11 @@
-package live.supeer.metropolis;
+package live.supeer.metropolis.command;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
+import live.supeer.metropolis.Database;
+import live.supeer.metropolis.Metropolis;
+import live.supeer.metropolis.MetropolisListener;
+import live.supeer.metropolis.utils.Utilities;
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.city.CityDatabase;
 import live.supeer.metropolis.homecity.HCDatabase;
@@ -23,7 +27,7 @@ import java.util.Objects;
 
 @CommandAlias("plot")
 public class CommandPlot extends BaseCommand {
-    static Metropolis plugin;
+    public static Metropolis plugin;
 
     @Default
     @CatchUnknown

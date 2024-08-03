@@ -1,7 +1,8 @@
-package live.supeer.metropolis;
+package live.supeer.metropolis.command;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
+import live.supeer.metropolis.Metropolis;
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.city.CityDatabase;
 import live.supeer.metropolis.homecity.HCDatabase;
@@ -18,7 +19,7 @@ import java.util.Objects;
 
 @CommandAlias("homecity|hc")
 public class CommandHomeCity extends BaseCommand implements Listener {
-    static Metropolis plugin;
+    public static Metropolis plugin;
 
     @Default
     public static void onHomeCity(Player player, @Optional String cityname) {

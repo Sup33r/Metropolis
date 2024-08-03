@@ -2,8 +2,12 @@ package live.supeer.metropolis;
 
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.city.CityDatabase;
+import live.supeer.metropolis.command.CommandCity;
+import live.supeer.metropolis.event.PlayerEnterCityEvent;
+import live.supeer.metropolis.event.PlayerExitCityEvent;
 import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.utils.DateUtil;
+import live.supeer.metropolis.utils.Utilities;
 import net.coreprotect.CoreProtect;
 import net.coreprotect.CoreProtectAPI;
 import org.bukkit.Bukkit;
@@ -452,30 +456,23 @@ public class MetropolisListener implements Listener {
         if ((from.getBlockX() >> 4) != (to.getBlockX() >> 4) || (from.getBlockZ() >> 4) != (to.getBlockZ() >> 4)) {
             if (playerInCity.containsKey(event.getPlayer().getUniqueId()) && CityDatabase.getClaim(to) == null) {
                 City fromCity = playerInCity.get(event.getPlayer().getUniqueId());
-                if (fromCity.getExitMessage() != null) {
-                    plugin.sendMessage(event.getPlayer(), "messages.city.exit", "%cityname%", fromCity.getCityName(), "%exit%", fromCity.getExitMessage());
-                }
-                Utilities.sendNatureScoreboard(event.getPlayer());
                 playerInCity.remove(event.getPlayer().getUniqueId());
+                PlayerExitCityEvent exitCityEvent = new PlayerExitCityEvent(event.getPlayer(), fromCity, event, true);
+                Bukkit.getServer().getPluginManager().callEvent(exitCityEvent);
             } else if (playerInCity.containsKey(event.getPlayer().getUniqueId()) && CityDatabase.getClaim(to) != null && playerInCity.get(event.getPlayer().getUniqueId()) != CityDatabase.getCity(Objects.requireNonNull(CityDatabase.getClaim(to)).getCityName()).get()) {
                 City fromCity = playerInCity.get(event.getPlayer().getUniqueId());
                 City toCity = CityDatabase.getCity(Objects.requireNonNull(CityDatabase.getClaim(to)).getCityName()).get();
-                if (fromCity.getExitMessage() != null) {
-                    plugin.sendMessage(event.getPlayer(), "messages.city.exit", "%cityname%", fromCity.getCityName(), "%exit%", fromCity.getExitMessage());
-                }
-                if (toCity.getEnterMessage() != null) {
-                    plugin.sendMessage(event.getPlayer(), "messages.city.enter", "%cityname%", toCity.getCityName(), "%enter%", toCity.getEnterMessage());
-                }
-                Utilities.sendCityScoreboard(event.getPlayer(), toCity);
                 playerInCity.remove(event.getPlayer().getUniqueId());
                 playerInCity.put(event.getPlayer().getUniqueId(), toCity);
+                PlayerEnterCityEvent enterCityEvent = new PlayerEnterCityEvent(event.getPlayer(), toCity, event);
+                Bukkit.getServer().getPluginManager().callEvent(enterCityEvent);
+                PlayerExitCityEvent exitCityEvent = new PlayerExitCityEvent(event.getPlayer(), fromCity, event, false);
+                Bukkit.getServer().getPluginManager().callEvent(exitCityEvent);
             } else if (!playerInCity.containsKey(event.getPlayer().getUniqueId()) && CityDatabase.getClaim(to) != null) {
                 City toCity = CityDatabase.getCity(Objects.requireNonNull(CityDatabase.getClaim(to)).getCityName()).get();
-                if (toCity.getEnterMessage() != null) {
-                    plugin.sendMessage(event.getPlayer(), "messages.city.enter", "%cityname%", toCity.getCityName(), "%enter%", toCity.getEnterMessage());
-                }
                 playerInCity.put(event.getPlayer().getUniqueId(), toCity);
-                Utilities.sendCityScoreboard(event.getPlayer(), toCity);
+                PlayerEnterCityEvent enterCityEvent = new PlayerEnterCityEvent(event.getPlayer(), toCity, event);
+                Bukkit.getServer().getPluginManager().callEvent(enterCityEvent);
             }
             return;
         }
