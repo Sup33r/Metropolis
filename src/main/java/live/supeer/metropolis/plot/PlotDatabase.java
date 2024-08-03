@@ -4,6 +4,7 @@ import co.aikar.idb.DB;
 import live.supeer.metropolis.Database;
 import live.supeer.metropolis.Utilities;
 import live.supeer.metropolis.city.City;
+import live.supeer.metropolis.utils.DateUtil;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -64,7 +65,7 @@ public class PlotDatabase {
                             + ", "
                             + Database.sqlString(Utilities.locationToString(plotCenter))
                             + ", "
-                            + Utilities.getTimestamp()
+                            + DateUtil.getTimestamp()
                             + ");");
             Plot plot =
                     new Plot(

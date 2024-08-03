@@ -7,6 +7,7 @@ import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.city.CityDatabase;
 import live.supeer.metropolis.city.Member;
 import live.supeer.metropolis.homecity.HCDatabase;
+import live.supeer.metropolis.utils.DateUtil;
 import lombok.Getter;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.command.CommandSender;
@@ -31,6 +32,7 @@ public final class Metropolis extends JavaPlugin {
         this.logger = getLogger();
         configuration = new MetropolisConfiguration(this);
         Utilities.plugin = this;
+        DateUtil.plugin = this;
         CommandCity.plugin = this;
         CommandPlot.plugin = this;
         CommandHomeCity.plugin = this;

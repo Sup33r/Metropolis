@@ -6,6 +6,7 @@ import co.aikar.commands.annotation.Optional;
 import co.aikar.idb.DB;
 import live.supeer.metropolis.city.*;
 import live.supeer.metropolis.homecity.HCDatabase;
+import live.supeer.metropolis.utils.DateUtil;
 import net.coreprotect.CoreProtect;
 import net.coreprotect.CoreProtectAPI;
 import net.milkbowl.vault.economy.Economy;
@@ -1211,7 +1212,7 @@ public class CommandCity extends BaseCommand {
                 int timeSinceLastChange = currentTime - latestNameChange;
 
                 if (timeSinceLastChange < cooldownTime) {
-                    plugin.sendMessage(player, "messages.error.namechange.cooldown", "%timeleft%", Utilities.formatTimeFromSeconds(cooldownTime - timeSinceLastChange));
+                    plugin.sendMessage(player, "messages.error.namechange.cooldown", "%timeleft%", DateUtil.formatTimeFromSeconds(cooldownTime - timeSinceLastChange));
                     return;
                 }
             }
@@ -1408,7 +1409,7 @@ public class CommandCity extends BaseCommand {
                                     + " -- §c"
                                     + result.getType().toString().toLowerCase().replace("_", " ")
                                     + "§2 -- "
-                                    + Utilities.niceDate(result.getTimestamp() / 1000L);
+                                    + DateUtil.niceDate(result.getTimestamp() / 1000L);
                 }
                 if (result.getActionId() == 1) {
                     row =
@@ -1419,7 +1420,7 @@ public class CommandCity extends BaseCommand {
                                     + " -- §a"
                                     + result.getType().toString().toLowerCase().replace("_", " ")
                                     + "§2 -- "
-                                    + Utilities.niceDate(result.getTimestamp() / 1000L);
+                                    + DateUtil.niceDate(result.getTimestamp() / 1000L);
                 }
                 if (result.getActionId() == 2) {
                     row =
@@ -1430,7 +1431,7 @@ public class CommandCity extends BaseCommand {
                                     + " -- §e"
                                     + result.getType().toString().toLowerCase().replace("_", " ")
                                     + "§2 -- "
-                                    + Utilities.niceDate(result.getTimestamp() / 1000L);
+                                    + DateUtil.niceDate(result.getTimestamp() / 1000L);
                 }
                 if (!row.isEmpty()) {
                     player.sendMessage(row);
@@ -1698,13 +1699,13 @@ public class CommandCity extends BaseCommand {
             } else {
                 Ban ban = CityDatabase.getCityBan(city, playerUUID);
                 assert ban != null;
-                plugin.sendMessage(player, "messages.city.ban.banned", "%player%", playerName, "%cityname%", city.getCityName(), "%reason%", ban.getReason(), "%length%", Utilities.formatDateDiff(ban.getLength()));
+                plugin.sendMessage(player, "messages.city.ban.banned", "%player%", playerName, "%cityname%", city.getCityName(), "%reason%", ban.getReason(), "%length%", DateUtil.formatDateDiff(ban.getLength()));
                 return;
             }
         }
-        long length = Utilities.parseDateDiff(args, true);
+        long length = DateUtil.parseDateDiff(args, true);
         boolean isMinus = args.startsWith("-");
-        String reason = Utilities.removeTimePattern(args);
+        String reason = DateUtil.removeTimePattern(args);
         boolean noReason = reason.length() < 2;
         if (playerName != null && isMinus && noReason) {
             if (bannedPlayers == null) {
@@ -1727,9 +1728,9 @@ public class CommandCity extends BaseCommand {
             return;
         }
         if (playerName != null && length != -1) {
-            long maxBanTime = Utilities.parseDateDiff(Metropolis.configuration.getMaxBanTime(), true);
+            long maxBanTime = DateUtil.parseDateDiff(Metropolis.configuration.getMaxBanTime(), true);
             if (length > maxBanTime) {
-                plugin.sendMessage(player, "messages.error.city.banTooLong", "%maxtime%", Utilities.formatDateDiff(maxBanTime));
+                plugin.sendMessage(player, "messages.error.city.banTooLong", "%maxtime%", DateUtil.formatDateDiff(maxBanTime));
                 return;
             }
             if (bannedPlayers != null) {
@@ -1742,7 +1743,7 @@ public class CommandCity extends BaseCommand {
             }
             long placeDate = System.currentTimeMillis();
             String playerUUID = Bukkit.getOfflinePlayer(playerName).getUniqueId().toString();
-            String expiryDate = Utilities.formatDateDiff(length);
+            String expiryDate = DateUtil.formatDateDiff(length);
             CityDatabase.addCityBan(city, playerUUID, reason, player, placeDate, length);
             plugin.sendMessage(player, "messages.city.ban.success", "%player%", playerName, "%cityname%", city.getCityName(), "%reason%", reason, "%length%", expiryDate);
 

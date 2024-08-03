@@ -5,6 +5,7 @@ import co.aikar.commands.annotation.*;
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.city.CityDatabase;
 import live.supeer.metropolis.homecity.HCDatabase;
+import live.supeer.metropolis.utils.BannerUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -95,7 +96,7 @@ public class CommandHomeCity extends BaseCommand implements Listener {
             Inventory gui = Bukkit.createInventory(player, 9, "§8Homecity");
             for (int j = 0; j < cityNames[0].length(); j++) {
                 if (j < 9) {
-                    ItemStack item = Utilities.letterBanner(String.valueOf(cityNames[0].charAt(j)), cityNames[0]);
+                    ItemStack item = BannerUtil.letterBanner(String.valueOf(cityNames[0].charAt(j)), cityNames[0]);
                     gui.setItem(j, item);
                 }
 
@@ -106,14 +107,14 @@ public class CommandHomeCity extends BaseCommand implements Listener {
             Inventory gui = Bukkit.createInventory(player, 9+9, "§8Homecity");
             for (int i = 0; i < cityNames[0].length(); i++) {
                 if (i < 9) {
-                    ItemStack item = Utilities.letterBanner(String.valueOf(cityNames[0].charAt(i)), cityNames[0]);
+                    ItemStack item = BannerUtil.letterBanner(String.valueOf(cityNames[0].charAt(i)), cityNames[0]);
                     gui.setItem(i, item);
                 }
 
             }
             for (int i = 0; i < cityNames[1].length(); i++) {
                 if (i < 9) {
-                    ItemStack item = Utilities.letterBanner(String.valueOf(cityNames[1].charAt(i)), cityNames[1]);
+                    ItemStack item = BannerUtil.letterBanner(String.valueOf(cityNames[1].charAt(i)), cityNames[1]);
                     gui.setItem(i+9, item);
                 }
             }
@@ -123,20 +124,20 @@ public class CommandHomeCity extends BaseCommand implements Listener {
             Inventory gui = Bukkit.createInventory(player, 9+9+9, "§8Homecity");
             for (int i = 0; i < cityNames[0].length(); i++) {
                 if (i < 9) {
-                    ItemStack item = Utilities.letterBanner(String.valueOf(cityNames[0].charAt(i)), cityNames[0]);
+                    ItemStack item = BannerUtil.letterBanner(String.valueOf(cityNames[0].charAt(i)), cityNames[0]);
                     gui.setItem(i, item);
                 }
 
             }
             for (int i = 0; i < cityNames[1].length(); i++) {
                 if (i < 9) {
-                    ItemStack item = Utilities.letterBanner(String.valueOf(cityNames[1].charAt(i)), cityNames[1]);
+                    ItemStack item = BannerUtil.letterBanner(String.valueOf(cityNames[1].charAt(i)), cityNames[1]);
                     gui.setItem(i+9, item);
                 }
             }
             for (int i = 0; i < cityNames[2].length(); i++) {
                 if (i < 9) {
-                    ItemStack item = Utilities.letterBanner(String.valueOf(cityNames[2].charAt(i)), cityNames[2]);
+                    ItemStack item = BannerUtil.letterBanner(String.valueOf(cityNames[2].charAt(i)), cityNames[2]);
                     gui.setItem(i+18, item);
                 }
             }

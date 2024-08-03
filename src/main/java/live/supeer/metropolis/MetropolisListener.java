@@ -3,6 +3,7 @@ package live.supeer.metropolis;
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.city.CityDatabase;
 import live.supeer.metropolis.plot.Plot;
+import live.supeer.metropolis.utils.DateUtil;
 import net.coreprotect.CoreProtect;
 import net.coreprotect.CoreProtectAPI;
 import org.bukkit.Bukkit;
@@ -211,7 +212,7 @@ public class MetropolisListener implements Listener {
                                             + " -- §c"
                                             + result.getType().toString().toLowerCase().replace("_", " ")
                                             + "§2 -- "
-                                            + Utilities.niceDate(result.getTimestamp() / 1000L);
+                                            + DateUtil.niceDate(result.getTimestamp() / 1000L);
                         }
                         if (result.getActionId() == 1) {
                             row =
@@ -222,7 +223,7 @@ public class MetropolisListener implements Listener {
                                             + " -- §a"
                                             + result.getType().toString().toLowerCase().replace("_", " ")
                                             + "§2 -- "
-                                            + Utilities.niceDate(result.getTimestamp() / 1000L);
+                                            + DateUtil.niceDate(result.getTimestamp() / 1000L);
                         }
                         if (result.getActionId() == 2) {
                             row =
@@ -233,7 +234,7 @@ public class MetropolisListener implements Listener {
                                             + " -- §e"
                                             + result.getType().toString().toLowerCase().replace("_", " ")
                                             + "§2 -- "
-                                            + Utilities.niceDate(result.getTimestamp() / 1000L);
+                                            + DateUtil.niceDate(result.getTimestamp() / 1000L);
                         }
                         if (!row.isEmpty()) {
                             player.sendMessage(row);
@@ -406,7 +407,7 @@ public class MetropolisListener implements Listener {
                                         + " -- §c"
                                         + result.getType().toString().toLowerCase().replace("_", " ")
                                         + "§2 -- "
-                                        + Utilities.niceDate(result.getTimestamp() / 1000L);
+                                        + DateUtil.niceDate(result.getTimestamp() / 1000L);
                     }
                     if (result.getActionId() == 1) {
                         row =
@@ -417,7 +418,7 @@ public class MetropolisListener implements Listener {
                                         + " -- §a"
                                         + result.getType().toString().toLowerCase().replace("_", " ")
                                         + "§2 -- "
-                                        + Utilities.niceDate(result.getTimestamp() / 1000L);
+                                        + DateUtil.niceDate(result.getTimestamp() / 1000L);
                     }
                     if (result.getActionId() == 2) {
                         row =
@@ -428,7 +429,7 @@ public class MetropolisListener implements Listener {
                                         + " -- §e"
                                         + result.getType().toString().toLowerCase().replace("_", " ")
                                         + "§2 -- "
-                                        + Utilities.niceDate(result.getTimestamp() / 1000L);
+                                        + DateUtil.niceDate(result.getTimestamp() / 1000L);
                     }
                     if (!row.isEmpty()) {
                         player.sendMessage(row);
@@ -442,11 +443,11 @@ public class MetropolisListener implements Listener {
     }
     @EventHandler
     public void onMove(PlayerMoveEvent event) {
-        if (event.getFrom().getBlockX() == event.getTo().getBlockX() && event.getFrom().getBlockY() == event.getTo().getBlockY() && event.getFrom().getBlockZ() == event.getTo().getBlockZ()) {
-            return;
-        }
         Location from = event.getFrom();
         Location to = event.getTo();
+        if (from.getBlockX() == to.getBlockX() && from.getBlockY() == to.getBlockY() && from.getBlockZ() == to.getBlockZ()) {
+            return;
+        }
 
         if ((from.getBlockX() >> 4) != (to.getBlockX() >> 4) || (from.getBlockZ() >> 4) != (to.getBlockZ() >> 4)) {
             if (playerInCity.containsKey(event.getPlayer().getUniqueId()) && CityDatabase.getClaim(to) == null) {
@@ -488,7 +489,5 @@ public class MetropolisListener implements Listener {
             }
         }
     }
-
-
 
 }

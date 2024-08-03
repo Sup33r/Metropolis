@@ -4,6 +4,7 @@ import co.aikar.idb.BukkitDB;
 import co.aikar.idb.DB;
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.city.CityDatabase;
+import live.supeer.metropolis.utils.DateUtil;
 
 import java.sql.SQLException;
 
@@ -191,7 +192,7 @@ public class Database {
                     "INSERT INTO `mp_citylogs` (`cityId`, `dateTime`, `jsonLog`) VALUES ("
                             + cityId
                             + ", "
-                            + Utilities.getTimestamp()
+                            + DateUtil.getTimestamp()
                             + ", "
                             + Database.sqlString(logEntry)
                             + ");");
