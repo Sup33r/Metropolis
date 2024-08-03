@@ -17,10 +17,8 @@ import org.bukkit.inventory.meta.BannerMeta;
 
 import java.awt.*;
 import java.text.NumberFormat;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Locale;
-import java.util.Objects;
+import java.time.Duration;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -115,50 +113,218 @@ public class Utilities {
         return time;
     }
 
-    public static long parseTimeToMillis(String length) {
-        long time = 0;
+        private static final Pattern timePattern = Pattern.compile("(?:([0-9]+)\\s*y[a-z]*[,\\s]*)?" + "(?:([0-9]+)\\s*mo[a-z]*[,\\s]*)?" + "(?:([0-9]+)\\s*w[a-z]*[,\\s]*)?" + "(?:([0-9]+)\\s*d[a-z]*[,\\s]*)?" + "(?:([0-9]+)\\s*h[a-z]*[,\\s]*)?" + "(?:([0-9]+)\\s*m[a-z]*[,\\s]*)?" + "(?:([0-9]+)\\s*(?:s[a-z]*)?)?", Pattern.CASE_INSENSITIVE);
+        private static final int maxYears = 100000;
+
+        public static String removeTimePattern(final String input) {
+            return timePattern.matcher(input).replaceFirst("").trim();
+        }
+
+        public static long parseDateDiff(String time, boolean future) {
+            return parseDateDiff(time, future, false);
+        }
+
+        public static long parseDateDiff(String time, boolean future, boolean emptyEpoch) {
+            final Matcher m = timePattern.matcher(time);
+            int years = 0;
+            int months = 0;
+            int weeks = 0;
+            int days = 0;
+            int hours = 0;
+            int minutes = 0;
+            int seconds = 0;
+            boolean found = false;
+            while (m.find()) {
+                if (m.group() == null || m.group().isEmpty()) {
+                    continue;
+                }
+                for (int i = 0; i < m.groupCount(); i++) {
+                    if (m.group(i) != null && !m.group(i).isEmpty()) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) {
+                    if (m.group(1) != null && !m.group(1).isEmpty()) {
+                        years = Integer.parseInt(m.group(1));
+                    }
+                    if (m.group(2) != null && !m.group(2).isEmpty()) {
+                        months = Integer.parseInt(m.group(2));
+                    }
+                    if (m.group(3) != null && !m.group(3).isEmpty()) {
+                        weeks = Integer.parseInt(m.group(3));
+                    }
+                    if (m.group(4) != null && !m.group(4).isEmpty()) {
+                        days = Integer.parseInt(m.group(4));
+                    }
+                    if (m.group(5) != null && !m.group(5).isEmpty()) {
+                        hours = Integer.parseInt(m.group(5));
+                    }
+                    if (m.group(6) != null && !m.group(6).isEmpty()) {
+                        minutes = Integer.parseInt(m.group(6));
+                    }
+                    if (m.group(7) != null && !m.group(7).isEmpty()) {
+                        seconds = Integer.parseInt(m.group(7));
+                    }
+                    break;
+                }
+            }
+            if (!found) {
+                return -1;
+            }
+            final Calendar c = new GregorianCalendar();
+
+            if (emptyEpoch) {
+                c.setTimeInMillis(0);
+            }
+
+            if (years > 0) {
+                if (years > maxYears) {
+                    years = maxYears;
+                }
+                c.add(Calendar.YEAR, years * (future ? 1 : -1));
+            }
+            if (months > 0) {
+                c.add(Calendar.MONTH, months * (future ? 1 : -1));
+            }
+            if (weeks > 0) {
+                c.add(Calendar.WEEK_OF_YEAR, weeks * (future ? 1 : -1));
+            }
+            if (days > 0) {
+                c.add(Calendar.DAY_OF_MONTH, days * (future ? 1 : -1));
+            }
+            if (hours > 0) {
+                c.add(Calendar.HOUR_OF_DAY, hours * (future ? 1 : -1));
+            }
+            if (minutes > 0) {
+                c.add(Calendar.MINUTE, minutes * (future ? 1 : -1));
+            }
+            if (seconds > 0) {
+                c.add(Calendar.SECOND, seconds * (future ? 1 : -1));
+            }
+            final Calendar max = new GregorianCalendar();
+            max.add(Calendar.YEAR, maxYears);
+            if (c.after(max)) {
+                return max.getTimeInMillis();
+            }
+            return c.getTimeInMillis();
+        }
+
+        static int dateDiff(final int type, final Calendar fromDate, final Calendar toDate, final boolean future) {
+            final int year = Calendar.YEAR;
+
+            final int fromYear = fromDate.get(year);
+            final int toYear = toDate.get(year);
+            if (Math.abs(fromYear - toYear) > maxYears) {
+                toDate.set(year, fromYear +
+                        (future ? maxYears : -maxYears));
+            }
+
+            int diff = 0;
+            long savedDate = fromDate.getTimeInMillis();
+            while ((future && !fromDate.after(toDate)) || (!future && !fromDate.before(toDate))) {
+                savedDate = fromDate.getTimeInMillis();
+                fromDate.add(type, future ? 1 : -1);
+                diff++;
+            }
+            diff--;
+            fromDate.setTimeInMillis(savedDate);
+            return diff;
+        }
+
+        public static String formatDateDiff(final long date) {
+            final Calendar c = new GregorianCalendar();
+            c.setTimeInMillis(date);
+            final Calendar now = new GregorianCalendar();
+            return formatDateDiff(now, c);
+        }
+
+        public static String formatDateDiff(final Calendar fromDate, final Calendar toDate) {
+            boolean future = false;
+            if (toDate.equals(fromDate)) {
+                return plugin.getMessage("messages.time.now");
+            }
+            if (toDate.after(fromDate)) {
+                future = true;
+            }
+            // Temporary 50ms time buffer added to avoid display truncation due to code execution delays
+            toDate.add(Calendar.MILLISECOND, future ? 50 : -50);
+            final StringBuilder sb = new StringBuilder();
+            final int[] types = new int[] {Calendar.YEAR, Calendar.MONTH, Calendar.DAY_OF_MONTH, Calendar.HOUR_OF_DAY, Calendar.MINUTE, Calendar.SECOND};
+            final String[] names = new String[] {plugin.getMessage("messages.time.year"), plugin.getMessage("messages.time.years"), plugin.getMessage("messages.time.month"), plugin.getMessage("messages.time.months"), plugin.getMessage("messages.time.day"), plugin.getMessage("messages.time.days"), plugin.getMessage("messages.time.hour"), plugin.getMessage("messages.time.hours"), plugin.getMessage("messages.time.minute"), plugin.getMessage("messages.time.minutes"), plugin.getMessage("messages.time.second"), plugin.getMessage("messages.time.seconds")};
+            int accuracy = 0;
+            for (int i = 0; i < types.length; i++) {
+                if (accuracy > 2) {
+                    break;
+                }
+                final int diff = dateDiff(types[i], fromDate, toDate, future);
+                if (diff > 0) {
+                    accuracy++;
+                    sb.append(" ").append(diff).append(" ").append(names[i * 2 + (diff > 1 ? 1 : 0)]);
+                }
+            }
+            // Preserve correctness in the original date object by removing the extra buffer time
+            toDate.add(Calendar.MILLISECOND, future ? -50 : 50);
+            if (sb.length() == 0) {
+                return plugin.getMessage("messages.time.now");
+            }
+            return sb.toString().trim();
+        }
+
+    public static Duration parseTimeToDuration(String length) {
+        Duration duration = Duration.ZERO;
         Matcher matcher = Pattern.compile("(\\d+)([smhdwy])").matcher(length);
         while (matcher.find()) {
             int value = Integer.parseInt(matcher.group(1));
             switch (matcher.group(2)) {
                 case "s":
-                    time += value * 1000L;
+                    duration = duration.plusSeconds(value);
                     break;
                 case "m":
-                    time += value * 60 * 1000L;
+                    duration = duration.plusMinutes(value);
                     break;
                 case "h":
-                    time += value * 60 * 60 * 1000L;
+                    duration = duration.plusHours(value);
                     break;
                 case "d":
-                    time += value * 24 * 60 * 60 * 1000L;
+                    duration = duration.plusDays(value);
                     break;
                 case "w":
-                    time += value * 7 * 24 * 60 * 60 * 1000L;
+                    duration = duration.plusDays(value * 7L);
                     break;
                 case "y":
-                    time += value * 365 * 24 * 60 * 60 * 1000L;
+                    duration = duration.plusDays(value * 365L);
                     break;
             }
         }
-        return time;
+        return duration;
     }
 
     public static String parseTimeToReadable(String length) {
-        long time = parseTimeToMillis(length);
-        long seconds = time / 1000 % 60;
-        long minutes = time / (60 * 1000) % 60;
-        long hours = time / (60 * 60 * 1000) % 24;
-        long days = time / (24 * 60 * 60 * 1000) % 7;
-        long weeks = time / (7 * 24 * 60 * 60 * 1000) % 52;
-        long years = time / (365 * 24 * 60 * 60 * 1000);
+        Duration duration = parseTimeToDuration(length);
+        long seconds = duration.getSeconds();
+
+        long years = seconds / (365 * 24 * 3600);
+        seconds %= 365 * 24 * 3600;
+
+        long months = seconds / (30 * 24 * 3600);
+        seconds %= 30 * 24 * 3600;
+
+        long days = seconds / (24 * 3600);
+        seconds %= 24 * 3600;
+
+        long hours = seconds / 3600;
+        seconds %= 3600;
+
+        long minutes = seconds / 60;
+        seconds %= 60;
 
         StringBuilder readableTime = new StringBuilder();
         if (years > 0) {
             readableTime.append(years).append(" ").append(plugin.getMessage("messages.time.years")).append(" ");
         }
-        if (weeks > 0) {
-            readableTime.append(weeks).append(" ").append(plugin.getMessage("messages.time.weeks")).append(" ");
+        if (months > 0) {
+            readableTime.append(months).append(" ").append(plugin.getMessage("messages.time.months")).append(" ");
         }
         if (days > 0) {
             readableTime.append(days).append(" ").append(plugin.getMessage("messages.time.days")).append(" ");

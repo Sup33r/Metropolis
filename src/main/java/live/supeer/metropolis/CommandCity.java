@@ -379,6 +379,10 @@ public class CommandCity extends BaseCommand {
             plugin.sendMessage(player, "messages.error.city.alreadyInCity");
             return;
         }
+        if(CityDatabase.getCityBan(city, player.getUniqueId().toString()) != null) {
+            plugin.sendMessage(player, "messages.error.city.banned");
+            return;
+        }
         if (!city.isOpen() && (!player.hasPermission("metropolis.admin.city.join") || !invites.containsKey(player) || invites.get(player) == null || !invites.get(player).equals(city))) {
             plugin.sendMessage(player, "messages.error.city.closed", "%cityname%", city.getCityName());
             return;
@@ -459,6 +463,10 @@ public class CommandCity extends BaseCommand {
                 };
         if (CityDatabase.getCityRole(city, inviteePlayer.getName()) != null) {
             plugin.sendMessage(player, "messages.error.city.alreadyInACity");
+            return;
+        }
+        if (CityDatabase.getCityBan(city, inviteePlayer.getUniqueId().toString()) != null) {
+            plugin.sendMessage(player, "messages.error.city.playerBanned", "%cityname%", city.getCityName());
             return;
         }
         if (invites.containsKey(player) && invites.get(player).equals(city)) {
@@ -1607,12 +1615,17 @@ public class CommandCity extends BaseCommand {
 
     @Subcommand("spawn")
     public static void onSpawn(Player player,@Optional String cityName) {
+        if (!player.hasPermission("metropolis.city.spawn")) {
+            plugin.sendMessage(player, "messages.error.permissionDenied");
+            return;
+        }
         if (cityName == null) {
             if (HCDatabase.hasHomeCity(player.getUniqueId().toString())) {
                 plugin.sendMessage(player, "messages.error.missing.homecity");
                 return;
             }
             City city = HCDatabase.getHomeCityToCity(player.getUniqueId().toString());
+            assert city != null;
             if (city.getCitySpawn() == null) {
                 plugin.sendMessage(player, "messages.error.missing.spawn");
                 return;
@@ -1620,10 +1633,6 @@ public class CommandCity extends BaseCommand {
             player.teleport(city.getCitySpawn());
             plugin.sendMessage(player, "messages.teleport", "%to%", "startpunkten i " + city.getCityName());
         } else {
-            if (!player.hasPermission("metropolis.city.spawn")) {
-                plugin.sendMessage(player, "messages.error.permissionDenied");
-                return;
-            }
             if (CityDatabase.getCity(cityName).isEmpty()) {
                 plugin.sendMessage(player, "messages.error.missing.city");
                 return;
@@ -1638,6 +1647,10 @@ public class CommandCity extends BaseCommand {
                 plugin.sendMessage(player, "messages.teleport", "%to%", "startpunkten i " + city.getCityName());
                 return;
             }
+            if (CityDatabase.getCityBan(city, player.getUniqueId().toString()) != null) {
+                plugin.sendMessage(player, "messages.city.spawn.banned", "%cityname%", city.getCityName());
+                return;
+            }
             if (!city.isOpen() && !CityDatabase.memberExists(player.getUniqueId().toString(), city)) {
                 plugin.sendMessage(player, "messages.city.spawn.closed", "%cityname%", city.getCityName());
                 return;
@@ -1648,7 +1661,7 @@ public class CommandCity extends BaseCommand {
     }
 
     @Subcommand("ban")
-    public static void onBan(Player player, @Optional String playerName, @Optional String length, @Optional String reason) {
+    public static void onBan(Player player, @Optional String playerName, @Optional String args) {
         if (!player.hasPermission("metropolis.city.ban")) {
             plugin.sendMessage(player, "messages.error.permissionDenied");
             return;
@@ -1666,9 +1679,7 @@ public class CommandCity extends BaseCommand {
             return;
         }
         List<Ban> bannedPlayers = CityDatabase.getCityBans(city);
-        if (playerName == null && length == null && reason == null) {
-            //Gör koden för att lista alla bannade spelare
-
+        if (playerName == null && args == null) {
             if (bannedPlayers == null || bannedPlayers.isEmpty()) {
                 plugin.sendMessage(player, "messages.city.ban.none", "%cityname%", city.getCityName());
                 return;
@@ -1681,39 +1692,48 @@ public class CommandCity extends BaseCommand {
             player.sendMessage(bannedPlayersList.delete(bannedPlayersList.length()-4,bannedPlayersList.length())+"");
             return;
         }
-        if (playerName != null && length == null && reason == null) {
-            //Gör koden för att lista en specifik bannad spelare
+        if (playerName != null && args == null) {
             String playerUUID = Bukkit.getOfflinePlayer(playerName).getUniqueId().toString();
             if (CityDatabase.getCityBan(city, playerUUID) == null) {
                 plugin.sendMessage(player, "messages.city.ban.notBanned","%cityname%", city.getCityName());
                 return;
-            }
-            if (CityDatabase.getCityBan(city, playerUUID) == null) {
-                plugin.sendMessage(player, "messages.city.ban.notBanned","%cityname%", city.getCityName());
+            } else {
+                Ban ban = CityDatabase.getCityBan(city, playerUUID);
+                assert ban != null;
+                plugin.sendMessage(player, "messages.city.ban.banned", "%player%", playerName, "%cityname%", city.getCityName(), "%reason%", ban.getReason(), "%length%", Utilities.formatDateDiff(ban.getLength()));
                 return;
             }
-            return;
-
         }
-        if (playerName != null && length != null && reason == null) {
-            if (length.equals("-")) {
-                if (bannedPlayers == null) {
-                    plugin.sendMessage(player, "messages.city.ban.none", "%cityname%", city.getCityName());
+        long length = Utilities.parseDateDiff(args, true);
+        boolean isMinus = args.startsWith("-");
+        String reason = Utilities.removeTimePattern(args);
+        boolean noReason = reason.length() < 2;
+        if (playerName != null && isMinus && noReason) {
+            if (bannedPlayers == null) {
+                plugin.sendMessage(player, "messages.city.ban.none", "%cityname%", city.getCityName());
+                return;
+            }
+            for (Ban ban : bannedPlayers) {
+                if (ban.getPlayerUUID().equals(Bukkit.getOfflinePlayer(playerName).getUniqueId().toString())) {
+                    CityDatabase.removeCityBan(city, ban);
+                    Database.addLogEntry(city, "{ \"type\": \"unban\", \"subtype\": \"city\", \"player\": " + ban.getPlayerUUID() + ", \"placer\": " + player.getUniqueId().toString() + " }");
+                    plugin.sendMessage(player, "messages.city.ban.unbanned", "%player%", playerName, "%cityname%", city.getCityName());
                     return;
                 }
-                for (Ban ban : bannedPlayers) {
-                    if (ban.getPlayerUUID().equals(Bukkit.getOfflinePlayer(playerName).getUniqueId().toString())) {
-                        CityDatabase.removeCityBan(city, ban);
-                        Database.addLogEntry(city, "{ \"type\": \"unban\", \"subtype\": \"city\", \"player\": " + ban.getPlayerUUID() + ", \"placer\": " + player.getUniqueId().toString() + " }");
-                        plugin.sendMessage(player, "messages.city.ban.unbanned", "%player%", playerName, "%cityname%", city.getCityName());
-                        return;
-                    }
-                }
-                plugin.sendMessage(player, "messages.city.ban.notBanned", "%cityname%", city.getCityName());
+            }
+            plugin.sendMessage(player, "messages.city.ban.notBanned", "%cityname%", city.getCityName());
+            return;
+        }
+        if (playerName != null && noReason) {
+            plugin.sendMessage(player, "messages.syntax.city.ban");
+            return;
+        }
+        if (playerName != null && length != -1) {
+            long maxBanTime = Utilities.parseDateDiff(Metropolis.configuration.getMaxBanTime(), true);
+            if (length > maxBanTime) {
+                plugin.sendMessage(player, "messages.error.city.banTooLong", "%maxtime%", Utilities.formatDateDiff(maxBanTime));
                 return;
             }
-        }
-        if (playerName != null && length != null && reason != null) {
             if (bannedPlayers != null) {
                 for (Ban ban : bannedPlayers) {
                     if (ban.getPlayerUUID().equals(Bukkit.getOfflinePlayer(playerName).getUniqueId().toString())) {
@@ -1722,12 +1742,11 @@ public class CommandCity extends BaseCommand {
                     }
                 }
             }
-            String playerUUID = Bukkit.getOfflinePlayer(playerName).getUniqueId().toString();
             long placeDate = System.currentTimeMillis();
-            long expiryDate = placeDate + Utilities.parseTime(length);
-
-            CityDatabase.addCityBan(city, playerUUID, reason, player, placeDate, expiryDate);
-            plugin.sendMessage(player, "messages.city.ban.success", "%player%", playerName, "%cityname%", city.getCityName(), "%reason%", reason, "%length%", Utilities.parseTimeToReadable(length));
+            String playerUUID = Bukkit.getOfflinePlayer(playerName).getUniqueId().toString();
+            String expiryDate = Utilities.formatDateDiff(length);
+            CityDatabase.addCityBan(city, playerUUID, reason, player, placeDate, length);
+            plugin.sendMessage(player, "messages.city.ban.success", "%player%", playerName, "%cityname%", city.getCityName(), "%reason%", reason, "%length%", expiryDate);
 
             // Log the ban
             Database.addLogEntry(city, "{ \"type\": \"ban\", \"subtype\": \"city\", \"player\": " + playerUUID + ", \"placer\": " + player.getUniqueId().toString() + ", \"reason\": \"" + reason + "\", \"length\": \"" + length + "\" }");

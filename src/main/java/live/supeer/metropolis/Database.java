@@ -174,7 +174,7 @@ public class Database {
                                 `cityID` int(11) NOT NULL,
                                 `playerUUID` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `placeDate` bigint(30) DEFAULT NULL,
-                                `expiryDate` bigint(30) DEFAULT NULL,
+                                `length` bigint(30) DEFAULT NULL,
                                 `reason` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                 `placeUUID` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                  PRIMARY KEY (cityID,playerUUID)
