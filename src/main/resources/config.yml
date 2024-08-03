@@ -6,6 +6,14 @@ sql:
   password:
 
 settings:
+  limits:
+    cityname: 16
+    citygoname: 20
+    citygodisplayname: 30
+    motd: 250
+    entermessage: 225
+    exitmessage: 225
+
   maxbantime: 10y
   cooldownTime:
     invite: 180
