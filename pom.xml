@@ -106,9 +106,15 @@
             <id>playpro-repo</id>
             <url>https://maven.playpro.com</url>
         </repository>
+
     </repositories>
 
     <dependencies>
+        <dependency>
+            <groupId>org.locationtech.jts</groupId>
+            <artifactId>jts-core</artifactId>
+            <version>1.18.1</version>
+        </dependency>
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>

@@ -1,27 +1,36 @@
 package live.supeer.metropolis.plot;
 
 import co.aikar.idb.DB;
+import co.aikar.idb.DbRow;
 import live.supeer.metropolis.Database;
 import live.supeer.metropolis.utils.Utilities;
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.utils.DateUtil;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Polygon;
 
 import java.awt.*;
+import java.util.List;
 
 public class PlotDatabase {
 
-    public static Plot createPlot(
-            Player player, Location[] plotPoints, String plotName, City city, int minY, int maxY) {
+    public static Plot createPlot(Player player, Location[] plotPoints, String plotName, City city, int minY, int maxY) {
         if (plotName == null) {
             int plotAmount = getPlotAmount() + 1;
             plotName = "Tomt #" + plotAmount;
         }
-        Polygon plotPolygon = new Polygon();
-        for (Location plotPoint : plotPoints) {
-            plotPolygon.addPoint(plotPoint.getBlockX(), plotPoint.getBlockZ());
+
+        GeometryFactory geometryFactory = new GeometryFactory();
+        Coordinate[] coordinates = new Coordinate[plotPoints.length + 1];
+        for (int i = 0; i < plotPoints.length; i++) {
+            coordinates[i] = new Coordinate(plotPoints[i].getBlockX(), plotPoints[i].getBlockZ());
         }
+        coordinates[plotPoints.length] = coordinates[0];
+        Polygon plotPolygon = geometryFactory.createPolygon(coordinates);
+
         if (minY == 0 && maxY == 0) {
             for (Location plotPoint : plotPoints) {
                 if (plotPoint.getBlockY() < minY) {
@@ -32,17 +41,12 @@ public class PlotDatabase {
                 }
             }
         }
-        int centerX = plotPolygon.getBounds().x + plotPolygon.getBounds().width / 2;
-        int centerZ = plotPolygon.getBounds().y + plotPolygon.getBounds().height / 2;
-        Location plotCenter =
-                new Location(
-                        plotPoints[0].getWorld(),
-                        centerX,
-                        player.getWorld().getHighestBlockYAt(centerX, centerZ) + 1,
-                        centerZ);
+        int centerX = (int) (plotPolygon.getEnvelopeInternal().getMinX() + plotPolygon.getEnvelopeInternal().getWidth() / 2);
+        int centerZ = (int) (plotPolygon.getEnvelopeInternal().getMinY() + plotPolygon.getEnvelopeInternal().getHeight() / 2);
+        Location plotCenter = new Location(plotPoints[0].getWorld(), centerX, player.getWorld().getHighestBlockYAt(centerX, centerZ) + 1, centerZ);
         try {
             DB.executeUpdate(
-                    "INSERT INTO `mp_plots` (`cityId`, `cityName`, `plotName`, `plotOwner`, `plotOwnerUUID`, `plotPoints`, `plotYMin`, `plotYMax`, `plotPermsMembers`, `plotPermsOutsiders`, `plotCenter`, `plotCreationDate`) VALUES ("
+                    "INSERT INTO `mp_plots` (`cityId`, `cityName`, `plotName`, `plotOwner`, `plotOwnerUUID`, `plotPoints`, `plotYMin`, `plotYMax`, `plotPermsMembers`, `plotPermsOutsiders`, `plotCenter`, `plotCreationDate`, `plotBoundary`) VALUES ("
                             + city.getCityID()
                             + ", "
                             + Database.sqlString(city.getCityName())
@@ -66,10 +70,12 @@ public class PlotDatabase {
                             + Database.sqlString(Utilities.locationToString(plotCenter))
                             + ", "
                             + DateUtil.getTimestamp()
+                            + ", "
+                            + "ST_GeomFromText('"
+                            + plotPolygon.toText()
+                            + "')"
                             + ");");
-            Plot plot =
-                    new Plot(
-                            DB.getFirstRow(
+            Plot plot = new Plot(DB.getFirstRow(
                                     "SELECT * FROM `mp_plots` WHERE `plotName` = "
                                             + Database.sqlString(plotName)
                                             + " AND `cityName` = "
@@ -120,17 +126,10 @@ public class PlotDatabase {
 
     public static boolean intersectsExistingPlot(Polygon polygon, int yMin, int yMax, City city) {
         try {
-            for (Plot plot : city.getCityPlots()) {
-                Polygon existingPlotPolygon = new Polygon();
-                int minY = plot.getPlotYMin();
-                int maxY = plot.getPlotYMax();
-                for (Location plotPoint : plot.getPlotPoints()) {
-                    existingPlotPolygon.addPoint(plotPoint.getBlockX(), plotPoint.getBlockZ());
-                }
-                if (polygon.intersects(existingPlotPolygon.getBounds()) && yMin <= maxY && yMax >= minY) {
-                    return true;
-                }
-            }
+            String polygonWKT = polygon.toText();
+            List<DbRow> results = DB.getResults(
+                    "SELECT * FROM `mp_plots` WHERE ST_Intersects(`plotBoundary`, ST_GeomFromText(" + Database.sqlString(polygonWKT) + ")) AND `cityId` = " + city.getCityID() + " AND `plotYMin` <= " + yMax + " AND `plotYMax` >= " + yMin + ";");
+            return !results.isEmpty();
         } catch (Exception e) {
             e.printStackTrace();
         }

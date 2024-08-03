@@ -12,6 +12,10 @@ import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.plot.PlotDatabase;
 import live.supeer.metropolis.plot.PlotPerms;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -28,6 +32,8 @@ import java.util.Objects;
 @CommandAlias("plot")
 public class CommandPlot extends BaseCommand {
     public static Metropolis plugin;
+    private static final GeometryFactory geometryFactory = new GeometryFactory();
+
 
     @Default
     @CatchUnknown
@@ -85,10 +91,10 @@ public class CommandPlot extends BaseCommand {
         Polygon regionPolygon = MetropolisListener.playerPolygons.get(player.getUniqueId());
         Location[] locations =
                 MetropolisListener.savedLocs.get(player.getUniqueId()).toArray(new Location[0]);
-        double minX = regionPolygon.getBounds().getMinX();
-        double maxX = regionPolygon.getBounds().getMaxX();
-        double minY = regionPolygon.getBounds().getMinY();
-        double maxY = regionPolygon.getBounds().getMaxY();
+        double minX = regionPolygon.getEnvelopeInternal().getMinX();
+        double maxX = regionPolygon.getEnvelopeInternal().getMaxX();
+        double minY = regionPolygon.getEnvelopeInternal().getMinY();
+        double maxY = regionPolygon.getEnvelopeInternal().getMaxY();
 
         if (maxX - minX < 3 || maxY - minY < 3) {
             plugin.sendMessage(player, "messages.error.plot.tooSmall");
@@ -107,11 +113,16 @@ public class CommandPlot extends BaseCommand {
         int startY = (int) Math.floor(minY / chunkSize) * chunkSize;
         int endY = (int) Math.floor(maxY / chunkSize) * chunkSize + chunkSize;
 
-        Rectangle chunkBounds = new Rectangle();
         for (int x = startX; x < endX; x += chunkSize) {
             for (int z = startY; z < endY; z += chunkSize) {
-                chunkBounds.setBounds(x, z, chunkSize, chunkSize);
-                if (regionPolygon.intersects(chunkBounds)) {
+                Polygon chunkPolygon = geometryFactory.createPolygon(new Coordinate[]{
+                        new Coordinate(x, z),
+                        new Coordinate(x + chunkSize, z),
+                        new Coordinate(x + chunkSize, z + chunkSize),
+                        new Coordinate(x, z + chunkSize),
+                        new Coordinate(x, z)
+                });
+                if (regionPolygon.intersects(chunkPolygon)) {
                     if (CityDatabase.getClaim(new Location(player.getWorld(), x, 0, z)) == null || !Objects.equals(Objects.requireNonNull(CityDatabase.getClaim(new Location(player.getWorld(), x, 0, z))).getCityName(), HCDatabase.getHomeCityToCityname(player.getUniqueId().toString()))) {
                         plugin.sendMessage(player, "messages.error.plot.intersectsExistingClaim");
                         return;
@@ -259,13 +270,11 @@ public class CommandPlot extends BaseCommand {
                 role.equals("assistant") || role.equals("vicemayor") || role.equals("mayor");
         if (CityDatabase.getClaim(player.getLocation()) != null) {
             for (Plot plot : city.getCityPlots()) {
-                Polygon polygon = new Polygon();
+                Polygon polygon = Utilities.createPolygonFromLocations(plot.getPlotPoints(), geometryFactory);
                 int ymin = plot.getPlotYMin();
                 int ymax = plot.getPlotYMax();
-                for (Location location : plot.getPlotPoints()) {
-                    polygon.addPoint(location.getBlockX(), location.getBlockZ());
-                }
-                if (polygon.contains(player.getLocation().getBlockX(), player.getLocation().getBlockZ())
+                Point point = geometryFactory.createPoint(new Coordinate(player.getLocation().getBlockX(), player.getLocation().getBlockZ()));
+                if (polygon.contains(point)
                         && player.getLocation().getBlockY() >= ymin
                         && player.getLocation().getBlockY() <= ymax) {
                     if (!isAssistant) {
@@ -322,13 +331,11 @@ public class CommandPlot extends BaseCommand {
                     plugin.sendMessage(player, "messages.error.plot.notOwner");
                     return;
                 }
-                Polygon polygon = new Polygon();
+                Polygon polygon = Utilities.createPolygonFromLocations(plot.getPlotPoints(), geometryFactory);
                 int ymin = plot.getPlotYMin();
                 int ymax = plot.getPlotYMax();
-                for (Location location : plot.getPlotPoints()) {
-                    polygon.addPoint(location.getBlockX(), location.getBlockZ());
-                }
-                if (polygon.contains(player.getLocation().getBlockX(), player.getLocation().getBlockZ())
+                Point point = geometryFactory.createPoint(new Coordinate(player.getLocation().getBlockX(), player.getLocation().getBlockZ()));
+                if (polygon.contains(point)
                         && player.getLocation().getBlockY() >= ymin
                         && player.getLocation().getBlockY() <= ymax) {
                     if (plot.getPlotOwnerUUID().equals(player.getUniqueId().toString())) {
@@ -381,13 +388,11 @@ public class CommandPlot extends BaseCommand {
         if (CityDatabase.getClaim(player.getLocation()) != null) {
             String role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
             for (Plot plot : city.getCityPlots()) {
-                Polygon polygon = new Polygon();
+                Polygon polygon = Utilities.createPolygonFromLocations(plot.getPlotPoints(), geometryFactory);
                 int ymin = plot.getPlotYMin();
                 int ymax = plot.getPlotYMax();
-                for (Location location : plot.getPlotPoints()) {
-                    polygon.addPoint(location.getBlockX(), location.getBlockZ());
-                }
-                if (polygon.contains(player.getLocation().getBlockX(), player.getLocation().getBlockZ())
+                Point point = geometryFactory.createPoint(new Coordinate(player.getLocation().getBlockX(), player.getLocation().getBlockZ()));
+                if (polygon.contains(point)
                         && player.getLocation().getBlockY() >= ymin
                         && player.getLocation().getBlockY() <= ymax) {
                     if (Objects.equals(plot.getPlotOwnerUUID(), player.getUniqueId().toString())
@@ -511,13 +516,11 @@ public class CommandPlot extends BaseCommand {
                         .get();
         if (CityDatabase.getClaim(player.getLocation()) != null) {
             for (Plot plot : city.getCityPlots()) {
-                Polygon polygon = new Polygon();
+                Polygon polygon = Utilities.createPolygonFromLocations(plot.getPlotPoints(), geometryFactory);
                 int ymin = plot.getPlotYMin();
                 int ymax = plot.getPlotYMax();
-                for (Location loc : plot.getPlotPoints()) {
-                    polygon.addPoint(loc.getBlockX(), loc.getBlockZ());
-                }
-                if (polygon.contains(player.getLocation().getBlockX(), player.getLocation().getBlockZ())
+                Point point = geometryFactory.createPoint(new Coordinate(player.getLocation().getBlockX(), player.getLocation().getBlockZ()));
+                if (polygon.contains(point)
                         && player.getLocation().getBlockY() >= ymin
                         && player.getLocation().getBlockY() <= ymax) {
                     List<Player> players = new ArrayList<>();
@@ -582,11 +585,9 @@ public class CommandPlot extends BaseCommand {
                     }
                     for (Player p : Bukkit.getOnlinePlayers()) {
                         for (Plot plot1 : city.getCityPlots()) {
-                            Polygon polygon1 = new Polygon();
-                            for (Location loc : plot1.getPlotPoints()) {
-                                polygon1.addPoint(loc.getBlockX(), loc.getBlockZ());
-                            }
-                            if (polygon1.contains(p.getLocation().getBlockX(), p.getLocation().getBlockZ())) {
+                            Polygon polygon1 = Utilities.createPolygonFromLocations(plot1.getPlotPoints(), geometryFactory);
+                            Point point1 = geometryFactory.createPoint(new Coordinate(p.getLocation().getBlockX(), p.getLocation().getBlockZ()));
+                            if (polygon1.contains(point1)) {
                                 if (plot1.getPlotID() == plot.getPlotID()) {
                                     if (!players.contains(p)) {
                                         players.add(p);
@@ -721,14 +722,11 @@ public class CommandPlot extends BaseCommand {
             if (CityDatabase.getClaim(player.getLocation()) != null) {
 
                 for (Plot plot : city.getCityPlots()) {
-                    Polygon polygon = new Polygon();
+                    Polygon polygon = Utilities.createPolygonFromLocations(plot.getPlotPoints(), geometryFactory);
                     int yMin = plot.getPlotYMin();
                     int yMax = plot.getPlotYMax();
-                    for (Location loc : plot.getPlotPoints()) {
-                        polygon.addPoint(loc.getBlockX(), loc.getBlockZ());
-                    }
-
-                    if (polygon.contains(player.getLocation().getBlockX(), player.getLocation().getBlockZ())
+                    Point point = geometryFactory.createPoint(new Coordinate(player.getLocation().getBlockX(), player.getLocation().getBlockZ()));
+                    if (polygon.contains(point)
                             && player.getLocation().getBlockY() >= yMin
                             && player.getLocation().getBlockY() <= yMax) {
                         StringBuilder stringBuilderOutsiders = new StringBuilder();
@@ -811,14 +809,12 @@ public class CommandPlot extends BaseCommand {
                 if (role.equals("mayor") || role.equals("assistant") || role.equals("vicemayor")) {
                     if (CityDatabase.getClaim(player.getLocation()) != null) {
                         for (Plot plot : city.getCityPlots()) {
-                            Polygon polygon = new Polygon();
+                            Polygon polygon = Utilities.createPolygonFromLocations(plot.getPlotPoints(), geometryFactory);
                             int yMin = plot.getPlotYMin();
                             int yMax = plot.getPlotYMax();
-                            for (Location loc : plot.getPlotPoints()) {
-                                polygon.addPoint(loc.getBlockX(), loc.getBlockZ());
-                            }
+                            Point point = geometryFactory.createPoint(new Coordinate(player.getLocation().getBlockX(), player.getLocation().getBlockZ()));
                             if (polygon.contains(
-                                    player.getLocation().getBlockX(), player.getLocation().getBlockZ())
+                                    point)
                                     && player.getLocation().getBlockY() >= yMin
                                     && player.getLocation().getBlockY() <= yMax) {
                                 if (plot.isKMarked() && !role.equals("mayor")) {
@@ -891,13 +887,11 @@ public class CommandPlot extends BaseCommand {
         if (role.equals("mayor") || role.equals("assistant") || role.equals("vicemayor")) {
             if (CityDatabase.getClaim(player.getLocation()) != null) {
                 for (Plot plot : city.getCityPlots()) {
-                    Polygon polygon = new Polygon();
+                    Polygon polygon = Utilities.createPolygonFromLocations(plot.getPlotPoints(), geometryFactory);
                     int yMin = plot.getPlotYMin();
                     int yMax = plot.getPlotYMax();
-                    for (Location loc : plot.getPlotPoints()) {
-                        polygon.addPoint(loc.getBlockX(), loc.getBlockZ());
-                    }
-                    if (polygon.contains(player.getLocation().getBlockX(), player.getLocation().getBlockZ())
+                    Point point = geometryFactory.createPoint(new Coordinate(player.getLocation().getBlockX(), player.getLocation().getBlockZ()));
+                    if (polygon.contains(point)
                             && player.getLocation().getBlockY() >= yMin
                             && player.getLocation().getBlockY() <= yMax) {
                         if (plot.isKMarked() && !role.equals("mayor")) {
@@ -1074,13 +1068,11 @@ public class CommandPlot extends BaseCommand {
             boolean isMayor = role.equals("mayor");
             if (CityDatabase.getClaim(player.getLocation()) != null) {
                 for (Plot plot : city.getCityPlots()) {
-                    Polygon polygon = new Polygon();
+                    Polygon polygon = Utilities.createPolygonFromLocations(plot.getPlotPoints(), geometryFactory);
                     int yMin = plot.getPlotYMin();
                     int yMax = plot.getPlotYMax();
-                    for (Location loc : plot.getPlotPoints()) {
-                        polygon.addPoint(loc.getBlockX(), loc.getBlockZ());
-                    }
-                    if (polygon.contains(player.getLocation().getBlockX(), player.getLocation().getBlockZ())
+                    Point point = geometryFactory.createPoint(new Coordinate(player.getLocation().getBlockX(), player.getLocation().getBlockZ()));
+                    if (polygon.contains(point)
                             && player.getLocation().getBlockY() >= yMin
                             && player.getLocation().getBlockY() <= yMax) {
                         if (plot.isKMarked() && isMayor) {
@@ -1180,13 +1172,11 @@ public class CommandPlot extends BaseCommand {
             boolean isMayor = role.equals("mayor");
             if (CityDatabase.getClaim(player.getLocation()) != null) {
                 for (Plot plot : city.getCityPlots()) {
-                    Polygon polygon = new Polygon();
+                    Polygon polygon = Utilities.createPolygonFromLocations(plot.getPlotPoints(), geometryFactory);
                     int yMin = plot.getPlotYMin();
                     int yMax = plot.getPlotYMax();
-                    for (Location loc : plot.getPlotPoints()) {
-                        polygon.addPoint(loc.getBlockX(), loc.getBlockZ());
-                    }
-                    if (polygon.contains(player.getLocation().getBlockX(), player.getLocation().getBlockZ())
+                    Point point = geometryFactory.createPoint(new Coordinate(player.getLocation().getBlockX(), player.getLocation().getBlockZ()));
+                    if (polygon.contains(point)
                             && player.getLocation().getBlockY() >= yMin
                             && player.getLocation().getBlockY() <= yMax) {
                         if (plot.isKMarked() && isMayor) {
@@ -1622,13 +1612,11 @@ public class CommandPlot extends BaseCommand {
             boolean isMayor = role.equals("mayor");
             if (CityDatabase.getClaim(player.getLocation()) != null) {
                 for (Plot plot : city.getCityPlots()) {
-                    Polygon polygon = new Polygon();
+                    Polygon polygon = Utilities.createPolygonFromLocations(plot.getPlotPoints(), geometryFactory);
                     int yMin = plot.getPlotYMin();
                     int yMax = plot.getPlotYMax();
-                    for (Location loc : plot.getPlotPoints()) {
-                        polygon.addPoint(loc.getBlockX(), loc.getBlockZ());
-                    }
-                    if (polygon.contains(player.getLocation().getBlockX(), player.getLocation().getBlockZ())
+                    Point point = geometryFactory.createPoint(new Coordinate(player.getLocation().getBlockX(), player.getLocation().getBlockZ()));
+                    if (polygon.contains(point)
                             && player.getLocation().getBlockY() >= yMin
                             && player.getLocation().getBlockY() <= yMax) {
                         if (plot.isKMarked() && !isMayor) {
@@ -1730,13 +1718,11 @@ public class CommandPlot extends BaseCommand {
             boolean isMayor = role.equals("mayor");
             if (CityDatabase.getClaim(player.getLocation()) != null) {
                 for (Plot plot : city.getCityPlots()) {
-                    Polygon polygon = new Polygon();
+                    Polygon polygon = Utilities.createPolygonFromLocations(plot.getPlotPoints(), geometryFactory);
                     int yMin = plot.getPlotYMin();
                     int yMax = plot.getPlotYMax();
-                    for (Location loc : plot.getPlotPoints()) {
-                        polygon.addPoint(loc.getBlockX(), loc.getBlockZ());
-                    }
-                    if (polygon.contains(player.getLocation().getBlockX(), player.getLocation().getBlockZ())
+                    Point point = geometryFactory.createPoint(new Coordinate(player.getLocation().getBlockX(), player.getLocation().getBlockZ()));
+                    if (polygon.contains(point)
                             && player.getLocation().getBlockY() >= yMin
                             && player.getLocation().getBlockY() <= yMax) {
                         if (plot.isKMarked() && !isMayor) {
@@ -1864,13 +1850,11 @@ public class CommandPlot extends BaseCommand {
             }
             if (CityDatabase.getClaim(player.getLocation()) != null) {
                 for (Plot plot : city.getCityPlots()) {
-                    Polygon polygon = new Polygon();
+                    Polygon polygon = Utilities.createPolygonFromLocations(plot.getPlotPoints(), geometryFactory);
                     int yMin = plot.getPlotYMin();
                     int yMax = plot.getPlotYMax();
-                    for (Location loc : plot.getPlotPoints()) {
-                        polygon.addPoint(loc.getBlockX(), loc.getBlockZ());
-                    }
-                    if (polygon.contains(player.getLocation().getBlockX(), player.getLocation().getBlockZ())
+                    Point point = geometryFactory.createPoint(new Coordinate(player.getLocation().getBlockX(), player.getLocation().getBlockZ()));
+                    if (polygon.contains(point)
                             && player.getLocation().getBlockY() >= yMin
                             && player.getLocation().getBlockY() <= yMax) {
                         if (plot.hasFlag('p')) {
@@ -1964,13 +1948,11 @@ public class CommandPlot extends BaseCommand {
             boolean isMayor = role.equals("mayor");
             if (CityDatabase.getClaim(player.getLocation()) != null) {
                 for (Plot plot : city.getCityPlots()) {
-                    Polygon polygon = new Polygon();
+                    Polygon polygon = Utilities.createPolygonFromLocations(plot.getPlotPoints(), geometryFactory);
                     int yMin = plot.getPlotYMin();
                     int yMax = plot.getPlotYMax();
-                    for (Location loc : plot.getPlotPoints()) {
-                        polygon.addPoint(loc.getBlockX(), loc.getBlockZ());
-                    }
-                    if (polygon.contains(player.getLocation().getBlockX(), player.getLocation().getBlockZ())
+                    Point point = geometryFactory.createPoint(new Coordinate(player.getLocation().getBlockX(), player.getLocation().getBlockZ()));
+                    if (polygon.contains(point)
                             && player.getLocation().getBlockY() >= yMin
                             && player.getLocation().getBlockY() <= yMax) {
                         if (plot.isKMarked() && !isMayor) {
@@ -2074,13 +2056,11 @@ public class CommandPlot extends BaseCommand {
             boolean isMayor = role.equals("mayor");
             if (CityDatabase.getClaim(player.getLocation()) != null) {
                 for (Plot plot : city.getCityPlots()) {
-                    Polygon polygon = new Polygon();
+                    Polygon polygon = Utilities.createPolygonFromLocations(plot.getPlotPoints(), geometryFactory);
                     int yMin = plot.getPlotYMin();
                     int yMax = plot.getPlotYMax();
-                    for (Location loc : plot.getPlotPoints()) {
-                        polygon.addPoint(loc.getBlockX(), loc.getBlockZ());
-                    }
-                    if (polygon.contains(player.getLocation().getBlockX(), player.getLocation().getBlockZ())
+                    Point point = geometryFactory.createPoint(new Coordinate(player.getLocation().getBlockX(), player.getLocation().getBlockZ()));
+                    if (polygon.contains(point)
                             && player.getLocation().getBlockY() >= yMin
                             && player.getLocation().getBlockY() <= yMax) {
                         if (plot.isKMarked() && !isMayor) {
@@ -2184,13 +2164,11 @@ public class CommandPlot extends BaseCommand {
             boolean isMayor = role.equals("mayor");
             if (CityDatabase.getClaim(player.getLocation()) != null) {
                 for (Plot plot : city.getCityPlots()) {
-                    Polygon polygon = new Polygon();
+                    Polygon polygon = Utilities.createPolygonFromLocations(plot.getPlotPoints(), geometryFactory);
                     int yMin = plot.getPlotYMin();
                     int yMax = plot.getPlotYMax();
-                    for (Location loc : plot.getPlotPoints()) {
-                        polygon.addPoint(loc.getBlockX(), loc.getBlockZ());
-                    }
-                    if (polygon.contains(player.getLocation().getBlockX(), player.getLocation().getBlockZ())
+                    Point point = geometryFactory.createPoint(new Coordinate(player.getLocation().getBlockX(), player.getLocation().getBlockZ()));
+                    if (polygon.contains(point)
                             && player.getLocation().getBlockY() >= yMin
                             && player.getLocation().getBlockY() <= yMax) {
                         if (plot.isKMarked() && !isMayor) {
@@ -2290,13 +2268,11 @@ public class CommandPlot extends BaseCommand {
             }
             if (CityDatabase.getClaim(player.getLocation()) != null) {
                 for (Plot plot : city.getCityPlots()) {
-                    Polygon polygon = new Polygon();
+                    Polygon polygon = Utilities.createPolygonFromLocations(plot.getPlotPoints(), geometryFactory);
                     int yMin = plot.getPlotYMin();
                     int yMax = plot.getPlotYMax();
-                    for (Location loc : plot.getPlotPoints()) {
-                        polygon.addPoint(loc.getBlockX(), loc.getBlockZ());
-                    }
-                    if (polygon.contains(player.getLocation().getBlockX(), player.getLocation().getBlockZ())
+                    Point point = geometryFactory.createPoint(new Coordinate(player.getLocation().getBlockX(), player.getLocation().getBlockZ()));
+                    if (polygon.contains(point)
                             && player.getLocation().getBlockY() >= yMin
                             && player.getLocation().getBlockY() <= yMax) {
                         if (plot.hasFlag('x')) {
@@ -2386,13 +2362,11 @@ public class CommandPlot extends BaseCommand {
             }
             if (CityDatabase.getClaim(player.getLocation()) != null) {
                 for (Plot plot : city.getCityPlots()) {
-                    Polygon polygon = new Polygon();
+                    Polygon polygon = Utilities.createPolygonFromLocations(plot.getPlotPoints(), geometryFactory);
                     int yMin = plot.getPlotYMin();
                     int yMax = plot.getPlotYMax();
-                    for (Location loc : plot.getPlotPoints()) {
-                        polygon.addPoint(loc.getBlockX(), loc.getBlockZ());
-                    }
-                    if (polygon.contains(player.getLocation().getBlockX(), player.getLocation().getBlockZ())
+                    Point point = geometryFactory.createPoint(new Coordinate(player.getLocation().getBlockX(), player.getLocation().getBlockZ()));
+                    if (polygon.contains(point)
                             && player.getLocation().getBlockY() >= yMin
                             && player.getLocation().getBlockY() <= yMax) {
                         if (plot.hasFlag('i')) {
@@ -2482,13 +2456,11 @@ public class CommandPlot extends BaseCommand {
             }
             if (CityDatabase.getClaim(player.getLocation()) != null) {
                 for (Plot plot : city.getCityPlots()) {
-                    Polygon polygon = new Polygon();
+                    Polygon polygon = Utilities.createPolygonFromLocations(plot.getPlotPoints(), geometryFactory);
                     int yMin = plot.getPlotYMin();
                     int yMax = plot.getPlotYMax();
-                    for (Location loc : plot.getPlotPoints()) {
-                        polygon.addPoint(loc.getBlockX(), loc.getBlockZ());
-                    }
-                    if (polygon.contains(player.getLocation().getBlockX(), player.getLocation().getBlockZ())
+                    Point point = geometryFactory.createPoint(new Coordinate(player.getLocation().getBlockX(), player.getLocation().getBlockZ()));
+                    if (polygon.contains(point)
                             && player.getLocation().getBlockY() >= yMin
                             && player.getLocation().getBlockY() <= yMax) {
                         if (plot.hasFlag('l')) {
@@ -2580,13 +2552,11 @@ public class CommandPlot extends BaseCommand {
             boolean isMayor = role.equals("mayor");
             if (CityDatabase.getClaim(player.getLocation()) != null) {
                 for (Plot plot : city.getCityPlots()) {
-                    Polygon polygon = new Polygon();
+                    Polygon polygon = Utilities.createPolygonFromLocations(plot.getPlotPoints(), geometryFactory);
                     int yMin = plot.getPlotYMin();
                     int yMax = plot.getPlotYMax();
-                    for (Location loc : plot.getPlotPoints()) {
-                        polygon.addPoint(loc.getBlockX(), loc.getBlockZ());
-                    }
-                    if (polygon.contains(player.getLocation().getBlockX(), player.getLocation().getBlockZ())
+                    Point point = geometryFactory.createPoint(new Coordinate(player.getLocation().getBlockX(), player.getLocation().getBlockZ()));
+                    if (polygon.contains(point)
                             && player.getLocation().getBlockY() >= yMin
                             && player.getLocation().getBlockY() <= yMax) {
                         if (!isMayor) {
@@ -2676,13 +2646,11 @@ public class CommandPlot extends BaseCommand {
         }
         if (CityDatabase.getClaim(player.getLocation()) != null) {
             for (Plot plot : city.getCityPlots()) {
-                Polygon polygon = new Polygon();
+                Polygon polygon = Utilities.createPolygonFromLocations(plot.getPlotPoints(), geometryFactory);
                 int yMin = plot.getPlotYMin();
                 int yMax = plot.getPlotYMax();
-                for (Location loc : plot.getPlotPoints()) {
-                    polygon.addPoint(loc.getBlockX(), loc.getBlockZ());
-                }
-                if (polygon.contains(player.getLocation().getBlockX(), player.getLocation().getBlockZ())
+                Point point = geometryFactory.createPoint(new Coordinate(player.getLocation().getBlockX(), player.getLocation().getBlockZ()));
+                if (polygon.contains(point)
                         && player.getLocation().getBlockY() >= yMin
                         && player.getLocation().getBlockY() <= yMax) {
                     if (!isViceMayor) {
@@ -2693,10 +2661,10 @@ public class CommandPlot extends BaseCommand {
                     Polygon regionPolygon = MetropolisListener.playerPolygons.get(player.getUniqueId());
                     Location[] locations =
                             MetropolisListener.savedLocs.get(player.getUniqueId()).toArray(new Location[0]);
-                    double minX = regionPolygon.getBounds().getMinX();
-                    double maxX = regionPolygon.getBounds().getMaxX();
-                    double minY = regionPolygon.getBounds().getMinY();
-                    double maxY = regionPolygon.getBounds().getMaxY();
+                    double minX = regionPolygon.getEnvelopeInternal().getMinX();
+                    double maxX = regionPolygon.getEnvelopeInternal().getMaxX();
+                    double minY = regionPolygon.getEnvelopeInternal().getMinY();
+                    double maxY = regionPolygon.getEnvelopeInternal().getMaxY();
 
                     if (maxX - minX < 3 || maxY - minY < 3) {
                         plugin.sendMessage(player, "messages.error.plot.tooSmall");
@@ -2715,11 +2683,16 @@ public class CommandPlot extends BaseCommand {
                     int startY = (int) Math.floor(minY / chunkSize) * chunkSize;
                     int endY = (int) Math.floor(maxY / chunkSize) * chunkSize + chunkSize;
 
-                    Rectangle chunkBounds = new Rectangle();
                     for (int x = startX; x < endX; x += chunkSize) {
                         for (int z = startY; z < endY; z += chunkSize) {
-                            chunkBounds.setBounds(x, z, chunkSize, chunkSize);
-                            if (regionPolygon.intersects(chunkBounds)) {
+                            Polygon chunkPolygon = geometryFactory.createPolygon(new Coordinate[]{
+                                    new Coordinate(x, z),
+                                    new Coordinate(x + chunkSize, z),
+                                    new Coordinate(x + chunkSize, z + chunkSize),
+                                    new Coordinate(x, z + chunkSize),
+                                    new Coordinate(x, z)
+                            });
+                            if (regionPolygon.intersects(chunkPolygon)) {
                                 if (CityDatabase.getClaim(new Location(player.getWorld(), x, 0, z)) == null
                                         || !Objects.equals(
                                         Objects.requireNonNull(
@@ -2808,13 +2781,11 @@ public class CommandPlot extends BaseCommand {
         Economy economy = Metropolis.getEconomy();
         if (CityDatabase.getClaim(player.getLocation()) != null) {
             for (Plot plot : city.getCityPlots()) {
-                Polygon polygon = new Polygon();
+                Polygon polygon = Utilities.createPolygonFromLocations(plot.getPlotPoints(), geometryFactory);
                 int yMin = plot.getPlotYMin();
                 int yMax = plot.getPlotYMax();
-                for (Location loc : plot.getPlotPoints()) {
-                    polygon.addPoint(loc.getBlockX(), loc.getBlockZ());
-                }
-                if (polygon.contains(player.getLocation().getBlockX(), player.getLocation().getBlockZ())
+                Point point = geometryFactory.createPoint(new Coordinate(player.getLocation().getBlockX(), player.getLocation().getBlockZ()));
+                if (polygon.contains(point)
                         && player.getLocation().getBlockY() >= yMin
                         && player.getLocation().getBlockY() <= yMax) {
                     if (plot.getPlotOwner() != null) {

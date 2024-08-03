@@ -8,6 +8,10 @@ import live.supeer.metropolis.event.PlayerExitCityEvent;
 import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.utils.DateUtil;
 import live.supeer.metropolis.utils.Utilities;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.Point;
 import net.coreprotect.CoreProtect;
 import net.coreprotect.CoreProtectAPI;
 import org.bukkit.Bukkit;
@@ -51,6 +55,8 @@ public class MetropolisListener implements Listener {
 
         return CoreProtect;
     }
+
+    private static final GeometryFactory geometryFactory = new GeometryFactory();
 
     private static final List<Player> savedPlayers = new ArrayList<>();
 
@@ -141,13 +147,11 @@ public class MetropolisListener implements Listener {
                     String role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
                     assert role != null;
                     for (Plot plot : city.getCityPlots()) {
-                        Polygon polygon = new Polygon();
+                        Polygon polygon = Utilities.createPolygonFromLocations(plot.getPlotPoints(), geometryFactory);
                         int ymin = plot.getPlotYMin();
                         int ymax = plot.getPlotYMax();
-                        for (Location location : plot.getPlotPoints()) {
-                            polygon.addPoint(location.getBlockX(), location.getBlockZ());
-                        }
-                        if (polygon.contains(event.getClickedBlock().getX(), event.getClickedBlock().getZ())
+                        Point point = geometryFactory.createPoint(new Coordinate(event.getClickedBlock().getX(), event.getClickedBlock().getZ()));
+                        if (polygon.contains(point)
                                 && event.getClickedBlock().getY() >= ymin
                                 && event.getClickedBlock().getY() <= ymax) {
                             if (!plot.getPlotOwnerUUID().equals(player.getUniqueId().toString())
@@ -296,9 +300,8 @@ public class MetropolisListener implements Listener {
                         .get(player.getUniqueId())
                         .get(0)
                         .equals(event.getClickedBlock().getLocation())) {
-                    Polygon regionPolygon = new Polygon();
+                    Polygon regionPolygon = Utilities.createPolygonFromLocations(savedLocs.get(player.getUniqueId()).toArray(new Location[0]), geometryFactory);
                     for (Location location : savedLocs.get(player.getUniqueId())) {
-                        regionPolygon.addPoint(location.getBlockX(), location.getBlockZ());
                         if (playerYMax.get(player.getUniqueId()) == null
                                 || location.getBlockY() > playerYMax.get(player.getUniqueId())) {
                             playerYMax.put(player.getUniqueId(), location.getBlockY());
@@ -340,13 +343,11 @@ public class MetropolisListener implements Listener {
                 String role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
                 assert role != null;
                 for (Plot plot : city.getCityPlots()) {
-                    Polygon polygon = new Polygon();
+                    Polygon polygon = Utilities.createPolygonFromLocations(plot.getPlotPoints(), geometryFactory);
                     int ymin = plot.getPlotYMin();
                     int ymax = plot.getPlotYMax();
-                    for (Location location : plot.getPlotPoints()) {
-                        polygon.addPoint(location.getBlockX(), location.getBlockZ());
-                    }
-                    if (polygon.contains(event.getBlockPlaced().getX(), event.getBlockPlaced().getZ())
+                    Point point = geometryFactory.createPoint(new Coordinate(event.getBlockPlaced().getX(), event.getBlockPlaced().getZ()));
+                    if (polygon.contains(point)
                             && event.getBlockPlaced().getY() >= ymin
                             && event.getBlockPlaced().getY() <= ymax) {
                         if (!plot.getPlotOwnerUUID().equals(player.getUniqueId().toString())

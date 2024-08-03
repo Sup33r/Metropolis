@@ -122,6 +122,7 @@ public class Database {
                                 `plotOwner` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                 `plotOwnerUUID` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                 `plotPoints` text COLLATE utf8mb4_unicode_ci NOT NULL,
+                                `plotBoundary` GEOMETRY NOT NULL,
                                 `plotYMin` int(11) NOT NULL,
                                 `plotYMax` int(11) NOT NULL,
                                 `plotType` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -134,7 +135,8 @@ public class Database {
                                 `plotCenter` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `plotFlags` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                 `plotCreationDate` bigint(30) DEFAULT NULL,
-                                PRIMARY KEY (`plotId`)
+                                PRIMARY KEY (`plotId`),
+                                SPATIAL INDEX `idx_plotBoundary` (`plotBoundary`)
                               ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;""");
 
             DB.executeUpdate(

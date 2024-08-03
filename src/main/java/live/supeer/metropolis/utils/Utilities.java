@@ -8,6 +8,8 @@ import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.plot.Plot;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
 
 import java.awt.*;
 import java.text.NumberFormat;
@@ -456,5 +458,14 @@ public class Utilities {
         board.updateLine(0, plugin.getMessage("messages.city.scoreboard.pvp_on"));
     }
 
-
+    public static org.locationtech.jts.geom.Polygon createPolygonFromLocations(Location[] locations, GeometryFactory geometryFactory) {
+        Coordinate[] coordinates = new Coordinate[locations.length + 1];
+        for (int i = 0; i < locations.length; i++) {
+            Location loc = locations[i];
+            coordinates[i] = new Coordinate(loc.getX(), loc.getZ());
+        }
+        // Close the polygon by repeating the first coordinate at the end
+        coordinates[locations.length] = coordinates[0];
+        return geometryFactory.createPolygon(coordinates);
+    }
 }
