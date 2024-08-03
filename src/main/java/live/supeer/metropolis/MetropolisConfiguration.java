@@ -17,7 +17,7 @@ public class MetropolisConfiguration {
     private final int cityClaimCost;
     private final int inviteCooldown;
     private final int nameChangeCooldown;
-    private final long maxBanTime;
+    private final String maxBanTime;
 
     MetropolisConfiguration(Metropolis plugin) {
         plugin.saveDefaultConfig();
@@ -35,6 +35,6 @@ public class MetropolisConfiguration {
         cityGoCost = plugin.getConfig().getInt("settings.city.gocost");
         cityClaimCost = plugin.getConfig().getInt("settings.city.claimcost");
         nameChangeCooldown = plugin.getConfig().getInt("settings.cooldownTime.namechange");
-        maxBanTime = plugin.getConfig().getLong("settings.maxbantime");
+        maxBanTime = plugin.getConfig().getString("settings.maxbantime");
     }
 }

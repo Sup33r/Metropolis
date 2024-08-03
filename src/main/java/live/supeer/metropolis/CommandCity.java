@@ -1705,7 +1705,7 @@ public class CommandCity extends BaseCommand {
             }
         }
         long length = Utilities.parseDateDiff(args, true);
-        boolean isMinus = args != null && args.startsWith("-");
+        boolean isMinus = args.startsWith("-");
         String reason = Utilities.removeTimePattern(args);
         boolean noReason = reason.length() < 2;
         if (playerName != null && isMinus && noReason) {
@@ -1728,7 +1728,12 @@ public class CommandCity extends BaseCommand {
             plugin.sendMessage(player, "messages.syntax.city.ban");
             return;
         }
-        if (playerName != null && length != -1 && !noReason) {
+        if (playerName != null && length != -1) {
+            long maxBanTime = Utilities.parseDateDiff(Metropolis.configuration.getMaxBanTime(), true);
+            if (length > maxBanTime) {
+                plugin.sendMessage(player, "messages.error.city.banTooLong", "%maxtime%", Utilities.formatDateDiff(maxBanTime));
+                return;
+            }
             if (bannedPlayers != null) {
                 for (Ban ban : bannedPlayers) {
                     if (ban.getPlayerUUID().equals(Bukkit.getOfflinePlayer(playerName).getUniqueId().toString())) {
@@ -1738,10 +1743,6 @@ public class CommandCity extends BaseCommand {
                 }
             }
             long placeDate = System.currentTimeMillis();
-            if (length > Metropolis.configuration.getMaxBanTime()) {
-                plugin.sendMessage(player, "messages.error.city.banTooLong", "%maxtime%", Utilities.formatDateDiff(Metropolis.configuration.getMaxBanTime()));
-                return;
-            }
             String playerUUID = Bukkit.getOfflinePlayer(playerName).getUniqueId().toString();
             String expiryDate = Utilities.formatDateDiff(length);
             CityDatabase.addCityBan(city, playerUUID, reason, player, placeDate, length);

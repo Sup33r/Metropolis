@@ -500,7 +500,7 @@ public class CityDatabase {
     private static void removeExpiredBans(City city) {
         try {
             long currentTime = System.currentTimeMillis();
-            DB.executeUpdate("DELETE FROM `mp_citybans` WHERE `cityID` = " + city.getCityID() + " AND `placeDate` + `length` < " + currentTime + ";");
+            DB.executeUpdate("DELETE FROM `mp_citybans` WHERE `cityID` = " + city.getCityID() + " AND `length` < " + currentTime + ";");
         } catch (SQLException e) {
             e.printStackTrace();
         }
