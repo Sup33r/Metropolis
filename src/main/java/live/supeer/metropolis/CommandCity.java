@@ -198,8 +198,8 @@ public class CommandCity extends BaseCommand {
             plugin.sendMessage(player, "messages.error.city.missing.balance.cityCost");
             return;
         }
-        if (cityName.isEmpty() || cityName.length() > 16) {
-            plugin.sendMessage(player, "messages.error.city.nameLength");
+        if (cityName.isEmpty() || cityName.length() > Metropolis.configuration.getCityNameLimit()) {
+            plugin.sendMessage(player, "messages.error.city.nameLength", "%maxlength%", String.valueOf(Metropolis.configuration.getCityNameLimit()));
             return;
         }
         if (!cityName.matches("[A-Za-zÀ-ÖØ-öø-ÿ0-9 ]+")) {
@@ -673,12 +673,10 @@ public class CommandCity extends BaseCommand {
                             player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
                     return;
                 }
-                if (args[3].length() > 30) {
+                if (args[3].length() > Metropolis.configuration.getCityGoDisplayNameLimit()) {
                     plugin.sendMessage(
                             player,
-                            "messages.error.city.go.invalidDisplayname",
-                            "%cityname%",
-                            city.getCityName());
+                            "messages.error.city.go.invalidDisplayname", "%cityname%", city.getCityName(), "%maxlength%", String.valueOf(Metropolis.configuration.getCityGoDisplayNameLimit()));
                     return;
                 }
                 if (Objects.equals(CityDatabase.getCityGoDisplayname(args[0], city), args[3])) {
@@ -709,8 +707,8 @@ public class CommandCity extends BaseCommand {
                 final String regex = "[^\\p{L}_0-9\\\\-]+";
                 final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
                 final Matcher matcher = pattern.matcher(args[3]);
-                if (matcher.find() || args[3].matches("^[0-9].*") || args[3].length() > 20) {
-                    plugin.sendMessage(player, "messages.error.city.go.invalidName");
+                if (matcher.find() || args[3].matches("^[0-9].*") || args[3].length() > Metropolis.configuration.getCityGoNameLimit()) {
+                    plugin.sendMessage(player, "messages.error.city.go.invalidName","%maxlength%", String.valueOf(Metropolis.configuration.getCityGoNameLimit()));
                     return;
                 }
                 if (CityDatabase.cityGoExists(args[3], city)) {
@@ -986,14 +984,14 @@ public class CommandCity extends BaseCommand {
                         player, "messages.city.successful.set.enter.removed", "%cityname%", city.getCityName());
                 return;
             }
-            if (message.length() > 225) {
+            if (message.length() > Metropolis.configuration.getCityEnterMessageLimit()) {
                 plugin.sendMessage(
                         player,
                         "messages.error.city.messageTooLong",
                         "%cityname%",
                         city.getCityName(),
                         "%count%",
-                        "225");
+                        String.valueOf(Metropolis.configuration.getCityEnterMessageLimit()));
                 return;
             }
             city.setEnterMessage(message);
@@ -1046,14 +1044,14 @@ public class CommandCity extends BaseCommand {
                         player, "messages.city.successful.set.exit.removed", "%cityname%", city.getCityName());
                 return;
             }
-            if (message.length() > 225) {
+            if (message.length() > Metropolis.configuration.getCityExitMessageLimit()) {
                 plugin.sendMessage(
                         player,
                         "messages.error.city.messageTooLong",
                         "%cityname%",
                         city.getCityName(),
                         "%count%",
-                        "225");
+                        String.valueOf(Metropolis.configuration.getCityExitMessageLimit()));
                 return;
             }
             city.setExitMessage(message);
@@ -1105,14 +1103,14 @@ public class CommandCity extends BaseCommand {
                         player, "messages.city.successful.set.motd.removed", "%cityname%", city.getCityName());
                 return;
             }
-            if (message.length() > 225) {
+            if (message.length() > Metropolis.configuration.getCityMotdLimit()) {
                 plugin.sendMessage(
                         player,
                         "messages.error.city.messageTooLong",
                         "%cityname%",
                         city.getCityName(),
                         "%count%",
-                        "225");
+                        String.valueOf(Metropolis.configuration.getCityMotdLimit()));
                 return;
             }
             city.setMotdMessage(message);
@@ -1192,8 +1190,8 @@ public class CommandCity extends BaseCommand {
                         player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
                 return;
             }
-            if (name.isEmpty() || name.length() > 16) {
-                plugin.sendMessage(player, "messages.error.city.nameLength");
+            if (name.isEmpty() || name.length() > Metropolis.configuration.getCityNameLimit()) {
+                plugin.sendMessage(player, "messages.error.city.nameLength","%maxlength%", String.valueOf(Metropolis.configuration.getCityNameLimit()));
                 return;
             }
             if (!name.matches("[A-Za-zÀ-ÖØ-öø-ÿ0-9 ]+")) {
@@ -1272,10 +1270,10 @@ public class CommandCity extends BaseCommand {
             final Matcher matcher = pattern.matcher(name);
             if (matcher.find()
                     || name.matches("^[0-9].*")
-                    || name.length() > 20
+                    || name.length() > Metropolis.configuration.getCityGoNameLimit()
                     || name.startsWith("-")) {
                 plugin.sendMessage(
-                        player, "messages.error.city.go.invalidName", "%cityname%", city.getCityName());
+                        player, "messages.error.city.go.invalidName", "%cityname%", city.getCityName(), "%maxlength%", String.valueOf(Metropolis.configuration.getCityGoNameLimit()));
                 return;
             }
             String role = CityDatabase.getCityRole(city, player.getUniqueId().toString());

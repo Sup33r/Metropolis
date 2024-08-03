@@ -19,6 +19,13 @@ public class MetropolisConfiguration {
     private final int nameChangeCooldown;
     private final String maxBanTime;
 
+    private final int cityNameLimit;
+    private final int cityGoNameLimit;
+    private final int cityGoDisplayNameLimit;
+    private final int cityMotdLimit;
+    private final int cityEnterMessageLimit;
+    private final int cityExitMessageLimit;
+
     MetropolisConfiguration(Metropolis plugin) {
         plugin.saveDefaultConfig();
         plugin.reloadConfig();
@@ -36,5 +43,12 @@ public class MetropolisConfiguration {
         cityClaimCost = plugin.getConfig().getInt("settings.city.claimcost");
         nameChangeCooldown = plugin.getConfig().getInt("settings.cooldownTime.namechange");
         maxBanTime = plugin.getConfig().getString("settings.maxbantime");
+
+        cityNameLimit = plugin.getConfig().getInt("settings.limits.cityname");
+        cityGoDisplayNameLimit = plugin.getConfig().getInt("settings.limits.citygodisplayname");
+        cityGoNameLimit = plugin.getConfig().getInt("settings.limits.citygoname");
+        cityMotdLimit = plugin.getConfig().getInt("settings.limits.motd");
+        cityEnterMessageLimit = plugin.getConfig().getInt("settings.limits.entermessage");
+        cityExitMessageLimit = plugin.getConfig().getInt("settings.limits.exitmessage");
     }
 }
