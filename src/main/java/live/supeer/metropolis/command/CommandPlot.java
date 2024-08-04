@@ -100,9 +100,7 @@ public class CommandPlot extends BaseCommand {
             plugin.sendMessage(player, "messages.error.plot.tooSmall");
             return;
         }
-        if (MetropolisListener.playerYMax.get(player.getUniqueId())
-                - MetropolisListener.playerYMin.get(player.getUniqueId())
-                < 3) {
+        if (MetropolisListener.playerYMax.get(player.getUniqueId()) - MetropolisListener.playerYMin.get(player.getUniqueId()) < 3 || !MetropolisListener.playerYMin.containsKey(player.getUniqueId()) || !MetropolisListener.playerYMax.containsKey(player.getUniqueId())) {
             plugin.sendMessage(player, "messages.error.plot.tooLowY");
             return;
         }
