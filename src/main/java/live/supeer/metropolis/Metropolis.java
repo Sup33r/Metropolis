@@ -14,6 +14,8 @@ import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.utils.DateUtil;
 import live.supeer.metropolis.utils.Utilities;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -103,7 +105,8 @@ public final class Metropolis extends JavaPlugin {
         String message = this.languageManager.getValue(key, getLocale(sender), replacements);
 
         if (message != null && !message.isEmpty()) {
-            sender.sendMessage(message);
+            Component component = languageManager.getMiniMessage().deserialize(message);
+            sender.sendMessage(component);
         }
     }
 
@@ -111,7 +114,10 @@ public final class Metropolis extends JavaPlugin {
         String message = this.languageManager.getValue(key, "sv_se", replacements);
 
         if (message != null && !message.isEmpty()) {
-            return message;
+            // Deserialize MiniMessage to a Component
+            Component component = languageManager.getMiniMessage().deserialize(message);
+            // Convert the Component to a legacy formatted string
+            return LegacyComponentSerializer.legacySection().serialize(component);
         }
         return null;
     }

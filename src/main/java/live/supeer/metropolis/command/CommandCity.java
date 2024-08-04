@@ -428,6 +428,7 @@ public class CommandCity extends BaseCommand {
             new HashMap<>();
 
     @Subcommand("invite")
+    @CommandCompletion("@players")
     public static void onInvite(Player player, String invitee) {
         if (!player.hasPermission("metropolis.city.invite")) {
             plugin.sendMessage(player, "messages.error.permissionDenied");
@@ -481,7 +482,7 @@ public class CommandCity extends BaseCommand {
             return;
         }
         if (inviteePlayer == player) {
-            plugin.sendMessage(player, "messages.error.city.invite.self");
+            plugin.sendMessage(player, "messages.error.city.invite.self", "%cityname%", city.getCityName());
             return;
         }
         if (!inviteCooldownTime.containsKey(uuidCityHashMap)) {
@@ -1459,7 +1460,7 @@ public class CommandCity extends BaseCommand {
         City city = HCDatabase.getHomeCityToCity(player.getUniqueId().toString());
         assert city != null;
         if (message.length() < 5) {
-            plugin.sendMessage(player, "messages.error.message.tooShort");
+            plugin.sendMessage(player, "messages.error.city.helpop.tooShort");
             return;
         }
         int cityStaffOnline = 0;
@@ -1473,20 +1474,14 @@ public class CommandCity extends BaseCommand {
         for (Player online : Bukkit.getOnlinePlayers()) {
             if (CityDatabase.memberExists(online.getUniqueId().toString(), city) && isCityStaff) {
                 cityStaffOnline++;
-                plugin.sendMessage(
-                        online,
-                        "messages.city.helpop.receive",
-                        "%player%",
-                        player.getName(),
-                        "%message%",
-                        message);
+                plugin.sendMessage(online, "messages.city.helpop.receive", "%cityname%", city.getCityName(), "%player%", player.getName(), "%message%", message);
             }
         }
         if (cityStaffOnline == 0) {
-            plugin.sendMessage(player, "messages.city.helpop.noStaffOnline");
+            plugin.sendMessage(player, "messages.city.helpop.noStaffOnline", "%cityname%", city.getCityName());
             return;
         }
-        plugin.sendMessage(player, "messages.city.helpop.sent", "%message%", message);
+        plugin.sendMessage(player, "messages.city.helpop.sent", "%cityname%", city.getCityName());
     }
 
     @Subcommand("leave")

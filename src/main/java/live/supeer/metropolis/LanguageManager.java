@@ -1,6 +1,7 @@
 package live.supeer.metropolis;
 
-import org.bukkit.ChatColor;
+import lombok.Getter;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,11 +18,14 @@ public class LanguageManager {
     private final Metropolis plugin;
     private final String defaultLocale;
     private final Map<String, YamlConfiguration> locales;
+    @Getter
+    private final MiniMessage miniMessage;
 
     public LanguageManager(@NotNull Metropolis plugin, @NotNull String defaultLocale) {
         this.plugin = plugin;
         this.defaultLocale = defaultLocale;
         this.locales = new HashMap<>();
+        this.miniMessage = MiniMessage.miniMessage();
         getOrLoadLocale(defaultLocale);
     }
 
@@ -133,8 +137,6 @@ public class LanguageManager {
             return null;
         }
 
-        value = ChatColor.translateAlternateColorCodes('&', value);
-
         return value;
     }
 
@@ -159,4 +161,5 @@ public class LanguageManager {
 
         return value;
     }
+
 }
