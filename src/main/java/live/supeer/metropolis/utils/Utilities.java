@@ -11,7 +11,6 @@ import org.bukkit.entity.Player;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 
-import java.awt.*;
 import java.text.NumberFormat;
 import java.util.*;
 
@@ -365,77 +364,61 @@ public class Utilities {
         return polygon;
     }
 
-    public static void sendCityScoreboard(Player player, City city) {
+    public static void sendCityScoreboard(Player player, City city, Plot plot) {
         FastBoard board = new FastBoard(player);
         int i = 0;
-        if (CityDatabase.getClaim(player.getLocation()) != null) {
-            board.updateTitle("§a             §l" + city.getCityName() + "§r             ");
+        board.updateTitle("§a             §l" + city.getCityName() + "§r             ");
+        board.updateLine(i, " ");
+        i = i + 1;
+        if (plot != null) {
+            if (plot.isKMarked()) {
+                board.updateLine(i, plugin.getMessage("messages.city.scoreboard.placeK"));
+            } else {
+                board.updateLine(i, plugin.getMessage("messages.city.scoreboard.place"));
+            }
+            board.updateLine(i + 1, "§a" + plot.getPlotName());
+            i = i + 2;
             board.updateLine(i, " ");
             i = i + 1;
-            for (Plot plot : city.getCityPlots()) {
-                Polygon polygon = new Polygon();
-                int yMin = plot.getPlotYMin();
-                int yMax = plot.getPlotYMax();
-                for (Location loc : plot.getPlotPoints()) {
-                    polygon.addPoint(loc.getBlockX(), loc.getBlockZ());
+            if (plot.getPlotType() != null) {
+                board.updateLine(i, plugin.getMessage("messages.city.scoreboard.type"));
+                String type = plot.getPlotType();
+                if (type.equals("church")) {
+                    type = plugin.getMessage("messages.plot.type.church");
                 }
-                if (player.getLocation().getBlockY() >= yMin && player.getLocation().getBlockY() <= yMax) {
-                    if (polygon.contains(
-                            player.getLocation().getBlockX(), player.getLocation().getBlockZ())) {
-                        if (plot.isKMarked()) {
-                            board.updateLine(i, plugin.getMessage("messages.city.scoreboard.placeK"));
-                        } else {
-                            board.updateLine(i, plugin.getMessage("messages.city.scoreboard.place"));
-                        }
-                        board.updateLine(i + 1, "§a" + plot.getPlotName());
-                        i = i + 2;
-                        board.updateLine(i, " ");
-                        i = i + 1;
-                        if (plot.getPlotType() != null) {
-                            board.updateLine(i, plugin.getMessage("messages.city.scoreboard.type"));
-                            String type = plot.getPlotType();
-                            if (type.equals("church")) {
-                                type = "Kyrka";
-                            }
-                            if (type.equals("farm")) {
-                                type = "Farm";
-                            }
-                            if (type.equals("shop")) {
-                                type = "Affär";
-                            }
-                            if (type.equals("vacation")) {
-                                type = "Ferietomt";
-                            }
-                            if (type.equals("jail")) {
-                                type = "Fängelse";
-                            }
-                            board.updateLine(i + 1, "§a" + type);
-                            board.updateLine(i + 2, " ");
-                            i = i + 3;
-                        }
-                        if (plot.getPlotOwner() != null) {
-                            board.updateLine(i, plugin.getMessage("messages.city.scoreboard.owner"));
-                            board.updateLine(i + 1, "§a" + plot.getPlotOwner());
-                            board.updateLine(i + 2, " ");
-                            i = i + 3;
-                        }
-                        if (plot.isForSale()) {
-                            board.updateLine(i, plugin.getMessage("messages.city.scoreboard.price"));
-                            board.updateLine(
-                                    i + 1, "§a" + Utilities.formattedMoney(plot.getPlotPrice()) + " minemynt");
-                            if (plot.getPlotRent() != 0) {
-                                board.updateLine(
-                                        i + 2, "§aTR: " + Utilities.formattedMoney(plot.getPlotRent()) + " minemynt");
-                            }
-                        }
-                        if (board.getLine(board.size() - 1).equals(" ")) {
-                            board.removeLine(board.size() - 1);
-                        }
-                        return;
-                    }
+                if (type.equals("farm")) {
+                    type = plugin.getMessage("messages.plot.type.farm");
+                }
+                if (type.equals("shop")) {
+                    type = plugin.getMessage("messages.plot.type.shop");
+                }
+                if (type.equals("vacation")) {
+                    type = plugin.getMessage("messages.plot.type.vacation");
+                }
+                if (type.equals("jail")) {
+                    type = plugin.getMessage("messages.plot.type.jail");
+                }
+                board.updateLine(i + 1, "§a" + type);
+                board.updateLine(i + 2, " ");
+                i = i + 3;
+            }
+            if (plot.getPlotOwner() != null) {
+                board.updateLine(i, plugin.getMessage("messages.city.scoreboard.owner"));
+                board.updateLine(i + 1, "§a" + plot.getPlotOwner());
+                board.updateLine(i + 2, " ");
+                i = i + 3;
+            }
+            if (plot.isForSale()) {
+                board.updateLine(i, plugin.getMessage("messages.city.scoreboard.price"));
+                board.updateLine(i + 1, "§a" + Utilities.formattedMoney(plot.getPlotPrice()) + " minemynt");
+                if (plot.getPlotRent() != 0) {
+                    board.updateLine(i + 2, "§aTR: " + Utilities.formattedMoney(plot.getPlotRent()) + " minemynt");
                 }
             }
-
+            if (board.getLine(board.size() - 1).equals(" ")) {
+                board.removeLine(board.size() - 1);
+            }
+        } else {
             board.updateLine(i, plugin.getMessage("messages.city.scoreboard.members"));
             i = i + 1;
             board.updateLine(i, "§a" + city.getCityMembers().size());
@@ -445,10 +428,6 @@ public class Utilities {
             board.updateLine(i, plugin.getMessage("messages.city.scoreboard.plots"));
             i = i + 1;
             board.updateLine(i, "§a" + city.getCityPlots().size());
-
-        } else {
-            board.updateTitle(plugin.getMessage("messages.city.scoreboard.nature"));
-            board.updateLine(0, plugin.getMessage("messages.city.scoreboard.pvp_on"));
         }
     }
 

@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.Point;
 
 import java.awt.*;
 import java.util.List;
@@ -134,5 +135,25 @@ public class PlotDatabase {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public static Plot getPlotAtLocation(Location location) {
+        GeometryFactory geometryFactory = new GeometryFactory();
+        Point point = geometryFactory.createPoint(new Coordinate(location.getX(), location.getZ()));
+
+        try {
+            DbRow result = DB.getFirstRow(
+                    "SELECT * FROM `mp_plots` WHERE ST_Intersects(`plotBoundary`, ST_GeomFromText(?))",
+                    point.toText()
+            );
+
+            if (result != null) {
+                return new Plot(result);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }

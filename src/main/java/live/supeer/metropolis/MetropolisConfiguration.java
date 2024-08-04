@@ -25,6 +25,7 @@ public class MetropolisConfiguration {
     private final int cityMotdLimit;
     private final int cityEnterMessageLimit;
     private final int cityExitMessageLimit;
+    private final int plotNameLimit;
 
     MetropolisConfiguration(Metropolis plugin) {
         plugin.saveDefaultConfig();
@@ -50,5 +51,6 @@ public class MetropolisConfiguration {
         cityMotdLimit = plugin.getConfig().getInt("settings.limits.motd");
         cityEnterMessageLimit = plugin.getConfig().getInt("settings.limits.entermessage");
         cityExitMessageLimit = plugin.getConfig().getInt("settings.limits.exitmessage");
+        plotNameLimit = plugin.getConfig().getInt("settings.limits.plotname");
     }
 }

@@ -2,7 +2,9 @@ package live.supeer.metropolis;
 
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.event.PlayerEnterCityEvent;
+import live.supeer.metropolis.event.PlayerEnterPlotEvent;
 import live.supeer.metropolis.event.PlayerExitCityEvent;
+import live.supeer.metropolis.event.PlayerExitPlotEvent;
 import live.supeer.metropolis.utils.Utilities;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -18,7 +20,7 @@ public class CityListener implements Listener {
             plugin.sendMessage(event.getPlayer(), "messages.city.enter", "%cityname%", city.getCityName(), "%enter%", city.getEnterMessage());
         }
 
-        Utilities.sendCityScoreboard(event.getPlayer(), city);
+        Utilities.sendCityScoreboard(event.getPlayer(), city, null);
 
         event.getPlayer().sendMessage("You have entered " + event.getCity().getCityName());
     }
@@ -35,6 +37,18 @@ public class CityListener implements Listener {
         }
 
         event.getPlayer().sendMessage("You have exited " + event.getCity().getCityName());
+    }
+
+    @EventHandler
+    public void onPlayerEnterPlot(PlayerEnterPlotEvent event) {
+        event.getPlayer().sendMessage("You have entered the plot " + event.getPlot().getPlotName());
+        Utilities.sendCityScoreboard(event.getPlayer(), event.getPlot().getCity(), event.getPlot());
+    }
+
+    @EventHandler
+    public void onPlayerExitPlot(PlayerExitPlotEvent event) {
+        event.getPlayer().sendMessage("You have exited the plot " + event.getPlot().getPlotName());
+        Utilities.sendCityScoreboard(event.getPlayer(), event.getPlot().getCity(), null);
     }
 
 

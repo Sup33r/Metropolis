@@ -124,7 +124,7 @@ messages:
           tooHigh: "§e%cityname% §7| §cThe rent must not exceed 100,000 minemynt."
         name:
           alreadyName: "§e%cityname% §7| §cThe plot is already named §4%name%§c."
-          tooLong: "§e%cityname% §7| §cThe plot name must not exceed 16 characters."
+          tooLong: "§e%cityname% §7| §cThe plot name must not exceed %maxlength% characters."
         type:
           alreadyType: "§e%cityname% §7| §cThe plot is already of type §4%type%§c."
           alreadyNoType: "§e%cityname% §7| §cThe plot already has no type."
@@ -165,6 +165,13 @@ messages:
   save:
     membership: "§aYour home city is now %cityname%."
   plot:
+    type:
+        church: "Church"
+        farm: "Farm"
+        shop: "Shop"
+        vacation: "Vacation"
+        none: "None"
+        jail: "Jail"
     help:
       header: "§2--- §aHelp: /plot §2---"
       buy: "§2/plot buy"

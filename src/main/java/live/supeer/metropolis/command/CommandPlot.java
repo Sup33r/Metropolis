@@ -1095,6 +1095,7 @@ public class CommandPlot extends BaseCommand {
                                 return;
                             }
                             plot.setPlotOwner(null);
+                            Utilities.sendCityScoreboard(player, city, plot);
                             plugin.sendMessage(
                                     player, "messages.plot.set.owner.removed", "%cityname%", city.getCityName());
                             return;
@@ -1131,6 +1132,7 @@ public class CommandPlot extends BaseCommand {
                         }
                         plot.setPlotOwner(offlinePlayer.getName());
                         plot.setPlotOwnerUUID(offlinePlayer.getUniqueId().toString());
+                        Utilities.sendCityScoreboard(player, city, plot);
                         plugin.sendMessage(
                                 player,
                                 "messages.plot.set.owner.success",
@@ -1219,6 +1221,7 @@ public class CommandPlot extends BaseCommand {
                                             + player.getUniqueId().toString()
                                             + " }");
                             plot.setPlotType(null);
+                            Utilities.sendCityScoreboard(player, city, plot);
                             plugin.sendMessage(
                                     player, "messages.plot.set.type.removed", "%cityname%", city.getCityName());
                             return;
@@ -1251,6 +1254,7 @@ public class CommandPlot extends BaseCommand {
                                                 + player.getUniqueId().toString()
                                                 + " }");
                                 plot.setPlotType("church");
+                                Utilities.sendCityScoreboard(player, city, plot);
                                 plugin.sendMessage(
                                         player,
                                         "messages.plot.set.type.success",
@@ -1284,6 +1288,7 @@ public class CommandPlot extends BaseCommand {
                                             + player.getUniqueId().toString()
                                             + " }");
                             plot.setPlotType("church");
+                            Utilities.sendCityScoreboard(player, city, plot);
                             plugin.sendMessage(
                                     player,
                                     "messages.plot.set.type.success",
@@ -1321,6 +1326,7 @@ public class CommandPlot extends BaseCommand {
                                                 + player.getUniqueId().toString()
                                                 + " }");
                                 plot.setPlotType("farm");
+                                Utilities.sendCityScoreboard(player, city, plot);
                                 plugin.sendMessage(
                                         player,
                                         "messages.plot.set.type.success",
@@ -1354,6 +1360,7 @@ public class CommandPlot extends BaseCommand {
                                             + player.getUniqueId().toString()
                                             + " }");
                             plot.setPlotType("farm");
+                            Utilities.sendCityScoreboard(player, city, plot);
                             plugin.sendMessage(
                                     player,
                                     "messages.plot.set.type.success",
@@ -1391,6 +1398,7 @@ public class CommandPlot extends BaseCommand {
                                                 + player.getUniqueId().toString()
                                                 + " }");
                                 plot.setPlotType("shop");
+                                Utilities.sendCityScoreboard(player, city, plot);
                                 plugin.sendMessage(
                                         player,
                                         "messages.plot.set.type.success",
@@ -1424,6 +1432,7 @@ public class CommandPlot extends BaseCommand {
                                             + player.getUniqueId().toString()
                                             + " }");
                             plot.setPlotType("shop");
+                            Utilities.sendCityScoreboard(player, city, plot);
                             plugin.sendMessage(
                                     player,
                                     "messages.plot.set.type.success",
@@ -1461,6 +1470,7 @@ public class CommandPlot extends BaseCommand {
                                                 + player.getUniqueId().toString()
                                                 + " }");
                                 plot.setPlotType("vacation");
+                                Utilities.sendCityScoreboard(player, city, plot);
                                 plugin.sendMessage(
                                         player,
                                         "messages.plot.set.type.success",
@@ -1494,6 +1504,7 @@ public class CommandPlot extends BaseCommand {
                                             + player.getUniqueId().toString()
                                             + " }");
                             plot.setPlotType("vacation");
+                            Utilities.sendCityScoreboard(player, city, plot);
                             plugin.sendMessage(
                                     player,
                                     "messages.plot.set.type.success",
@@ -1520,6 +1531,7 @@ public class CommandPlot extends BaseCommand {
                                                     + player.getUniqueId().toString()
                                                     + " }");
                                     plot.setPlotType("jail");
+                                    Utilities.sendCityScoreboard(player, city, plot);
                                     plugin.sendMessage(
                                             player,
                                             "messages.plot.set.type.success",
@@ -1553,6 +1565,7 @@ public class CommandPlot extends BaseCommand {
                                                 + player.getUniqueId().toString()
                                                 + " }");
                                 plot.setPlotType("jail");
+                                Utilities.sendCityScoreboard(player, city, plot);
                                 plugin.sendMessage(
                                         player,
                                         "messages.plot.set.type.success",
@@ -1653,6 +1666,7 @@ public class CommandPlot extends BaseCommand {
                                             + player.getUniqueId().toString()
                                             + " }");
                             plot.setPlotName("Tomt #" + plot.getPlotID());
+                            Utilities.sendCityScoreboard(player, city, plot);
                             plugin.sendMessage(
                                     player,
                                     "messages.plot.set.name.success",
@@ -1662,9 +1676,9 @@ public class CommandPlot extends BaseCommand {
                                     name);
                             return;
                         }
-                        if (name.length() > 16) {
+                        if (name.length() > Metropolis.configuration.getPlotNameLimit()) {
                             plugin.sendMessage(
-                                    player, "messages.error.plot.set.name.tooLong", "%cityname%", city.getCityName());
+                                    player, "messages.error.plot.set.name.tooLong", "%cityname%", city.getCityName(), "%maxlength%", String.valueOf(Metropolis.configuration.getPlotNameLimit()));
                             return;
                         }
                         Database.addLogEntry(
@@ -1679,6 +1693,7 @@ public class CommandPlot extends BaseCommand {
                                         + player.getUniqueId().toString()
                                         + " }");
                         plot.setPlotName(name);
+                        Utilities.sendCityScoreboard(player, city, plot);
                         plugin.sendMessage(
                                 player,
                                 "messages.plot.set.name.success",
@@ -1750,6 +1765,7 @@ public class CommandPlot extends BaseCommand {
                                             + player.getUniqueId().toString()
                                             + " }");
                             plot.setPlotRent(0);
+                            Utilities.sendCityScoreboard(player, city, plot);
                             plugin.sendMessage(
                                     player, "messages.plot.set.rent.removed", "%cityname%", city.getCityName());
                             return;
@@ -1766,6 +1782,7 @@ public class CommandPlot extends BaseCommand {
                         }
                         if (!plot.isForSale()) {
                             plot.setPlotPrice(0);
+                            Utilities.sendCityScoreboard(player, city, plot);
                             Database.addLogEntry(
                                     city,
                                     "{ \"type\": \"plotMarket\", \"subtype\": \"add\", \"id\": "
@@ -1793,6 +1810,7 @@ public class CommandPlot extends BaseCommand {
                                         + player.getUniqueId().toString()
                                         + " }");
                         plot.setPlotRent(rentInt);
+                        Utilities.sendCityScoreboard(player, city, plot);
                         plugin.sendMessage(
                                 player,
                                 "messages.plot.set.rent.success",
@@ -2579,6 +2597,7 @@ public class CommandPlot extends BaseCommand {
                                             + player.getUniqueId().toString()
                                             + " }");
                             plot.setKMarked(false);
+                            Utilities.sendCityScoreboard(player, city, plot);
                             plugin.sendMessage(
                                     player,
                                     "messages.plot.toggle.k-marked.success",
@@ -2601,6 +2620,7 @@ public class CommandPlot extends BaseCommand {
                                             + player.getUniqueId().toString()
                                             + " }");
                             plot.setKMarked(true);
+                            Utilities.sendCityScoreboard(player, city, plot);
                             plugin.sendMessage(
                                     player,
                                     "messages.plot.toggle.k-marked.success",
@@ -2721,15 +2741,8 @@ public class CommandPlot extends BaseCommand {
                                                 + ", \"player\": "
                                                 + player.getUniqueId().toString()
                                                 + " }");
-                                plot.updatePlot(
-                                        player,
-                                        locations,
-                                        MetropolisListener.playerYMin.get(player.getUniqueId()),
-                                        MetropolisListener.playerYMax.get(player.getUniqueId()));
-                                MetropolisListener.savedLocs.remove(player.getUniqueId());
-                                MetropolisListener.playerPolygons.remove(player.getUniqueId());
-                                MetropolisListener.playerYMin.remove(player.getUniqueId());
-                                MetropolisListener.playerYMax.remove(player.getUniqueId());
+                                plot.updatePlot(player, locations, MetropolisListener.playerYMin.get(player.getUniqueId()), MetropolisListener.playerYMax.get(player.getUniqueId()));MetropolisListener.savedLocs.remove(player.getUniqueId());MetropolisListener.playerPolygons.remove(player.getUniqueId());MetropolisListener.playerYMin.remove(player.getUniqueId());MetropolisListener.playerYMax.remove(player.getUniqueId());
+                                Utilities.sendCityScoreboard(player, city, plot);
                                 plugin.sendMessage(
                                         player,
                                         "messages.city.successful.set.plot.new",

@@ -4,8 +4,11 @@ import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.city.CityDatabase;
 import live.supeer.metropolis.command.CommandCity;
 import live.supeer.metropolis.event.PlayerEnterCityEvent;
+import live.supeer.metropolis.event.PlayerEnterPlotEvent;
 import live.supeer.metropolis.event.PlayerExitCityEvent;
+import live.supeer.metropolis.event.PlayerExitPlotEvent;
 import live.supeer.metropolis.plot.Plot;
+import live.supeer.metropolis.plot.PlotDatabase;
 import live.supeer.metropolis.utils.DateUtil;
 import live.supeer.metropolis.utils.Utilities;
 import org.locationtech.jts.geom.Coordinate;
@@ -66,19 +69,23 @@ public class MetropolisListener implements Listener {
     public static void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         if (CityDatabase.getClaim(player.getLocation()) != null) {
-            if (CityDatabase.getCity(
-                            Objects.requireNonNull(CityDatabase.getClaim(player.getLocation())).getCityName())
-                    .isEmpty()) {
+            if (CityDatabase.getCity(Objects.requireNonNull(CityDatabase.getClaim(player.getLocation())).getCityName()).isEmpty()) {
                 Utilities.sendNatureScoreboard(player);
+                playerInCity.remove(player.getUniqueId());
+                return;
             }
-            City city =
-                    CityDatabase.getCity(
-                                    Objects.requireNonNull(CityDatabase.getClaim(player.getLocation())).getCityName())
-                            .get();
+            City city = CityDatabase.getCity(Objects.requireNonNull(CityDatabase.getClaim(player.getLocation())).getCityName()).get();
             playerInCity.put(player.getUniqueId(), city);
-            Utilities.sendCityScoreboard(player, city);
+            Plot plot = PlotDatabase.getPlotAtLocation(player.getLocation());
+            if (plot != null) {
+                playerInPlot.put(player.getUniqueId(), PlotDatabase.getPlotAtLocation(player.getLocation()));
+                Utilities.sendCityScoreboard(player, city,plot);
+            } else {
+                Utilities.sendCityScoreboard(player, city, null);
+            }
         } else {
             Utilities.sendNatureScoreboard(player);
+            playerInCity.remove(player.getUniqueId());
         }
         String[] list = CityDatabase.memberCityList(player.getUniqueId().toString());
         for (int i = 0; i < Objects.requireNonNull(list).length; i++) {
@@ -97,6 +104,7 @@ public class MetropolisListener implements Listener {
     public static HashMap<UUID, Integer> playerYMin = new HashMap<>();
     public static HashMap<UUID, Integer> playerYMax = new HashMap<>();
     public static HashMap<UUID, City> playerInCity = new HashMap<>();
+    public static HashMap<UUID, Plot> playerInPlot = new HashMap<>();
     public static HashMap<UUID, List<String[]>> savedBlockHistory = new HashMap<>();
 
     @EventHandler
@@ -480,10 +488,20 @@ public class MetropolisListener implements Listener {
 
         if(event.getFrom().getX() != event.getTo().getX() || event.getFrom().getZ() != event.getTo().getZ()) {
             if (playerInCity.containsKey(event.getPlayer().getUniqueId())) {
-                City city = playerInCity.get(event.getPlayer().getUniqueId());
-                Utilities.sendCityScoreboard(event.getPlayer(), city);
-            } else {
-                Utilities.sendNatureScoreboard(event.getPlayer());
+                Plot plot = PlotDatabase.getPlotAtLocation(event.getTo());
+                if (plot == null) {
+                    if (playerInPlot.containsKey(event.getPlayer().getUniqueId())) {
+                        PlayerExitPlotEvent exitEvent = new PlayerExitPlotEvent(event.getPlayer(), playerInPlot.get(event.getPlayer().getUniqueId()));
+                        playerInPlot.remove(event.getPlayer().getUniqueId());
+                        plugin.getServer().getPluginManager().callEvent(exitEvent);
+                    }
+                    return;
+                }
+                if (!playerInPlot.containsKey(event.getPlayer().getUniqueId())) {
+                    PlayerEnterPlotEvent enterEvent = new PlayerEnterPlotEvent(event.getPlayer(), plot);
+                    playerInPlot.put(event.getPlayer().getUniqueId(), plot);
+                    plugin.getServer().getPluginManager().callEvent(enterEvent);
+                }
             }
         }
     }

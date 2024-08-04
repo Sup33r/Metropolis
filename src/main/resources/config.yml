@@ -13,6 +13,7 @@ settings:
     motd: 250
     entermessage: 225
     exitmessage: 225
+    plotname: 16
 
   maxbantime: 10y
   cooldownTime:

@@ -257,7 +257,7 @@ public class CommandCity extends BaseCommand {
         Claim claim =
                 CityDatabase.createClaim(city, player.getLocation(), false, player.getName(), player.getUniqueId().toString());
         MetropolisListener.playerInCity.put(player.getUniqueId(), city);
-        Utilities.sendCityScoreboard(player, city);
+        Utilities.sendCityScoreboard(player, city, null);
         assert claim != null;
         Database.addLogEntry(
                 city,
@@ -337,7 +337,7 @@ public class CommandCity extends BaseCommand {
                         + player.getUniqueId().toString()
                         + " }");
         MetropolisListener.playerInCity.put(player.getUniqueId(), city);
-        Utilities.sendCityScoreboard(player, city);
+        Utilities.sendCityScoreboard(player, city, null);
         CityDatabase.removeCityBalance(city, Metropolis.configuration.getCityClaimCost());
         plugin.sendMessage(
                 player,

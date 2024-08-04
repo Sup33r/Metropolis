@@ -124,7 +124,7 @@ messages:
           tooHigh: "§e%cityname% §7| §cTomträttsavgälden får inte vara högre än 100 000 minemynt."
         name:
           alreadyName: "§e%cityname% §7| §cTomten har redan namnet §4%name%§c."
-          tooLong: "§e%cityname% §7| §cTomtens namn får inte vara längre än 16 tecken."
+          tooLong: "§e%cityname% §7| §cTomtens namn får inte vara längre än %maxlength% tecken."
         type:
           alreadyType: "§e%cityname% §7| §cTomten är redan av typen §4%type%§c."
           alreadyNoType: "§e%cityname% §7| §cTomten har redan ingen typ."
@@ -165,6 +165,13 @@ messages:
   save:
     membership: "§aDin hemstad är nu %cityname%."
   plot:
+    type:
+      church: "Kyrka"
+      farm: "Farm"
+      shop: "Butik"
+      vacation: "Ferietomt"
+      none: "Ingen"
+      jail: "Fängelse"
     help:
       header: "§2--- §aHjälp: /plot §2---"
       buy: "§2/plot buy"
