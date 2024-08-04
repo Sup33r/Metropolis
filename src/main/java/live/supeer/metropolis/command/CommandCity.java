@@ -1840,6 +1840,7 @@ public class CommandCity extends BaseCommand {
                 }
                 Database.addLogEntry(city, "{ \"type\": \"rank\", \"subtype\": \"change\", \"from\": \"" + targetRole + "\", \"to\": \"" + rank.toLowerCase() + "\", \"issuer\": \"" + player.getUniqueId().toString() + "\", \"player\": \"" + targetPlayer.getUniqueId().toString() + "\" }");
                 break;
+            case "member":
             case "-":
                 CityDatabase.setCityRole(city, targetPlayer.getUniqueId().toString(), "member");
                 plugin.sendMessage(player, "messages.city.successful.rank.changed","%cityname%", city.getCityName(), "%playername%", playerName, "%newrole%", plugin.getMessage("messages.city.roles.member"));

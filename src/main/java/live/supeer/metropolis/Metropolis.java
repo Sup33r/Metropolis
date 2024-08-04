@@ -73,7 +73,7 @@ public final class Metropolis extends JavaPlugin {
         Database.initialize();
         Database.synchronize();
         manager.getCommandCompletions().registerCompletion("plotType", c -> ImmutableList.of("church", "farm", "shop", "vacation"));
-        manager.getCommandCompletions().registerCompletion("cityRoles", c -> ImmutableList.of("vicemayor", "assistant", "inviter", "member", "swap"));
+        manager.getCommandCompletions().registerCompletion("cityRoles", c -> ImmutableList.of("vicemayor", "assistant", "inviter", "member", "swap", "-", "member"));
     }
 
     @Override

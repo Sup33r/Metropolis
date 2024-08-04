@@ -336,7 +336,7 @@ messages:
       price: "§2§lFor sale:"
     successful:
       rank:
-        promoted: "§e%cityname% §7| §aYou have been given the role §2%newrole%§a."
+        promoted: "§e%cityname% §7| §aYour role has changed to §2%newrole%§a."
         changed: "§e%cityname% §7| §a%playername% has been given the role §2%newrole%§a."
         swapped: "§e%cityname% §7| §a%playername% has been given the role §2Mayor§a and you have been given the role §2%newrole%§a."
       delete:
