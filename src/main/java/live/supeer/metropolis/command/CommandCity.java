@@ -324,29 +324,35 @@ public class CommandCity extends BaseCommand {
             plugin.sendMessage(player, "messages.error.city.permissionDenied", "%cityname%", cityName);
             return;
         }
-        Claim claim =
-                CityDatabase.createClaim(city, player.getLocation(), false, player.getName(), player.getUniqueId().toString());
-        assert claim != null;
-        Database.addLogEntry(
-                city,
-                "{ \"type\": \"buy\", \"subtype\": \"claim\", \"balance\": "
-                        + "500"
-                        + ", \"claimlocation\": "
-                        + Utilities.formatChunk(
-                        claim.getClaimWorld(), claim.getXPosition(), claim.getZPosition())
-                        + ", \"player\": "
-                        + player.getUniqueId().toString()
-                        + " }");
-        MetropolisListener.playerInCity.put(player.getUniqueId(), city);
-        Utilities.sendCityScoreboard(player, city, null);
-        CityDatabase.removeCityBalance(city, Metropolis.configuration.getCityClaimCost());
-        plugin.sendMessage(
-                player,
-                "messages.city.successful.claim",
-                "%cityname%",
-                city.getCityName(),
-                "%amount%",
-                Utilities.formattedMoney(Metropolis.configuration.getCityClaimCost()));
+
+        Claim claim1 = CityDatabase.getClaim(player.getLocation().add(16, 0, 0));
+        Claim claim2 = CityDatabase.getClaim(player.getLocation().add(-16, 0, 0));
+        Claim claim3 = CityDatabase.getClaim(player.getLocation().add(0, 0, 16));
+        Claim claim4 = CityDatabase.getClaim(player.getLocation().add(0, 0, -16));
+
+        if ((claim1 != null && claim1.getCity() == city) ||
+                (claim2 != null && claim2.getCity() == city) ||
+                (claim3 != null && claim3.getCity() == city) ||
+                (claim4 != null && claim4.getCity() == city)) {
+            Claim claim = CityDatabase.createClaim(city, player.getLocation(), false, player.getName(), player.getUniqueId().toString());
+            assert claim != null;
+            Database.addLogEntry(
+                    city,
+                    "{ \"type\": \"buy\", \"subtype\": \"claim\", \"balance\": "
+                            + "500"
+                            + ", \"claimlocation\": "
+                            + Utilities.formatChunk(
+                            claim.getClaimWorld(), claim.getXPosition(), claim.getZPosition())
+                            + ", \"player\": "
+                            + player.getUniqueId().toString()
+                            + " }");
+            MetropolisListener.playerInCity.put(player.getUniqueId(), city);
+            Utilities.sendCityScoreboard(player, city, null);
+            CityDatabase.removeCityBalance(city, Metropolis.configuration.getCityClaimCost());
+            plugin.sendMessage(player, "messages.city.successful.claim", "%cityname%", city.getCityName(), "%amount%", Utilities.formattedMoney(Metropolis.configuration.getCityClaimCost()));
+        } else {
+            plugin.sendMessage(player, "messages.error.city.claimTooFar", "%cityname%", city.getCityName());
+        }
     }
 
     @Subcommand("price")
@@ -1325,7 +1331,50 @@ public class CommandCity extends BaseCommand {
         }
 
         @Subcommand("outpost")
-        public static void onOutpost(Player player) {}
+        public static void onOutpost(Player player) {
+            if (!player.hasPermission("metropolis.city.buy.outpost")) {
+                plugin.sendMessage(player, "messages.error.permissionDenied");
+                return;
+            }
+            if (HCDatabase.hasHomeCity(player.getUniqueId().toString())
+                    || HCDatabase.getHomeCityToCityname(player.getUniqueId().toString()) == null) {
+                plugin.sendMessage(player, "messages.error.missing.homeCity");
+                return;
+            }
+            City city = HCDatabase.getHomeCityToCity(player.getUniqueId().toString());
+            assert city != null;
+            String role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
+            if (role == null) {
+                plugin.sendMessage(
+                        player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
+                return;
+            }
+            boolean isViceMayor = role.equals("mayor") || role.equals("vicemayor");
+            if (!isViceMayor) {
+                plugin.sendMessage(
+                        player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
+                return;
+            }
+            if (city.getCityBalance() < Metropolis.configuration.getCityOutpostCost()) {
+                plugin.sendMessage(
+                        player, "messages.error.city.missing.balance.outpostCost", "%cityname%", city.getCityName());
+                return;
+            }
+            Claim claim = CityDatabase.createClaim(city, player.getLocation(), true, player.getName(), player.getUniqueId().toString());
+            assert claim != null;
+            city.removeCityBalance(Metropolis.configuration.getCityOutpostCost());
+            Database.addLogEntry(
+                    city,
+                    "{ \"type\": \"buy\", \"subtype\": \"outpost\", \"player\": "
+                            + player.getUniqueId().toString()
+                            + ", \"balance\": "
+                            + Metropolis.configuration.getCityOutpostCost()
+                            + ", \"claimlocation\": "
+                            + Utilities.formatLocation(player.getLocation())
+                            + " }");
+            Utilities.sendCityScoreboard(player, city, null);
+            plugin.sendMessage(player, "messages.city.successful.outpost", "%cityname%", city.getCityName(), "%amount%", Utilities.formattedMoney(Metropolis.configuration.getCityOutpostCost()));
+        }
     }
 
     public static final List<Player> blockEnabled = new ArrayList<>();

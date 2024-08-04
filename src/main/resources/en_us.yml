@@ -75,6 +75,7 @@ messages:
       notFound: "<red>Player not found."
       notInCity: "<red>Player is not a member of any city."
     city:
+      claimTooFar: "<yellow>%cityname% <gray>| <red>This land isn't connected to the city. Do you still want to claim it? If so, consider buying an outpost instead."
       rank:
         helpop:
           tooShort: "<red>The message is too short. Please clarify, specify!"
@@ -115,6 +116,7 @@ messages:
         mayor: "<yellow>%cityname% <gray>| <red>You cannot leave the city as mayor. Consider deleting the city with /city delete <underlined>cityname<reset><red>, or swapping roles with another member using the command /city rank <underlined>player<reset><red> swap."
       missing:
         balance:
+          outpostCost: "<yellow>%cityname% <gray>| <red>The city cannot afford the 15,000 minemynt cost of an outpost."
           goCost: "<yellow>%cityname% <gray>| <red>The city cannot afford the 5,000 minemynt cost to buy a teleport point for a city."
           cityCost: "<red>You cannot afford the 500,000 minemynt cost of a city."
       set:
@@ -337,6 +339,7 @@ messages:
       owner: "<dark_green><bold>Owner:"
       price: "<dark_green><bold>For sale:"
     successful:
+      outpost: "<yellow>%cityname% <gray>| <green>The city has bought an outpost for %amount% minemynt."
       rank:
         promoted: "<yellow>%cityname% <gray>| <green>Your role has changed to <dark_green>%newrole%<green>."
         changed: "<yellow>%cityname% <gray>| <green>%playername% has been given the role <dark_green>%newrole%<green>."

@@ -75,6 +75,7 @@ messages:
       notFound: "<red>Spelaren hittades inte."
       notInCity: "<red>Spelaren är inte medlem i någon stad."
     city:
+      claimTooFar: "<yellow>%cityname% <gray>| <red>Markbiten sitter inte ihop med staden. Vill du fortfarande överta den? Överväg isåfall att köpa en utpost istället."
       helpop:
         tooShort: "<red>Meddelandet är för kort, Tydliggör, precisera!"
       rank:
@@ -115,6 +116,7 @@ messages:
         mayor: "<yellow>%cityname% <gray>| <red>Du kan inte lämna staden som borgermästare. Överväg att istället ta bort staden med /city delete <underlined>stadsnamn<reset><red>, eller byta roll med en annan medlem med kommandot /city rank <underlined>spelare<reset><red> swap."
       missing:
         balance:
+          outpostCost: "<yellow>%cityname% <gray>| <red>Staden har inte råd med 15 000 minemynt som en utpost kostar."
           goCost: "<yellow>%cityname% <gray>| <red>Staden har inte råd med 5 000 minemynt som det kostar att köpa en teleporteringspunkt till en stad."
           cityCost: "<red>Du har inte råd med 500 000 minemynt som en stad kostar."
       set:
@@ -337,6 +339,7 @@ messages:
       owner: "<dark_green><bold>Ägare:"
       price: "<dark_green><bold>Till salu:"
     successful:
+      outpost: "<yellow>%cityname% <gray>| <green>Staden har köpt en utpost för %amount% minemynt."
       rank:
         promoted: "<yellow>%cityname% <gray>| <green>Du har fått rollen <dark_green>%newrole%<green>."
         changed: "<yellow>%cityname% <gray>| <green>%playername% har fått rollen <dark_green>%newrole%<green>."

@@ -15,6 +15,7 @@ public class MetropolisConfiguration {
     private final int cityStartingTax;
     private final int cityGoCost;
     private final int cityClaimCost;
+    private final int cityOutpostCost;
     private final int inviteCooldown;
     private final int nameChangeCooldown;
     private final String maxBanTime;
@@ -37,6 +38,7 @@ public class MetropolisConfiguration {
         sqlUsername = plugin.getConfig().getString("sql.username");
         sqlPassword = plugin.getConfig().getString("sql.password");
         inviteCooldown = plugin.getConfig().getInt("settings.cooldownTime.invite");
+        cityOutpostCost = plugin.getConfig().getInt("settings.city.outpostcost");
         cityCreationCost = plugin.getConfig().getInt("settings.city.creationcost");
         cityStartingBalance = plugin.getConfig().getInt("settings.city.startingbalance");
         cityStartingTax = plugin.getConfig().getInt("settings.city.startingtax");
