@@ -95,7 +95,7 @@ public class CityDatabase {
     public static void newMember(City city, Player player) {
         try {
             String cityName = city.getCityName();
-            DB.executeUpdate("INSERT INTO `mp_members` (`playerName`, `playerUUID`, `cityID`, `cityName`, `cityRole`, `joinDate`) VALUES (" + Database.sqlString(player.getName()) + ", " + Database.sqlString(player.getUniqueId().toString()) + ", " + city.getCityID() + ", " + Database.sqlString(cityName) + ", " + "NULL" + ", " + DateUtil.getTimestamp() + ");");
+            DB.executeUpdate("INSERT INTO `mp_members` (`playerName`, `playerUUID`, `cityID`, `cityName`, `cityRole`, `joinDate`) VALUES (" + Database.sqlString(player.getName()) + ", " + Database.sqlString(player.getUniqueId().toString()) + ", " + city.getCityID() + ", " + Database.sqlString(cityName) + ", " + Database.sqlString("member") + ", " + DateUtil.getTimestamp() + ");");
             city.addCityMember(
                     new Member(
                             DB.getFirstRow(

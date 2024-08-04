@@ -75,6 +75,11 @@ messages:
       notFound: "§cPlayer not found."
       notInCity: "§cPlayer is not a member of any city."
     city:
+      rank:
+        invalid: "§e%cityname% §7| §cInvalid role."
+        notInCity: "§e%cityname% §7| §c%playername% is not a member of the city."
+        cannotChangeOwnRole: "§e%cityname% §7| §cYou cannot modify your own role."
+        cannotChangeHigherRole: "§e%cityname% §7| §cYou cannot modify the role of a player with a higher role than your own."
       go:
         alreadyAccessLevel: "§e%cityname% §7| §cThe teleport point already has the specified access level."
         accessLevelTooHigh: "§e%cityname% §7| §cYou cannot set the access level of teleport points higher than your own rank."
@@ -263,6 +268,12 @@ messages:
           2: "§7f = frame, g = go, h = home, j = jukebox"
           3: "§7r = repair (anvil), s = switch, t = teleport, v = villager"
   city:
+    roles:
+      member: "Member"
+      inviter: "Inviter"
+      assistant: "Assistant"
+      vicemayor: "Vice Mayor"
+      mayor: "Mayor"
     ban:
       success: "§e%cityname% §7| §aThe player %player% has been banned from the city for %length%, with the reason: %reason%."
       alreadyBanned: "§e%cityname% §7| §cThe player %player% is already banned from the city."
@@ -324,6 +335,10 @@ messages:
       owner: "§2§lOwner:"
       price: "§2§lFor sale:"
     successful:
+      rank:
+        promoted: "§e%cityname% §7| §aYou have been given the role §2%newrole%§a."
+        changed: "§e%cityname% §7| §a%playername% has been given the role §2%newrole%§a."
+        swapped: "§e%cityname% §7| §a%playername% has been given the role §2Mayor§a and you have been given the role §2%newrole%§a."
       delete:
         citygo: "§e%cityname% §7|§a The city teleport point %name% was removed."
       remove:

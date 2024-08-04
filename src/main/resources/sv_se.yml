@@ -75,6 +75,11 @@ messages:
       notFound: "§cSpelaren hittades inte."
       notInCity: "§cSpelaren är inte medlem i någon stad."
     city:
+      rank:
+        invalid: "§e%cityname% §7| §cDen angivna rollen hittades inte."
+        notInCity: "§e%cityname% §7| §c%playername% är inte medlem i staden."
+        cannotChangeOwnRole: "§e%cityname% §7| §cDu kan inte ändra din egen roll."
+        cannotChangeHigherRole: "§e%cityname% §7| §cDu kan inte modifiera rollen på en spelare med en högre roll än din egen."
       go:
         alreadyAccessLevel: "§e%cityname% §7| §cTeleporteringspunkten har redan den angivna åtkomstnivån."
         accessLevelTooHigh: "§e%cityname% §7| §cDu kan inte ändra åtkomstnivån för teleporteringspunkter till en högre nivå än din egen rank."
@@ -263,6 +268,12 @@ messages:
           2: "§7f = frame, g = go, h = home, j = jukebox"
           3: "§7r = repair (anvil), s = switch, t = teleport, v = villager"
   city:
+    roles:
+      member: "Medlem"
+      inviter: "Inbjudare"
+      assistant: "Assistent"
+      vicemayor: "Vice borgmästare"
+      mayor: "Borgmästare"
     ban:
       success: "§e%cityname% §7| §aSpelaren %player% har blivit bannlyst från staden i %length%, med anledningen: %reason%."
       alreadyBanned: "§e%cityname% §7| §cSpelaren  %player% är redan bannlyst från staden."
@@ -324,6 +335,10 @@ messages:
       owner: "§2§lÄgare:"
       price: "§2§lTill salu:"
     successful:
+      rank:
+        promoted: "§e%cityname% §7| §aDu har fått rollen §2%newrole%§a."
+        changed: "§e%cityname% §7| §a%playername% har fått rollen §2%newrole%§a."
+        swapped: "§e%cityname% §7| §a%playername% har fått rollen §2Borgmästare§a och du har fått rollen §2%newrole%§a."
       delete:
         citygo: "§e%cityname% §7|§a Stadsteleporteringspunkten %name% togs bort."
       remove:

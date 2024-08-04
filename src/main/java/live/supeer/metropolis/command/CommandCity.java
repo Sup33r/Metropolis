@@ -1,7 +1,7 @@
 package live.supeer.metropolis.command;
 
 import co.aikar.commands.BaseCommand;
-import co.aikar.commands.annotation.*;
+import co.aikar.commands.annotation .*;
 import co.aikar.commands.annotation.Optional;
 import co.aikar.idb.DB;
 import live.supeer.metropolis.Database;
@@ -16,6 +16,7 @@ import net.coreprotect.CoreProtectAPI;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -1757,4 +1758,113 @@ public class CommandCity extends BaseCommand {
         }
         plugin.sendMessage(player, "messages.error.usage", "%command%", "/city ban <player> <length> <reason>");
     }
+
+    @Subcommand("rank")
+    @CommandCompletion("@players @cityRoles")
+    public static void onRank(Player player , String playerName, String rank) {
+        if (!player.hasPermission("metropolis.city.rank")) {
+            plugin.sendMessage(player, "messages.error.permissionDenied");
+            return;
+        }
+
+
+        City city = HCDatabase.getHomeCityToCity(player.getUniqueId().toString());
+        if (city == null) {
+            plugin.sendMessage(player, "messages.error.missing.homecity");
+            return;
+        }
+
+        String role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
+        assert role != null;
+        boolean isViceMayor = role.equals("mayor") || role.equals("vicemayor");
+        boolean isMayor = role.equals("mayor");
+
+        OfflinePlayer targetPlayer = Bukkit.getOfflinePlayer(playerName);
+        if (!CityDatabase.memberExists(targetPlayer.getUniqueId().toString(), city)) {
+            plugin.sendMessage(player, "messages.error.city.rank.notInCity", "%cityname%", city.getCityName(), "%playername%", playerName);
+            return;
+        }
+
+        if (targetPlayer.getUniqueId() == player.getUniqueId()) {
+            plugin.sendMessage(player, "messages.error.city.rank.cannotChangeOwnRole", "%cityname%", city.getCityName());
+            return;
+        }
+
+        String targetRole = CityDatabase.getCityRole(city, Bukkit.getOfflinePlayer(playerName).getUniqueId().toString());
+        assert targetRole != null;
+
+        if (!isViceMayor) {
+            plugin.sendMessage(player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
+            return;
+        }
+
+        if (!isMayor && targetRole.equals("mayor")) {
+            plugin.sendMessage(player, "messages.error.city.rank.cannotChangeHigherRole", "%cityname%", city.getCityName());
+            return;
+        }
+
+        switch (rank.toLowerCase()) {
+            case "assistant":
+                if (!isMayor && targetRole.equals("vicemayor")) {
+                    plugin.sendMessage(player, "messages.error.city.rank.cannotChangeHigherRole", "%playername%", playerName);
+                    return;
+                }
+                CityDatabase.setCityRole(city, targetPlayer.getUniqueId().toString(), "assistant");
+                plugin.sendMessage(player, "messages.city.successful.rank.changed","%cityname%", city.getCityName(), "%playername%", playerName, "%newrole%", plugin.getMessage("messages.city.roles.assistant"));
+                if (targetPlayer.isOnline()) {
+                    plugin.sendMessage((Player) targetPlayer, "messages.city.successful.rank.promoted", "%cityname%", city.getCityName(), "%newrole%", plugin.getMessage("messages.city.roles.assistant"));
+                }
+                Database.addLogEntry(city, "{ \"type\": \"rank\", \"subtype\": \"change\", \"from\": \"" + targetRole + "\", \"to\": \"" + rank.toLowerCase() + "\", \"issuer\": \"" + player.getUniqueId().toString() + "\", \"player\": \"" + targetPlayer.getUniqueId().toString() + "\" }");
+                break;
+            case "inviter":
+                if (!isMayor && targetRole.equals("vicemayor")) {
+                    plugin.sendMessage(player, "messages.error.city.rank.cannotChangeHigherRole", "%playername%", playerName);
+                    return;
+                }
+                CityDatabase.setCityRole(city, targetPlayer.getUniqueId().toString(), "inviter");
+                plugin.sendMessage(player, "messages.city.successful.rank.changed","%cityname%", city.getCityName(), "%playername%", playerName, "%newrole%", plugin.getMessage("messages.city.roles.inviter"));
+                if (targetPlayer.isOnline()) {
+                    plugin.sendMessage((Player) targetPlayer, "messages.city.successful.rank.promoted", "%cityname%", city.getCityName(), "%newrole%", plugin.getMessage("messages.city.roles.inviter"));
+                }
+                Database.addLogEntry(city, "{ \"type\": \"rank\", \"subtype\": \"change\", \"from\": \"" + targetRole + "\", \"to\": \"" + rank.toLowerCase() + "\", \"issuer\": \"" + player.getUniqueId().toString() + "\", \"player\": \"" + targetPlayer.getUniqueId().toString() + "\" }");
+                break;
+            case "vicemayor":
+                if (!isMayor && targetRole.equals("vicemayor")) {
+                    plugin.sendMessage(player, "messages.error.city.rank.cannotChangeHigherRole", "%playername%", playerName);
+                    return;
+                }
+                CityDatabase.setCityRole(city, targetPlayer.getUniqueId().toString(), "vicemayor");
+                plugin.sendMessage(player, "messages.city.successful.rank.changed","%cityname%", city.getCityName(), "%playername%", playerName, "%newrole%", plugin.getMessage("messages.city.roles.vicemayor"));
+                if (targetPlayer.isOnline()) {
+                    plugin.sendMessage((Player) targetPlayer, "messages.city.successful.rank.promoted", "%cityname%", city.getCityName(), "%newrole%", plugin.getMessage("messages.city.roles.vicemayor"));
+                }
+                Database.addLogEntry(city, "{ \"type\": \"rank\", \"subtype\": \"change\", \"from\": \"" + targetRole + "\", \"to\": \"" + rank.toLowerCase() + "\", \"issuer\": \"" + player.getUniqueId().toString() + "\", \"player\": \"" + targetPlayer.getUniqueId().toString() + "\" }");
+                break;
+            case "-":
+                CityDatabase.setCityRole(city, targetPlayer.getUniqueId().toString(), "member");
+                plugin.sendMessage(player, "messages.city.successful.rank.changed","%cityname%", city.getCityName(), "%playername%", playerName, "%newrole%", plugin.getMessage("messages.city.roles.member"));
+                if (targetPlayer.isOnline()) {
+                    plugin.sendMessage((Player) targetPlayer, "messages.city.successful.rank.promoted", "%cityname%", city.getCityName(), "%newrole%", plugin.getMessage("messages.city.roles.member"));
+                }
+                Database.addLogEntry(city, "{ \"type\": \"rank\", \"subtype\": \"remove\", \"from\": \"" + targetRole + "\", \"issuer\": \"" + player.getUniqueId().toString() + "\", \"player\": \"" + targetPlayer.getUniqueId().toString() + "\" }");
+                break;
+            case "swap":
+                if (!isMayor) {
+                    plugin.sendMessage(player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
+                    return;
+                }
+                CityDatabase.setCityRole(city, player.getUniqueId().toString(), targetRole);
+                CityDatabase.setCityRole(city, targetPlayer.getUniqueId().toString(), "mayor");
+                plugin.sendMessage(player, "messages.city.successful.rank.swapped","%cityname%", city.getCityName(), "%playername%", playerName, "%newrole%", plugin.getMessage("messages.city.roles." + targetRole));
+                if (targetPlayer.isOnline()) {
+                    plugin.sendMessage((Player) targetPlayer, "messages.city.successful.rank.promoted", "%cityname%", city.getCityName(), "%newrole%", plugin.getMessage("messages.city.roles.mayor"));
+                }
+                Database.addLogEntry(city, "{ \"type\": \"rank\", \"subtype\": \"swap\", \"from\": \"" + role + "\", \"to\": \"" + targetRole + "\", \"issuer\": \"" + player.getUniqueId().toString() + "\", \"player\": \"" + targetPlayer.getUniqueId().toString() + "\" }");
+                break;
+            default:
+                plugin.sendMessage(player, "messages.error.city.rank.invalid", "%cityname%", city.getCityName());
+                break;
+        }
+    }
+
 }
