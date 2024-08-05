@@ -4,6 +4,7 @@ import co.aikar.idb.DB;
 import co.aikar.idb.DbRow;
 import live.supeer.metropolis.Database;
 import live.supeer.metropolis.Metropolis;
+import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.utils.Utilities;
 import live.supeer.metropolis.plot.Plot;
 import lombok.Getter;
@@ -31,7 +32,8 @@ public class City {
     private String enterMessage;
     private String exitMessage;
     private String motdMessage;
-    private final boolean isOpen;
+    private boolean isOpen;
+    private boolean isPublic;
     private boolean isRemoved;
 
     public City(DbRow data) {
@@ -46,6 +48,7 @@ public class City {
         this.exitMessage = data.getString("exitMessage");
         this.motdMessage = data.getString("motdMessage");
         this.isOpen = data.get("isOpen");
+        this.isPublic = data.get("isPublic");
         this.isRemoved = data.get("isRemoved");
     }
 
@@ -81,12 +84,8 @@ public class City {
 
     public void removeCityMember(Member member) {
         this.cityMembers.remove(member);
-        DB.executeUpdateAsync(
-                "DELETE FROM `mp_members` WHERE `cityID` = "
-                        + cityID
-                        + " AND `playerUUID` = "
-                        + Database.sqlString(member.getPlayerUUID())
-                        + ";");
+        HCDatabase.removeHomeCity(member.getPlayerUUID(), this);
+        DB.executeUpdateAsync("DELETE FROM `mp_members` WHERE `cityID` = " + cityID + " AND `playerUUID` = " + Database.sqlString(member.getPlayerUUID()) + ";");
     }
 
     public void setCitySpawn(Location citySpawn) {
@@ -141,6 +140,35 @@ public class City {
 
     public void addCityMember(Member member) {
         cityMembers.add(member);
+    }
+
+    public Member getCityMember(String playerUUID) {
+        for (Member member : cityMembers) {
+            if (member.getPlayerUUID().equals(playerUUID)) {
+                return member;
+            }
+        }
+        return null;
+    }
+
+    public boolean toggleOpen() {
+        DB.executeUpdateAsync(
+                "UPDATE `mp_cities` SET `isOpen` = "
+                        + (isOpen ? 0 : 1)
+                        + " WHERE `cityID` = "
+                        + cityID
+                        + ";");
+        return isOpen = !isOpen;
+    }
+
+    public boolean togglePublic() {
+        DB.executeUpdateAsync(
+                "UPDATE `mp_cities` SET `isPublic` = "
+                        + (isPublic ? 0 : 1)
+                        + " WHERE `cityID` = "
+                        + cityID
+                        + ";");
+        return isPublic = !isPublic;
     }
 
 //    public void addCityBan(Ban ban) {

@@ -39,6 +39,9 @@ messages:
     goes: "<dark_green>--- <green>Stadsteleporteringspunkter (sida <bold>%startPage% <reset><green>av <bold>%totalPages%<reset><green>) <dark_green>---"
   syntax:
     city:
+      toggle:
+        open: "<gray>Syntax: /city toggle open"
+        public: "<gray>Syntax: /city toggle public"
       go: "<gray>Syntax: /city go <underlined>namn\n<gray>Syntax: /city go <underlined>namn<reset> <gray>delete\n<gray>Syntax: /city go <underlined>namn<reset> <gray>set displayname <underlined>visningsnamn\n<gray>Syntax: /city go <underlined>namn<reset> <gray>set displayname -\n<gray>/city go <underlined>namn<reset> <gray>set accesslevel <underlined>åtkomstnivå\n<gray>/city go <underlined>namn<reset> <gray>set accesslevel -"
       ban: "<gray>Syntax: /city ban\n<gray>Syntax: /city ban <underlined>spelare\n<gray>Syntax: /city ban <underlined>spelare<reset> <gray>-\n<gray>Syntax: /city ban <underlined>spelare längd anledning"
       buy:
@@ -272,6 +275,11 @@ messages:
           2: "<gray>f = frame, g = go, h = home, j = jukebox"
           3: "<gray>r = repair (anvil), s = switch, t = teleport, v = villager"
   city:
+    toggle:
+      open: "<yellow>%cityname% <gray>| <green>Staden är nu Öppen."
+      closed: "<yellow>%cityname% <gray>| <green>Staden är nu Stängd."
+      public: "<yellow>%cityname% <gray>| <green>Staden är nu Offentlig."
+      private: "<yellow>%cityname% <gray>| <green>Staden är nu Privat."
     roles:
       member: "Medlem"
       inviter: "Inbjudare"

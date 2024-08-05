@@ -6,6 +6,10 @@ import live.supeer.metropolis.Database;
 import live.supeer.metropolis.utils.Utilities;
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.city.CityDatabase;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -19,14 +23,16 @@ import java.util.UUID;
 
 @Getter
 public class Plot {
+    private static final GeometryFactory geometryFactory = new GeometryFactory();
+
 
     private final int plotID;
     private final int cityID;
     private String plotName;
     private String plotOwner;
     private String plotOwnerUUID;
-    private final int plotYMin;
-    private final int plotYMax;
+    private int plotYMin;
+    private int plotYMax;
     private String plotType;
     private boolean kMarked;
     private boolean isForSale;
@@ -34,10 +40,10 @@ public class Plot {
     private int plotRent;
     private char[] permsMembers;
     private char[] permsOutsiders;
-    private final Location plotCenter;
+    private Location plotCenter;
     private char[] plotFlags;
     private final long plotCreationDate;
-    private final Location[] plotPoints;
+    private Location[] plotPoints;
     private final City city;
 
     public Plot(DbRow data) {
@@ -147,10 +153,7 @@ public class Plot {
     }
 
     public void updatePlot(Player player, Location[] plotPoints, int minY, int maxY) {
-        Polygon plotPolygon = new Polygon();
-        for (Location plotPoint : plotPoints) {
-            plotPolygon.addPoint(plotPoint.getBlockX(), plotPoint.getBlockZ());
-        }
+        Polygon plotPolygon = Utilities.createPolygonFromLocations(plotPoints, geometryFactory);
         if (minY == 0 && maxY == 0) {
             for (Location plotPoint : plotPoints) {
                 if (plotPoint.getBlockY() < minY) {
@@ -161,8 +164,8 @@ public class Plot {
                 }
             }
         }
-        int centerX = plotPolygon.getBounds().x + plotPolygon.getBounds().width / 2;
-        int centerZ = plotPolygon.getBounds().y + plotPolygon.getBounds().height / 2;
+        int centerX = (int) (plotPolygon.getEnvelopeInternal().getMinX() + plotPolygon.getEnvelopeInternal().getWidth() / 2);
+        int centerZ = (int) (plotPolygon.getEnvelopeInternal().getMinY() + plotPolygon.getEnvelopeInternal().getHeight() / 2);
         Location plotCenter =
                 new Location(
                         plotPoints[0].getWorld(),
@@ -179,9 +182,18 @@ public class Plot {
                             + maxY
                             + ", `plotCenter` = "
                             + Database.sqlString(Utilities.locationToString(plotCenter))
+                            + ", `plotBoundary` = ST_GeomFromText('"
+                            + plotPolygon.toText()
+                            + "')"
                             + " WHERE `plotId` = "
                             + plotID
                             + ";");
+
+            // Update local instance variables
+            this.plotPoints = plotPoints;
+            this.plotYMin = minY;
+            this.plotYMax = maxY;
+            this.plotCenter = plotCenter;
         } catch (Exception e) {
             e.printStackTrace();
         }

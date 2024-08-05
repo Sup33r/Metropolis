@@ -128,32 +128,14 @@ public class CommandCity extends BaseCommand {
                 plugin.sendMessage(player, "messages.syntax.city.bank.withdraw");
                 return;
             }
-
-            if (HCDatabase.getHomeCityToCityname(player.getUniqueId().toString()) == null) {
-                plugin.sendMessage(player, "messages.error.missing.homeCity");
+            City city = Utilities.hasCityPermissions(player,"metropolis.city.bank.withdraw", Role.VICE_MAYOR);
+            if (city == null) {
                 return;
             }
             int inputBalance = Integer.parseInt(args[0].replaceAll("[^0-9]", ""));
-            if (CityDatabase.getCity(HCDatabase.getHomeCityToCityname(player.getUniqueId().toString()))
-                    .isEmpty()) {
-                plugin.sendMessage(player, "messages.error.missing.city");
-                return;
-            }
-            City city = HCDatabase.getHomeCityToCity(player.getUniqueId().toString());
             String inputBalanceFormatted = Utilities.formattedMoney(inputBalance);
             String reason = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
-            assert city != null;
             int cityBalance = city.getCityBalance();
-            String cityRole = CityDatabase.getCityRole(city, player.getUniqueId().toString());
-
-            if (cityRole == null
-                    || cityRole.equals("member")
-                    || cityRole.equals("inviter")
-                    || cityRole.equals("assistant")) {
-                plugin.sendMessage(
-                        player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
-                return;
-            }
             if (!(reason.length() >= 8)) {
                 plugin.sendMessage(
                         player, "messages.error.missing.reasonLength", "%cityname%", city.getCityName());
@@ -254,7 +236,7 @@ public class CommandCity extends BaseCommand {
                         + ", \"player\": "
                         + player.getUniqueId().toString()
                         + " }");
-        CityDatabase.setCityRole(city, player.getUniqueId().toString(), "mayor");
+        CityDatabase.setCityRole(city, player.getUniqueId().toString(), Role.MAYOR);
         Claim claim =
                 CityDatabase.createClaim(city, player.getLocation(), false, player.getName(), player.getUniqueId().toString());
         MetropolisListener.playerInCity.put(player.getUniqueId(), city);
@@ -436,45 +418,18 @@ public class CommandCity extends BaseCommand {
     @Subcommand("invite")
     @CommandCompletion("@players")
     public static void onInvite(Player player, String invitee) {
-        if (!player.hasPermission("metropolis.city.invite")) {
-            plugin.sendMessage(player, "messages.error.permissionDenied");
+        City city = Utilities.hasCityPermissions(player, "metropolis.city.invite", Role.INVITER);
+        if (city == null) {
             return;
         }
-        if (HCDatabase.hasHomeCity(player.getUniqueId().toString())
-                || HCDatabase.getHomeCityToCityname(player.getUniqueId().toString()) == null) {
-            plugin.sendMessage(player, "messages.error.missing.homeCity");
-            return;
-        }
-        @Deprecated Player inviteePlayer = Bukkit.getPlayer(invitee);
+        Player inviteePlayer = Bukkit.getPlayer(invitee);
         if (inviteePlayer == null) {
             plugin.sendMessage(player, "messages.error.missing.player");
             return;
         }
-        City city = HCDatabase.getHomeCityToCity(player.getUniqueId().toString());
-        assert city != null;
-        String role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
-        if (role == null) {
-            plugin.sendMessage(
-                    player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
-            return;
-        }
-        boolean isInviter =
-                role.equals("inviter")
-                        || role.equals("assistant")
-                        || role.equals("vicemayor")
-                        || role.equals("mayor");
-        if (!isInviter) {
-            plugin.sendMessage(
-                    player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
-            return;
-        }
-        HashMap<UUID, City> uuidCityHashMap =
-                new HashMap<>() {
-                    {
-                        put(inviteePlayer.getUniqueId(), city);
-                    }
-                };
-        if (CityDatabase.getCityRole(city, inviteePlayer.getName()) != null) {
+
+        HashMap<UUID, City> uuidCityHashMap = new HashMap<>() {{put(inviteePlayer.getUniqueId(), city);}};
+        if (CityDatabase.memberExists(inviteePlayer.getUniqueId().toString(), city)) {
             plugin.sendMessage(player, "messages.error.city.alreadyInACity");
             return;
         }
@@ -492,18 +447,6 @@ public class CommandCity extends BaseCommand {
             return;
         }
         if (!inviteCooldownTime.containsKey(uuidCityHashMap)) {
-            if (inviteCooldownTime.containsKey(uuidCityHashMap)) {
-                if (inviteCooldownTime.get(uuidCityHashMap) > 0) {
-                    plugin.sendMessage(
-                            player,
-                            "messages.error.city.invite.cooldown",
-                            "%playername%",
-                            inviteePlayer.getName(),
-                            "%time%",
-                            inviteCooldownTime.get(uuidCityHashMap).toString());
-                    return;
-                }
-            }
             invites.put(inviteePlayer, city);
             plugin.sendMessage(
                     player,
@@ -538,8 +481,49 @@ public class CommandCity extends BaseCommand {
                     });
             inviteCooldownTask.get(uuidCityHashMap).runTaskTimer(plugin, 20, 20);
         } else {
-            plugin.sendMessage(
-                    player, "messages.error.city.invite.alreadyInvited", "%cityname%", city.getCityName());
+            if (inviteCooldownTime.get(uuidCityHashMap) > 0) {
+                plugin.sendMessage(
+                        player,
+                        "messages.error.city.invite.cooldown",
+                        "%playername%",
+                        inviteePlayer.getName(),
+                        "%time%",
+                        inviteCooldownTime.get(uuidCityHashMap).toString());
+            } else {
+                invites.put(inviteePlayer, city);
+                plugin.sendMessage(
+                        player,
+                        "messages.city.invite.invited",
+                        "%player%",
+                        inviteePlayer.getName(),
+                        "%cityname%",
+                        city.getCityName(),
+                        "%inviter%",
+                        player.getName());
+                plugin.sendMessage(
+                        inviteePlayer,
+                        "messages.city.invite.inviteMessage",
+                        "%cityname%",
+                        city.getCityName(),
+                        "%inviter%",
+                        player.getName());
+                inviteCooldownTime.put(uuidCityHashMap, Metropolis.configuration.getInviteCooldown());
+                inviteCooldownTask.put(
+                        uuidCityHashMap,
+                        new BukkitRunnable() {
+                            @Override
+                            public void run() {
+                                inviteCooldownTime.put(uuidCityHashMap, inviteCooldownTime.get(uuidCityHashMap) - 1);
+                                if (inviteCooldownTime.get(uuidCityHashMap) == 0) {
+                                    inviteCooldownTime.remove(uuidCityHashMap);
+                                    inviteCooldownTask.remove(uuidCityHashMap);
+                                    invites.remove(inviteePlayer, city);
+                                    cancel();
+                                }
+                            }
+                        });
+                inviteCooldownTask.get(uuidCityHashMap).runTaskTimer(plugin, 20, 20);
+            }
         }
     }
 
@@ -556,21 +540,16 @@ public class CommandCity extends BaseCommand {
         }
         City city = HCDatabase.getHomeCityToCity(player.getUniqueId().toString());
         assert city != null;
-        String role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
+        Role role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
         if (role == null) {
             plugin.sendMessage(
                     player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
             return;
         }
-        boolean isInviter =
-                role.equals("inviter")
-                        || role.equals("assistant")
-                        || role.equals("vicemayor")
-                        || role.equals("mayor");
-        boolean isAssistant =
-                role.equals("assistant") || role.equals("vicemayor") || role.equals("mayor");
-        boolean isViceMayor = role.equals("vicemayor") || role.equals("mayor");
-        boolean isMayor = role.equals("mayor");
+        boolean isInviter = role.equals(Role.INVITER) || role.equals(Role.ASSISTANT) || role.equals(Role.VICE_MAYOR) || role.equals(Role.MAYOR);
+        boolean isAssistant = role.equals(Role.ASSISTANT) || role.equals(Role.VICE_MAYOR) || role.equals(Role.MAYOR);
+        boolean isViceMayor = role.equals(Role.VICE_MAYOR) || role.equals(Role.MAYOR);
+        boolean isMayor = role.equals(Role.MAYOR);
         if (args.length == 0
                 || args.length == 1 && !args[0].replaceAll("[0-9]", "").matches("[^0-9].*")) {
             if (!player.hasPermission("metropolis.city.go.list")) {
@@ -961,27 +940,8 @@ public class CommandCity extends BaseCommand {
 
         @Subcommand("enter")
         public static void onEnter(Player player, String message) {
-            if (!player.hasPermission("metropolis.city.set.enter")) {
-                plugin.sendMessage(player, "messages.error.permissionDenied");
-                return;
-            }
-            if (HCDatabase.hasHomeCity(player.getUniqueId().toString())
-                    || HCDatabase.getHomeCityToCityname(player.getUniqueId().toString()) == null) {
-                plugin.sendMessage(player, "messages.error.missing.homeCity");
-                return;
-            }
-            City city = HCDatabase.getHomeCityToCity(player.getUniqueId().toString());
-            assert city != null;
-            String role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
-            if (role == null) {
-                plugin.sendMessage(
-                        player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
-                return;
-            }
-            boolean isViceMayor = role.equals("mayor") || role.equals("vicemayor");
-            if (!isViceMayor) {
-                plugin.sendMessage(
-                        player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
+            City city = Utilities.hasCityPermissions(player, "metropolis.city.set.enter", Role.VICE_MAYOR);
+            if (city == null) {
                 return;
             }
             if (message.equals("-")) {
@@ -1021,27 +981,8 @@ public class CommandCity extends BaseCommand {
 
         @Subcommand("exit")
         public static void onExit(Player player, String message) {
-            if (!player.hasPermission("metropolis.city.set.exit")) {
-                plugin.sendMessage(player, "messages.error.permissionDenied");
-                return;
-            }
-            if (HCDatabase.hasHomeCity(player.getUniqueId().toString())
-                    || HCDatabase.getHomeCityToCityname(player.getUniqueId().toString()) == null) {
-                plugin.sendMessage(player, "messages.error.missing.homeCity");
-                return;
-            }
-            City city = HCDatabase.getHomeCityToCity(player.getUniqueId().toString());
-            assert city != null;
-            String role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
-            if (role == null) {
-                plugin.sendMessage(
-                        player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
-                return;
-            }
-            boolean isViceMayor = role.equals("mayor") || role.equals("vicemayor");
-            if (!isViceMayor) {
-                plugin.sendMessage(
-                        player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
+            City city = Utilities.hasCityPermissions(player, "metropolis.city.set.exit", Role.VICE_MAYOR);
+            if (city == null) {
                 return;
             }
             if (message.equals("-")) {
@@ -1081,26 +1022,8 @@ public class CommandCity extends BaseCommand {
 
         @Subcommand("motd")
         public static void onMotd(Player player, String message) {
-            if (!player.hasPermission("metropolis.city.set.motd")) {
-                plugin.sendMessage(player, "messages.error.permissionDenied");
-                return;
-            }
-            if (HCDatabase.hasHomeCity(player.getUniqueId().toString())) {
-                plugin.sendMessage(player, "messages.error.missing.homeCity");
-                return;
-            }
-            City city = HCDatabase.getHomeCityToCity(player.getUniqueId().toString());
-            assert city != null;
-            String role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
-            if (role == null) {
-                plugin.sendMessage(
-                        player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
-                return;
-            }
-            boolean isViceMayor = role.equals("mayor") || role.equals("vicemayor");
-            if (!isViceMayor) {
-                plugin.sendMessage(
-                        player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
+            City city = Utilities.hasCityPermissions(player, "metropolis.city.set.motd", Role.VICE_MAYOR);
+            if (city == null) {
                 return;
             }
             if (message.equals("-")) {
@@ -1139,26 +1062,8 @@ public class CommandCity extends BaseCommand {
         }
         @Subcommand("spawn")
         public static void onSpawn(Player player) {
-            if (!player.hasPermission("metropolis.city.set.spawn")) {
-                plugin.sendMessage(player, "messages.error.permissionDenied");
-                return;
-            }
-            if (HCDatabase.hasHomeCity(player.getUniqueId().toString())) {
-                plugin.sendMessage(player, "messages.error.missing.homeCity");
-                return;
-            }
-            City city = HCDatabase.getHomeCityToCity(player.getUniqueId().toString());
-            assert city != null;
-            String role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
-            if (role == null) {
-                plugin.sendMessage(
-                        player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
-                return;
-            }
-            boolean isViceMayor = role.equals("mayor") || role.equals("vicemayor");
-            if (!isViceMayor) {
-                plugin.sendMessage(
-                        player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
+            City city = Utilities.hasCityPermissions(player, "metropolis.city.set.spawn", Role.VICE_MAYOR);
+            if (city == null) {
                 return;
             }
             Claim claim = CityDatabase.getClaim(player.getLocation());
@@ -1181,26 +1086,8 @@ public class CommandCity extends BaseCommand {
 
         @Subcommand("name")
         public static void onName(Player player, String name) {
-            if (!player.hasPermission("metropolis.city.set.name")) {
-                plugin.sendMessage(player, "messages.error.permissionDenied");
-                return;
-            }
-            if (HCDatabase.hasHomeCity(player.getUniqueId().toString())) {
-                plugin.sendMessage(player, "messages.error.missing.homeCity");
-                return;
-            }
-            City city = HCDatabase.getHomeCityToCity(player.getUniqueId().toString());
-            assert city != null;
-            String role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
-            if (role == null) {
-                plugin.sendMessage(
-                        player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
-                return;
-            }
-            boolean isMayor = role.equals("mayor");
-            if (!isMayor) {
-                plugin.sendMessage(
-                        player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
+            City city = Utilities.hasCityPermissions(player, "metropolis.city.set.name", Role.MAYOR);
+            if (city == null) {
                 return;
             }
             if (name.isEmpty() || name.length() > Metropolis.configuration.getCityNameLimit()) {
@@ -1267,17 +1154,10 @@ public class CommandCity extends BaseCommand {
 
         @Subcommand("go")
         public static void onGo(Player player, String name) {
-            if (!player.hasPermission("metropolis.city.go")) {
-                plugin.sendMessage(player, "messages.error.permissionDenied");
+            City city = Utilities.hasCityPermissions(player, "metropolis.city.buy.go", Role.VICE_MAYOR);
+            if (city == null) {
                 return;
             }
-            if (HCDatabase.hasHomeCity(player.getUniqueId().toString())
-                    || HCDatabase.getHomeCityToCityname(player.getUniqueId().toString()) == null) {
-                plugin.sendMessage(player, "messages.error.missing.homeCity");
-                return;
-            }
-            City city = HCDatabase.getHomeCityToCity(player.getUniqueId().toString());
-            assert city != null;
             final String regex = "[^\\p{L}_0-9\\\\-]+";
             final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
             final Matcher matcher = pattern.matcher(name);
@@ -1287,16 +1167,6 @@ public class CommandCity extends BaseCommand {
                     || name.startsWith("-")) {
                 plugin.sendMessage(
                         player, "messages.error.city.go.invalidName", "%cityname%", city.getCityName(), "%maxlength%", String.valueOf(Metropolis.configuration.getCityGoNameLimit()));
-                return;
-            }
-            String role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
-            if (role == null) {
-                plugin.sendMessage(
-                        player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
-                return;
-            }
-            if (!player.hasPermission("metropolis.city.buy.go")) {
-                plugin.sendMessage(player, "messages.error.permissionDenied");
                 return;
             }
             if (city.getCityBalance() < Metropolis.configuration.getCityGoCost()) {
@@ -1332,27 +1202,8 @@ public class CommandCity extends BaseCommand {
 
         @Subcommand("outpost")
         public static void onOutpost(Player player) {
-            if (!player.hasPermission("metropolis.city.buy.outpost")) {
-                plugin.sendMessage(player, "messages.error.permissionDenied");
-                return;
-            }
-            if (HCDatabase.hasHomeCity(player.getUniqueId().toString())
-                    || HCDatabase.getHomeCityToCityname(player.getUniqueId().toString()) == null) {
-                plugin.sendMessage(player, "messages.error.missing.homeCity");
-                return;
-            }
-            City city = HCDatabase.getHomeCityToCity(player.getUniqueId().toString());
-            assert city != null;
-            String role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
-            if (role == null) {
-                plugin.sendMessage(
-                        player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
-                return;
-            }
-            boolean isViceMayor = role.equals("mayor") || role.equals("vicemayor");
-            if (!isViceMayor) {
-                plugin.sendMessage(
-                        player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
+            City city = Utilities.hasCityPermissions(player, "metropolis.city.buy.outpost", Role.VICE_MAYOR);
+            if (city == null) {
                 return;
             }
             if (city.getCityBalance() < Metropolis.configuration.getCityOutpostCost()) {
@@ -1497,29 +1348,20 @@ public class CommandCity extends BaseCommand {
 
     @Subcommand("helpop")
     public static void onHelpop(Player player, String message) {
-        if (!player.hasPermission("metropolis.city.helpop")) {
-            plugin.sendMessage(player, "messages.error.permissionDenied");
+        City city = Utilities.hasCityPermissions(player, "metropolis.city.helpop", Role.MEMBER);
+        if (city == null) {
             return;
         }
-        if (HCDatabase.hasHomeCity(player.getUniqueId().toString())
-                || HCDatabase.getHomeCityToCityname(player.getUniqueId().toString()) == null) {
-            plugin.sendMessage(player, "messages.error.missing.homeCity");
-            return;
-        }
-        City city = HCDatabase.getHomeCityToCity(player.getUniqueId().toString());
-        assert city != null;
         if (message.length() < 5) {
             plugin.sendMessage(player, "messages.error.city.helpop.tooShort");
             return;
         }
         int cityStaffOnline = 0;
         boolean isCityStaff =
-                Objects.equals(
-                        CityDatabase.getCityRole(city, String.valueOf(player.getUniqueId())), "mayor")
+                Objects.equals(CityDatabase.getCityRole(city, String.valueOf(player.getUniqueId())), Role.MAYOR) || Objects.equals(
+                        CityDatabase.getCityRole(city, String.valueOf(player.getUniqueId())), Role.VICE_MAYOR)
                         || Objects.equals(
-                        CityDatabase.getCityRole(city, String.valueOf(player.getUniqueId())), "vicemayor")
-                        || Objects.equals(
-                        CityDatabase.getCityRole(city, String.valueOf(player.getUniqueId())), "assistant");
+                        CityDatabase.getCityRole(city, String.valueOf(player.getUniqueId())), Role.ASSISTANT);
         for (Player online : Bukkit.getOnlinePlayers()) {
             if (CityDatabase.memberExists(online.getUniqueId().toString(), city) && isCityStaff) {
                 cityStaffOnline++;
@@ -1535,39 +1377,19 @@ public class CommandCity extends BaseCommand {
 
     @Subcommand("leave")
     public static void onLeave(Player player, String cityname) throws SQLException {
-        if (!player.hasPermission("metropolis.city.leave")) {
-            plugin.sendMessage(player, "messages.error.permissionDenied");
+        City city = Utilities.hasCityPermissions(player, "metropolis.city.leave", Role.MEMBER);
+        if (city == null) {
             return;
         }
-        if (HCDatabase.hasHomeCity(player.getUniqueId().toString())
-                || HCDatabase.getHomeCityToCityname(player.getUniqueId().toString()) == null) {
-            plugin.sendMessage(player, "messages.error.missing.homeCity");
-            return;
-        }
-        if (CityDatabase.getCity(cityname).isEmpty()) {
-            plugin.sendMessage(player, "messages.error.missing.city");
-        }
-        City city = HCDatabase.getHomeCityToCity(player.getUniqueId().toString());
-        if (!CityDatabase.memberExists(player.getUniqueId().toString(), CityDatabase.getCity(cityname).get())) {
-            plugin.sendMessage(player, "messages.error.city.notInCity");
-            return;
-        }
-        if (Objects.equals(
-                CityDatabase.getCityRole(
-                        CityDatabase.getCity(cityname).get(), String.valueOf(player.getUniqueId())),
-                "mayor")) {
+//        if (!CityDatabase.memberExists(player.getUniqueId().toString(), CityDatabase.getCity(cityname).get())) {
+//            plugin.sendMessage(player, "messages.error.city.notInCity");
+//            return;
+//        }
+        if (Objects.equals(CityDatabase.getCityRole(city, player.getUniqueId().toString()), Role.MAYOR)) {
             plugin.sendMessage(player, "messages.error.city.leave.mayor", "%cityname%", cityname);
             return;
         }
-        assert city != null;
-        city.removeCityMember(
-                new Member(
-                        DB.getFirstRow(
-                                "SELECT * FROM `mp_members` WHERE `cityName` = "
-                                        + Database.sqlString(cityname)
-                                        + " AND `playerUUID` = "
-                                        + Database.sqlString(player.getUniqueId().toString())
-                                        + ";")));
+        city.removeCityMember(city.getCityMember(player.getUniqueId().toString()));
         plugin.sendMessage(player, "messages.city.leave.success", "%cityname%", cityname);
         for (Player online : Bukkit.getOnlinePlayers()) {
             if (CityDatabase.memberExists(online.getUniqueId().toString(), city)) {
@@ -1596,7 +1418,7 @@ public class CommandCity extends BaseCommand {
         }
         City city = CityDatabase.getCity(cityname).get();
         plugin.sendMessage(player, "messages.city.members.header", "%cityname%", city.getCityName(), "%membercount%",String.valueOf(CityDatabase.getCityMemberCount(city)));
-        player.sendMessage(CityDatabase.getCityMembers(city));
+        player.sendMessage(Objects.requireNonNull(CityDatabase.getCityMembers(city)));
     }
 
     @Subcommand("online")
@@ -1614,7 +1436,7 @@ public class CommandCity extends BaseCommand {
         int cityStaffOnline = 0;
         int cityMembersOnline = 0;
         int totalOnline = 0;
-        HashMap<String,String> onlinePlayers = new HashMap<>();
+        HashMap<String,Role> onlinePlayers = new HashMap<>();
         for (Player online : Bukkit.getOnlinePlayers()) {
             if (CityDatabase.memberExists(online.getUniqueId().toString(), city)) {
                 onlinePlayers.put(online.getName(),CityDatabase.getCityRole(city,online.getUniqueId().toString()));
@@ -1622,8 +1444,8 @@ public class CommandCity extends BaseCommand {
         }
         StringBuilder onlineStaff = new StringBuilder().append("§2");
         StringBuilder onlineMembers = new StringBuilder().append("§2");
-        for (String role : onlinePlayers.values()) {
-            if (role.equals("mayor") || role.equals("assistant") || role.equals("inviter") || role.equals("vice mayor")) {
+        for (Role role : onlinePlayers.values()) {
+            if (role.equals(Role.MAYOR) || role.equals(Role.ASSISTANT) || role.equals(Role.INVITER) || role.equals(Role.VICE_MAYOR)) {
                 cityStaffOnline++;
             } else {
                 cityMembersOnline++;
@@ -1632,7 +1454,7 @@ public class CommandCity extends BaseCommand {
         }
 
         for (String name : onlinePlayers.keySet()) {
-            if (onlinePlayers.get(name).equals("mayor") || onlinePlayers.get(name).equals("assistant") || onlinePlayers.get(name).equals("inviter") || onlinePlayers.get(name).equals("vice mayor")) {
+            if (onlinePlayers.get(name).equals(Role.MAYOR) || onlinePlayers.get(name).equals(Role.ASSISTANT) || onlinePlayers.get(name).equals(Role.INVITER) || onlinePlayers.get(name).equals(Role.VICE_MAYOR)) {
                 onlineStaff.append(name).append("§a, §2");
             } else {
                 onlineMembers.append(name).append("§a, §2");
@@ -1668,12 +1490,10 @@ public class CommandCity extends BaseCommand {
             return;
         }
         if (cityName == null) {
-            if (HCDatabase.hasHomeCity(player.getUniqueId().toString())) {
-                plugin.sendMessage(player, "messages.error.missing.homecity");
+            City city = Utilities.hasCityPermissions(player, "metropolis.city.spawn", Role.MEMBER);
+            if (city == null) {
                 return;
             }
-            City city = HCDatabase.getHomeCityToCity(player.getUniqueId().toString());
-            assert city != null;
             if (city.getCitySpawn() == null) {
                 plugin.sendMessage(player, "messages.error.missing.spawn");
                 return;
@@ -1699,7 +1519,7 @@ public class CommandCity extends BaseCommand {
                 plugin.sendMessage(player, "messages.city.spawn.banned", "%cityname%", city.getCityName());
                 return;
             }
-            if (!city.isOpen() && !CityDatabase.memberExists(player.getUniqueId().toString(), city)) {
+            if (!city.isPublic() && !CityDatabase.memberExists(player.getUniqueId().toString(), city)) {
                 plugin.sendMessage(player, "messages.city.spawn.closed", "%cityname%", city.getCityName());
                 return;
             }
@@ -1710,20 +1530,8 @@ public class CommandCity extends BaseCommand {
 
     @Subcommand("ban")
     public static void onBan(Player player, @Optional String playerName, @Optional String args) {
-        if (!player.hasPermission("metropolis.city.ban")) {
-            plugin.sendMessage(player, "messages.error.permissionDenied");
-            return;
-        }
-        City city = HCDatabase.getHomeCityToCity(player.getUniqueId().toString());
+        City city = Utilities.hasCityPermissions(player, "metropolis.city.ban", Role.ASSISTANT);
         if (city == null) {
-            plugin.sendMessage(player, "messages.error.missing.homecity");
-            return;
-        }
-        String role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
-        assert role != null;
-        boolean isAssistant = role.equals("mayor") || role.equals("vicemayor") || role.equals("assistant");
-        if (!isAssistant) {
-            plugin.sendMessage(player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
             return;
         }
         List<Ban> bannedPlayers = CityDatabase.getCityBans(city);
@@ -1806,22 +1614,14 @@ public class CommandCity extends BaseCommand {
     @Subcommand("rank")
     @CommandCompletion("@players @cityRoles")
     public static void onRank(Player player , String playerName, String rank) {
-        if (!player.hasPermission("metropolis.city.rank")) {
-            plugin.sendMessage(player, "messages.error.permissionDenied");
-            return;
-        }
-
-
-        City city = HCDatabase.getHomeCityToCity(player.getUniqueId().toString());
+        City city = Utilities.hasCityPermissions(player, "metropolis.city.rank", Role.VICE_MAYOR);
         if (city == null) {
-            plugin.sendMessage(player, "messages.error.missing.homecity");
             return;
         }
-
-        String role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
+        Role role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
         assert role != null;
-        boolean isViceMayor = role.equals("mayor") || role.equals("vicemayor");
-        boolean isMayor = role.equals("mayor");
+        boolean isViceMayor = role.equals(Role.MAYOR) || role.equals(Role.VICE_MAYOR);
+        boolean isMayor = role.equals(Role.MAYOR);
 
         OfflinePlayer targetPlayer = Bukkit.getOfflinePlayer(playerName);
         if (!CityDatabase.memberExists(targetPlayer.getUniqueId().toString(), city)) {
@@ -1834,26 +1634,29 @@ public class CommandCity extends BaseCommand {
             return;
         }
 
-        String targetRole = CityDatabase.getCityRole(city, Bukkit.getOfflinePlayer(playerName).getUniqueId().toString());
-        assert targetRole != null;
+        Role targetRole = CityDatabase.getCityRole(city, Bukkit.getOfflinePlayer(playerName).getUniqueId().toString());
+        if (targetRole == null) {
+            plugin.sendMessage(player, "messages.error.city.rank.notInCity", "%cityname%", city.getCityName(), "%playername%", playerName);
+            return;
+        }
 
         if (!isViceMayor) {
             plugin.sendMessage(player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
             return;
         }
 
-        if (!isMayor && targetRole.equals("mayor")) {
+        if (!isMayor && targetRole.equals(Role.MAYOR)) {
             plugin.sendMessage(player, "messages.error.city.rank.cannotChangeHigherRole", "%cityname%", city.getCityName());
             return;
         }
 
         switch (rank.toLowerCase()) {
             case "assistant":
-                if (!isMayor && targetRole.equals("vicemayor")) {
+                if (!isMayor && targetRole.equals(Role.VICE_MAYOR)) {
                     plugin.sendMessage(player, "messages.error.city.rank.cannotChangeHigherRole", "%playername%", playerName);
                     return;
                 }
-                CityDatabase.setCityRole(city, targetPlayer.getUniqueId().toString(), "assistant");
+                CityDatabase.setCityRole(city, targetPlayer.getUniqueId().toString(), Role.ASSISTANT);
                 plugin.sendMessage(player, "messages.city.successful.rank.changed","%cityname%", city.getCityName(), "%playername%", playerName, "%newrole%", plugin.getMessage("messages.city.roles.assistant"));
                 if (targetPlayer.isOnline()) {
                     plugin.sendMessage((Player) targetPlayer, "messages.city.successful.rank.promoted", "%cityname%", city.getCityName(), "%newrole%", plugin.getMessage("messages.city.roles.assistant"));
@@ -1861,11 +1664,11 @@ public class CommandCity extends BaseCommand {
                 Database.addLogEntry(city, "{ \"type\": \"rank\", \"subtype\": \"change\", \"from\": \"" + targetRole + "\", \"to\": \"" + rank.toLowerCase() + "\", \"issuer\": \"" + player.getUniqueId().toString() + "\", \"player\": \"" + targetPlayer.getUniqueId().toString() + "\" }");
                 break;
             case "inviter":
-                if (!isMayor && targetRole.equals("vicemayor")) {
+                if (!isMayor && targetRole.equals(Role.VICE_MAYOR)) {
                     plugin.sendMessage(player, "messages.error.city.rank.cannotChangeHigherRole", "%playername%", playerName);
                     return;
                 }
-                CityDatabase.setCityRole(city, targetPlayer.getUniqueId().toString(), "inviter");
+                CityDatabase.setCityRole(city, targetPlayer.getUniqueId().toString(), Role.INVITER);
                 plugin.sendMessage(player, "messages.city.successful.rank.changed","%cityname%", city.getCityName(), "%playername%", playerName, "%newrole%", plugin.getMessage("messages.city.roles.inviter"));
                 if (targetPlayer.isOnline()) {
                     plugin.sendMessage((Player) targetPlayer, "messages.city.successful.rank.promoted", "%cityname%", city.getCityName(), "%newrole%", plugin.getMessage("messages.city.roles.inviter"));
@@ -1873,11 +1676,11 @@ public class CommandCity extends BaseCommand {
                 Database.addLogEntry(city, "{ \"type\": \"rank\", \"subtype\": \"change\", \"from\": \"" + targetRole + "\", \"to\": \"" + rank.toLowerCase() + "\", \"issuer\": \"" + player.getUniqueId().toString() + "\", \"player\": \"" + targetPlayer.getUniqueId().toString() + "\" }");
                 break;
             case "vicemayor":
-                if (!isMayor && targetRole.equals("vicemayor")) {
+                if (!isMayor && targetRole.equals(Role.VICE_MAYOR)) {
                     plugin.sendMessage(player, "messages.error.city.rank.cannotChangeHigherRole", "%playername%", playerName);
                     return;
                 }
-                CityDatabase.setCityRole(city, targetPlayer.getUniqueId().toString(), "vicemayor");
+                CityDatabase.setCityRole(city, targetPlayer.getUniqueId().toString(), Role.VICE_MAYOR);
                 plugin.sendMessage(player, "messages.city.successful.rank.changed","%cityname%", city.getCityName(), "%playername%", playerName, "%newrole%", plugin.getMessage("messages.city.roles.vicemayor"));
                 if (targetPlayer.isOnline()) {
                     plugin.sendMessage((Player) targetPlayer, "messages.city.successful.rank.promoted", "%cityname%", city.getCityName(), "%newrole%", plugin.getMessage("messages.city.roles.vicemayor"));
@@ -1886,7 +1689,11 @@ public class CommandCity extends BaseCommand {
                 break;
             case "member":
             case "-":
-                CityDatabase.setCityRole(city, targetPlayer.getUniqueId().toString(), "member");
+                if (!isMayor && targetRole.equals(Role.VICE_MAYOR)) {
+                    plugin.sendMessage(player, "messages.error.city.rank.cannotChangeHigherRole", "%playername%", playerName);
+                    return;
+                }
+                CityDatabase.setCityRole(city, targetPlayer.getUniqueId().toString(), Role.MEMBER);
                 plugin.sendMessage(player, "messages.city.successful.rank.changed","%cityname%", city.getCityName(), "%playername%", playerName, "%newrole%", plugin.getMessage("messages.city.roles.member"));
                 if (targetPlayer.isOnline()) {
                     plugin.sendMessage((Player) targetPlayer, "messages.city.successful.rank.promoted", "%cityname%", city.getCityName(), "%newrole%", plugin.getMessage("messages.city.roles.member"));
@@ -1899,7 +1706,7 @@ public class CommandCity extends BaseCommand {
                     return;
                 }
                 CityDatabase.setCityRole(city, player.getUniqueId().toString(), targetRole);
-                CityDatabase.setCityRole(city, targetPlayer.getUniqueId().toString(), "mayor");
+                CityDatabase.setCityRole(city, targetPlayer.getUniqueId().toString(), Role.MAYOR);
                 plugin.sendMessage(player, "messages.city.successful.rank.swapped","%cityname%", city.getCityName(), "%playername%", playerName, "%newrole%", plugin.getMessage("messages.city.roles." + targetRole));
                 if (targetPlayer.isOnline()) {
                     plugin.sendMessage((Player) targetPlayer, "messages.city.successful.rank.promoted", "%cityname%", city.getCityName(), "%newrole%", plugin.getMessage("messages.city.roles.mayor"));
@@ -1909,6 +1716,50 @@ public class CommandCity extends BaseCommand {
             default:
                 plugin.sendMessage(player, "messages.error.city.rank.invalid", "%cityname%", city.getCityName());
                 break;
+        }
+    }
+
+    @Subcommand("toggle")
+    public static void onToggle(Player player) {
+        if (!player.hasPermission("metropolis.city.toggle")) {
+            plugin.sendMessage(player, "messages.error.permissionDenied");
+            return;
+        }
+        plugin.sendMessage(player, "messages.syntax.city.toggle.open");
+        plugin.sendMessage(player, "messages.syntax.city.toggle.public");
+    }
+
+    @Subcommand("toggle")
+    public class Toggle extends BaseCommand {
+
+        @Subcommand("open")
+        public static void onOpen(Player player) {
+            City city = Utilities.hasCityPermissions(player, "metropolis.city.toggle.open", Role.VICE_MAYOR);
+            if (city == null) {
+                return;
+            }
+            if (city.toggleOpen()) {
+                plugin.sendMessage(player, "messages.city.toggle.open", "%cityname%", city.getCityName());
+                Database.addLogEntry(city, "{ \"type\": \"city\", \"subtype\": \"toggleOpen\", \"state\": \"open\", \"player\": \"" + player.getUniqueId().toString() + "\" }");
+            } else {
+                plugin.sendMessage(player, "messages.city.toggle.closed", "%cityname%", city.getCityName());
+                Database.addLogEntry(city, "{ \"type\": \"city\", \"subtype\": \"toggleOpen\", \"state\": \"closed\", \"player\": \"" + player.getUniqueId().toString() + "\" }");
+            }
+        }
+
+        @Subcommand("public")
+        public static void onPublic(Player player) {
+            City city = Utilities.hasCityPermissions(player, "metropolis.city.toggle.public", Role.VICE_MAYOR);
+            if (city == null) {
+                return;
+            }
+            if (city.togglePublic()) {
+                plugin.sendMessage(player, "messages.city.toggle.public", "%cityname%", city.getCityName());
+                Database.addLogEntry(city, "{ \"type\": \"city\", \"subtype\": \"togglePublic\", \"state\": \"public\", \"player\": \"" + player.getUniqueId().toString() + "\" }");
+            } else {
+                plugin.sendMessage(player, "messages.city.toggle.private", "%cityname%", city.getCityName());
+                Database.addLogEntry(city, "{ \"type\": \"city\", \"subtype\": \"togglePublic\", \"state\": \"private\", \"player\": \"" + player.getUniqueId().toString() + "\" }");
+            }
         }
     }
 

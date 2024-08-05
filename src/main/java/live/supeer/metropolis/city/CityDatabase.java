@@ -95,7 +95,7 @@ public class CityDatabase {
     public static void newMember(City city, Player player) {
         try {
             String cityName = city.getCityName();
-            DB.executeUpdate("INSERT INTO `mp_members` (`playerName`, `playerUUID`, `cityID`, `cityName`, `cityRole`, `joinDate`) VALUES (" + Database.sqlString(player.getName()) + ", " + Database.sqlString(player.getUniqueId().toString()) + ", " + city.getCityID() + ", " + Database.sqlString(cityName) + ", " + Database.sqlString("member") + ", " + DateUtil.getTimestamp() + ");");
+            DB.executeUpdate("INSERT INTO `mp_members` (`playerName`, `playerUUID`, `cityID`, `cityName`, `cityRole`, `joinDate`) VALUES (" + Database.sqlString(player.getName()) + ", " + Database.sqlString(player.getUniqueId().toString()) + ", " + city.getCityID() + ", " + Database.sqlString(cityName) + ", " + Database.sqlString(Role.MEMBER.getRoleName()) + ", " + DateUtil.getTimestamp() + ");");
             city.addCityMember(
                     new Member(
                             DB.getFirstRow(
@@ -153,8 +153,8 @@ public class CityDatabase {
 
 
 
-    public static int getCityGoCount(City city, String role) {
-        if (role == null) {
+    public static int getCityGoCount(City city, Role role) {
+        if (role.equals(Role.MEMBER)) {
             try {
                 var results = DB.getResults("SELECT * FROM `mp_citygoes` WHERE `cityID` = " + city.getCityID() + " AND `accessLevel` IS NULL ;");
                 return results.size();
@@ -162,7 +162,7 @@ public class CityDatabase {
                 e.printStackTrace();
             }
         }
-        if (Objects.equals(role, "inviter")) {
+        if (role.equals(Role.INVITER)) {
             try {
                 var results = DB.getResults("SELECT * FROM `mp_citygoes` WHERE `cityID` = " + city.getCityID() + " AND `accessLevel` IS NULL OR `accessLevel` = 'inviter';");
                 return results.size();
@@ -170,7 +170,7 @@ public class CityDatabase {
                 e.printStackTrace();
             }
         }
-        if (Objects.equals(role, "assistant")) {
+        if (role.equals(Role.ASSISTANT)) {
             try {
                 var results = DB.getResults("SELECT * FROM `mp_citygoes` WHERE `cityID` = " + city.getCityID() + " AND `accessLevel` IS NULL OR `accessLevel` = 'inviter' OR `accessLevel` = 'assistant';");
                 return results.size();
@@ -178,7 +178,7 @@ public class CityDatabase {
                 e.printStackTrace();
             }
         }
-        if (Objects.equals(role, "vicemayor")) {
+        if (role.equals(Role.VICE_MAYOR)) {
             try {
                 var results = DB.getResults("SELECT * FROM `mp_citygoes` WHERE `cityID` = " + city.getCityID() + " AND `accessLevel` IS NULL OR `accessLevel` = 'inviter' OR `accessLevel` = 'assistant' OR `accessLevel` = 'vicemayor';");
                 return results.size();
@@ -186,9 +186,9 @@ public class CityDatabase {
                 e.printStackTrace();
             }
         }
-        if (Objects.equals(role, "mayor")) {
+        if (role.equals(Role.MAYOR)) {
             try {
-                var results = DB.getResults("SELECT * FROM `mp_citygoes` WHERE `cityID` = " + city.getCityID() + " AND `accessLevel` IS NULL OR `accessLevel` = 'inviter' OR `accessLevel` = 'assistant' OR `accessLevel` = 'vicemayor' OR `accessLevel` = 'mayor';");
+                var results = DB.getResults("SELECT * FROM `mp_citygoes` WHERE `cityID` = " + city.getCityID() + ";");
                 return results.size();
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -197,8 +197,8 @@ public class CityDatabase {
         return 0;
     }
 
-    public static List<String> getCityGoNames(City city, String role) {
-        if (role == null) {
+    public static List<String> getCityGoNames(City city, Role role) {
+        if (role.equals(Role.MEMBER)) {
             try {
                 var results = DB.getResults("SELECT * FROM `mp_citygoes` WHERE `cityID` = " + city.getCityID() + " AND `accessLevel` IS NULL ;");
                 return results.stream().map(result -> result.getString("goName")).collect(Collectors.toList());
@@ -206,7 +206,7 @@ public class CityDatabase {
                 e.printStackTrace();
             }
         }
-        if (Objects.equals(role, "inviter")) {
+        if (role.equals(Role.INVITER)) {
             try {
                 var results = DB.getResults("SELECT * FROM `mp_citygoes` WHERE `cityID` = " + city.getCityID() + " AND `accessLevel` IS NULL OR `accessLevel` = 'inviter';");
                 return results.stream().map(result -> result.getString("goName")).collect(Collectors.toList());
@@ -214,7 +214,7 @@ public class CityDatabase {
                 e.printStackTrace();
             }
         }
-        if (Objects.equals(role, "assistant")) {
+        if (role.equals(Role.ASSISTANT)) {
             try {
                 var results = DB.getResults("SELECT * FROM `mp_citygoes` WHERE `cityID` = " + city.getCityID() + " AND `accessLevel` IS NULL OR `accessLevel` = 'inviter' OR `accessLevel` = 'assistant';");
                 return results.stream().map(result -> result.getString("goName")).collect(Collectors.toList());
@@ -222,7 +222,7 @@ public class CityDatabase {
                 e.printStackTrace();
             }
         }
-        if (Objects.equals(role, "vicemayor")) {
+        if (role.equals(Role.VICE_MAYOR)) {
             try {
                 var results = DB.getResults("SELECT * FROM `mp_citygoes` WHERE `cityID` = " + city.getCityID() + " AND `accessLevel` IS NULL OR `accessLevel` = 'inviter' OR `accessLevel` = 'assistant' OR `accessLevel` = 'vicemayor';");
                 return results.stream().map(result -> result.getString("goName")).collect(Collectors.toList());
@@ -230,9 +230,9 @@ public class CityDatabase {
                 e.printStackTrace();
             }
         }
-        if (Objects.equals(role, "mayor")) {
+        if (role.equals(Role.MAYOR)) {
             try {
-                var results = DB.getResults("SELECT * FROM `mp_citygoes` WHERE `cityID` = " + city.getCityID() + " AND `accessLevel` IS NULL OR `accessLevel` = 'inviter' OR `accessLevel` = 'assistant' OR `accessLevel` = 'vicemayor' OR `accessLevel` = 'mayor';");
+                var results = DB.getResults("SELECT * FROM `mp_citygoes` WHERE `cityID` = " + city.getCityID() + ";");
                 return results.stream().map(result -> result.getString("goName")).collect(Collectors.toList());
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -342,20 +342,20 @@ public class CityDatabase {
     }
 
 
-    public static String getCityRole(City city, String playerUUID) {
+    public static Role getCityRole(City city, String playerUUID) {
         try {
             if (DB.getResults("SELECT * FROM `mp_members` WHERE `playerUUID` = " + Database.sqlString(playerUUID) + " AND `cityName` = " + Database.sqlString(city.getCityName()) + ";").isEmpty())
                 return null;
-            return DB.getFirstRow("SELECT * FROM `mp_members` WHERE `playerUUID` = " + Database.sqlString(playerUUID) + " AND `cityName` = " + Database.sqlString(city.getCityName()) + ";").getString("cityRole");
+            return Role.fromString(DB.getFirstRow("SELECT * FROM `mp_members` WHERE `playerUUID` = " + Database.sqlString(playerUUID) + " AND `cityName` = " + Database.sqlString(city.getCityName()) + ";").getString("cityRole"));
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public static void setCityRole(City city, String playerUUID, String role) {
+    public static void setCityRole(City city, String playerUUID, Role role) {
         try {
-            DB.executeUpdate("UPDATE `mp_members` SET `cityRole` = " + Database.sqlString(role) + " WHERE `playerUUID` = " + Database.sqlString(playerUUID) + " AND `cityName` = " + Database.sqlString(city.getCityName()) + ";");
+            DB.executeUpdate("UPDATE `mp_members` SET `cityRole` = " + Database.sqlString(role.getRoleName()) + " WHERE `playerUUID` = " + Database.sqlString(playerUUID) + " AND `cityName` = " + Database.sqlString(city.getCityName()) + ";");
         } catch (SQLException e) {
             e.printStackTrace();
         }
