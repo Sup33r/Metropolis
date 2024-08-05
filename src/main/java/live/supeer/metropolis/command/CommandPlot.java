@@ -393,39 +393,39 @@ public class CommandPlot extends BaseCommand {
         plugin.sendMessage(player, "messages.plot.list.city", "%cityname%", plot.getCity().getCityName());
         plugin.sendMessage(player, "messages.plot.list.owner", "%owner%", plot.getPlotOwner());
         if (Arrays.toString(plot.getPlotFlags()).contains("p")) {
-            plugin.sendMessage(player, "messages.plot.list.pvp", "%status%", "§cPå");
+            plugin.sendMessage(player, "messages.plot.list.pvp", "%status%", "<red>" + plugin.getRawMessage("messages.words.on"));
         } else {
-            plugin.sendMessage(player, "messages.plot.list.pvp", "%status%", "§aAv");
+            plugin.sendMessage(player, "messages.plot.list.pvp", "%status%", "<green>" + plugin.getRawMessage("messages.words.off"));
         }
         if (Arrays.toString(plot.getPlotFlags()).contains("a")) {
-            plugin.sendMessage(player, "messages.plot.list.animals", "%status%", "§aPå");
+            plugin.sendMessage(player, "messages.plot.list.animals", "%status%", "<green>" + plugin.getRawMessage("messages.words.on"));
         } else {
-            plugin.sendMessage(player, "messages.plot.list.animals", "%status%", "§aAv");
+            plugin.sendMessage(player, "messages.plot.list.animals", "%status%", "<green>" + plugin.getRawMessage("messages.words.off"));
         }
         if (Arrays.toString(plot.getPlotFlags()).contains("m")) {
-            plugin.sendMessage(player, "messages.plot.list.monsters", "%status%", "§cPå");
+            plugin.sendMessage(player, "messages.plot.list.monsters", "%status%", "<red>" + plugin.getRawMessage("messages.words.on"));
         } else {
-            plugin.sendMessage(player, "messages.plot.list.monsters", "%status%", "§aAv");
+            plugin.sendMessage(player, "messages.plot.list.monsters", "%status%", "<green>" + plugin.getRawMessage("messages.words.off"));
         }
         if (Arrays.toString(plot.getPlotFlags()).contains("l")) {
-            plugin.sendMessage(player, "messages.plot.list.monsters", "%status%", "§aJa");
+            plugin.sendMessage(player, "messages.plot.list.monsters", "%status%", "<green>" + plugin.getRawMessage("messages.words.yes"));
         } else {
-            plugin.sendMessage(player, "messages.plot.list.monsters", "%status%", "§aNej");
+            plugin.sendMessage(player, "messages.plot.list.monsters", "%status%", "<green>" + plugin.getRawMessage("messages.words.no"));
         }
         if (plot.isKMarked()) {
-            plugin.sendMessage(player, "messages.plot.list.k-marked", "%status%", "§aJa");
+            plugin.sendMessage(player, "messages.plot.list.k-marked", "%status%", "<green>" + plugin.getRawMessage("messages.words.yes"));
         } else {
-            plugin.sendMessage(player, "messages.plot.list.k-marked", "%status%", "§aNej");
+            plugin.sendMessage(player, "messages.plot.list.k-marked", "%status%", "<green>" + plugin.getRawMessage("messages.words.no"));
         }
         if (Arrays.toString(plot.getPlotFlags()).contains("i")) {
-            plugin.sendMessage(player, "messages.plot.list.lose.items", "%status%", "§cJa");
+            plugin.sendMessage(player, "messages.plot.list.lose.items", "%status%", "<red>" + plugin.getRawMessage("messages.words.yes"));
         } else {
-            plugin.sendMessage(player, "messages.plot.list.lose.items", "%status%", "§aNej");
+            plugin.sendMessage(player, "messages.plot.list.lose.items", "%status%", "<green>" + plugin.getRawMessage("messages.words.no"));
         }
         if (Arrays.toString(plot.getPlotFlags()).contains("x")) {
-            plugin.sendMessage(player, "messages.plot.list.lose.xp", "%status%", "§cJa");
+            plugin.sendMessage(player, "messages.plot.list.lose.xp", "%status%", "<red>" + plugin.getRawMessage("messages.words.yes"));
         } else {
-            plugin.sendMessage(player, "messages.plot.list.lose.xp", "%status%", "§aNej");
+            plugin.sendMessage(player, "messages.plot.list.lose.xp", "%status%", "<green>" + plugin.getRawMessage("messages.words.no"));
         }
         if (player.hasPermission("metropolis.plot.info.coordinates")) {
             plugin.sendMessage(
@@ -469,8 +469,8 @@ public class CommandPlot extends BaseCommand {
             for (Player p : players) {
                 // dont append last player
                 if (players.indexOf(p) == players.size() - 1)
-                    stringBuilder.append(p.getName()).append("§2");
-                else stringBuilder.append(p.getName()).append("§2,§a ");
+                    stringBuilder.append(p.getName()).append("<dark_green>  ");
+                else stringBuilder.append(p.getName()).append("<dark_green>,<green> ");
             }
             plugin.sendMessage(
                     player,
@@ -528,7 +528,7 @@ public class CommandPlot extends BaseCommand {
         }
         // For the eventual time when i will add the syntax stuff
         // plugin.sendMessage(player, "messages.syntax.plot.tp");
-        if (!plotID.matches("[0-9]")) {
+        if (!plotID.matches("[0-9]+")) {
             plugin.sendMessage(player, "messages.syntax.plot.tp");
             return;
         }
@@ -582,7 +582,7 @@ public class CommandPlot extends BaseCommand {
                     .isEmpty()
                     || stringBuilderOutsiders.substring(0, stringBuilderOutsiders.toString().length())
                     == null) {
-                permsOutsiders = "§onada";
+                permsOutsiders = "<italic>nada";
             }
             StringBuilder stringBuilderMembers = new StringBuilder();
             for (char s : plot.getPermsMembers()) {
@@ -598,7 +598,7 @@ public class CommandPlot extends BaseCommand {
                     .isEmpty()
                     || stringBuilderOutsiders.substring(0, stringBuilderOutsiders.toString().length())
                     == null) {
-                permsMembers = "§onada";
+                permsMembers = "<italic>nada";
             }
             plugin.sendMessage(
                     player, "messages.plot.list.perm.header", "%plot%", plot.getPlotName());
@@ -1446,16 +1446,16 @@ public class CommandPlot extends BaseCommand {
     @Subcommand("toggle")
     public static void onToggle(Player player) {
         if (player.hasPermission("metropolis.admin.plot.toggle.keepinv")) {
-            player.sendMessage("§7Syntax: /plot toggle §nkeepinv");
+            player.sendMessage("§7Syntax: /plot toggle keepinv");
         }
         if (player.hasPermission("metropolis.admin.plot.toggle.keepexp")) {
-            player.sendMessage("§7Syntax: /plot toggle §nkeepexp");
+            player.sendMessage("§7Syntax: /plot toggle keepexp");
         }
         if (player.hasPermission("metropolis.admin.plot.toggle.pvp")) {
-            player.sendMessage("§7Syntax: /plot toggle §npvp");
+            player.sendMessage("§7Syntax: /plot toggle pvp");
         }
         if (player.hasPermission("metropolis.admin.plot.toggle.lock")) {
-            player.sendMessage("§7Syntax: /plot toggle §nlock");
+            player.sendMessage("§7Syntax: /plot toggle lock");
         }
         plugin.sendMessage(player, "messages.syntax.plot.toggle");
     }

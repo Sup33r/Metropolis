@@ -1,4 +1,9 @@
 messages:
+  words:
+    on: "On"
+    off: "Off"
+    yes: "Yes"
+    no: "No"
   time:
     now: "just now"
     second: "second"

@@ -1,4 +1,9 @@
 messages:
+  words:
+    on: "På"
+    off: "Av"
+    yes: "Ja"
+    no: "Nej"
   time:
     now: "just nu"
     second: "sekund"
@@ -62,7 +67,7 @@ messages:
         withdraw: "<gray>Syntax: /city bank -<underlined>belopp<reset><gray> <underlined>anledning"
         bank: "<gray>Syntax: /city bank"
     plot:
-      toggle: "<gray>Syntax: /plot toggle <underlined>animals\n<gray>Syntax: /plot toggle <underlined>meeting\n<gray>Syntax: /plot toggle <underlined>mobs\n<gray>Syntax: /plot toggle <underlined>k"
+      toggle: "<gray>Syntax: /plot toggle animals\n<gray>Syntax: /plot toggle meeting\n<gray>Syntax: /plot toggle mobs\n<gray>Syntax: /plot toggle k"
       set:
         rent: "<gray>Syntax: /plot set rent <underlined>tomträttsavgäld\n<gray>Syntax: /plot set rent -"
         set: "<gray>Syntax: /plot set type <underlined>church\n<gray>Syntax: /plot set type <underlined>farm\n<gray>Syntax: /plot set type <underlined>shop\n<gray>Syntax: /plot set type <underlined>vacation\n<gray>Syntax: /plot set type -\n<gray>Syntax: /plot set owner <underlined>spelare\n<gray>Syntax: /plot set owner -\n<gray>Syntax: /plot set rent <underlined>tomträttsavgäld\n<gray>Syntax: /plot set rent -\n<gray>Syntax: /plot set name <underlined>namn\n<gray>Syntax: /plot set name -"

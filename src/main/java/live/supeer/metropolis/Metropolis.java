@@ -122,6 +122,10 @@ public final class Metropolis extends JavaPlugin {
         return null;
     }
 
+    public String getRawMessage(@NotNull String key, String... replacements) {
+        return this.languageManager.getValue(key, "sv_se", replacements);
+    }
+
     private @NotNull String getLocale(@NotNull CommandSender sender) {
         if (sender instanceof Player) {
             return ((Player) sender).getLocale();
