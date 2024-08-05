@@ -4,8 +4,10 @@ import fr.mrmicky.fastboard.FastBoard;
 import live.supeer.metropolis.Metropolis;
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.city.CityDatabase;
+import live.supeer.metropolis.city.Role;
 import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.plot.Plot;
+import live.supeer.metropolis.plot.PlotDatabase;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.locationtech.jts.geom.Coordinate;
@@ -446,5 +448,63 @@ public class Utilities {
         // Close the polygon by repeating the first coordinate at the end
         coordinates[locations.length] = coordinates[0];
         return geometryFactory.createPolygon(coordinates);
+    }
+
+    public static City hasCityPermissions(Player player, String permission, Role targetRole) {
+        if (!player.hasPermission(permission)) {
+            plugin.sendMessage(player, "messages.error.permissionDenied");
+            return null;
+        }
+        City city = HCDatabase.getHomeCityToCity(player.getUniqueId().toString());
+        if (city == null) {
+            plugin.sendMessage(player, "messages.error.missing.homecity");
+            return null;
+        }
+        if (targetRole != null) {
+            Role role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
+            if (role == null) {
+                plugin.sendMessage(player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
+                return null;
+            }
+            if (role.getPermissionLevel() < targetRole.getPermissionLevel()) {
+                plugin.sendMessage(player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
+                return null;
+            }
+        }
+        return city;
+    }
+    public static Plot hasPlotPermissions(Player player, String permission, Role targetRole, boolean isOwner) {
+        if (permission != null && !player.hasPermission(permission)) {
+            plugin.sendMessage(player, "messages.error.permissionDenied");
+            return null;
+        }
+        Plot plot = PlotDatabase.getPlotAtLocation(player.getLocation());
+        if (plot == null) {
+            plugin.sendMessage(player, "messages.error.plot.notInPlot");
+            return null;
+        }
+        Role role = CityDatabase.getCityRole(plot.getCity(), player.getUniqueId().toString());
+        if (isOwner) {
+            if (plot.getPlotOwner().equals(player.getUniqueId().toString())) {
+                return plot;
+            }
+            if (role != null && targetRole != null) {
+                if (role.getPermissionLevel() > targetRole.getPermissionLevel()) {
+                    return plot;
+                }
+            }
+            plugin.sendMessage(player, "messages.error.plot.permissionDenied");
+            return null;
+        } else {
+            if (role == null) {
+                plugin.sendMessage(player, "messages.error.plot.permissionDenied");
+                return null;
+            }
+            if (role.getPermissionLevel() < targetRole.getPermissionLevel()) {
+                plugin.sendMessage(player, "messages.error.plot.permissionDenied");
+                return null;
+            }
+        }
+        return plot;
     }
 }

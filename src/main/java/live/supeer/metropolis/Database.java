@@ -62,6 +62,7 @@ public class Database {
                                 `exitMessage` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                 `motdMessage` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                 `isOpen` tinyint(1) DEFAULT 0,
+                                `isPublic` tinyint(1) DEFAULT 0,
                                 `isRemoved` tinyint(1) NOT NULL,
                                 PRIMARY KEY (`cityID`)
                               ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;""");

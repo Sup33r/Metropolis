@@ -2,6 +2,7 @@ package live.supeer.metropolis;
 
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.city.CityDatabase;
+import live.supeer.metropolis.city.Role;
 import live.supeer.metropolis.command.CommandCity;
 import live.supeer.metropolis.event.PlayerEnterCityEvent;
 import live.supeer.metropolis.event.PlayerEnterPlotEvent;
@@ -137,128 +138,36 @@ public class MetropolisListener implements Listener {
             if (event.getMaterial() == Material.STICK) {
                 if (CommandCity.blockEnabled.contains(player)) {
                     event.setCancelled(true);
-                    if (CityDatabase.getClaim(event.getClickedBlock().getLocation()) == null
-                            || CityDatabase.getCity(
-                                    Objects.requireNonNull(
-                                                    CityDatabase.getClaim(event.getClickedBlock().getLocation()))
-                                            .getCityName())
-                            .isEmpty()) {
+                    if (CityDatabase.getClaim(event.getClickedBlock().getLocation()) == null || CityDatabase.getCity(Objects.requireNonNull(CityDatabase.getClaim(event.getClickedBlock().getLocation())).getCityName()).isEmpty()) {
                         plugin.sendMessage(player, "messages.error.permissionDenied");
                         return;
                     }
-                    City city =
-                            CityDatabase.getCity(
-                                            Objects.requireNonNull(
-                                                            CityDatabase.getClaim(event.getClickedBlock().getLocation()))
-                                                    .getCityName())
-                                    .get();
-                    String role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
+                    City city = CityDatabase.getCity(Objects.requireNonNull(CityDatabase.getClaim(event.getClickedBlock().getLocation())).getCityName()).get();
+                    Role role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
                     assert role != null;
-                    for (Plot plot : city.getCityPlots()) {
-                        Polygon polygon = Utilities.createPolygonFromLocations(plot.getPlotPoints(), geometryFactory);
-                        int ymin = plot.getPlotYMin();
-                        int ymax = plot.getPlotYMax();
-                        Point point = geometryFactory.createPoint(new Coordinate(event.getClickedBlock().getX(), event.getClickedBlock().getZ()));
-                        if (polygon.contains(point)
-                                && event.getClickedBlock().getY() >= ymin
-                                && event.getClickedBlock().getY() <= ymax) {
-                            if (!plot.getPlotOwnerUUID().equals(player.getUniqueId().toString())
-                                    && !Objects.equals(role, "assistant")
-                                    && !Objects.equals(role, "vicemayor")
-                                    && !Objects.equals(role, "mayor")) {
-                                plugin.sendMessage(
-                                        player,
-                                        "messages.error.city.permissionDenied",
-                                        "%cityname%",
-                                        city.getCityName());
-                                return;
-                            }
+                    Plot plot = PlotDatabase.getPlotAtLocation(event.getClickedBlock().getLocation());
+                    if (plot != null) {
+                        if (plot.getPlotOwnerUUID().equals(player.getUniqueId().toString()) || role.getPermissionLevel() > Role.ASSISTANT.getPermissionLevel()) {
+                            coreProtectInteractCheck(player, event);
+                            return;
+                        } else {
+                            plugin.sendMessage(
+                                    player,
+                                    "messages.error.city.permissionDenied",
+                                    "%cityname%",
+                                    city.getCityName());
+                            return;
                         }
                     }
-                    boolean isAssistant =
-                            Objects.equals(role, "assistant")
-                                    || Objects.equals(role, "vicemayor")
-                                    || Objects.equals(role, "mayor");
+                    boolean isAssistant = Objects.equals(role, Role.ASSISTANT)
+                            || Objects.equals(role, Role.VICE_MAYOR)
+                            || Objects.equals(role, Role.MAYOR);
                     if (!isAssistant) {
                         plugin.sendMessage(
                                 player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
                         return;
                     }
-
-                    if (getCoreProtect() == null) {
-                        Bukkit.getLogger().severe("[Metropolis] CoreProtect not found.");
-                        player.sendMessage("§cSomething went wrong. Please contact an administrator.");
-                        return;
-                    }
-                    if (getCoreProtect().blockLookup(event.getClickedBlock(), 0).isEmpty()) {
-                        plugin.sendMessage(player, "messages.city.blockhistory.noData");
-                        return;
-                    }
-                    int itemsPerPage = 8;
-                    int start = 0;
-                    player.sendMessage("");
-                    plugin.sendMessage(
-                            player,
-                            "messages.city.blockhistory.header",
-                            "%location%",
-                            Utilities.formatLocation(event.getClickedBlock().getLocation()),
-                            "%page%",
-                            String.valueOf(start + 1),
-                            "%totalpages%",
-                            String.valueOf(
-                                    (int)
-                                            Math.ceil(
-                                                    ((double) getCoreProtect().blockLookup(event.getClickedBlock(), 0).size())
-                                                            / ((double) itemsPerPage))));
-                    for (int i = start; i < itemsPerPage; i++) {
-                        if (i >= getCoreProtect().blockLookup(event.getClickedBlock(), 0).size()) {
-                            break;
-                        }
-                        CoreProtectAPI.ParseResult result =
-                                getCoreProtect()
-                                        .parseResult(getCoreProtect().blockLookup(event.getClickedBlock(), 0).get(i));
-                        String row = "";
-                        int show = i + 1;
-                        if (result.getActionId() == 0) {
-                            row =
-                                    "§2#"
-                                            + show
-                                            + " "
-                                            + result.getPlayer()
-                                            + " -- §c"
-                                            + result.getType().toString().toLowerCase().replace("_", " ")
-                                            + "§2 -- "
-                                            + DateUtil.niceDate(result.getTimestamp() / 1000L);
-                        }
-                        if (result.getActionId() == 1) {
-                            row =
-                                    "§2#"
-                                            + show
-                                            + " "
-                                            + result.getPlayer()
-                                            + " -- §a"
-                                            + result.getType().toString().toLowerCase().replace("_", " ")
-                                            + "§2 -- "
-                                            + DateUtil.niceDate(result.getTimestamp() / 1000L);
-                        }
-                        if (result.getActionId() == 2) {
-                            row =
-                                    "§2#"
-                                            + show
-                                            + " "
-                                            + result.getPlayer()
-                                            + " -- §e"
-                                            + result.getType().toString().toLowerCase().replace("_", " ")
-                                            + "§2 -- "
-                                            + DateUtil.niceDate(result.getTimestamp() / 1000L);
-                        }
-                        if (!row.isEmpty()) {
-                            player.sendMessage(row);
-                        }
-                    }
-                    savedBlockHistory.remove(player.getUniqueId());
-                    savedBlockHistory.put(
-                            player.getUniqueId(), getCoreProtect().blockLookup(event.getClickedBlock(), 0));
+                    coreProtectInteractCheck(player, event);
                     return;
                 }
                 event.setCancelled(true);
@@ -324,7 +233,7 @@ public class MetropolisListener implements Listener {
                     savedPlayers.add(player);
                 }
             }
-        }
+            }
     }
 
     @EventHandler
@@ -333,124 +242,36 @@ public class MetropolisListener implements Listener {
         if (event.getBlock().getType().equals(Material.DIRT)) {
             if (CommandCity.blockEnabled.contains(player)) {
                 event.setCancelled(true);
-                if (CityDatabase.getClaim(event.getBlockPlaced().getLocation()) == null
-                        || CityDatabase.getCity(
-                                Objects.requireNonNull(
-                                                CityDatabase.getClaim(event.getBlockPlaced().getLocation()))
-                                        .getCityName())
-                        .isEmpty()) {
+                if (CityDatabase.getClaim(event.getBlockPlaced().getLocation()) == null || CityDatabase.getCity(Objects.requireNonNull(CityDatabase.getClaim(event.getBlockPlaced().getLocation())).getCityName()).isEmpty()) {
                     plugin.sendMessage(player, "messages.error.permissionDenied");
                     return;
                 }
-                City city =
-                        CityDatabase.getCity(
-                                        Objects.requireNonNull(
-                                                        CityDatabase.getClaim(event.getBlockPlaced().getLocation()))
-                                                .getCityName())
-                                .get();
-                String role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
+                City city = CityDatabase.getCity(Objects.requireNonNull(CityDatabase.getClaim(event.getBlockPlaced().getLocation())).getCityName()).get();
+                Role role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
                 assert role != null;
-                for (Plot plot : city.getCityPlots()) {
-                    Polygon polygon = Utilities.createPolygonFromLocations(plot.getPlotPoints(), geometryFactory);
-                    int ymin = plot.getPlotYMin();
-                    int ymax = plot.getPlotYMax();
-                    Point point = geometryFactory.createPoint(new Coordinate(event.getBlockPlaced().getX(), event.getBlockPlaced().getZ()));
-                    if (polygon.contains(point)
-                            && event.getBlockPlaced().getY() >= ymin
-                            && event.getBlockPlaced().getY() <= ymax) {
-                        if (!plot.getPlotOwnerUUID().equals(player.getUniqueId().toString())
-                                && !Objects.equals(role, "assistant")
-                                && !Objects.equals(role, "vicemayor")
-                                && !Objects.equals(role, "mayor")) {
-                            plugin.sendMessage(
-                                    player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
-                            return;
-                        }
+                Plot plot = PlotDatabase.getPlotAtLocation(event.getBlockPlaced().getLocation());
+                if (plot != null) {
+                    if (plot.getPlotOwnerUUID().equals(player.getUniqueId().toString()) || role.getPermissionLevel() > Role.ASSISTANT.getPermissionLevel()) {
+                        coreProtectPlaceCheck(player, event);
+                        return;
+                    } else {
+                        plugin.sendMessage(
+                                player,
+                                "messages.error.city.permissionDenied",
+                                "%cityname%",
+                                city.getCityName());
+                        return;
                     }
                 }
-                boolean isAssistant =
-                        Objects.equals(role, "assistant")
-                                || Objects.equals(role, "vicemayor")
-                                || Objects.equals(role, "mayor");
+                boolean isAssistant = Objects.equals(role, Role.ASSISTANT)
+                        || Objects.equals(role, Role.VICE_MAYOR)
+                        || Objects.equals(role, Role.MAYOR);
                 if (!isAssistant) {
                     plugin.sendMessage(
                             player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
                     return;
                 }
-                if (getCoreProtect() == null) {
-                    Bukkit.getLogger().severe("[Metropolis] CoreProtect not found.");
-                    player.sendMessage("§cSomething went wrong. Please contact an administrator.");
-                    return;
-                }
-                if (getCoreProtect().blockLookup(event.getBlockPlaced(), 0).isEmpty()) {
-                    plugin.sendMessage(player, "messages.city.blockhistory.noData");
-                    return;
-                }
-                int itemsPerPage = 8;
-                int start = 0;
-                player.sendMessage("");
-                plugin.sendMessage(
-                        player,
-                        "messages.city.blockhistory.header",
-                        "%location%",
-                        Utilities.formatLocation(event.getBlockPlaced().getLocation()),
-                        "%page%",
-                        String.valueOf(start + 1),
-                        "%totalpages%",
-                        String.valueOf(
-                                (int)
-                                        Math.ceil(
-                                                ((double) getCoreProtect().blockLookup(event.getBlockPlaced(), 0).size())
-                                                        / ((double) itemsPerPage))));
-                for (int i = start; i < itemsPerPage; i++) {
-                    if (i >= getCoreProtect().blockLookup(event.getBlockPlaced(), 0).size()) {
-                        break;
-                    }
-                    CoreProtectAPI.ParseResult result =
-                            getCoreProtect()
-                                    .parseResult(getCoreProtect().blockLookup(event.getBlockPlaced(), 0).get(i));
-                    String row = "";
-                    int show = i + 1;
-                    if (result.getActionId() == 0) {
-                        row =
-                                "§2#"
-                                        + show
-                                        + " "
-                                        + result.getPlayer()
-                                        + " -- §c"
-                                        + result.getType().toString().toLowerCase().replace("_", " ")
-                                        + "§2 -- "
-                                        + DateUtil.niceDate(result.getTimestamp() / 1000L);
-                    }
-                    if (result.getActionId() == 1) {
-                        row =
-                                "§2#"
-                                        + show
-                                        + " "
-                                        + result.getPlayer()
-                                        + " -- §a"
-                                        + result.getType().toString().toLowerCase().replace("_", " ")
-                                        + "§2 -- "
-                                        + DateUtil.niceDate(result.getTimestamp() / 1000L);
-                    }
-                    if (result.getActionId() == 2) {
-                        row =
-                                "§2#"
-                                        + show
-                                        + " "
-                                        + result.getPlayer()
-                                        + " -- §e"
-                                        + result.getType().toString().toLowerCase().replace("_", " ")
-                                        + "§2 -- "
-                                        + DateUtil.niceDate(result.getTimestamp() / 1000L);
-                    }
-                    if (!row.isEmpty()) {
-                        player.sendMessage(row);
-                    }
-                }
-                savedBlockHistory.remove(player.getUniqueId());
-                savedBlockHistory.put(
-                        player.getUniqueId(), getCoreProtect().blockLookup(event.getBlockPlaced(), 0));
+                coreProtectPlaceCheck(player, event);
             }
         }
     }
@@ -506,4 +327,157 @@ public class MetropolisListener implements Listener {
         }
     }
 
+    public void coreProtectInteractCheck(Player player, PlayerInteractEvent event) {
+        if (getCoreProtect() == null) {
+            Bukkit.getLogger().severe("[Metropolis] CoreProtect not found.");
+            player.sendMessage("§cSomething went wrong. Please contact an administrator.");
+            return;
+        }
+        if (getCoreProtect().blockLookup(event.getClickedBlock(), 0).isEmpty()) {
+            plugin.sendMessage(player, "messages.city.blockhistory.noData");
+            return;
+        }
+        int itemsPerPage = 8;
+        int start = 0;
+        player.sendMessage("");
+        plugin.sendMessage(
+                player,
+                "messages.city.blockhistory.header",
+                "%location%",
+                Utilities.formatLocation(event.getClickedBlock().getLocation()),
+                "%page%",
+                String.valueOf(start + 1),
+                "%totalpages%",
+                String.valueOf(
+                        (int)
+                                Math.ceil(
+                                        ((double) getCoreProtect().blockLookup(event.getClickedBlock(), 0).size())
+                                                / ((double) itemsPerPage))));
+        for (int i = start; i < itemsPerPage; i++) {
+            if (i >= getCoreProtect().blockLookup(event.getClickedBlock(), 0).size()) {
+                break;
+            }
+            CoreProtectAPI.ParseResult result =
+                    getCoreProtect()
+                            .parseResult(getCoreProtect().blockLookup(event.getClickedBlock(), 0).get(i));
+            String row = "";
+            int show = i + 1;
+            if (result.getActionId() == 0) {
+                row =
+                        "§2#"
+                                + show
+                                + " "
+                                + result.getPlayer()
+                                + " -- §c"
+                                + result.getType().toString().toLowerCase().replace("_", " ")
+                                + "§2 -- "
+                                + DateUtil.niceDate(result.getTimestamp() / 1000L);
+            }
+            if (result.getActionId() == 1) {
+                row =
+                        "§2#"
+                                + show
+                                + " "
+                                + result.getPlayer()
+                                + " -- §a"
+                                + result.getType().toString().toLowerCase().replace("_", " ")
+                                + "§2 -- "
+                                + DateUtil.niceDate(result.getTimestamp() / 1000L);
+            }
+            if (result.getActionId() == 2) {
+                row =
+                        "§2#"
+                                + show
+                                + " "
+                                + result.getPlayer()
+                                + " -- §e"
+                                + result.getType().toString().toLowerCase().replace("_", " ")
+                                + "§2 -- "
+                                + DateUtil.niceDate(result.getTimestamp() / 1000L);
+            }
+            if (!row.isEmpty()) {
+                player.sendMessage(row);
+            }
+        }
+        savedBlockHistory.remove(player.getUniqueId());
+        savedBlockHistory.put(
+                player.getUniqueId(), getCoreProtect().blockLookup(event.getClickedBlock(), 0));
+    }
+
+    public void coreProtectPlaceCheck(Player player, BlockPlaceEvent event) {
+        if (getCoreProtect() == null) {
+            Bukkit.getLogger().severe("[Metropolis] CoreProtect not found.");
+            player.sendMessage("§cSomething went wrong. Please contact an administrator.");
+            return;
+        }
+        if (getCoreProtect().blockLookup(event.getBlockPlaced(), 0).isEmpty()) {
+            plugin.sendMessage(player, "messages.city.blockhistory.noData");
+            return;
+        }
+        int itemsPerPage = 8;
+        int start = 0;
+        player.sendMessage("");
+        plugin.sendMessage(
+                player,
+                "messages.city.blockhistory.header",
+                "%location%",
+                Utilities.formatLocation(event.getBlockPlaced().getLocation()),
+                "%page%",
+                String.valueOf(start + 1),
+                "%totalpages%",
+                String.valueOf(
+                        (int)
+                                Math.ceil(
+                                        ((double) getCoreProtect().blockLookup(event.getBlockPlaced(), 0).size())
+                                                / ((double) itemsPerPage))));
+        for (int i = start; i < itemsPerPage; i++) {
+            if (i >= getCoreProtect().blockLookup(event.getBlockPlaced(), 0).size()) {
+                break;
+            }
+            CoreProtectAPI.ParseResult result =
+                    getCoreProtect()
+                            .parseResult(getCoreProtect().blockLookup(event.getBlockPlaced(), 0).get(i));
+            String row = "";
+            int show = i + 1;
+            if (result.getActionId() == 0) {
+                row =
+                        "§2#"
+                                + show
+                                + " "
+                                + result.getPlayer()
+                                + " -- §c"
+                                + result.getType().toString().toLowerCase().replace("_", " ")
+                                + "§2 -- "
+                                + DateUtil.niceDate(result.getTimestamp() / 1000L);
+            }
+            if (result.getActionId() == 1) {
+                row =
+                        "§2#"
+                                + show
+                                + " "
+                                + result.getPlayer()
+                                + " -- §a"
+                                + result.getType().toString().toLowerCase().replace("_", " ")
+                                + "§2 -- "
+                                + DateUtil.niceDate(result.getTimestamp() / 1000L);
+            }
+            if (result.getActionId() == 2) {
+                row =
+                        "§2#"
+                                + show
+                                + " "
+                                + result.getPlayer()
+                                + " -- §e"
+                                + result.getType().toString().toLowerCase().replace("_", " ")
+                                + "§2 -- "
+                                + DateUtil.niceDate(result.getTimestamp() / 1000L);
+            }
+            if (!row.isEmpty()) {
+                player.sendMessage(row);
+            }
+        }
+        savedBlockHistory.remove(player.getUniqueId());
+        savedBlockHistory.put(
+                player.getUniqueId(), getCoreProtect().blockLookup(event.getBlockPlaced(), 0));
+    }
 }

@@ -137,6 +137,22 @@ public class PlotDatabase {
         return false;
     }
 
+    public static Plot[] intersectingPlots(Polygon polygon, int yMin, int yMax, City city) {
+        try {
+            String polygonWKT = polygon.toText();
+            List<DbRow> results = DB.getResults(
+                    "SELECT * FROM `mp_plots` WHERE ST_Intersects(`plotBoundary`, ST_GeomFromText(" + Database.sqlString(polygonWKT) + ")) AND `cityId` = " + city.getCityID() + " AND `plotYMin` <= " + yMax + " AND `plotYMax` >= " + yMin + ";");
+            Plot[] plots = new Plot[results.size()];
+            for (int i = 0; i < results.size(); i++) {
+                plots[i] = new Plot(results.get(i));
+            }
+            return plots;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public static Plot getPlotAtLocation(Location location) {
         GeometryFactory geometryFactory = new GeometryFactory();
         Point point = geometryFactory.createPoint(new Coordinate(location.getX(), location.getZ()));

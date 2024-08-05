@@ -39,6 +39,9 @@ messages:
     goes: "<dark_green>--- <green>City teleport points (page <bold>%startPage% <reset><green>of <bold>%totalPages%<reset><green>) <dark_green>---"
   syntax:
     city:
+      toggle:
+        open: "<gray>Syntax: /city toggle open"
+        public: "<gray>Syntax: /city toggle public"
       go: "<gray>Syntax: /city go <underlined>name\n<gray>Syntax: /city go <underlined>name<reset> <gray>delete\n<gray>Syntax: /city go <underlined>name<reset> <gray>set displayname <underlined>displayname\n<gray>Syntax: /city go <underlined>name<reset> <gray>set displayname -\n<gray>/city go <underlined>name<reset> <gray>set accesslevel <underlined>accesslevel\n<gray>/city go <underlined>name<reset> <gray>set accesslevel -"
       ban: "<gray>Syntax: /city ban\n<gray>Syntax: /city ban <underlined>player\n<gray>Syntax: /city ban <underlined>player<reset> <gray>-\n<gray>Syntax: /city ban <underlined>player length reason"
       buy:
@@ -272,6 +275,11 @@ messages:
           2: "<gray>f = frame, g = go, h = home, j = jukebox"
           3: "<gray>r = repair (anvil), s = switch, t = teleport, v = villager"
   city:
+    toggle:
+      open: "<yellow>%cityname% <gray>| <green>The city is now Open."
+      closed: "<yellow>%cityname% <gray>| <green>The city is now Closed."
+      public: "<yellow>%cityname% <gray>| <green>The city is now Public."
+      private: "<yellow>%cityname% <gray>| <green>The city is now Private."
     roles:
       member: "Member"
       inviter: "Inviter"
