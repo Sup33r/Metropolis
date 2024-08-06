@@ -413,17 +413,17 @@ public class CommandPlot extends BaseCommand {
             plugin.sendMessage(player, "messages.plot.list.monsters", "%status%", "<green>" + plugin.getRawMessage("messages.words.no"));
         }
         if (plot.isKMarked()) {
-            plugin.sendMessage(player, "messages.plot.list.k-marked", "%status%", "<green>" + plugin.getRawMessage("messages.words.yes"));
+            plugin.sendMessage(player, "messages.plot.list.k-marked", "%status%",plugin.getRawMessage("messages.words.yes"));
         } else {
-            plugin.sendMessage(player, "messages.plot.list.k-marked", "%status%", "<green>" + plugin.getRawMessage("messages.words.no"));
+            plugin.sendMessage(player, "messages.plot.list.k-marked", "%status%",plugin.getRawMessage("messages.words.no"));
         }
         if (Arrays.toString(plot.getPlotFlags()).contains("i")) {
-            plugin.sendMessage(player, "messages.plot.list.lose.items", "%status%", "<red>" + plugin.getRawMessage("messages.words.yes"));
+            plugin.sendMessage(player, "messages.plot.list.lose.items", "%status%",plugin.getRawMessage("messages.words.yes"));
         } else {
-            plugin.sendMessage(player, "messages.plot.list.lose.items", "%status%", "<green>" + plugin.getRawMessage("messages.words.no"));
+            plugin.sendMessage(player, "messages.plot.list.lose.items", "%status%",plugin.getRawMessage("messages.words.no"));
         }
         if (Arrays.toString(plot.getPlotFlags()).contains("x")) {
-            plugin.sendMessage(player, "messages.plot.list.lose.xp", "%status%", "<red>" + plugin.getRawMessage("messages.words.yes"));
+            plugin.sendMessage(player, "messages.plot.list.lose.xp", "%status%",plugin.getRawMessage("messages.words.yes"));
         } else {
             plugin.sendMessage(player, "messages.plot.list.lose.xp", "%status%", "<green>" + plugin.getRawMessage("messages.words.no"));
         }
@@ -551,6 +551,9 @@ public class CommandPlot extends BaseCommand {
                 "%cityname%",
                 city.getCityName());
         player.teleport(plot.getPlotCenter());
+        MetropolisListener.playerInPlot.put(player.getUniqueId(), plot);
+        MetropolisListener.playerInCity.put(player.getUniqueId(), city);
+        Utilities.sendCityScoreboard(player, city, plot);
     }
 
     @Subcommand("perm")

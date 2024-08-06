@@ -12,6 +12,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.intellij.lang.annotations.Language;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -195,6 +196,28 @@ public class CityDatabase {
             }
         }
         return 0;
+    }
+
+    public static List<City> getCityList(Player player, int count, String searchterm) {
+        List<City> cityList = new ArrayList<>();
+        try {
+            String query;
+            if (searchterm == null) {
+                query = "SELECT * FROM `mp_cities` WHERE `isRemoved` = 0 ORDER BY `cityBalance` DESC LIMIT " + count + ";";
+            } else {
+                query = "SELECT * FROM `mp_cities` WHERE `isRemoved` = 0 AND `cityName` LIKE " + Database.sqlString("%" + searchterm + "%") + " ORDER BY `cityBalance` DESC LIMIT " + count + ";";
+            }
+            var results = DB.getResults(query);
+            for (var row : results) {
+                City city = new City(row);
+                if (city.getCityMember(player.getUniqueId().toString()) != null || city.isPublic()) {
+                    cityList.add(city);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return cityList;
     }
 
     public static List<String> getCityGoNames(City city, Role role) {

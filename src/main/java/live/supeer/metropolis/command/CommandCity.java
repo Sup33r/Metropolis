@@ -1763,4 +1763,43 @@ public class CommandCity extends BaseCommand {
         }
     }
 
+    @Subcommand("list")
+    public static void onList(Player player, @Optional String searchterm) {
+        if (!player.hasPermission("metropolis.city.list")) {
+            plugin.sendMessage(player, "messages.error.permissionDenied");
+            return;
+        }
+        int maxCount = 20;
+        StringBuilder stringBuilder = new StringBuilder();
+
+        if (searchterm == null) {
+            plugin.sendMessage(player, "messages.city.list.header");
+            List<City> cityList = CityDatabase.getCityList(player, maxCount, null);
+            for (City city : cityList) {
+                stringBuilder.append("§2").append(city.getCityName()).append(" (").append(CityDatabase.getCityMemberCount(city)).append(")").append("§a, §2");
+            }
+            if (!cityList.isEmpty()) {
+                player.sendMessage(stringBuilder.delete(stringBuilder.length()-4,stringBuilder.length())+"");
+            } else {
+                plugin.sendMessage(player, "messages.city.list.none");
+            }
+            return;
+        }
+
+        if (searchterm.length() < 3) {
+            plugin.sendMessage(player, "messages.error.city.list.tooShort");
+            return;
+        }
+
+        plugin.sendMessage(player, "messages.city.list.header");
+        List<City> cityList = CityDatabase.getCityList(player, maxCount, searchterm);
+        for (City city : cityList) {
+            stringBuilder.append("§2").append(city.getCityName()).append(" (").append(CityDatabase.getCityMemberCount(city)).append(")").append("§a, §2");
+        }
+        if (!cityList.isEmpty()) {
+            player.sendMessage(stringBuilder.delete(stringBuilder.length()-4,stringBuilder.length())+"");
+        } else {
+            plugin.sendMessage(player, "messages.city.list.none");
+        }
+    }
 }

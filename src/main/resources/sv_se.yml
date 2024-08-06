@@ -280,6 +280,10 @@ messages:
           2: "<gray>f = frame, g = go, h = home, j = jukebox"
           3: "<gray>r = repair (anvil), s = switch, t = teleport, v = villager"
   city:
+    list:
+      header: "<dark_green>--- <green>Städer <dark_green>---"
+      none: "<red>Inga städer hittades."
+      tooShort: "<red>Sökordet är för kort."
     toggle:
       open: "<yellow>%cityname% <gray>| <green>Staden är nu Öppen."
       closed: "<yellow>%cityname% <gray>| <green>Staden är nu Stängd."
