@@ -10,8 +10,6 @@ import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.plot.PlotDatabase;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
 
 import java.text.NumberFormat;
 import java.util.*;
@@ -136,8 +134,8 @@ public class Utilities {
             flagsOriginal = new char[0];
         }
         String flagsRaw = new String(flagsOriginal);
-        change = change.replace("*", "abcefghjrstv");
 
+        change = change.replace("*", "abcefghjrstv");
         boolean isAdding = true;
 
         for (int i = 0; i < change.length(); i++) {
@@ -145,11 +143,6 @@ public class Utilities {
 
             // the first character must be either a + or a -
             if (i == 0 && currentChar != '+' && currentChar != '-') {
-                return null;
-            }
-
-            if (flagsRaw.isEmpty() && currentChar == '-'
-                    || flagsRaw.isEmpty() && currentChar == '+') {
                 return null;
             }
 
@@ -161,7 +154,8 @@ public class Utilities {
                 continue;
             }
 
-            if (isValidFlag(currentChar)) {
+            // check if the flag is valid
+            if (isValidPerm(currentChar)) {
                 if (flagType.equals("plot")) {
                     plugin.sendMessage(player, "messages.error.plot.perm.notFound");
                 } else {
@@ -170,8 +164,7 @@ public class Utilities {
                 return null;
             }
 
-            flagsRaw =
-                    isAdding ? flagsRaw + currentChar : flagsRaw.replace(String.valueOf(currentChar), "");
+            flagsRaw = isAdding ? flagsRaw + currentChar : flagsRaw.replace(String.valueOf(currentChar), "");
         }
 
         StringBuilder flagsNew = new StringBuilder();

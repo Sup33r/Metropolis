@@ -77,12 +77,15 @@ messages:
       expand: "<gray>Syntax: /plot expand <underlined>antal<reset><gray> <underlined>up/down"
       tp: "<gray>Syntax: /plot tp <underlined>ID"
       market: "<gray>Syntax: /plot market <underlined>pris\n<gray>Syntax: /plot market <underlined>-"
-      perm: "<gray>Syntax: /plot perm <underlined>spelare<reset><gray> +/-<underlined>ändring\n<gray>Syntax: /plot perm members +/-<underlined>ändring\n<gray>Syntax: /plot perm outsiders +/-<underlined>ändring"
+      perm: "<gray>Syntax: /plot perm <underlined>spelare<reset><gray> +/-<underlined>ändring</underlined>\n<gray>Syntax: /plot perm members +/-<underlined>ändring</underlined>\n<gray>Syntax: /plot perm outsiders +/-<underlined>ändring</underlined>"
   error:
     player:
       notFound: "<red>Spelaren hittades inte."
       notInCity: "<red>Spelaren är inte medlem i någon stad."
     city:
+      perm:
+        noChange: "<red>Det finns inga ändringar att göra."
+        notFound: "<red>Rättighetsflaggan hittades inte. Använd /city perm för att se alla rättigheter."
       claimTooFar: "<yellow>%cityname% <gray>| <red>Markbiten sitter inte ihop med staden. Vill du fortfarande överta den? Överväg isåfall att köpa en utpost istället."
       helpop:
         tooShort: "<red>Meddelandet är för kort, Tydliggör, precisera!"
@@ -182,6 +185,9 @@ messages:
   save:
     membership: "<green>Din hemstad är nu %cityname%."
   plot:
+    share:
+        success: "<yellow>%cityname% <gray>| <green>Tomten delades med %player%."
+        remove: "<yellow>%cityname% <gray>| <green>Tomten delas inte längre med %player%."
     type:
       church: "Kyrka"
       farm: "Farm"
@@ -274,7 +280,7 @@ messages:
         header: "<dark_green>--- <green>Tomträttigheter: %plot% <dark_green>---"
         outsiders: "<dark_green>Utomstående: <green>%perms%"
         members: "<dark_green>Stadsmedlemmar: <green>%perms%"
-        players: "<dark_green>Spelare %player%: <green>%perms%"
+        players: "<dark_green>%player%: <green>%perms%"
         permsrow:
           1: "<gray>a = animal, b = block, c = container, e = enderpearl"
           2: "<gray>f = frame, g = go, h = home, j = jukebox"

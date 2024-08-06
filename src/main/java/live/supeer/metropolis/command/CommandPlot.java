@@ -557,8 +557,77 @@ public class CommandPlot extends BaseCommand {
         Utilities.sendCityScoreboard(player, city, plot);
     }
 
+    @Subcommand("share")
+    @CommandCompletion("@players")
+    public static void onShare(Player player, String sharePlayer) {
+        Plot plot = Utilities.hasPlotPermissions(player, "metropolis.plot.share", Role.ASSISTANT, true);
+        if (plot == null) {
+            return;
+        }
+        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(sharePlayer);
+        if (!offlinePlayer.hasPlayedBefore()) {
+            plugin.sendMessage(player, "messages.error.player.notFound");
+            return;
+        }
+
+        PlotPerms perms = plot.getPlayerPlotPerm(offlinePlayer.getUniqueId().toString());
+        if (perms == null || perms.getPerms().length == 0) {
+            String newPerms = Utilities.parsePermChange(null, "+*", player, "plot");
+            if (newPerms == null) {
+                return;
+            }
+            plot.setPlotPerms("players",
+                    newPerms,
+                    offlinePlayer.getUniqueId().toString());
+            Database.addLogEntry(
+                    plot.getCity(),
+                    "{ \"type\": \"plot\", \"subtype\": \"perm\", \"id\": "
+                            + plot.getPlotID()
+                            + ", \"name\": "
+                            + plot.getPlotName()
+                            + ", \"type\": "
+                            + "player"
+                            + ", \"from\": "
+                            + "null"
+                            + ", \"to\": "
+                            + newPerms
+                            + ", \"issuer\": "
+                            + player.getUniqueId().toString()
+                            + ", \"player\": "
+                            + offlinePlayer.getUniqueId().toString()
+                            + " }");
+            plugin.sendMessage(player,"messages.plot.share.success", "%cityname%", plot.getCity().getCityName(), "%player%", offlinePlayer.getName());
+        } else {
+            String newPerms = Utilities.parsePermChange(perms.getPerms(), "-*", player, "plot");
+            if (newPerms == null) {
+                return;
+            }
+            plot.setPlotPerms("players",
+                    newPerms,
+                    offlinePlayer.getUniqueId().toString());
+            Database.addLogEntry(
+                    plot.getCity(),
+                    "{ \"type\": \"plot\", \"subtype\": \"perm\", \"id\": "
+                            + plot.getPlotID()
+                            + ", \"name\": "
+                            + plot.getPlotName()
+                            + ", \"type\": "
+                            + "player"
+                            + ", \"from\": "
+                            + Arrays.toString(perms.getPerms())
+                            + ", \"to\": "
+                            + newPerms
+                            + ", \"issuer\": "
+                            + player.getUniqueId().toString()
+                            + ", \"player\": "
+                            + offlinePlayer.getUniqueId().toString()
+                            + " }");
+            plugin.sendMessage(player,"messages.plot.share.remove", "%cityname%", plot.getCity().getCityName(), "%player%", offlinePlayer.getName());
+        }
+    }
+
     @Subcommand("perm")
-    public static void onPerm(Player player, String[] args) throws SQLException {
+    public static void onPerm(Player player, @Optional String subject, @Optional String perm) {
         City city = Utilities.hasCityPermissions(player, "metropolis.plot.perm", null);
         if (city == null) {
             return;
@@ -569,13 +638,12 @@ public class CommandPlot extends BaseCommand {
             return;
         }
         Role role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
-        if (args == null || args.length == 0) {
+        if (subject == null) {
             StringBuilder stringBuilderOutsiders = new StringBuilder();
             for (char s : plot.getPermsOutsiders()) {
                 stringBuilderOutsiders.append(s);
             }
-            String permsOutsiders =
-                    "+"
+            String permsOutsiders = "+"
                             + stringBuilderOutsiders.substring(
                             0, stringBuilderOutsiders.toString().length());
             if (stringBuilderOutsiders
@@ -594,13 +662,13 @@ public class CommandPlot extends BaseCommand {
             }
             String permsMembers =
                     "+" + stringBuilderMembers.substring(0, stringBuilderMembers.toString().length());
-            if (stringBuilderOutsiders
-                    .substring(0, stringBuilderOutsiders.toString().length())
+            if (stringBuilderMembers
+                    .substring(0, stringBuilderMembers.toString().length())
                     .equals(" ")
-                    || stringBuilderOutsiders
-                    .substring(0, stringBuilderOutsiders.toString().length())
+                    || stringBuilderMembers
+                    .substring(0, stringBuilderMembers.toString().length())
                     .isEmpty()
-                    || stringBuilderOutsiders.substring(0, stringBuilderOutsiders.toString().length())
+                    || stringBuilderMembers.substring(0, stringBuilderMembers.toString().length())
                     == null) {
                 permsMembers = "<italic>nada";
             }
@@ -632,69 +700,62 @@ public class CommandPlot extends BaseCommand {
             plugin.sendMessage(player, "messages.plot.list.perm.permsrow.3");
             return;
         }
-        if (args.length > 2) {
+
+        if (perm != null && perm.contains(" ")) {
             plugin.sendMessage(player, "messages.syntax.plot.perm");
             return;
         }
-        if (args.length == 1) {
-            if (args[0].equals("-")) {
-                if (plot.getPlotOwnerUUID().equals(player.getUniqueId().toString()) || !Objects.equals(role, Role.MAYOR) || !Objects.equals(role, Role.ASSISTANT) || !Objects.equals(role, Role.VICE_MAYOR)) {
-                    if (plot.isKMarked() && !Objects.equals(role, Role.MAYOR)) {
-                        plugin.sendMessage(
-                                player,
-                                "messages.error.city.permissionDenied",
-                                "%cityname%",
-                                city.getCityName());
-                        return;
-                    }
-                    Database.addLogEntry(
-                            city,
-                            "{ \"type\": \"plot\", \"subtype\": \"perm\", \"id\": "
-                                    + plot.getPlotID()
-                                    + ", \"name\": "
-                                    + plot.getPlotName()
-                                    + ", \"type\": "
-                                    + "all"
-                                    + ", \"from\": "
-                                    + ""
-                                    + ", \"to\": "
-                                    + ""
-                                    + ", \"player\": "
-                                    + player.getUniqueId().toString()
-                                    + " }");
-                    plot.removePlotPerms();
+
+        if (subject.equals("-") && perm == null) {
+            if (plot.getPlotOwnerUUID().equals(player.getUniqueId().toString()) || role != null && role.hasPermission(Role.ASSISTANT)) {
+                if (plot.isKMarked() && !Objects.equals(role, Role.MAYOR)) {
                     plugin.sendMessage(
                             player,
-                            "messages.city.successful.set.plot.perm.remove.all",
+                            "messages.error.city.permissionDenied",
                             "%cityname%",
                             city.getCityName());
                     return;
-                } else {
-                    plugin.sendMessage(
-                            player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
-                    return;
                 }
-            }
-            plugin.sendMessage(player, "messages.syntax.plot.perm");
-            return;
-        }
-        if (!args[0].equals("members") && !args[0].equals("outsiders") && !args[0].equals("-")) {
-            @Deprecated OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[0]);
-            if (offlinePlayer == null) {
-                plugin.sendMessage(player, "messages.error.player.notFound");
+                plot.removePlotPerms();
+                Database.addLogEntry(
+                        city,
+                        "{ \"type\": \"plot\", \"subtype\": \"perm\", \"id\": "
+                                + plot.getPlotID()
+                                + ", \"name\": "
+                                + plot.getPlotName()
+                                + ", \"type\": "
+                                + "all"
+                                + ", \"from\": "
+                                + ""
+                                + ", \"to\": "
+                                + ""
+                                + ", \"player\": "
+                                + player.getUniqueId().toString()
+                                + " }");
+                plugin.sendMessage(
+                        player,
+                        "messages.city.successful.set.plot.perm.remove.all",
+                        "%cityname%",
+                        city.getCityName());
+                return;
+            } else {
+                plugin.sendMessage(
+                        player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
                 return;
             }
         }
-        if (CityDatabase.getClaim(player.getLocation()) == null) {
-            plugin.sendMessage(player, "messages.error.plot.notFound");
+
+        if (perm == null) {
+            plugin.sendMessage(player, "messages.syntax.plot.perm");
             return;
         }
-        if (role == null) {
-            plugin.sendMessage(
-                    player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
+
+        if (!perm.startsWith("+") && !perm.startsWith("-")) {
+            plugin.sendMessage(player, "messages.syntax.plot.perm");
             return;
         }
-        if (plot.getPlotOwnerUUID().equals(player.getUniqueId().toString()) || !Objects.equals(role, Role.MAYOR) || !Objects.equals(role, Role.ASSISTANT) || !Objects.equals(role, Role.VICE_MAYOR)) {
+
+        if (plot.getPlotOwnerUUID().equals(player.getUniqueId().toString()) || role != null && role.hasPermission(Role.ASSISTANT)) {
             if (plot.isKMarked() && !Objects.equals(role, Role.MAYOR)) {
                 plugin.sendMessage(
                         player,
@@ -703,10 +764,18 @@ public class CommandPlot extends BaseCommand {
                         city.getCityName());
                 return;
             }
-            if (args[0].equals("members")) {
-                if (Utilities.parsePermChange(plot.getPermsMembers(), args[1], player, "plot") == null) {
+            if (subject.equals("members")) {
+                if (Utilities.parsePermChange(plot.getPermsMembers(), perm, player, "plot") == null) {
                     return;
                 }
+                String perms = Utilities.parsePermChange(plot.getPermsMembers(), perm, player, "plot");
+                if (perms == null) {
+                    return;
+                }
+                plot.setPlotPerms(
+                        "members",
+                        perms,
+                        null);
                 Database.addLogEntry(
                         city,
                         "{ \"type\": \"plot\", \"subtype\": \"perm\", \"id\": "
@@ -718,28 +787,33 @@ public class CommandPlot extends BaseCommand {
                                 + ", \"from\": "
                                 + Arrays.toString(plot.getPermsMembers())
                                 + ", \"to\": "
-                                + Utilities.parsePermChange(plot.getPermsMembers(), args[1], player, "plot")
+                                + Utilities.parsePermChange(plot.getPermsMembers(), perm, player, "plot")
                                 + ", \"issuer\": "
                                 + player.getUniqueId().toString()
                                 + " }");
-                plot.setPlotPerms(
-                        "members",
-                        Utilities.parsePermChange(plot.getPermsMembers(), args[1], player, "plot"),
-                        null);
                 plugin.sendMessage(
                         player,
                         "messages.city.successful.set.plot.perm.change.members",
                         "%perms%",
-                        args[1],
+                        new String(plot.getPermsMembers()),
                         "%cityname%",
                         city.getCityName());
                 return;
             }
 
-            if (args[0].equals("outsiders")) {
-                if (Utilities.parsePermChange(plot.getPermsOutsiders(), args[1], player, "plot") == null) {
+            if (subject.equals("outsiders")) {
+                if (Utilities.parsePermChange(plot.getPermsOutsiders(), perm, player, "plot") == null) {
                     return;
                 }
+
+                String perms = Utilities.parsePermChange(plot.getPermsOutsiders(), perm, player, "plot");
+                if (perms == null) {
+                    return;
+                }
+                plot.setPlotPerms(
+                        "outsiders",
+                        perms,
+                        null);
                 Database.addLogEntry(
                         city,
                         "{ \"type\": \"plot\", \"subtype\": \"perm\", \"id\": "
@@ -751,38 +825,34 @@ public class CommandPlot extends BaseCommand {
                                 + ", \"from\": "
                                 + Arrays.toString(plot.getPermsOutsiders())
                                 + ", \"to\": "
-                                + Utilities.parsePermChange(plot.getPermsOutsiders(), args[1], player, "plot")
+                                + Utilities.parsePermChange(plot.getPermsOutsiders(), perm, player, "plot")
                                 + ", \"issuer\": "
                                 + player.getUniqueId().toString()
                                 + " }");
-                plot.setPlotPerms(
-                        "outsiders",
-                        Utilities.parsePermChange(plot.getPermsOutsiders(), args[1], player, "plot"),
-                        null);
                 plugin.sendMessage(
                         player,
                         "messages.city.successful.set.plot.perm.change.outsiders",
                         "%perms%",
-                        args[1],
+                        perms,
                         "%cityname%",
                         city.getCityName());
                 return;
             }
 
-            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[0]);
+            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(subject);
             if (!offlinePlayer.hasPlayedBefore()) {
                 plugin.sendMessage(player, "messages.error.player.notFound");
                 return;
             }
-
-            if (plot.getPlayerPlotPerm(offlinePlayer.getUniqueId().toString()) == null
-                    || plot.getPlayerPlotPerm(offlinePlayer.getUniqueId().toString()).getPerms()
-                    == null) {
+            if (plot.getPlayerPlotPerm(offlinePlayer.getUniqueId().toString()) == null) {
+                String perms = Utilities.parsePermChange(null, perm, player,"plot");
+                if (perms == null) {
+                    return;
+                }
                 plot.setPlotPerms(
                         "players",
-                        Utilities.parsePerms(args[1], "plot", player),
+                        perms,
                         offlinePlayer.getUniqueId().toString());
-            } else {
                 Database.addLogEntry(
                         city,
                         "{ \"type\": \"plot\", \"subtype\": \"perm\", \"id\": "
@@ -792,35 +862,48 @@ public class CommandPlot extends BaseCommand {
                                 + ", \"type\": "
                                 + "player"
                                 + ", \"from\": "
-                                + Arrays.toString(
-                                plot.getPlayerPlotPerm(offlinePlayer.getUniqueId().toString()).getPerms())
+                                + "null"
                                 + ", \"to\": "
-                                + Utilities.parsePermChange(
-                                plot.getPlayerPlotPerm(offlinePlayer.getUniqueId().toString()).getPerms(),
-                                args[1],
-                                player,
-                                "plot")
+                                + perms
                                 + ", \"issuer\": "
                                 + player.getUniqueId().toString()
                                 + ", \"player\": "
                                 + offlinePlayer.getUniqueId().toString()
                                 + " }");
-                plot.setPlotPerms(
-                        "players",
-                        Utilities.parsePermChange(
-                                plot.getPlayerPlotPerm(offlinePlayer.getUniqueId().toString()).getPerms(),
-                                args[1],
-                                player,
-                                "plot"),
+            } else {
+                String perms = Utilities.parsePermChange(plot.getPlayerPlotPerm(offlinePlayer.getUniqueId().toString()).getPerms(), perm, player, "plot");
+                String from = Arrays.toString(plot.getPlayerPlotPerm(offlinePlayer.getUniqueId().toString()).getPerms());
+                if (perms == null) {
+                    return;
+                }
+                plot.setPlotPerms("players",
+                        perms,
                         offlinePlayer.getUniqueId().toString());
+                Database.addLogEntry(
+                        city,
+                        "{ \"type\": \"plot\", \"subtype\": \"perm\", \"id\": "
+                                + plot.getPlotID()
+                                + ", \"name\": "
+                                + plot.getPlotName()
+                                + ", \"type\": "
+                                + "player"
+                                + ", \"from\": "
+                                + from
+                                + ", \"to\": "
+                                + perms
+                                + ", \"issuer\": "
+                                + player.getUniqueId().toString()
+                                + ", \"player\": "
+                                + offlinePlayer.getUniqueId().toString()
+                                + " }");
             }
             plugin.sendMessage(
                     player,
-                    "messages.successful.set.plot.perm.change.player",
+                    "messages.city.successful.set.plot.perm.change.player",
                     "%player%",
                     offlinePlayer.getName(),
                     "%perms%",
-                    args[1],
+                    new String(plot.getPlayerPlotPerm(offlinePlayer.getUniqueId().toString()).getPerms()),
                     "%cityname%",
                     city.getCityName());
         } else {

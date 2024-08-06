@@ -203,50 +203,58 @@ public class Plot {
         }
     }
 
-    public void setPlotPerms(String type, String perms, String playerUUID) throws SQLException {
-        if (type.equalsIgnoreCase("members")) {
+    public void setPlotPerms(String type, String perms, String playerUUID) {
+        try {
+            if (type.equalsIgnoreCase("members")) {
+                DB.executeUpdate(
+                        "UPDATE `mp_plots` SET `plotPermsMembers` = "
+                                + Database.sqlString(perms)
+                                + " WHERE `plotID` = "
+                                + plotID
+                                + ";");
+                this.permsMembers = perms.toCharArray();
+                return;
+            } else if (type.equalsIgnoreCase("outsiders")) {
+                DB.executeUpdate(
+                        "UPDATE `mp_plots` SET `plotPermsOutsiders` = "
+                                + Database.sqlString(perms)
+                                + " WHERE `plotID` = "
+                                + plotID
+                                + ";");
+                this.permsOutsiders = perms.toCharArray();
+                return;
+            }
             DB.executeUpdate(
-                    "UPDATE `mp_plots` SET `plotPermsMembers` = "
-                            + Database.sqlString(perms)
-                            + " WHERE `plotID` = "
+                    "INSERT INTO `mp_plotperms` (`plotId`, `cityId`, `plotPerms`, `playerUUID`, `playerName`) VALUES ("
                             + plotID
-                            + ";");
-            this.permsMembers = perms.toCharArray();
-            return;
-        } else if (type.equalsIgnoreCase("outsiders")) {
-            DB.executeUpdate(
-                    "UPDATE `mp_plots` SET `plotPermsOutsiders` = "
+                            + ", "
+                            + cityID
+                            + ", "
                             + Database.sqlString(perms)
-                            + " WHERE `plotID` = "
-                            + plotID
-                            + ";");
-            this.permsOutsiders = perms.toCharArray();
-            return;
+                            + ", "
+                            + Database.sqlString(playerUUID)
+                            + ", "
+                            + Database.sqlString(Bukkit.getOfflinePlayer(UUID.fromString(playerUUID)).getName())
+                            + ") ON DUPLICATE KEY UPDATE plotPerms = '"
+                            + perms
+                            + "';");
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        DB.executeUpdate(
-                "INSERT INTO `mp_plotperms` (`plotId`, `cityId`, `plotPerms`, `playerUUID`, `playerName`) VALUES ("
-                        + plotID
-                        + ", "
-                        + cityID
-                        + ", "
-                        + Database.sqlString(perms)
-                        + ", "
-                        + Database.sqlString(playerUUID)
-                        + ", "
-                        + Database.sqlString(Bukkit.getOfflinePlayer(UUID.fromString(playerUUID)).getName())
-                        + ") ON DUPLICATE KEY UPDATE plotPerms = '"
-                        + perms
-                        + "';");
     }
 
-    public void removePlotPerms() throws SQLException {
-        DB.executeUpdate(
-                "UPDATE `mp_plots` SET `plotPermsMembers` = '', `plotPermsOutsiders` = '' WHERE `plotID` = "
-                        + plotID
-                        + ";");
-        DB.executeUpdate("DELETE FROM `mp_plotperms` WHERE `plotId` = " + plotID + ";");
-        this.permsMembers = new char[] {' '};
-        this.permsOutsiders = new char[] {' '};
+    public void removePlotPerms() {
+        try {
+            DB.executeUpdate(
+                    "UPDATE `mp_plots` SET `plotPermsMembers` = '', `plotPermsOutsiders` = '' WHERE `plotID` = "
+                            + plotID
+                            + ";");
+            DB.executeUpdate("DELETE FROM `mp_plotperms` WHERE `plotId` = " + plotID + ";");
+            this.permsMembers = new char[] {' '};
+            this.permsOutsiders = new char[] {' '};
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public boolean hasFlag(char needle) {
@@ -294,27 +302,17 @@ public class Plot {
     }
 
     public PlotPerms getPlayerPlotPerm(String playerUUID) {
+        DbRow row = null;
         try {
-            if (DB.getFirstRow(
-                    "SELECT * FROM `mp_plotperms` WHERE `plotId` = "
-                            + plotID
-                            + " AND `playerUUID` = "
-                            + Database.sqlString(playerUUID)
-                            + ";")
-                    == null) {
-                return null;
-            }
-            DbRow row =
-                    DB.getFirstRow(
-                            "SELECT * FROM `mp_plotperms` WHERE `plotId` = "
-                                    + plotID
-                                    + " AND `playerUUID` = "
-                                    + Database.sqlString(playerUUID)
-                                    + ";");
-            return new PlotPerms(row);
+            row = DB.getFirstRow(
+                    "SELECT * FROM `mp_plotperms` WHERE `plotId` = " + plotID + " AND `playerUUID` = " + Database.sqlString(playerUUID) + ";"
+            );
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        if (row == null) {
+            return null; // Return null if no data is found
+        }
+        return new PlotPerms(row);
     }
 }
