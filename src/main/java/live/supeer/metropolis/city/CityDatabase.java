@@ -4,6 +4,7 @@ import co.aikar.idb.DB;
 import co.aikar.idb.DbRow;
 import live.supeer.metropolis.Database;
 import live.supeer.metropolis.Metropolis;
+import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.utils.Utilities;
 import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.plot.Plot;
@@ -81,7 +82,7 @@ public class CityDatabase {
 
     public static City newCity(String cityName, Player player) {
         try {
-            DB.executeUpdate("INSERT INTO `mp_cities` (`cityName`, `originalMayorUUID`, `originalMayorName`, `cityBalance`, `citySpawn`, `createDate`, `isRemoved`) VALUES (" + Database.sqlString(cityName) + ", " + Database.sqlString(player.getUniqueId().toString()) + ", " + Database.sqlString(player.getName()) + ", " + Metropolis.configuration.getCityStartingBalance() + ", " + Database.sqlString(Utilities.locationToString(player.getLocation())) + ", " + DateUtil.getTimestamp() + ", " + "0" + ");");
+            DB.executeUpdate("INSERT INTO `mp_cities` (`cityName`, `originalMayorUUID`, `originalMayorName`, `cityBalance`, `citySpawn`, `createDate`, `isRemoved`) VALUES (" + Database.sqlString(cityName) + ", " + Database.sqlString(player.getUniqueId().toString()) + ", " + Database.sqlString(player.getName()) + ", " + Metropolis.configuration.getCityStartingBalance() + ", " + Database.sqlString(LocationUtil.locationToString(player.getLocation())) + ", " + DateUtil.getTimestamp() + ", " + "0" + ");");
             City city = new City(DB.getFirstRow("SELECT * FROM `mp_cities` WHERE `cityName` = " + Database.sqlString(cityName) + ";"));
             cities.add(city);
             newMember(city, player);
@@ -125,7 +126,7 @@ public class CityDatabase {
 
     public static void newCityGo(Location location, String name, City city) {
         try {
-            DB.executeInsert("INSERT INTO `mp_citygoes` (`cityID`, `goName`, `goLocation`, `createDate`) VALUES (" + city.getCityID() + ", " + Database.sqlString(name) + ", " + Database.sqlString(Utilities.locationToString(location)) + ", " + DateUtil.getTimestamp() + ");");
+            DB.executeInsert("INSERT INTO `mp_citygoes` (`cityID`, `goName`, `goLocation`, `createDate`) VALUES (" + city.getCityID() + ", " + Database.sqlString(name) + ", " + Database.sqlString(LocationUtil.locationToString(location)) + ", " + DateUtil.getTimestamp() + ");");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -268,7 +269,7 @@ public class CityDatabase {
         try {
             var results = DB.getResults("SELECT * FROM `mp_citygoes` WHERE `cityID` = " + city.getCityID() + " AND `goName` = " + Database.sqlString(name) + ";");
             if (!results.isEmpty()) {
-                return Utilities.stringToLocation(results.get(0).getString("goLocation"));
+                return LocationUtil.stringToLocation(results.get(0).getString("goLocation"));
             }
         } catch (SQLException e) {
             e.printStackTrace();

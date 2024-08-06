@@ -20,63 +20,12 @@ import java.util.*;
 public class Utilities {
     public static Metropolis plugin;
 
-    public static String formatLocation(Location location) {
-        return "(["
-                + location.getWorld().getName()
-                + "]"
-                + location.getBlockX()
-                + ", "
-                + location.getBlockY()
-                + ", "
-                + location.getBlockZ()
-                + ")";
-    }
-
-    public static String formatChunk(String world, int x, int z) {
-        return "([" + world + "]" + x + ", " + z + ")";
-    }
 
     public static String formattedMoney(Integer money) {
         NumberFormat formatter = NumberFormat.getInstance(Locale.US);
         formatter.setGroupingUsed(true);
         return formatter.format(money).replace(",", " ");
     }
-
-
-    public static String locationToString(Location location) {
-        if (location == null) {
-            return null;
-        }
-
-        return location.getWorld().getName()
-                + " "
-                + location.getX()
-                + " "
-                + location.getY()
-                + " "
-                + location.getZ()
-                + " "
-                + location.getYaw()
-                + " "
-                + location.getPitch();
-    }
-
-    public static Location stringToLocation(String string) {
-        if (string == null || string.isEmpty()) {
-            return null;
-        }
-
-        String[] split = string.split(" ");
-        return new Location(
-                Bukkit.getWorld(split[0]),
-                Double.parseDouble(split[1]),
-                Double.parseDouble(split[2]),
-                Double.parseDouble(split[3]),
-                Float.parseFloat(split[4]),
-                Float.parseFloat(split[5]));
-    }
-
-
 
     public static boolean isCloseToOtherCity(Player player, Location location, String type) {
         int centerZ = location.getChunk().getZ();
@@ -98,24 +47,6 @@ public class Utilities {
             }
         }
         return false;
-    }
-
-    public static String parsePoints(Location[] locations) {
-        if (locations == null) {
-            return null;
-        }
-
-        StringBuilder points = new StringBuilder();
-
-        for (Location location : locations) {
-            String test = "(" + location.getBlockX() + ", " + "y" + ", " + location.getBlockZ() + ")";
-            if (Arrays.asList(locations).indexOf(location) == locations.length - 1) {
-                points.append(test);
-                break;
-            }
-            points.append(test).append(",");
-        }
-        return points.substring(0, points.length() - 1);
     }
 
     public static String parseFlagChange(char[] flagsOriginal, String change) {
@@ -337,35 +268,6 @@ public class Utilities {
                 && currentChar != 'v';
     }
 
-    public static String polygonToString(Location[] polygon) {
-        StringBuilder string = new StringBuilder();
-        for (Location location : polygon) {
-            string.append(locationToString(location)).append(" ");
-        }
-        return string.toString();
-    }
-
-    public static Location[] stringToPolygon(String string) {
-        String[] split = string.split(" ");
-        Location[] polygon = new Location[split.length / 6];
-        for (int i = 0; i < split.length; i += 6) {
-            polygon[i / 6] =
-                    stringToLocation(
-                            split[i]
-                                    + " "
-                                    + split[i + 1]
-                                    + " "
-                                    + split[i + 2]
-                                    + " "
-                                    + split[i + 3]
-                                    + " "
-                                    + split[i + 4]
-                                    + " "
-                                    + split[i + 5]);
-        }
-        return polygon;
-    }
-
     public static void sendCityScoreboard(Player player, City city, Plot plot) {
         FastBoard board = new FastBoard(player);
         int i = 0;
@@ -437,17 +339,6 @@ public class Utilities {
         FastBoard board = new FastBoard(player);
         board.updateTitle(plugin.getMessage("messages.city.scoreboard.nature"));
         board.updateLine(0, plugin.getMessage("messages.city.scoreboard.pvp_on"));
-    }
-
-    public static org.locationtech.jts.geom.Polygon createPolygonFromLocations(Location[] locations, GeometryFactory geometryFactory) {
-        Coordinate[] coordinates = new Coordinate[locations.length + 1];
-        for (int i = 0; i < locations.length; i++) {
-            Location loc = locations[i];
-            coordinates[i] = new Coordinate(loc.getX(), loc.getZ());
-        }
-        // Close the polygon by repeating the first coordinate at the end
-        coordinates[locations.length] = coordinates[0];
-        return geometryFactory.createPolygon(coordinates);
     }
 
     public static City hasCityPermissions(Player player, String permission, Role targetRole) {

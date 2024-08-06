@@ -6,12 +6,14 @@ import com.google.common.collect.ImmutableList;
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.city.CityDatabase;
 import live.supeer.metropolis.city.Member;
+import live.supeer.metropolis.city.Role;
 import live.supeer.metropolis.command.CommandCity;
 import live.supeer.metropolis.command.CommandHere;
 import live.supeer.metropolis.command.CommandHomeCity;
 import live.supeer.metropolis.command.CommandPlot;
 import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.utils.DateUtil;
+import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.utils.Utilities;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
@@ -23,6 +25,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
 import java.util.logging.Logger;
 
 public final class Metropolis extends JavaPlugin {
@@ -50,6 +53,7 @@ public final class Metropolis extends JavaPlugin {
         CityListener.plugin = this;
         City.plugin = this;
         Member.plugin = this;
+        LocationUtil.plugin = this;
         MetropolisListener.plugin = this;
         this.languageManager = new LanguageManager(this, "sv_se");
         if (!setupEconomy()) {
@@ -74,8 +78,7 @@ public final class Metropolis extends JavaPlugin {
         this.getServer().getPluginManager().registerEvents(new CityListener(), this);
         Database.initialize();
         Database.synchronize();
-        manager.getCommandCompletions().registerCompletion("plotType", c -> ImmutableList.of("church", "farm", "shop", "vacation"));
-        manager.getCommandCompletions().registerCompletion("cityRoles", c -> ImmutableList.of("vicemayor", "assistant", "inviter", "member", "swap", "-", "member"));
+        registerCompletions(manager);
     }
 
     @Override
@@ -132,5 +135,31 @@ public final class Metropolis extends JavaPlugin {
         } else {
             return this.getConfig().getString("settings.locale", "sv_se");
         }
+    }
+
+    public static void registerCompletions(PaperCommandManager manager) {
+        manager.getCommandCompletions().registerCompletion("plotType", c -> ImmutableList.of("church", "farm", "shop", "vacation"));
+        manager.getCommandCompletions().registerCompletion("cityRoles", c -> ImmutableList.of("vicemayor", "assistant", "inviter", "member", "swap", "-", "member"));
+        manager.getCommandCompletions().registerCompletion("cityGo1", c -> ImmutableList.of("delete", "set"));
+        manager.getCommandCompletions().registerCompletion("cityGo2", c -> ImmutableList.of("set"));
+        manager.getCommandCompletions().registerCompletion("cityGo3", c -> ImmutableList.of("displayname", "accesslevel"));
+        manager.getCommandCompletions().registerCompletion("cityGoes", c -> {
+            Player player = c.getPlayer();
+            if (player == null) {
+                return Collections.emptyList();
+            }
+
+            City city = HCDatabase.getHomeCityToCity(player.getUniqueId().toString());
+            if (city == null) {
+                return Collections.emptyList();
+            }
+
+            Role role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
+            if (role == null) {
+                return Collections.emptyList();
+            }
+
+            return CityDatabase.getCityGoNames(city, role);
+        });
     }
 }

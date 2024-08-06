@@ -3,10 +3,12 @@ package live.supeer.metropolis.plot;
 import co.aikar.idb.DB;
 import co.aikar.idb.DbRow;
 import live.supeer.metropolis.Database;
+import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.utils.Utilities;
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.utils.DateUtil;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -58,7 +60,7 @@ public class PlotDatabase {
                             + ", "
                             + Database.sqlString(player.getUniqueId().toString())
                             + ", "
-                            + Database.sqlString(Utilities.polygonToString(plotPoints))
+                            + Database.sqlString(LocationUtil.polygonToString(plotPolygon))
                             + ", "
                             + minY
                             + ", "
@@ -68,7 +70,7 @@ public class PlotDatabase {
                             + ", "
                             + "'gt'"
                             + ", "
-                            + Database.sqlString(Utilities.locationToString(plotCenter))
+                            + Database.sqlString(LocationUtil.locationToString(plotCenter))
                             + ", "
                             + DateUtil.getTimestamp()
                             + ", "
@@ -125,11 +127,12 @@ public class PlotDatabase {
         return false;
     }
 
-    public static boolean intersectsExistingPlot(Polygon polygon, int yMin, int yMax, City city) {
+    public static boolean intersectsExistingPlot(Polygon polygon, int yMin, int yMax, City city, World world) {
+        String worldName = world.getName();
         try {
             String polygonWKT = polygon.toText();
             List<DbRow> results = DB.getResults(
-                    "SELECT * FROM `mp_plots` WHERE ST_Intersects(`plotBoundary`, ST_GeomFromText(" + Database.sqlString(polygonWKT) + ")) AND `cityId` = " + city.getCityID() + " AND `plotYMin` <= " + yMax + " AND `plotYMax` >= " + yMin + ";");
+                    "SELECT * FROM `mp_plots` WHERE ST_Intersects(`plotBoundary`, ST_GeomFromText(" + Database.sqlString(polygonWKT) + ")) AND `cityId` = " + city.getCityID() + " AND `plotYMin` <= " + yMax + " AND `plotYMax` >= " + yMin + " AND `plotCenter` LIKE " + Database.sqlString(worldName + "%") + ";");
             return !results.isEmpty();
         } catch (Exception e) {
             e.printStackTrace();
@@ -137,11 +140,12 @@ public class PlotDatabase {
         return false;
     }
 
-    public static Plot[] intersectingPlots(Polygon polygon, int yMin, int yMax, City city) {
+    public static Plot[] intersectingPlots(Polygon polygon, int yMin, int yMax, City city, World world) {
+        String worldName = world.getName();
         try {
             String polygonWKT = polygon.toText();
             List<DbRow> results = DB.getResults(
-                    "SELECT * FROM `mp_plots` WHERE ST_Intersects(`plotBoundary`, ST_GeomFromText(" + Database.sqlString(polygonWKT) + ")) AND `cityId` = " + city.getCityID() + " AND `plotYMin` <= " + yMax + " AND `plotYMax` >= " + yMin + ";");
+                    "SELECT * FROM `mp_plots` WHERE ST_Intersects(`plotBoundary`, ST_GeomFromText(" + Database.sqlString(polygonWKT) + ")) AND `cityId` = " + city.getCityID() + " AND `plotYMin` <= " + yMax + " AND `plotYMax` >= " + yMin + " AND `plotCenter` LIKE " + Database.sqlString(worldName + "%") + ";");
             Plot[] plots = new Plot[results.size()];
             for (int i = 0; i < results.size(); i++) {
                 plots[i] = new Plot(results.get(i));
@@ -156,11 +160,16 @@ public class PlotDatabase {
     public static Plot getPlotAtLocation(Location location) {
         GeometryFactory geometryFactory = new GeometryFactory();
         Point point = geometryFactory.createPoint(new Coordinate(location.getX(), location.getZ()));
+        int y = location.getBlockY();
+        String worldName = location.getWorld().getName();
 
         try {
             DbRow result = DB.getFirstRow(
-                    "SELECT * FROM `mp_plots` WHERE ST_Intersects(`plotBoundary`, ST_GeomFromText(?))",
+                    "SELECT * FROM `mp_plots` WHERE ST_Intersects(`plotBoundary`, ST_GeomFromText(?)) AND `plotYMin` <= ? AND `plotYMax` >= ? AND `plotCenter` LIKE ?;",
                     point.toText()
+                    , y
+                    , y
+                    , worldName + "%"
             );
 
             if (result != null) {

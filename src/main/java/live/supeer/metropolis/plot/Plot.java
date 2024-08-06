@@ -3,9 +3,11 @@ package live.supeer.metropolis.plot;
 import co.aikar.idb.DB;
 import co.aikar.idb.DbRow;
 import live.supeer.metropolis.Database;
+import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.utils.Utilities;
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.city.CityDatabase;
+import org.bukkit.World;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
@@ -43,7 +45,8 @@ public class Plot {
     private Location plotCenter;
     private char[] plotFlags;
     private final long plotCreationDate;
-    private Location[] plotPoints;
+    private World plotWorld;
+    private Polygon plotPoints;
     private final City city;
 
     public Plot(DbRow data) {
@@ -72,13 +75,14 @@ public class Plot {
                 data.getString("plotPermsOutsiders") == null
                         ? new char[0]
                         : data.getString("plotPermsOutsiders").toCharArray();
-        this.plotCenter = Utilities.stringToLocation(data.getString("plotCenter"));
+        this.plotCenter = LocationUtil.stringToLocation(data.getString("plotCenter"));
         this.plotFlags =
                 data.getString("plotFlags") == null
                         ? new char[0]
                         : data.getString("plotFlags").toCharArray();
         this.plotCreationDate = data.getLong("plotCreationDate");
-        this.plotPoints = Utilities.stringToPolygon(data.getString("plotPoints"));
+        this.plotPoints = LocationUtil.stringToPolygon(data.getString("plotPoints"));
+        this.plotWorld = plotCenter.getWorld();
     }
 
     public void setPlotName(String plotName) {
@@ -153,7 +157,7 @@ public class Plot {
     }
 
     public void updatePlot(Player player, Location[] plotPoints, int minY, int maxY) {
-        Polygon plotPolygon = Utilities.createPolygonFromLocations(plotPoints, geometryFactory);
+        Polygon plotPolygon = LocationUtil.createPolygonFromLocations(plotPoints, geometryFactory);
         if (minY == 0 && maxY == 0) {
             for (Location plotPoint : plotPoints) {
                 if (plotPoint.getBlockY() < minY) {
@@ -175,13 +179,13 @@ public class Plot {
         try {
             DB.executeUpdate(
                     "UPDATE `mp_plots` SET `plotPoints` = "
-                            + Database.sqlString(Utilities.polygonToString(plotPoints))
+                            + Database.sqlString(LocationUtil.polygonToString(plotPolygon))
                             + ", `plotYMin` = "
                             + minY
                             + ", `plotYMax` = "
                             + maxY
                             + ", `plotCenter` = "
-                            + Database.sqlString(Utilities.locationToString(plotCenter))
+                            + Database.sqlString(LocationUtil.locationToString(plotCenter))
                             + ", `plotBoundary` = ST_GeomFromText('"
                             + plotPolygon.toText()
                             + "')"
@@ -190,7 +194,7 @@ public class Plot {
                             + ";");
 
             // Update local instance variables
-            this.plotPoints = plotPoints;
+            this.plotPoints = plotPolygon;
             this.plotYMin = minY;
             this.plotYMax = maxY;
             this.plotCenter = plotCenter;

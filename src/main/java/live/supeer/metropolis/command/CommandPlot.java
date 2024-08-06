@@ -6,6 +6,7 @@ import live.supeer.metropolis.Database;
 import live.supeer.metropolis.Metropolis;
 import live.supeer.metropolis.MetropolisListener;
 import live.supeer.metropolis.city.Role;
+import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.utils.Utilities;
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.city.CityDatabase;
@@ -115,7 +116,7 @@ public class CommandPlot extends BaseCommand {
                             regionPolygon,
                             MetropolisListener.playerYMin.get(player.getUniqueId()),
                             MetropolisListener.playerYMax.get(player.getUniqueId()),
-                            city)) {
+                            city, player.getWorld())) {
                         plugin.sendMessage(player, "messages.error.plot.intersectsExistingPlot");
                         return;
                     }
@@ -135,7 +136,7 @@ public class CommandPlot extends BaseCommand {
                                     + ", \"name\": "
                                     + plotname
                                     + ", \"points\": "
-                                    + Utilities.parsePoints(locations)
+                                    + LocationUtil.parsePoints(locations)
                                     + ", \"ymin\": "
                                     + MetropolisListener.playerYMin.get(player.getUniqueId())
                                     + ", \"ymax\": "
@@ -454,7 +455,7 @@ public class CommandPlot extends BaseCommand {
                     String.valueOf(plot.getPlotCenter().getBlockZ()));
         }
         for (Player p : Bukkit.getOnlinePlayers()) {
-            Polygon polygon = Utilities.createPolygonFromLocations(plot.getPlotPoints(), geometryFactory);
+            Polygon polygon = plot.getPlotPoints();
             Point point = geometryFactory.createPoint(new Coordinate(p.getLocation().getBlockX(), p.getLocation().getBlockZ()));
             if (polygon.contains(point)) {
                 if (plot.getPlotID() == plot.getPlotID()) {
@@ -2096,7 +2097,7 @@ public class CommandPlot extends BaseCommand {
                         plugin.sendMessage(player, "messages.error.plot.intersectsExistingClaim");
                         return;
                     }
-                    Plot[] intersectingPlots = PlotDatabase.intersectingPlots(regionPolygon, yMin, yMax, city);
+                    Plot[] intersectingPlots = PlotDatabase.intersectingPlots(regionPolygon, yMin, yMax, city, player.getWorld());
                     if (!(intersectingPlots == null) && intersectingPlots.length > 1) {
                         plugin.sendMessage(player, "messages.error.plot.intersectsExistingPlot");
                         return;
@@ -2108,7 +2109,7 @@ public class CommandPlot extends BaseCommand {
                                     + ", \"name\": "
                                     + plot.getPlotName()
                                     + ", \"points\": "
-                                    + Utilities.parsePoints(locations)
+                                    + LocationUtil.parsePoints(locations)
                                     + ", \"ymin\": "
                                     + MetropolisListener.playerYMin.get(player.getUniqueId())
                                     + ", \"ymax\": "

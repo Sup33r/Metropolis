@@ -13,13 +13,11 @@ public class PlayerExitCityEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
     private final Player player;
     private final City city;
-    private final PlayerMoveEvent moveEvent;
     private final boolean toNature;
 
-    public PlayerExitCityEvent(Player player, City city, PlayerMoveEvent moveEvent, boolean toNature) {
+    public PlayerExitCityEvent(Player player, City city, boolean toNature) {
         this.player = player;
         this.city = city;
-        this.moveEvent = moveEvent;
         this.toNature = toNature;
     }
 

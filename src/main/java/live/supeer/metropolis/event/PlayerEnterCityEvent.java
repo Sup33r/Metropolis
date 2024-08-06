@@ -13,12 +13,10 @@ public class PlayerEnterCityEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
     private final Player player;
     private final City city;
-    private final PlayerMoveEvent moveEvent;
 
-    public PlayerEnterCityEvent(Player player, City city, PlayerMoveEvent moveEvent) {
+    public PlayerEnterCityEvent(Player player, City city) {
         this.player = player;
         this.city = city;
-        this.moveEvent = moveEvent;
     }
 
     @Override

@@ -5,6 +5,7 @@ import co.aikar.idb.DbRow;
 import live.supeer.metropolis.Database;
 import live.supeer.metropolis.Metropolis;
 import live.supeer.metropolis.homecity.HCDatabase;
+import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.utils.Utilities;
 import live.supeer.metropolis.plot.Plot;
 import lombok.Getter;
@@ -42,7 +43,7 @@ public class City {
         this.originalMayorName = data.getString("originalMayorName");
         this.originalMayorUUID = data.getString("originalMayorUUID");
         this.cityBalance = data.getInt("cityBalance");
-        this.citySpawn = Utilities.stringToLocation(data.getString("citySpawn"));
+        this.citySpawn = LocationUtil.stringToLocation(data.getString("citySpawn"));
         this.cityCreationDate = data.getLong("createDate");
         this.enterMessage = data.getString("enterMessage");
         this.exitMessage = data.getString("exitMessage");
@@ -92,7 +93,7 @@ public class City {
         this.citySpawn = citySpawn;
         DB.executeUpdateAsync(
                 "UPDATE `mp_cities` SET `citySpawn` = "
-                        + Database.sqlString(Utilities.locationToString(citySpawn))
+                        + Database.sqlString(LocationUtil.locationToString(citySpawn))
                         + " WHERE `cityID` = "
                         + cityID
                         + ";");

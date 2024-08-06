@@ -7,6 +7,8 @@ import co.aikar.idb.DB;
 import live.supeer.metropolis.Database;
 import live.supeer.metropolis.Metropolis;
 import live.supeer.metropolis.MetropolisListener;
+import live.supeer.metropolis.event.PlayerEnterCityEvent;
+import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.utils.Utilities;
 import live.supeer.metropolis.city.*;
 import live.supeer.metropolis.homecity.HCDatabase;
@@ -216,7 +218,7 @@ public class CommandCity extends BaseCommand {
                         + ", \"tax\": "
                         + Metropolis.configuration.getCityStartingTax()
                         + ", \"spawn\": "
-                        + Utilities.formatLocation(city.getCitySpawn())
+                        + LocationUtil.formatLocation(city.getCitySpawn())
                         + ", \"balance\": "
                         + Metropolis.configuration.getCityStartingBalance()
                         + ", \"player\": "
@@ -237,17 +239,16 @@ public class CommandCity extends BaseCommand {
                         + player.getUniqueId().toString()
                         + " }");
         CityDatabase.setCityRole(city, player.getUniqueId().toString(), Role.MAYOR);
-        Claim claim =
-                CityDatabase.createClaim(city, player.getLocation(), false, player.getName(), player.getUniqueId().toString());
-        MetropolisListener.playerInCity.put(player.getUniqueId(), city);
-        Utilities.sendCityScoreboard(player, city, null);
+        Claim claim = CityDatabase.createClaim(city, player.getLocation(), false, player.getName(), player.getUniqueId().toString());
+        PlayerEnterCityEvent enterCityEvent = new PlayerEnterCityEvent(player, city);
+        Bukkit.getServer().getPluginManager().callEvent(enterCityEvent);
         assert claim != null;
         Database.addLogEntry(
                 city,
                 "{ \"type\": \"buy\", \"subtype\": \"claim\", \"balance\": "
                         + "0"
                         + ", \"claimlocation\": "
-                        + Utilities.formatChunk(
+                        + LocationUtil.formatChunk(
                         claim.getClaimWorld(), claim.getXPosition(), claim.getZPosition())
                         + ", \"player\": "
                         + player.getUniqueId().toString()
@@ -323,13 +324,13 @@ public class CommandCity extends BaseCommand {
                     "{ \"type\": \"buy\", \"subtype\": \"claim\", \"balance\": "
                             + "500"
                             + ", \"claimlocation\": "
-                            + Utilities.formatChunk(
+                            + LocationUtil.formatChunk(
                             claim.getClaimWorld(), claim.getXPosition(), claim.getZPosition())
                             + ", \"player\": "
                             + player.getUniqueId().toString()
                             + " }");
-            MetropolisListener.playerInCity.put(player.getUniqueId(), city);
-            Utilities.sendCityScoreboard(player, city, null);
+            PlayerEnterCityEvent enterCityEvent = new PlayerEnterCityEvent(player, city);
+            Bukkit.getServer().getPluginManager().callEvent(enterCityEvent);
             CityDatabase.removeCityBalance(city, Metropolis.configuration.getCityClaimCost());
             plugin.sendMessage(player, "messages.city.successful.claim", "%cityname%", city.getCityName(), "%amount%", Utilities.formattedMoney(Metropolis.configuration.getCityClaimCost()));
         } else {
@@ -528,6 +529,7 @@ public class CommandCity extends BaseCommand {
     }
 
     @Subcommand("go")
+    @CommandCompletion("@cityGoes @cityGo1 @cityGo2 @cityGo3")
     public static void onGo(Player player, String[] args) {
         if (!player.hasPermission("metropolis.city.go")) {
             plugin.sendMessage(player, "messages.error.permissionDenied");
@@ -607,7 +609,7 @@ public class CommandCity extends BaseCommand {
                                     Math.ceil(
                                             ((double) CityDatabase.getCityGoCount(city, role))
                                                     / ((double) itemsPerPage))));
-            player.sendMessage("§a" + tmpMessage.substring(0, tmpMessage.length() - 2));
+            player.sendMessage("§a" + tmpMessage.substring(0, tmpMessage.length() - 4));
 
         } else if (args.length == 2) {
             if (!CityDatabase.cityGoExists(args[0], city)) {
@@ -1194,7 +1196,7 @@ public class CommandCity extends BaseCommand {
                             + ", \"balance\": "
                             + Metropolis.configuration.getCityGoCost()
                             + ", \"claimlocation\": "
-                            + Utilities.formatLocation(player.getLocation())
+                            + LocationUtil.formatLocation(player.getLocation())
                             + " }");
             plugin.sendMessage(
                     player, "messages.city.go.created", "%cityname%", city.getCityName(), "%name%", name);
@@ -1221,9 +1223,10 @@ public class CommandCity extends BaseCommand {
                             + ", \"balance\": "
                             + Metropolis.configuration.getCityOutpostCost()
                             + ", \"claimlocation\": "
-                            + Utilities.formatLocation(player.getLocation())
+                            + LocationUtil.formatLocation(player.getLocation())
                             + " }");
-            Utilities.sendCityScoreboard(player, city, null);
+            PlayerEnterCityEvent enterCityEvent = new PlayerEnterCityEvent(player, city);
+            Bukkit.getServer().getPluginManager().callEvent(enterCityEvent);
             plugin.sendMessage(player, "messages.city.successful.outpost", "%cityname%", city.getCityName(), "%amount%", Utilities.formattedMoney(Metropolis.configuration.getCityOutpostCost()));
         }
     }

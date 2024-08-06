@@ -19,7 +19,7 @@ public class CityListener implements Listener {
         if (city.getEnterMessage() != null) {
             plugin.sendMessage(event.getPlayer(), "messages.city.enter", "%cityname%", city.getCityName(), "%enter%", city.getEnterMessage());
         }
-
+        MetropolisListener.playerInCity.put(event.getPlayer().getUniqueId(), city);
         Utilities.sendCityScoreboard(event.getPlayer(), city, null);
 
         event.getPlayer().sendMessage("You have entered " + event.getCity().getCityName());
@@ -28,6 +28,7 @@ public class CityListener implements Listener {
     @EventHandler
     public void onPlayerExitCity(PlayerExitCityEvent event) {
         City city = event.getCity();
+        MetropolisListener.playerInCity.remove(event.getPlayer().getUniqueId(), city);
         if (city.getExitMessage() != null) {
             plugin.sendMessage(event.getPlayer(), "messages.city.exit", "%cityname%", city.getCityName(), "%exit%", city.getExitMessage());
         }
@@ -42,12 +43,14 @@ public class CityListener implements Listener {
     @EventHandler
     public void onPlayerEnterPlot(PlayerEnterPlotEvent event) {
         event.getPlayer().sendMessage("You have entered the plot " + event.getPlot().getPlotName());
+        MetropolisListener.playerInPlot.put(event.getPlayer().getUniqueId(), event.getPlot());
         Utilities.sendCityScoreboard(event.getPlayer(), event.getPlot().getCity(), event.getPlot());
     }
 
     @EventHandler
     public void onPlayerExitPlot(PlayerExitPlotEvent event) {
         event.getPlayer().sendMessage("You have exited the plot " + event.getPlot().getPlotName());
+        MetropolisListener.playerInPlot.remove(event.getPlayer().getUniqueId(), event.getPlot());
         Utilities.sendCityScoreboard(event.getPlayer(), event.getPlot().getCity(), null);
     }
 
