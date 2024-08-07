@@ -8,8 +8,8 @@ sql:
 settings:
   limits:
     cityname: 16
-    citygoname: 20
-    citygodisplayname: 30
+    citygoname: 42
+    citygodisplayname: 42
     motd: 250
     entermessage: 225
     exitmessage: 225
