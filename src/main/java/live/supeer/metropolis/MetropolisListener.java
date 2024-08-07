@@ -193,7 +193,6 @@ public class MetropolisListener implements Listener {
                     return;
                 }
 
-                savedLocs.get(player.getUniqueId()).add(event.getClickedBlock().getLocation());
                 plugin.sendMessage(
                         player,
                         "messages.city.markings.add",
@@ -227,6 +226,7 @@ public class MetropolisListener implements Listener {
                     plugin.sendMessage(player, "messages.city.markings.finish");
                     savedPlayers.add(player);
                 }
+                savedLocs.get(player.getUniqueId()).add(event.getClickedBlock().getLocation());
             }
             }
     }
@@ -273,13 +273,11 @@ public class MetropolisListener implements Listener {
     @EventHandler
     public void onMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
-        Location from = event.getFrom();
-        Location to = event.getTo();
-
+        Location from = event.getFrom().toBlockLocation();
+        Location to = event.getTo().toBlockLocation();
         if (from.getBlockX() == to.getBlockX() && from.getBlockY() == to.getBlockY() && from.getBlockZ() == to.getBlockZ()) {
             return;
         }
-
         // Existing city enter/exit logic
         if ((from.getBlockX() >> 4) != (to.getBlockX() >> 4) || (from.getBlockZ() >> 4) != (to.getBlockZ() >> 4)) {
             // Autoclaiming check
@@ -289,7 +287,6 @@ public class MetropolisListener implements Listener {
                 AutoclaimAttemptEvent autoclaimEvent = new AutoclaimAttemptEvent(player, city, to.toBlockLocation());
                 Bukkit.getPluginManager().callEvent(autoclaimEvent);
             }
-
             if (playerInCity.containsKey(player.getUniqueId()) && CityDatabase.getClaim(to) == null) {
                 City fromCity = playerInCity.get(player.getUniqueId());
                 PlayerExitCityEvent exitCityEvent = new PlayerExitCityEvent(player, fromCity, true);

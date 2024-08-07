@@ -76,17 +76,19 @@ public class CommandPlot extends BaseCommand {
             return;
         }
         Polygon regionPolygon = MetropolisListener.playerPolygons.get(player.getUniqueId());
-        Location[] locations =
-                MetropolisListener.savedLocs.get(player.getUniqueId()).toArray(new Location[0]);
+        Location[] locations = MetropolisListener.savedLocs.get(player.getUniqueId()).toArray(new Location[0]);
         double minX = regionPolygon.getEnvelopeInternal().getMinX();
         double maxX = regionPolygon.getEnvelopeInternal().getMaxX();
         double minY = regionPolygon.getEnvelopeInternal().getMinY();
         double maxY = regionPolygon.getEnvelopeInternal().getMaxY();
+        player.sendMessage("minX: " + minX + " | maxX: " + maxX + " | minY: " + minY + " | maxY: " + maxY);
 
         if (maxX - minX < 3 || maxY - minY < 3) {
             plugin.sendMessage(player, "messages.error.plot.tooSmall");
             return;
         }
+        player.sendMessage(String.valueOf(MetropolisListener.playerYMin.get(player.getUniqueId())));
+        player.sendMessage(String.valueOf(MetropolisListener.playerYMax.get(player.getUniqueId())));
         if (MetropolisListener.playerYMax.get(player.getUniqueId()) - MetropolisListener.playerYMin.get(player.getUniqueId()) < 3 || !MetropolisListener.playerYMin.containsKey(player.getUniqueId()) || !MetropolisListener.playerYMax.containsKey(player.getUniqueId())) {
             plugin.sendMessage(player, "messages.error.plot.tooLowY");
             return;
@@ -97,6 +99,7 @@ public class CommandPlot extends BaseCommand {
         int endX = (int) Math.floor(maxX / chunkSize) * chunkSize + chunkSize;
         int startY = (int) Math.floor(minY / chunkSize) * chunkSize;
         int endY = (int) Math.floor(maxY / chunkSize) * chunkSize + chunkSize;
+        player.sendMessage("startX: " + startX + " | endX: " + endX + " | startY: " + startY + " | endY: " + endY);
 
         for (int x = startX; x < endX; x += chunkSize) {
             for (int z = startY; z < endY; z += chunkSize) {
@@ -123,11 +126,12 @@ public class CommandPlot extends BaseCommand {
                     Plot plot =
                             PlotDatabase.createPlot(
                                     player,
-                                    locations,
+                                    regionPolygon,
                                     plotname,
                                     city,
                                     MetropolisListener.playerYMin.get(player.getUniqueId()),
-                                    MetropolisListener.playerYMax.get(player.getUniqueId()));
+                                    MetropolisListener.playerYMax.get(player.getUniqueId()),
+                                    player.getWorld());
                     assert plot != null;
                     Database.addLogEntry(
                             city,
@@ -158,6 +162,16 @@ public class CommandPlot extends BaseCommand {
                 }
             }
         }
+    }
+
+    @Subcommand("get")
+    public static void onGet(Player player) {
+        Plot plot = PlotDatabase.getPlotAtLocation(player.getLocation().toBlockLocation());
+        if (plot == null) {
+            plugin.sendMessage(player, "messages.error.plot.notInPlot");
+            return;
+        }
+        player.sendMessage(plot.getPlotName());
     }
 
     @Subcommand("expand")

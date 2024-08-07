@@ -12,6 +12,7 @@ import live.supeer.metropolis.command.CommandHere;
 import live.supeer.metropolis.command.CommandHomeCity;
 import live.supeer.metropolis.command.CommandPlot;
 import live.supeer.metropolis.homecity.HCDatabase;
+import live.supeer.metropolis.plot.PlotDatabase;
 import live.supeer.metropolis.utils.DateUtil;
 import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.utils.Utilities;
@@ -55,6 +56,7 @@ public final class Metropolis extends JavaPlugin {
         Member.plugin = this;
         LocationUtil.plugin = this;
         MetropolisListener.plugin = this;
+        PlotDatabase.plugin = this;
         this.languageManager = new LanguageManager(this, "sv_se");
         if (!setupEconomy()) {
             this.getLogger().severe("[Metropolis] Vault not found, disabling plugin");

@@ -3,6 +3,7 @@ package live.supeer.metropolis.plot;
 import co.aikar.idb.DB;
 import co.aikar.idb.DbRow;
 import live.supeer.metropolis.Database;
+import live.supeer.metropolis.Metropolis;
 import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.utils.Utilities;
 import live.supeer.metropolis.city.City;
@@ -19,34 +20,24 @@ import java.awt.*;
 import java.util.List;
 
 public class PlotDatabase {
+    public static Metropolis plugin;
 
-    public static Plot createPlot(Player player, Location[] plotPoints, String plotName, City city, int minY, int maxY) {
+    public static Plot createPlot(Player player, Polygon plotPolygon, String plotName, City city, int minY, int maxY, World world) {
         if (plotName == null) {
             int plotAmount = getPlotAmount() + 1;
             plotName = "Tomt #" + plotAmount;
         }
 
-        GeometryFactory geometryFactory = new GeometryFactory();
-        Coordinate[] coordinates = new Coordinate[plotPoints.length + 1];
-        for (int i = 0; i < plotPoints.length; i++) {
-            coordinates[i] = new Coordinate(plotPoints[i].getBlockX(), plotPoints[i].getBlockZ());
-        }
-        coordinates[plotPoints.length] = coordinates[0];
-        Polygon plotPolygon = geometryFactory.createPolygon(coordinates);
+
 
         if (minY == 0 && maxY == 0) {
-            for (Location plotPoint : plotPoints) {
-                if (plotPoint.getBlockY() < minY) {
-                    minY = plotPoint.getBlockY();
-                }
-                if (plotPoint.getBlockY() > maxY) {
-                    maxY = plotPoint.getBlockY();
-                }
-            }
+            minY = 0;
+            maxY = 256;
+            plugin.getLogger().warning("PlotDatabase.createPlot: minY and maxY was 0, setting to 0 and 256");
         }
         int centerX = (int) (plotPolygon.getEnvelopeInternal().getMinX() + plotPolygon.getEnvelopeInternal().getWidth() / 2);
         int centerZ = (int) (plotPolygon.getEnvelopeInternal().getMinY() + plotPolygon.getEnvelopeInternal().getHeight() / 2);
-        Location plotCenter = new Location(plotPoints[0].getWorld(), centerX, player.getWorld().getHighestBlockYAt(centerX, centerZ) + 1, centerZ);
+        Location plotCenter = new Location(world, centerX, player.getWorld().getHighestBlockYAt(centerX, centerZ) + 1, centerZ);
         try {
             DB.executeUpdate(
                     "INSERT INTO `mp_plots` (`cityId`, `cityName`, `plotName`, `plotOwner`, `plotOwnerUUID`, `plotPoints`, `plotYMin`, `plotYMax`, `plotPermsMembers`, `plotPermsOutsiders`, `plotCenter`, `plotCreationDate`, `plotBoundary`) VALUES ("
