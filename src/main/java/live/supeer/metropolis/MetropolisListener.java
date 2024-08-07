@@ -11,10 +11,8 @@ import live.supeer.metropolis.utils.DateUtil;
 import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.utils.Utilities;
 import org.bukkit.event.player.*;
-import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
-import org.locationtech.jts.geom.Point;
 import net.coreprotect.CoreProtect;
 import net.coreprotect.CoreProtectAPI;
 import org.bukkit.Bukkit;
@@ -27,7 +25,6 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.plugin.Plugin;
 
-import java.awt.*;
 import java.util.*;
 import java.util.List;
 
@@ -68,7 +65,7 @@ public class MetropolisListener implements Listener {
         if (CityDatabase.getClaim(player.getLocation()) != null) {
             if (CityDatabase.getCity(Objects.requireNonNull(CityDatabase.getClaim(player.getLocation())).getCityName()).isEmpty()) {
                 Utilities.sendNatureScoreboard(player);
-                playerInCity.remove(player.getUniqueId());
+                Metropolis.playerInCity.remove(player.getUniqueId());
                 return;
             }
             City city = CityDatabase.getCity(Objects.requireNonNull(CityDatabase.getClaim(player.getLocation())).getCityName()).get();
@@ -81,7 +78,7 @@ public class MetropolisListener implements Listener {
             }
         } else {
             Utilities.sendNatureScoreboard(player);
-            playerInCity.remove(player.getUniqueId());
+            Metropolis.playerInCity.remove(player.getUniqueId());
         }
         String[] list = CityDatabase.memberCityList(player.getUniqueId().toString());
         for (int i = 0; i < Objects.requireNonNull(list).length; i++) {
@@ -99,8 +96,6 @@ public class MetropolisListener implements Listener {
     public static HashMap<UUID, Polygon> playerPolygons = new HashMap<>();
     public static HashMap<UUID, Integer> playerYMin = new HashMap<>();
     public static HashMap<UUID, Integer> playerYMax = new HashMap<>();
-    public static HashMap<UUID, City> playerInCity = new HashMap<>();
-    public static HashMap<UUID, Plot> playerInPlot = new HashMap<>();
     public static HashMap<UUID, List<String[]>> savedBlockHistory = new HashMap<>();
 
     @EventHandler
@@ -287,18 +282,18 @@ public class MetropolisListener implements Listener {
                 AutoclaimAttemptEvent autoclaimEvent = new AutoclaimAttemptEvent(player, city, to.toBlockLocation());
                 Bukkit.getPluginManager().callEvent(autoclaimEvent);
             }
-            if (playerInCity.containsKey(player.getUniqueId()) && CityDatabase.getClaim(to) == null) {
-                City fromCity = playerInCity.get(player.getUniqueId());
+            if (Metropolis.playerInCity.containsKey(player.getUniqueId()) && CityDatabase.getClaim(to) == null) {
+                City fromCity = Metropolis.playerInCity.get(player.getUniqueId());
                 PlayerExitCityEvent exitCityEvent = new PlayerExitCityEvent(player, fromCity, true);
                 Bukkit.getServer().getPluginManager().callEvent(exitCityEvent);
-            } else if (playerInCity.containsKey(player.getUniqueId()) && CityDatabase.getClaim(to) != null && playerInCity.get(player.getUniqueId()) != CityDatabase.getCity(Objects.requireNonNull(CityDatabase.getClaim(to)).getCityName()).get()) {
-                City fromCity = playerInCity.get(player.getUniqueId());
+            } else if (Metropolis.playerInCity.containsKey(player.getUniqueId()) && CityDatabase.getClaim(to) != null && Metropolis.playerInCity.get(player.getUniqueId()) != CityDatabase.getCity(Objects.requireNonNull(CityDatabase.getClaim(to)).getCityName()).get()) {
+                City fromCity = Metropolis.playerInCity.get(player.getUniqueId());
                 City toCity = CityDatabase.getCity(Objects.requireNonNull(CityDatabase.getClaim(to)).getCityName()).get();
                 PlayerExitCityEvent exitCityEvent = new PlayerExitCityEvent(player, fromCity, false);
                 Bukkit.getServer().getPluginManager().callEvent(exitCityEvent);
                 PlayerEnterCityEvent enterCityEvent = new PlayerEnterCityEvent(player, toCity);
                 Bukkit.getServer().getPluginManager().callEvent(enterCityEvent);
-            } else if (!playerInCity.containsKey(player.getUniqueId()) && CityDatabase.getClaim(to) != null) {
+            } else if (!Metropolis.playerInCity.containsKey(player.getUniqueId()) && CityDatabase.getClaim(to) != null) {
                 City toCity = CityDatabase.getCity(Objects.requireNonNull(CityDatabase.getClaim(to)).getCityName()).get();
                 PlayerEnterCityEvent enterCityEvent = new PlayerEnterCityEvent(player, toCity);
                 Bukkit.getServer().getPluginManager().callEvent(enterCityEvent);
@@ -308,16 +303,16 @@ public class MetropolisListener implements Listener {
 
         // Existing plot enter/exit logic
         if (from.getX() != to.getX() || from.getZ() != to.getZ() || from.getY() != to.getY()) {
-            if (playerInCity.containsKey(player.getUniqueId())) {
+            if (Metropolis.playerInCity.containsKey(player.getUniqueId())) {
                 Plot plot = PlotDatabase.getPlotAtLocation(to);
                 if (plot == null) {
-                    if (playerInPlot.containsKey(player.getUniqueId())) {
-                        PlayerExitPlotEvent exitEvent = new PlayerExitPlotEvent(player, playerInPlot.get(player.getUniqueId()));
+                    if (Metropolis.playerInPlot.containsKey(player.getUniqueId())) {
+                        PlayerExitPlotEvent exitEvent = new PlayerExitPlotEvent(player, Metropolis.playerInPlot.get(player.getUniqueId()));
                         plugin.getServer().getPluginManager().callEvent(exitEvent);
                     }
                     return;
                 }
-                if (!playerInPlot.containsKey(player.getUniqueId())) {
+                if (!Metropolis.playerInPlot.containsKey(player.getUniqueId())) {
                     PlayerEnterPlotEvent enterEvent = new PlayerEnterPlotEvent(player, plot);
                     plugin.getServer().getPluginManager().callEvent(enterEvent);
                 }
@@ -338,8 +333,8 @@ public class MetropolisListener implements Listener {
         }
 
         // Check for city changes
-        if (playerInCity.containsKey(playerId)) {
-            City fromCity = playerInCity.get(playerId);
+        if (Metropolis.playerInCity.containsKey(playerId)) {
+            City fromCity = Metropolis.playerInCity.get(playerId);
             if (CityDatabase.getClaim(to) == null) {
                 PlayerExitCityEvent exitCityEvent = new PlayerExitCityEvent(player, fromCity, true);
                 Bukkit.getServer().getPluginManager().callEvent(exitCityEvent);
@@ -359,14 +354,14 @@ public class MetropolisListener implements Listener {
         }
 
         // Check for plot changes
-        if (playerInCity.containsKey(playerId)) {
+        if (Metropolis.playerInCity.containsKey(playerId)) {
             Plot plot = PlotDatabase.getPlotAtLocation(to);
             if (plot == null) {
-                if (playerInPlot.containsKey(playerId)) {
-                    PlayerExitPlotEvent exitEvent = new PlayerExitPlotEvent(player, playerInPlot.get(playerId));
+                if (Metropolis.playerInPlot.containsKey(playerId)) {
+                    PlayerExitPlotEvent exitEvent = new PlayerExitPlotEvent(player, Metropolis.playerInPlot.get(playerId));
                     plugin.getServer().getPluginManager().callEvent(exitEvent);
                 }
-            } else if (!playerInPlot.containsKey(playerId)) {
+            } else if (!Metropolis.playerInPlot.containsKey(playerId)) {
                 PlayerEnterPlotEvent enterEvent = new PlayerEnterPlotEvent(player, plot);
                 plugin.getServer().getPluginManager().callEvent(enterEvent);
             }
@@ -386,8 +381,8 @@ public class MetropolisListener implements Listener {
         }
 
         // Check for city changes
-        if (playerInCity.containsKey(playerId)) {
-            City fromCity = playerInCity.get(playerId);
+        if (Metropolis.playerInCity.containsKey(playerId)) {
+            City fromCity = Metropolis.playerInCity.get(playerId);
             if (CityDatabase.getClaim(to) == null) {
                 PlayerExitCityEvent exitCityEvent = new PlayerExitCityEvent(player, fromCity, true);
                 Bukkit.getServer().getPluginManager().callEvent(exitCityEvent);
@@ -407,14 +402,14 @@ public class MetropolisListener implements Listener {
         }
 
         // Check for plot changes
-        if (playerInCity.containsKey(playerId)) {
+        if (Metropolis.playerInCity.containsKey(playerId)) {
             Plot plot = PlotDatabase.getPlotAtLocation(to);
             if (plot == null) {
-                if (playerInPlot.containsKey(playerId)) {
-                    PlayerExitPlotEvent exitEvent = new PlayerExitPlotEvent(player, playerInPlot.get(playerId));
+                if (Metropolis.playerInPlot.containsKey(playerId)) {
+                    PlayerExitPlotEvent exitEvent = new PlayerExitPlotEvent(player, Metropolis.playerInPlot.get(playerId));
                     plugin.getServer().getPluginManager().callEvent(exitEvent);
                 }
-            } else if (!playerInPlot.containsKey(playerId)) {
+            } else if (!Metropolis.playerInPlot.containsKey(playerId)) {
                 PlayerEnterPlotEvent enterEvent = new PlayerEnterPlotEvent(player, plot);
                 plugin.getServer().getPluginManager().callEvent(enterEvent);
             }

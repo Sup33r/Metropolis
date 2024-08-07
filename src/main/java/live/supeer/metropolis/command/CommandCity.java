@@ -1466,6 +1466,12 @@ public class CommandCity extends BaseCommand {
             return;
         }
         city.removeCityMember(city.getCityMember(player.getUniqueId().toString()));
+        Database.addLogEntry(
+                city,
+                "{ \"type\": \"leave\", \"player\": "
+                        + player.getUniqueId().toString()
+                        + " }");
+        Utilities.sendScoreboard(player);
         plugin.sendMessage(player, "messages.city.leave.success", "%cityname%", cityname);
         for (Player online : Bukkit.getOnlinePlayers()) {
             if (CityDatabase.memberExists(online.getUniqueId().toString(), city)) {

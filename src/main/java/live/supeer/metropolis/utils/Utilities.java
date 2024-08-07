@@ -334,6 +334,15 @@ public class Utilities {
         board.updateLine(0, plugin.getMessage("messages.city.scoreboard.pvp_on"));
     }
 
+    public static void sendScoreboard(Player player) {
+        if (!Metropolis.playerInCity.containsKey(player.getUniqueId())) {
+            sendNatureScoreboard(player);
+            return;
+        }
+        City city = Metropolis.playerInCity.get(player.getUniqueId());
+        Plot plot = Metropolis.playerInPlot.get(player.getUniqueId());
+        sendCityScoreboard(player, city, plot);
+    }
     public static City hasCityPermissions(Player player, String permission, Role targetRole) {
         if (!player.hasPermission(permission)) {
             plugin.sendMessage(player, "messages.error.permissionDenied");

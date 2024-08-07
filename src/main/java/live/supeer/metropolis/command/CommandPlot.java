@@ -24,7 +24,6 @@ import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -567,8 +566,8 @@ public class CommandPlot extends BaseCommand {
                 "%cityname%",
                 city.getCityName());
         player.teleport(plot.getPlotCenter());
-        MetropolisListener.playerInPlot.put(player.getUniqueId(), plot);
-        MetropolisListener.playerInCity.put(player.getUniqueId(), city);
+        Metropolis.playerInPlot.put(player.getUniqueId(), plot);
+        Metropolis.playerInCity.put(player.getUniqueId(), city);
         Utilities.sendCityScoreboard(player, city, plot);
     }
 

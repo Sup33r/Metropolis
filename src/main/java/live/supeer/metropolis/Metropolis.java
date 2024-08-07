@@ -12,6 +12,7 @@ import live.supeer.metropolis.command.CommandHere;
 import live.supeer.metropolis.command.CommandHomeCity;
 import live.supeer.metropolis.command.CommandPlot;
 import live.supeer.metropolis.homecity.HCDatabase;
+import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.plot.PlotDatabase;
 import live.supeer.metropolis.utils.DateUtil;
 import live.supeer.metropolis.utils.LocationUtil;
@@ -27,9 +28,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 public final class Metropolis extends JavaPlugin {
+    public static HashMap<UUID, City> playerInCity = new HashMap<>();
+    public static HashMap<UUID, Plot> playerInPlot = new HashMap<>();
     public Logger logger = null;
     public static MetropolisConfiguration configuration;
     @Getter
