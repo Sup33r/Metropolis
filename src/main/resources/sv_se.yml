@@ -286,6 +286,12 @@ messages:
           2: "<gray>f = frame, g = go, h = home, j = jukebox"
           3: "<gray>r = repair (anvil), s = switch, t = teleport, v = villager"
   city:
+    autoclaim:
+      notNature: "<red>Markbiten du står på tillhör inte naturen."
+      started: "<yellow>%cityname% <gray>| <green>Autoövertagningen av markbitar har startats. \n<green>Markbitar kvar på autoövertagning: %remaining%. Avbryt med <dark_green>/city claim -<green>."
+      stopped: "<yellow>%cityname% <gray>| <green>Autoövertagningen av markbitar har avslutats."
+      claimed: "<yellow>%cityname% <gray>| <green>Markbiten har blivit övertagen för %amount% minemynt. \n<green>Markbitar kvar på autoövertagning: %remaining%.Avbryt med <dark_green>/city claim -<green>."
+      unclaimable: "<red>Markbiten är inte tillgänglig för övertagande, och autoövertagningen avslutade därmed."
     list:
       header: "<dark_green>--- <green>Städer <dark_green>---"
       none: "<red>Inga städer hittades."
@@ -304,7 +310,7 @@ messages:
     ban:
       success: "<yellow>%cityname% <gray>| <green>Spelaren %player% har blivit bannlyst från staden i %length%, med anledningen: %reason%."
       alreadyBanned: "<yellow>%cityname% <gray>| <red>Spelaren  %player% är redan bannlyst från staden."
-      none: "<yellow>%cityname% <gray>| <red>Det finns inga bannlysta spelare i staden."
+      none: "<yellow>%cityname% <gray>| <red>Inga spelare är bannlysta från staden."
       header: "<dark_red>--- <red>Bannlysta spelare i staden: %cityname% <dark_red>---"
       unbanned: "<yellow>%cityname% <gray>| <green>Spelaren %player%s bannlysning från staden har blivit upphävd."
       notBanned: "<yellow>%cityname% <gray>| <red>Spelaren i fråga är inte bannlyst från staden."

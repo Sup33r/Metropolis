@@ -4,6 +4,7 @@ import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation .*;
 import co.aikar.commands.annotation.Optional;
 import co.aikar.idb.DB;
+import live.supeer.metropolis.AutoclaimManager;
 import live.supeer.metropolis.Database;
 import live.supeer.metropolis.Metropolis;
 import live.supeer.metropolis.MetropolisListener;
@@ -273,7 +274,7 @@ public class CommandCity extends BaseCommand {
     }
 
     @Subcommand("claim")
-    public static void onClaim(Player player, @Optional String mass) {
+    public static void onClaim(Player player, @Optional String arg) {
         if (!player.hasPermission("metropolis.city.claim")) {
             plugin.sendMessage(player, "messages.error.permissionDenied");
             return;
@@ -283,15 +284,88 @@ public class CommandCity extends BaseCommand {
             return;
         }
         String cityName = HCDatabase.getHomeCityToCityname(player.getUniqueId().toString());
-        if (CityDatabase.getClaim(player.getLocation()) != null) {
-            plugin.sendMessage(player, "messages.error.city.claimExists");
-            return;
-        }
+
         if (CityDatabase.getCity(cityName).isEmpty()) {
             plugin.sendMessage(player, "messages.error.missing.city");
             return;
         }
         City city = CityDatabase.getCity(cityName).get();
+
+        if (arg != null) {
+            if (arg.equals("-")) {
+                // Stop autoclaiming
+                AutoclaimManager.stopAutoclaim(player);
+                plugin.sendMessage(player, "messages.city.autoclaim.stopped", "%cityname%", cityName);
+                return;
+            }
+
+            try {
+                int autoclaimCount = Integer.parseInt(arg);
+                if (autoclaimCount > 0) {
+                    if (CityDatabase.getClaim(player.getLocation()) != null) {
+                        plugin.sendMessage(player, "messages.city.autoclaim.notNature");
+                        return;
+                    }
+                    if (CityDatabase.getCityBalance(city) < Metropolis.configuration.getCityClaimCost()) {
+                        plugin.sendMessage(player, "messages.error.missing.claimCost", "%cityname%", city.getCityName(), "%cost%", ""+Metropolis.configuration.getCityClaimCost());
+                        return;
+                    }
+                    if (Utilities.isCloseToOtherCity(player, player.getLocation(), "city")) {
+                        plugin.sendMessage(player, "messages.error.city.tooCloseToOtherCity");
+                        return;
+                    }
+                    if (CityDatabase.getCityRole(city, player.getUniqueId().toString()) == null || Objects.equals(CityDatabase.getCityRole(city, player.getUniqueId().toString()), Role.MEMBER)
+                            || Objects.equals(
+                            CityDatabase.getCityRole(city, player.getUniqueId().toString()), Role.INVITER)) {
+                        plugin.sendMessage(player, "messages.error.city.permissionDenied", "%cityname%", cityName);
+                        return;
+                    }
+
+                    Claim claim1 = CityDatabase.getClaim(player.getLocation().add(16, 0, 0));
+                    Claim claim2 = CityDatabase.getClaim(player.getLocation().add(-16, 0, 0));
+                    Claim claim3 = CityDatabase.getClaim(player.getLocation().add(0, 0, 16));
+                    Claim claim4 = CityDatabase.getClaim(player.getLocation().add(0, 0, -16));
+
+                    if ((claim1 != null && claim1.getCity() == city) ||
+                            (claim2 != null && claim2.getCity() == city) ||
+                            (claim3 != null && claim3.getCity() == city) ||
+                            (claim4 != null && claim4.getCity() == city)) {
+                        Claim claim = CityDatabase.createClaim(city, player.getLocation(), false, player.getName(), player.getUniqueId().toString());
+                        assert claim != null;
+                        Database.addLogEntry(
+                                city,
+                                "{ \"type\": \"buy\", \"subtype\": \"claim\", \"balance\": "
+                                        + "500"
+                                        + ", \"claimlocation\": "
+                                        + LocationUtil.formatChunk(
+                                        claim.getClaimWorld(), claim.getXPosition(), claim.getZPosition())
+                                        + ", \"player\": "
+                                        + player.getUniqueId().toString()
+                                        + " }");
+                        PlayerEnterCityEvent enterCityEvent = new PlayerEnterCityEvent(player, city);
+                        Bukkit.getServer().getPluginManager().callEvent(enterCityEvent);
+                        CityDatabase.removeCityBalance(city, Metropolis.configuration.getCityClaimCost());
+                        plugin.sendMessage(player, "messages.city.successful.claim", "%cityname%", city.getCityName(), "%amount%", Utilities.formattedMoney(Metropolis.configuration.getCityClaimCost()));
+                    } else {
+                        plugin.sendMessage(player, "messages.error.city.claimTooFar", "%cityname%", city.getCityName());
+                    }
+
+                    // Start autoclaiming
+                    AutoclaimManager.startAutoclaim(player, city, autoclaimCount);
+                    plugin.sendMessage(player, "messages.city.autoclaim.started", "%remaining%", String.valueOf(autoclaimCount), "%cityname%", cityName);
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                plugin.sendMessage(player, "messages.syntax.city.claim");
+                return;
+            }
+        }
+
+        if (CityDatabase.getClaim(player.getLocation()) != null) {
+            plugin.sendMessage(player, "messages.error.city.claimExists");
+            return;
+        }
+
         if (CityDatabase.getCityBalance(city) < Metropolis.configuration.getCityClaimCost()) {
             plugin.sendMessage(player, "messages.error.missing.claimCost", "%cityname%", city.getCityName(), "%cost%", ""+Metropolis.configuration.getCityClaimCost());
             return;
@@ -300,10 +374,9 @@ public class CommandCity extends BaseCommand {
             plugin.sendMessage(player, "messages.error.city.tooCloseToOtherCity");
             return;
         }
-        if (CityDatabase.getCityRole(city, player.getUniqueId().toString()) == null
-                || Objects.equals(CityDatabase.getCityRole(city, player.getUniqueId().toString()), "member")
+        if (CityDatabase.getCityRole(city, player.getUniqueId().toString()) == null || Objects.equals(CityDatabase.getCityRole(city, player.getUniqueId().toString()), Role.MEMBER)
                 || Objects.equals(
-                CityDatabase.getCityRole(city, player.getUniqueId().toString()), "inviter")) {
+                CityDatabase.getCityRole(city, player.getUniqueId().toString()), Role.INVITER)) {
             plugin.sendMessage(player, "messages.error.city.permissionDenied", "%cityname%", cityName);
             return;
         }
