@@ -1,9 +1,4 @@
 messages:
-  words:
-    on: "På"
-    off: "Av"
-    yes: "Ja"
-    no: "Nej"
   time:
     now: "just nu"
     second: "sekund"
@@ -20,6 +15,11 @@ messages:
     months: "månader"
     year: "år"
     years: "år"
+  words:
+    yes_word: "Ja"
+    no_word: "Nej"
+    on_state: "På"
+    off_state: "Av"
   months:
     january: "januari"
     february: "februari"

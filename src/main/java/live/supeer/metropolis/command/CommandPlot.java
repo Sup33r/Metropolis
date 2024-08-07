@@ -384,6 +384,7 @@ public class CommandPlot extends BaseCommand {
         }
         Plot plot = PlotDatabase.getPlotAtLocation(player.getLocation());
         if (plot == null) {
+            plugin.sendMessage(player, "messages.error.plot.notInPlot");
             return;
         }
         Role role = CityDatabase.getCityRole(plot.getCity(), player.getUniqueId().toString());
@@ -394,39 +395,39 @@ public class CommandPlot extends BaseCommand {
         plugin.sendMessage(player, "messages.plot.list.city", "%cityname%", plot.getCity().getCityName());
         plugin.sendMessage(player, "messages.plot.list.owner", "%owner%", plot.getPlotOwner());
         if (Arrays.toString(plot.getPlotFlags()).contains("p")) {
-            plugin.sendMessage(player, "messages.plot.list.pvp", "%status%", "<red>" + plugin.getRawMessage("messages.words.on"));
+            plugin.sendMessage(player, "messages.plot.list.pvp", "%status%", "<red>" + plugin.getRawMessage("messages.words.on_state"));
         } else {
-            plugin.sendMessage(player, "messages.plot.list.pvp", "%status%", "<green>" + plugin.getRawMessage("messages.words.off"));
+            plugin.sendMessage(player, "messages.plot.list.pvp", "%status%", "<green>" + plugin.getRawMessage("messages.words.off_state"));
         }
         if (Arrays.toString(plot.getPlotFlags()).contains("a")) {
-            plugin.sendMessage(player, "messages.plot.list.animals", "%status%", "<green>" + plugin.getRawMessage("messages.words.on"));
+            plugin.sendMessage(player, "messages.plot.list.animals", "%status%", "<green>" + plugin.getRawMessage("messages.words.on_state"));
         } else {
-            plugin.sendMessage(player, "messages.plot.list.animals", "%status%", "<green>" + plugin.getRawMessage("messages.words.off"));
+            plugin.sendMessage(player, "messages.plot.list.animals", "%status%", "<green>" + plugin.getRawMessage("messages.words.off_state"));
         }
         if (Arrays.toString(plot.getPlotFlags()).contains("m")) {
-            plugin.sendMessage(player, "messages.plot.list.monsters", "%status%", "<red>" + plugin.getRawMessage("messages.words.on"));
+            plugin.sendMessage(player, "messages.plot.list.monsters", "%status%", "<red>" + plugin.getRawMessage("messages.words.on_state"));
         } else {
-            plugin.sendMessage(player, "messages.plot.list.monsters", "%status%", "<green>" + plugin.getRawMessage("messages.words.off"));
+            plugin.sendMessage(player, "messages.plot.list.monsters", "%status%", "<green>" + plugin.getRawMessage("messages.words.off_state"));
         }
         if (Arrays.toString(plot.getPlotFlags()).contains("l")) {
-            plugin.sendMessage(player, "messages.plot.list.monsters", "%status%", "<green>" + plugin.getRawMessage("messages.words.yes"));
+            plugin.sendMessage(player, "messages.plot.list.monsters", "%status%", "<green>" + plugin.getRawMessage("messages.words.yes_word"));
         } else {
-            plugin.sendMessage(player, "messages.plot.list.monsters", "%status%", "<green>" + plugin.getRawMessage("messages.words.no"));
+            plugin.sendMessage(player, "messages.plot.list.monsters", "%status%", "<green>" + plugin.getRawMessage("messages.words.no_word"));
         }
         if (plot.isKMarked()) {
-            plugin.sendMessage(player, "messages.plot.list.k-marked", "%status%",plugin.getRawMessage("messages.words.yes"));
+            plugin.sendMessage(player, "messages.plot.list.k-marked", "%status%","<green>" + plugin.getRawMessage("messages.words.yes_word"));
         } else {
-            plugin.sendMessage(player, "messages.plot.list.k-marked", "%status%",plugin.getRawMessage("messages.words.no"));
+            plugin.sendMessage(player, "messages.plot.list.k-marked", "%status%","<green>" + plugin.getRawMessage("messages.words.no_word"));
         }
         if (Arrays.toString(plot.getPlotFlags()).contains("i")) {
-            plugin.sendMessage(player, "messages.plot.list.lose.items", "%status%",plugin.getRawMessage("messages.words.yes"));
+            plugin.sendMessage(player, "messages.plot.list.lose.items", "%status%","<red>" + plugin.getRawMessage("messages.words.yes_word"));
         } else {
-            plugin.sendMessage(player, "messages.plot.list.lose.items", "%status%",plugin.getRawMessage("messages.words.no"));
+            plugin.sendMessage(player, "messages.plot.list.lose.items", "%status%","<green>" + plugin.getRawMessage("messages.words.no_word"));
         }
         if (Arrays.toString(plot.getPlotFlags()).contains("x")) {
-            plugin.sendMessage(player, "messages.plot.list.lose.xp", "%status%",plugin.getRawMessage("messages.words.yes"));
+            plugin.sendMessage(player, "messages.plot.list.lose.xp", "%status%","<red>" + plugin.getRawMessage("messages.words.yes_word"));
         } else {
-            plugin.sendMessage(player, "messages.plot.list.lose.xp", "%status%", "<green>" + plugin.getRawMessage("messages.words.no"));
+            plugin.sendMessage(player, "messages.plot.list.lose.xp", "%status%", "<green>" + plugin.getRawMessage("messages.words.no_word"));
         }
         if (player.hasPermission("metropolis.plot.info.coordinates")) {
             plugin.sendMessage(

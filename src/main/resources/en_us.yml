@@ -1,9 +1,4 @@
 messages:
-  words:
-    on: "On"
-    off: "Off"
-    yes: "Yes"
-    no: "No"
   time:
     now: "just now"
     second: "second"
@@ -20,6 +15,11 @@ messages:
     months: "months"
     year: "year"
     years: "years"
+  words:
+    on_state: "On"
+    off_state: "Off"
+    yes_word: "Yes"
+    no_word: "No"
   months:
     january: "January"
     february: "February"
