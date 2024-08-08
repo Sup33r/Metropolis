@@ -13,6 +13,7 @@ public class MetropolisConfiguration {
     private final int cityCreationCost;
     private final int cityStartingBalance;
     private final int cityStartingTax;
+    private final int cityBonusCost;
     private final int cityGoCost;
     private final int cityClaimCost;
     private final int cityOutpostCost;
@@ -43,6 +44,7 @@ public class MetropolisConfiguration {
         cityStartingBalance = plugin.getConfig().getInt("settings.city.startingbalance");
         cityStartingTax = plugin.getConfig().getInt("settings.city.startingtax");
         cityGoCost = plugin.getConfig().getInt("settings.city.gocost");
+        cityBonusCost = plugin.getConfig().getInt("settings.city.bonuscost");
         cityClaimCost = plugin.getConfig().getInt("settings.city.claimcost");
         nameChangeCooldown = plugin.getConfig().getInt("settings.cooldownTime.namechange");
         maxBanTime = plugin.getConfig().getString("settings.maxbantime");

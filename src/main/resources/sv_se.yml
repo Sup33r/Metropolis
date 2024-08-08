@@ -20,6 +20,7 @@ messages:
     no_word: "Nej"
     on_state: "På"
     off_state: "Av"
+    wilderness: "Vildmark"
   months:
     january: "januari"
     february: "februari"
@@ -83,6 +84,9 @@ messages:
       notFound: "<red>Spelaren hittades inte."
       notInCity: "<red>Spelaren är inte medlem i någon stad."
     city:
+      bonus:
+        invalidAmount: "<red>Antalet bonusmarkbitar måste vara ett positivt heltal."
+      maxClaims: "<yellow>%cityname% <gray>| <red>Staden har uppnått maxgränsen för markbitar. Överväg att ta in nya medlemmar, eller köpa bonusmarkbitar."
       perm:
         noChange: "<red>Det finns inga ändringar att göra."
         notFound: "<red>Rättighetsflaggan hittades inte. Använd /city perm för att se alla rättigheter."
@@ -127,6 +131,7 @@ messages:
         mayor: "<yellow>%cityname% <gray>| <red>Du kan inte lämna staden som borgermästare. Överväg att istället ta bort staden med /city delete <underlined>stadsnamn<reset><red>, eller byta roll med en annan medlem med kommandot /city rank <underlined>spelare<reset><red> swap."
       missing:
         balance:
+          bonusCost: "<yellow>%cityname% <gray>| <red>Staden har inte råd med %amount% minemynt som %count% bonusmarkbit(ar) kostar."
           outpostCost: "<yellow>%cityname% <gray>| <red>Staden har inte råd med 15 000 minemynt som en utpost kostar."
           goCost: "<yellow>%cityname% <gray>| <red>Staden har inte råd med 5 000 minemynt som det kostar att köpa en teleporteringspunkt till en stad."
           cityCost: "<red>Du har inte råd med 500 000 minemynt som en stad kostar."
@@ -286,6 +291,11 @@ messages:
           2: "<gray>f = frame, g = go, h = home, j = jukebox"
           3: "<gray>r = repair (anvil), s = switch, t = teleport, v = villager"
   city:
+    map:
+      header: "<dark_green>--- <green>Detaljplanering: %cityname% <dark_green>---"
+      legend:
+        city: "<white>■ = icke detaljplanerad mark, <green>■<white> = %cityname%, <red>■<white> = annan stad"
+        wilderness: "<white>■ = icke detaljplanerad mark, <red>■<white> = annan stad"
     autoclaim:
       notNature: "<red>Markbiten du står på tillhör inte naturen."
       started: "<yellow>%cityname% <gray>| <green>Autoövertagningen av markbitar har startats. \n<green>Markbitar kvar på autoövertagning: %remaining%. Avbryt med <dark_green>/city claim -<green>."
@@ -368,6 +378,7 @@ messages:
       owner: "<dark_green><bold>Ägare:"
       price: "<dark_green><bold>Till salu:"
     successful:
+      bonus: "<yellow>%cityname% <gray>| <green>Staden har köpt %amount% bonusmarkbit(ar) för %cost% minemynt."
       outpost: "<yellow>%cityname% <gray>| <green>Staden har köpt en utpost för %amount% minemynt."
       rank:
         promoted: "<yellow>%cityname% <gray>| <green>Du har fått rollen <dark_green>%newrole%<green>."

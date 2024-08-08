@@ -5,6 +5,7 @@ import live.supeer.metropolis.Metropolis;
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.city.CityDatabase;
 import live.supeer.metropolis.city.Role;
+import live.supeer.metropolis.command.CommandCity;
 import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.plot.PlotDatabase;
@@ -399,5 +400,54 @@ public class Utilities {
             }
         }
         return plot;
+    }
+
+    public static boolean cityCanClaim(City city) {
+        return city.getCityClaims().size() < city.getCityMembers().size() * 20 + city.getBonusClaims();
+    }
+
+    public static String[][] generateAsciiMap(Player player, int centerX, int centerZ, City playerCity) {
+        String[][] map = new String[10][29];
+
+        for (int z = 0; z < 10; z++) {
+            for (int x = 0; x < 29; x++) {
+                int chunkX = centerX - 14 + x;
+                int chunkZ = centerZ - 5 + z;
+
+                if (x == 14 && z == 5) {
+                    map[z][x] = "§0■"; // Player position (black)
+                } else {
+                    City chunkCity = CityDatabase.getCityByClaim(new Location(player.getWorld(), chunkX << 4, 0, chunkZ << 4));
+                    if (chunkCity == null) {
+                        map[z][x] = "§f■"; // Unclaimed (white)
+                    } else if (chunkCity.equals(playerCity)) {
+                        map[z][x] = "§a■"; // Player's city (green)
+                    } else {
+                        map[z][x] = "§c■"; // Other city (red)
+                    }
+                }
+            }
+        }
+
+        return map;
+    }
+
+    public static void sendMapToPlayer(Player player, String[][] asciiMap, City city) {
+        CommandCity.plugin.sendMessage(player, "messages.city.map.header", "%cityname%", city != null ? city.getCityName() : CommandCity.plugin.getMessage("messages.words.wilderness"));
+        if (city == null) {
+            CommandCity.plugin.sendMessage(player, "messages.city.map.legend.wilderness");
+        } else {
+            CommandCity.plugin.sendMessage(player, "messages.city.map.legend.city", "%cityname%", city.getCityName());
+        }
+
+        StringBuilder mapBuilder = new StringBuilder();
+        for (String[] row : asciiMap) {
+            for (String cell : row) {
+                mapBuilder.append(cell);
+            }
+            mapBuilder.append("\n");
+        }
+
+        player.sendMessage(mapBuilder.toString());
     }
 }

@@ -27,6 +27,7 @@ public class City {
     private final List<Claim> cityClaims = new ArrayList<>();
     private final List<Plot> cityPlots = new ArrayList<>();
 //    private final List<Ban> cityBans = new ArrayList<>();
+    private int bonusClaims;
     private int cityBalance;
     private Location citySpawn;
     private final long cityCreationDate;
@@ -51,6 +52,7 @@ public class City {
         this.isOpen = data.get("isOpen");
         this.isPublic = data.get("isPublic");
         this.isRemoved = data.get("isRemoved");
+        this.bonusClaims = data.getInt("bonusClaims");
     }
 
     public void setCityName(String cityName) {
@@ -94,6 +96,16 @@ public class City {
         DB.executeUpdateAsync(
                 "UPDATE `mp_cities` SET `citySpawn` = "
                         + Database.sqlString(LocationUtil.locationToString(citySpawn))
+                        + " WHERE `cityID` = "
+                        + cityID
+                        + ";");
+    }
+
+    public void addBonusClaims(int bonusClaims) {
+        this.bonusClaims += bonusClaims;
+        DB.executeUpdateAsync(
+                "UPDATE `mp_cities` SET `bonusClaims` = "
+                        + this.bonusClaims
                         + " WHERE `cityID` = "
                         + cityID
                         + ";");

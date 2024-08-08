@@ -3,7 +3,6 @@ package live.supeer.metropolis.command;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation .*;
 import co.aikar.commands.annotation.Optional;
-import co.aikar.idb.DB;
 import live.supeer.metropolis.AutoclaimManager;
 import live.supeer.metropolis.Database;
 import live.supeer.metropolis.Metropolis;
@@ -318,6 +317,11 @@ public class CommandCity extends BaseCommand {
                             || Objects.equals(
                             CityDatabase.getCityRole(city, player.getUniqueId().toString()), Role.INVITER)) {
                         plugin.sendMessage(player, "messages.error.city.permissionDenied", "%cityname%", cityName);
+                        return;
+                    }
+
+                    if (!Utilities.cityCanClaim(city)) {
+                        plugin.sendMessage(player, "messages.error.city.maxClaims", "%cityname%", city.getCityName());
                         return;
                     }
 
@@ -1222,7 +1226,39 @@ public class CommandCity extends BaseCommand {
     public class Buy extends BaseCommand {
 
         @Subcommand("bonus")
-        public static void onBonus(Player player, int count) {}
+        public static void onBonus(Player player, int count) {
+            City city = Utilities.hasCityPermissions(player, "metropolis.city.buy.bonus", Role.VICE_MAYOR);
+            if (city == null) {
+                return;
+            }
+            if (count < 1) {
+                plugin.sendMessage(player, "messages.error.city.bonus.invalidAmount");
+                return;
+            }
+            if (city.getCityBalance() < Metropolis.configuration.getCityBonusCost() * count) {
+                plugin.sendMessage(
+                        player, "messages.error.city.missing.balance.bonusCost", "%cityname%", city.getCityName(), "%amount%", Utilities.formattedMoney(Metropolis.configuration.getCityBonusCost() * count), "%count%", String.valueOf(count));
+                return;
+            }
+            city.addBonusClaims(count);
+            city.removeCityBalance(Metropolis.configuration.getCityBonusCost() * count);
+            Database.addLogEntry(
+                    city,
+                    "{ \"type\": \"buy\", \"subtype\": \"bonus\", \"count\": "
+                            + count
+                            + ", \"player\": "
+                            + player.getUniqueId().toString()
+                            + ", \"balance\": "
+                            + Metropolis.configuration.getCityBonusCost() * count
+                            + " }");
+            plugin.sendMessage(
+                    player,
+                    "messages.city.successful.bonus",
+                    "%cityname%",
+                    city.getCityName(),
+                    "%amount%",
+                    Utilities.formattedMoney(Metropolis.configuration.getCityBonusCost() * count), "%count%", String.valueOf(count));
+        }
 
         @Subcommand("district")
         public static void onDistrict(Player player, String name) {}
@@ -1884,4 +1920,26 @@ public class CommandCity extends BaseCommand {
             plugin.sendMessage(player, "messages.city.list.none");
         }
     }
+
+    @Subcommand("map")
+    public static void onMap(Player player) {
+        if (!player.hasPermission("metropolis.city.map")) {
+            plugin.sendMessage(player, "messages.error.permissionDenied");
+            return;
+        }
+
+        // Get the player's location and facing direction
+        Location playerLoc = player.getLocation();
+        int playerX = playerLoc.getBlockX() >> 4; // Convert to chunk coordinates
+        int playerZ = playerLoc.getBlockZ() >> 4;
+
+        City city = CityDatabase.getCityByClaim(playerLoc.toBlockLocation());
+
+        // Generate the ASCII map
+        String[][] asciiMap = Utilities.generateAsciiMap(player, playerX, playerZ, city);
+
+        // Send the map to the player
+        Utilities.sendMapToPlayer(player, asciiMap, city);
+    }
+
 }
