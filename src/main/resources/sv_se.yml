@@ -84,6 +84,9 @@ messages:
       notFound: "<red>Spelaren hittades inte."
       notInCity: "<red>Spelaren är inte medlem i någon stad."
     city:
+      tax:
+        invalidAmount: "<red>Skattesatsen måste vara ett tal mellan 0.00 - %max%."
+        maxAmount: "<red>Skattesatsen får inte överstiga %max%."
       bonus:
         invalidAmount: "<red>Antalet bonusmarkbitar måste vara ett positivt heltal."
       maxClaims: "<yellow>%cityname% <gray>| <red>Staden har uppnått maxgränsen för markbitar. Överväg att ta in nya medlemmar, eller köpa bonusmarkbitar."
@@ -401,6 +404,7 @@ messages:
         self: "<green>Du skapade staden %cityname%."
       claim: "<yellow>%cityname% <gray>|<green> Markbit övertagen för %amount% minemynt."
       set:
+        tax: "<yellow>%cityname% <gray>|<green> Skattesatsen är nu %tax%."
         spawn: "<yellow>%cityname% <gray>|<green> Stadens startpunkt ändrades."
         enter:
           removed: "<yellow>%cityname% <gray>|<green> Meddelandet vid stadsankomst togs bort."

@@ -37,6 +37,7 @@ public class City {
     private boolean isOpen;
     private boolean isPublic;
     private boolean isRemoved;
+    private double cityTax;
 
     public City(DbRow data) {
         this.cityID = data.getInt("cityID");
@@ -53,6 +54,7 @@ public class City {
         this.isPublic = data.get("isPublic");
         this.isRemoved = data.get("isRemoved");
         this.bonusClaims = data.getInt("bonusClaims");
+        this.cityTax = data.getDbl("cityTax");
     }
 
     public void setCityName(String cityName) {
@@ -99,6 +101,16 @@ public class City {
                         + " WHERE `cityID` = "
                         + cityID
                         + ";");
+    }
+
+    public void setCityTax(double cityTax) {
+        DB.executeUpdateAsync(
+                "UPDATE `mp_cities` SET `cityTax` = "
+                        + cityTax
+                        + " WHERE `cityID` = "
+                        + cityID
+                        + ";");
+        this.cityTax = cityTax;
     }
 
     public void addBonusClaims(int bonusClaims) {

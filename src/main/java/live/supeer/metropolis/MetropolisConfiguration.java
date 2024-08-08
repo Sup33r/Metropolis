@@ -29,6 +29,8 @@ public class MetropolisConfiguration {
     private final int cityExitMessageLimit;
     private final int plotNameLimit;
 
+    private final double cityMaxTax;
+
     MetropolisConfiguration(Metropolis plugin) {
         plugin.saveDefaultConfig();
         plugin.reloadConfig();
@@ -47,7 +49,7 @@ public class MetropolisConfiguration {
         cityBonusCost = plugin.getConfig().getInt("settings.city.bonuscost");
         cityClaimCost = plugin.getConfig().getInt("settings.city.claimcost");
         nameChangeCooldown = plugin.getConfig().getInt("settings.cooldownTime.namechange");
-        maxBanTime = plugin.getConfig().getString("settings.maxbantime");
+        maxBanTime = plugin.getConfig().getString("settings.limits.maxbantime");
 
         cityNameLimit = plugin.getConfig().getInt("settings.limits.cityname");
         cityGoDisplayNameLimit = plugin.getConfig().getInt("settings.limits.citygodisplayname");
@@ -56,5 +58,7 @@ public class MetropolisConfiguration {
         cityEnterMessageLimit = plugin.getConfig().getInt("settings.limits.entermessage");
         cityExitMessageLimit = plugin.getConfig().getInt("settings.limits.exitmessage");
         plotNameLimit = plugin.getConfig().getInt("settings.limits.plotname");
+
+        cityMaxTax = plugin.getConfig().getDouble("settings.limits.citymaxtax");
     }
 }

@@ -54,7 +54,7 @@ public class Database {
                                 `originalMayorUUID` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `originalMayorName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `cityBalance` int(25) NOT NULL,
-                                `cityTax` int(11) DEFAULT 2,
+                                `cityTax` double DEFAULT 2,
                                 `bonusClaims` int(11) DEFAULT 0,
                                 `citySpawn` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `createDate` bigint(30) DEFAULT NULL,

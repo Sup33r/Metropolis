@@ -15,7 +15,10 @@ settings:
     exitmessage: 225
     plotname: 16
 
-  maxbantime: 10y
+    maxbantime: 10y
+
+    citymaxtax: 10.00
+
   cooldownTime:
     invite: 180
     namechange: 43200

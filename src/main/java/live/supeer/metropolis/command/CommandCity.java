@@ -1208,6 +1208,37 @@ public class CommandCity extends BaseCommand {
             CityDatabase.setLatestNameChange(city, (int) (System.currentTimeMillis() / 1000));
             plugin.sendMessage(player, "messages.city.successful.set.name", "%cityname%", name);
         }
+
+        @Subcommand("tax")
+        public static void onTax(Player player, double tax) {
+            City city = Utilities.hasCityPermissions(player, "metropolis.city.set.tax", Role.VICE_MAYOR);
+            if (city == null) {
+                return;
+            }
+            double maxTax = Metropolis.configuration.getCityMaxTax();
+            if (tax < 0) {
+                plugin.sendMessage(player, "messages.error.city.tax.invalidAmount", "%max%", String.valueOf(maxTax));
+                return;
+            }
+
+            tax = Math.round(tax * 100.0) / 100.0;
+
+            if (tax > maxTax) {
+                plugin.sendMessage(player, "messages.error.city.tax.maxAmount", "%max%", String.valueOf(maxTax));
+                return;
+            }
+            Database.addLogEntry(
+                    city,
+                    "{ \"type\": \"set\", \"subtype\": \"tax\", \"from\": "
+                            + city.getCityTax()
+                            + ", \"to\": "
+                            + tax
+                            + ", \"player\": "
+                            + player.getUniqueId().toString()
+                            + " }");
+            city.setCityTax(tax);
+            plugin.sendMessage(player, "messages.city.successful.set.tax", "%cityname%", city.getCityName(), "%tax%", String.valueOf(tax));
+        }
     }
 
     @Subcommand("buy")
