@@ -65,7 +65,9 @@ public class Database {
                                 `isOpen` tinyint(1) DEFAULT 0,
                                 `isPublic` tinyint(1) DEFAULT 0,
                                 `isRemoved` tinyint(1) NOT NULL,
+                                `cityBoundary` GEOMETRY NOT NULL,
                                 PRIMARY KEY (`cityID`)
+                                SPATIAL INDEX `idx_cityBoundary` (`cityBoundary`)
                               ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;""");
 
             DB.executeUpdate(

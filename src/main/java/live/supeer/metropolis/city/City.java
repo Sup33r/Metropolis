@@ -10,6 +10,8 @@ import live.supeer.metropolis.utils.Utilities;
 import live.supeer.metropolis.plot.Plot;
 import lombok.Getter;
 import org.bukkit.Location;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.WKTReader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +41,8 @@ public class City {
     private boolean isRemoved;
     private double cityTax;
 
+    private Geometry cityBoundary;
+
     public City(DbRow data) {
         this.cityID = data.getInt("cityID");
         this.cityName = data.getString("cityName");
@@ -55,6 +59,27 @@ public class City {
         this.isRemoved = data.get("isRemoved");
         this.bonusClaims = data.getInt("bonusClaims");
         this.cityTax = data.getDbl("cityTax");
+        WKTReader reader = new WKTReader();
+        String wkt = data.getString("cityBoundary");
+        if (wkt != null) {
+            try {
+                this.cityBoundary = reader.read(wkt);
+            } catch (org.locationtech.jts.io.ParseException e) {
+                plugin.getLogger().warning("Failed to parse city boundary for city " + cityName);
+                this.cityBoundary = null;
+            }
+        } else {
+            this.cityBoundary = null;
+        }
+    }
+
+    public void setCityBoundary(Geometry cityBoundary) {
+        this.cityBoundary = cityBoundary;
+        // Update the database
+        DB.executeUpdateAsync(
+                "UPDATE `mp_cities` SET `cityBoundary` = ST_GeomFromText(?) WHERE `cityID` = ?",
+                cityBoundary.toText(), cityID
+        );
     }
 
     public void setCityName(String cityName) {
