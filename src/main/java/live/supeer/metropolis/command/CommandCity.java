@@ -249,7 +249,7 @@ public class CommandCity extends BaseCommand {
                         + "0"
                         + ", \"claimlocation\": "
                         + LocationUtil.formatChunk(
-                        claim.getClaimWorld(), claim.getXPosition(), claim.getZPosition())
+                        claim.getClaimWorld().getName(), claim.getXPosition(), claim.getZPosition())
                         + ", \"player\": "
                         + player.getUniqueId().toString()
                         + " }");
@@ -342,7 +342,7 @@ public class CommandCity extends BaseCommand {
                                         + "500"
                                         + ", \"claimlocation\": "
                                         + LocationUtil.formatChunk(
-                                        claim.getClaimWorld(), claim.getXPosition(), claim.getZPosition())
+                                        claim.getClaimWorld().getName(), claim.getXPosition(), claim.getZPosition())
                                         + ", \"player\": "
                                         + player.getUniqueId().toString()
                                         + " }");
@@ -402,7 +402,7 @@ public class CommandCity extends BaseCommand {
                             + "500"
                             + ", \"claimlocation\": "
                             + LocationUtil.formatChunk(
-                            claim.getClaimWorld(), claim.getXPosition(), claim.getZPosition())
+                            claim.getClaimWorld().getName(), claim.getXPosition(), claim.getZPosition())
                             + ", \"player\": "
                             + player.getUniqueId().toString()
                             + " }");
@@ -1975,7 +1975,6 @@ public class CommandCity extends BaseCommand {
 
     @Subcommand("near")
     @CommandCompletion("@nothing|@range:100-10000")
-    //Det är "good enough" nu. det inom () bör inte vara medlemstal, utan avstånd, menmen.
     public static void onNear(Player player, @Optional Integer blocks) {
         if (!player.hasPermission("metropolis.city.near")) {
             plugin.sendMessage(player, "messages.error.permissionDenied");
@@ -1992,7 +1991,7 @@ public class CommandCity extends BaseCommand {
         }
 
         Location playerLocation = player.getLocation();
-        List<City> nearbyCities = CityDatabase.getCitiesWithinRadius(playerLocation, radius);
+        List<CityDistance> nearbyCities = CityDatabase.getCitiesWithinRadius(playerLocation, radius);
 
         if (nearbyCities.isEmpty()) {
             plugin.sendMessage(player, "messages.city.near.noCitiesFound", "%radius%", String.valueOf(radius));
@@ -2001,9 +2000,11 @@ public class CommandCity extends BaseCommand {
 
         StringBuilder cityList = new StringBuilder();
         for (int i = 0; i < nearbyCities.size(); i++) {
-            City city = nearbyCities.get(i);
+            CityDistance cityDistance = nearbyCities.get(i);
+            City city = cityDistance.getCity();
+            int distance = cityDistance.getDistance();
             String cityEntry = "§2" + city.getCityName() + " (" +
-                    "§a" + CityDatabase.getCityMemberCount(city) +
+                    "§a" + distance + "m" +
                     "§2" + ")";
 
             if (i == nearbyCities.size() - 2) {

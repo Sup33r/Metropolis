@@ -72,7 +72,7 @@ public class CityListener implements Listener {
                                 + "500"
                                 + ", \"claimlocation\": "
                                 + LocationUtil.formatChunk(
-                                claim.getClaimWorld(), claim.getXPosition(), claim.getZPosition())
+                                claim.getClaimWorld().getName(), claim.getXPosition(), claim.getZPosition())
                                 + ", \"player\": "
                                 + player.getUniqueId().toString()
                                 + " }");

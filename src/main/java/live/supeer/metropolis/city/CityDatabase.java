@@ -10,6 +10,7 @@ import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.utils.DateUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -17,10 +18,7 @@ import org.intellij.lang.annotations.Language;
 import org.locationtech.jts.geom.*;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class CityDatabase {
@@ -83,18 +81,7 @@ public class CityDatabase {
 
     public static City newCity(String cityName, Player player) {
         try {
-            GeometryFactory geometryFactory = new GeometryFactory();
-            Coordinate[] coordinates = new Coordinate[5];
-            int chunkX = player.getChunk().getX();
-            int chunkZ = player.getChunk().getZ();
-            coordinates[0] = new Coordinate(chunkX * 16, chunkZ * 16);
-            coordinates[1] = new Coordinate((chunkX + 1) * 16, chunkZ * 16);
-            coordinates[2] = new Coordinate((chunkX + 1) * 16, (chunkZ + 1) * 16);
-            coordinates[3] = new Coordinate(chunkX * 16, (chunkZ + 1) * 16);
-            coordinates[4] = coordinates[0];
-            Polygon newClaim = geometryFactory.createPolygon(coordinates);
-            MultiPolygon initialBoundary = geometryFactory.createMultiPolygon(new Polygon[]{newClaim});
-            DB.executeUpdate("INSERT INTO `mp_cities` (`cityName`, `originalMayorUUID`, `originalMayorName`, `cityBalance`, `citySpawn`, `createDate`, `isRemoved`, `cityBoundary`) VALUES (" + Database.sqlString(cityName) + ", " + Database.sqlString(player.getUniqueId().toString()) + ", " + Database.sqlString(player.getName()) + ", " + Metropolis.configuration.getCityStartingBalance() + ", " + Database.sqlString(LocationUtil.locationToString(player.getLocation())) + ", " + DateUtil.getTimestamp() + ", " + "0" + ", " + "ST_GeomFromText(?)" + ");", initialBoundary.toText());
+            DB.executeUpdate("INSERT INTO `mp_cities` (`cityName`, `originalMayorUUID`, `originalMayorName`, `cityBalance`, `citySpawn`, `createDate`, `isRemoved`) VALUES (" + Database.sqlString(cityName) + ", " + Database.sqlString(player.getUniqueId().toString()) + ", " + Database.sqlString(player.getName()) + ", " + Metropolis.configuration.getCityStartingBalance() + ", " + Database.sqlString(LocationUtil.locationToString(player.getLocation())) + ", " + DateUtil.getTimestamp() + ", " + "0" + ");");
             City city = new City(DB.getFirstRow("SELECT * FROM `mp_cities` WHERE `cityName` = " + Database.sqlString(cityName) + ";"));
             cities.add(city);
             newMember(city, player);
@@ -127,33 +114,7 @@ public class CityDatabase {
     public static Claim createClaim(City city, Location location, boolean outpost, String playername, String playerUUID) {
         try {
             String cityName = city.getCityName();
-            GeometryFactory geometryFactory = new GeometryFactory();
-            Coordinate[] coordinates = new Coordinate[5];
-            int chunkX = location.getChunk().getX();
-            int chunkZ = location.getChunk().getZ();
-            coordinates[0] = new Coordinate(chunkX * 16, chunkZ * 16);
-            coordinates[1] = new Coordinate((chunkX + 1) * 16, chunkZ * 16);
-            coordinates[2] = new Coordinate((chunkX + 1) * 16, (chunkZ + 1) * 16);
-            coordinates[3] = new Coordinate(chunkX * 16, (chunkZ + 1) * 16);
-            coordinates[4] = coordinates[0];
-            Polygon newClaim = geometryFactory.createPolygon(coordinates);
-
-            if (city.getCityBoundary() == null) {
-                city.setCityBoundary(newClaim);
-            } else {
-                Geometry cityBoundary = city.getCityBoundary();
-                if (cityBoundary instanceof GeometryCollection) {
-                    List<Geometry> geometries = new ArrayList<>();
-                    for (int i = 0; i < cityBoundary.getNumGeometries(); i++) {
-                        geometries.add(cityBoundary.getGeometryN(i));
-                    }
-                    geometries.add(newClaim);
-                    city.setCityBoundary(geometryFactory.createGeometryCollection(geometries.toArray(new Geometry[0])));
-                } else {
-                    city.setCityBoundary(cityBoundary.union(newClaim));
-                }
-            }
-            DB.executeInsert("INSERT INTO `mp_claims` (`claimerName`, `claimerUUID`, `world`, `xPosition`, `zPosition`, `claimDate`, `cityName`, `outpost`) VALUES (" + Database.sqlString(playername) + ", " + Database.sqlString(playerUUID) + ", '" + location.getChunk().getWorld() + "', " + location.getChunk().getX() + ", " + location.getChunk().getZ() + ", " + DateUtil.getTimestamp() + ", '" + cityName + "', " + outpost + ");");
+            DB.executeInsert("INSERT INTO `mp_claims` (`claimerName`, `claimerUUID`, `world`, `xPosition`, `zPosition`, `claimDate`, `cityName`, `outpost`) VALUES (" + Database.sqlString(playername) + ", " + Database.sqlString(playerUUID) + ", '" + location.getChunk().getWorld().getName() + "', " + location.getChunk().getX() + ", " + location.getChunk().getZ() + ", " + DateUtil.getTimestamp() + ", '" + cityName + "', " + outpost + ");");
             city.addCityClaim(new Claim(DB.getFirstRow("SELECT * FROM `mp_claims` WHERE `cityName` = " + Database.sqlString(cityName) + " AND `xPosition` = " + location.getChunk().getX() + " AND `zPosition` = " + location.getChunk().getZ() + ";")));
             return city.getCityClaim(location);
         } catch (SQLException e) {
@@ -569,17 +530,68 @@ public class CityDatabase {
         }
     }
 
-    public static List<City> getCitiesWithinRadius(Location center, int radius) {
-        List<City> nearbyCities = new ArrayList<>();
-        for (City city : cities) {
-            Location cityLocation = city.getCitySpawn();
-            if (cityLocation != null && cityLocation.getWorld().equals(center.getWorld())) {
-                double distance = cityLocation.distance(center);
-                if (distance <= radius) {
-                    nearbyCities.add(city);
+    public static List<CityDistance> getCitiesWithinRadius(Location center, int radius) {
+        List<CityDistance> result = new ArrayList<>();
+        int chunkRadius = (radius / 16) + 1; // Convert block radius to chunk radius
+
+        try {
+            // Query claims within a square area
+            String sql = "SELECT DISTINCT c.cityName, cl.xPosition, cl.zPosition " +
+                    "FROM mp_claims cl " +
+                    "JOIN mp_cities c ON cl.cityName = c.cityName " +
+                    "WHERE cl.world = ? " +
+                    "AND cl.xPosition BETWEEN ? AND ? " +
+                    "AND cl.zPosition BETWEEN ? AND ?";
+
+            List<DbRow> rows = DB.getResults(sql,
+                    center.getWorld().getName(),
+                    center.getChunk().getX() - chunkRadius,
+                    center.getChunk().getX() + chunkRadius,
+                    center.getChunk().getZ() - chunkRadius,
+                    center.getChunk().getZ() + chunkRadius
+            );
+
+            Map<String, Location> cityLocations = new HashMap<>();
+
+            for (DbRow row : rows) {
+                String cityName = row.getString("cityName");
+                int chunkX = row.getInt("xPosition");
+                int chunkZ = row.getInt("zPosition");
+
+                // Convert chunk coordinates to block coordinates (center of the chunk)
+                Location claimLocation = new Location(center.getWorld(),
+                        chunkX * 16 + 8,
+                        center.getY(),
+                        chunkZ * 16 + 8);
+
+                // Keep only the nearest claim for each city
+                if (!cityLocations.containsKey(cityName) ||
+                        claimLocation.distanceSquared(center) < cityLocations.get(cityName).distanceSquared(center)) {
+                    cityLocations.put(cityName, claimLocation);
                 }
             }
+
+            // Calculate precise distances and filter by actual radius
+            for (Map.Entry<String, Location> entry : cityLocations.entrySet()) {
+                String cityName = entry.getKey();
+                Location claimLocation = entry.getValue();
+                double distance = Math.sqrt(claimLocation.distanceSquared(center));
+
+                if (distance <= radius) {
+                    Optional<City> cityOpt = getCity(cityName);
+                    if (cityOpt.isPresent()) {
+                        result.add(new CityDistance(cityOpt.get(), (int) distance));
+                    }
+                }
+            }
+
+            // Sort results by distance
+            result.sort(Comparator.comparingInt(CityDistance::getDistance));
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        return nearbyCities;
+
+        return result;
     }
 }
