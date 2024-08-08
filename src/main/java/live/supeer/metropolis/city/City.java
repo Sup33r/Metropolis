@@ -11,6 +11,7 @@ import live.supeer.metropolis.plot.Plot;
 import lombok.Getter;
 import org.bukkit.Location;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.WKBReader;
 import org.locationtech.jts.io.WKTReader;
 
 import java.util.ArrayList;
@@ -59,11 +60,11 @@ public class City {
         this.isRemoved = data.get("isRemoved");
         this.bonusClaims = data.getInt("bonusClaims");
         this.cityTax = data.getDbl("cityTax");
-        WKTReader reader = new WKTReader();
-        String wkt = data.getString("cityBoundary");
-        if (wkt != null) {
+        byte[] wkb = data.get("cityBoundary");
+        if (wkb != null) {
             try {
-                this.cityBoundary = reader.read(wkt);
+                WKBReader reader = new WKBReader();
+                this.cityBoundary = reader.read(wkb);
             } catch (org.locationtech.jts.io.ParseException e) {
                 plugin.getLogger().warning("Failed to parse city boundary for city " + cityName);
                 this.cityBoundary = null;
