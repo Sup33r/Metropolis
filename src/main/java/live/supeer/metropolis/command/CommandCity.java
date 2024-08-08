@@ -325,10 +325,10 @@ public class CommandCity extends BaseCommand {
                         return;
                     }
 
-                    Claim claim1 = CityDatabase.getClaim(player.getLocation().add(16, 0, 0));
-                    Claim claim2 = CityDatabase.getClaim(player.getLocation().add(-16, 0, 0));
-                    Claim claim3 = CityDatabase.getClaim(player.getLocation().add(0, 0, 16));
-                    Claim claim4 = CityDatabase.getClaim(player.getLocation().add(0, 0, -16));
+                    Claim claim1 = CityDatabase.getClaim(player.getLocation().toBlockLocation().add(16, 0, 0));
+                    Claim claim2 = CityDatabase.getClaim(player.getLocation().toBlockLocation().add(-16, 0, 0));
+                    Claim claim3 = CityDatabase.getClaim(player.getLocation().toBlockLocation().add(0, 0, 16));
+                    Claim claim4 = CityDatabase.getClaim(player.getLocation().toBlockLocation().add(0, 0, -16));
 
                     if ((claim1 != null && claim1.getCity() == city) ||
                             (claim2 != null && claim2.getCity() == city) ||
@@ -355,7 +355,7 @@ public class CommandCity extends BaseCommand {
                     }
 
                     // Start autoclaiming
-                    AutoclaimManager.startAutoclaim(player, city, autoclaimCount);
+                    AutoclaimManager.startAutoclaim(player, city, autoclaimCount-1);
                     plugin.sendMessage(player, "messages.city.autoclaim.started", "%remaining%", String.valueOf(autoclaimCount), "%cityname%", cityName);
                     return;
                 }

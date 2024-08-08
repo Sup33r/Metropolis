@@ -14,6 +14,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.intellij.lang.annotations.Language;
+import org.locationtech.jts.geom.*;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -82,7 +83,18 @@ public class CityDatabase {
 
     public static City newCity(String cityName, Player player) {
         try {
-            DB.executeUpdate("INSERT INTO `mp_cities` (`cityName`, `originalMayorUUID`, `originalMayorName`, `cityBalance`, `citySpawn`, `createDate`, `isRemoved`) VALUES (" + Database.sqlString(cityName) + ", " + Database.sqlString(player.getUniqueId().toString()) + ", " + Database.sqlString(player.getName()) + ", " + Metropolis.configuration.getCityStartingBalance() + ", " + Database.sqlString(LocationUtil.locationToString(player.getLocation())) + ", " + DateUtil.getTimestamp() + ", " + "0" + ");");
+            GeometryFactory geometryFactory = new GeometryFactory();
+            Coordinate[] coordinates = new Coordinate[5];
+            int chunkX = player.getChunk().getX();
+            int chunkZ = player.getChunk().getZ();
+            coordinates[0] = new Coordinate(chunkX * 16, chunkZ * 16);
+            coordinates[1] = new Coordinate((chunkX + 1) * 16, chunkZ * 16);
+            coordinates[2] = new Coordinate((chunkX + 1) * 16, (chunkZ + 1) * 16);
+            coordinates[3] = new Coordinate(chunkX * 16, (chunkZ + 1) * 16);
+            coordinates[4] = coordinates[0];
+            Polygon newClaim = geometryFactory.createPolygon(coordinates);
+            MultiPolygon initialBoundary = geometryFactory.createMultiPolygon(new Polygon[]{newClaim});
+            DB.executeUpdate("INSERT INTO `mp_cities` (`cityName`, `originalMayorUUID`, `originalMayorName`, `cityBalance`, `citySpawn`, `createDate`, `isRemoved`, `cityBoundary`) VALUES (" + Database.sqlString(cityName) + ", " + Database.sqlString(player.getUniqueId().toString()) + ", " + Database.sqlString(player.getName()) + ", " + Metropolis.configuration.getCityStartingBalance() + ", " + Database.sqlString(LocationUtil.locationToString(player.getLocation())) + ", " + DateUtil.getTimestamp() + ", " + "0" + ", " + "ST_GeomFromText(?)" + ");", initialBoundary.toText());
             City city = new City(DB.getFirstRow("SELECT * FROM `mp_cities` WHERE `cityName` = " + Database.sqlString(cityName) + ";"));
             cities.add(city);
             newMember(city, player);
@@ -115,6 +127,32 @@ public class CityDatabase {
     public static Claim createClaim(City city, Location location, boolean outpost, String playername, String playerUUID) {
         try {
             String cityName = city.getCityName();
+            GeometryFactory geometryFactory = new GeometryFactory();
+            Coordinate[] coordinates = new Coordinate[5];
+            int chunkX = location.getChunk().getX();
+            int chunkZ = location.getChunk().getZ();
+            coordinates[0] = new Coordinate(chunkX * 16, chunkZ * 16);
+            coordinates[1] = new Coordinate((chunkX + 1) * 16, chunkZ * 16);
+            coordinates[2] = new Coordinate((chunkX + 1) * 16, (chunkZ + 1) * 16);
+            coordinates[3] = new Coordinate(chunkX * 16, (chunkZ + 1) * 16);
+            coordinates[4] = coordinates[0];
+            Polygon newClaim = geometryFactory.createPolygon(coordinates);
+
+            if (city.getCityBoundary() == null) {
+                city.setCityBoundary(newClaim);
+            } else {
+                Geometry cityBoundary = city.getCityBoundary();
+                if (cityBoundary instanceof GeometryCollection) {
+                    List<Geometry> geometries = new ArrayList<>();
+                    for (int i = 0; i < cityBoundary.getNumGeometries(); i++) {
+                        geometries.add(cityBoundary.getGeometryN(i));
+                    }
+                    geometries.add(newClaim);
+                    city.setCityBoundary(geometryFactory.createGeometryCollection(geometries.toArray(new Geometry[0])));
+                } else {
+                    city.setCityBoundary(cityBoundary.union(newClaim));
+                }
+            }
             DB.executeInsert("INSERT INTO `mp_claims` (`claimerName`, `claimerUUID`, `world`, `xPosition`, `zPosition`, `claimDate`, `cityName`, `outpost`) VALUES (" + Database.sqlString(playername) + ", " + Database.sqlString(playerUUID) + ", '" + location.getChunk().getWorld() + "', " + location.getChunk().getX() + ", " + location.getChunk().getZ() + ", " + DateUtil.getTimestamp() + ", '" + cityName + "', " + outpost + ");");
             city.addCityClaim(new Claim(DB.getFirstRow("SELECT * FROM `mp_claims` WHERE `cityName` = " + Database.sqlString(cityName) + " AND `xPosition` = " + location.getChunk().getX() + " AND `zPosition` = " + location.getChunk().getZ() + ";")));
             return city.getCityClaim(location);

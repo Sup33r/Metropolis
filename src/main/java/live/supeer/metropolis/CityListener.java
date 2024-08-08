@@ -92,24 +92,33 @@ public class CityListener implements Listener {
 
     private boolean isChunkClaimable(City city, Player player, Location location) {
         if (CityDatabase.getCityBalance(city) < Metropolis.configuration.getCityClaimCost()) {
+            player.sendMessage("Not enough money");
             return false;
         }
         if (CityDatabase.getClaim(location) != null) {
+            player.sendMessage("Chunk is already claimed");
             return false;
         }
         if (Utilities.isCloseToOtherCity(player, location, "city")) {
+            player.sendMessage("Too close to another city");
             return false;
         }
         if (CityDatabase.getCityRole(city, player.getUniqueId().toString()) == null) {
+            player.sendMessage("You are not a member of this city");
+            return false;
+        }
+        if (!Utilities.cityCanClaim(city)) {
+            plugin.sendMessage(player, "messages.error.city.maxClaims", "%cityname%", city.getCityName());
             return false;
         }
         if (!CityDatabase.getCityRole(city, player.getUniqueId().toString()).hasPermission(Role.ASSISTANT)) {
+            player.sendMessage("You do not have permission to claim chunks");
             return false;
         }
-        Claim claim1 = CityDatabase.getClaim(location.add(16, 0, 0));
-        Claim claim2 = CityDatabase.getClaim(location.add(-16, 0, 0));
-        Claim claim3 = CityDatabase.getClaim(location.add(0, 0, 16));
-        Claim claim4 = CityDatabase.getClaim(location.add(0, 0, -16));
+        Claim claim1 = CityDatabase.getClaim(location.toBlockLocation().add(16, 0, 0));
+        Claim claim2 = CityDatabase.getClaim(location.toBlockLocation().add(-16, 0, 0));
+        Claim claim3 = CityDatabase.getClaim(location.toBlockLocation().add(0, 0, 16));
+        Claim claim4 = CityDatabase.getClaim(location.toBlockLocation().add(0, 0, -16));
         return (claim1 != null && claim1.getCity() == city) ||
                 (claim2 != null && claim2.getCity() == city) ||
                 (claim3 != null && claim3.getCity() == city) ||
