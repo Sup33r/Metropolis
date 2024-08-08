@@ -214,7 +214,7 @@ public class City {
 
     public Claim getCityClaim(Location location) {
         for (Claim claim : cityClaims) {
-            if (claim.getClaimWorld().equals(location.getWorld().toString())
+            if (claim.getClaimWorld().equals(location.getWorld())
                     && claim.getXPosition() == location.getChunk().getX()
                     && claim.getZPosition() == location.getChunk().getZ()) {
                 return claim;

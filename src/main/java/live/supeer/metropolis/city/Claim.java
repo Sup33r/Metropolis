@@ -22,13 +22,11 @@ public class Claim {
     private final long claimDate;
     private final boolean outpost;
     private final City city;
-    private Point point;
-
     public Claim(DbRow data) {
         this.claimId = data.getInt("claimId");
         this.claimerUUID = data.getString("claimerUUID");
         this.claimerName = data.getString("claimerName");
-        this.claimWorld = plugin.getServer().getWorld(data.getString("claimWorld"));
+        this.claimWorld = plugin.getServer().getWorld(data.getString("world"));
         this.xPosition = data.getInt("xPosition");
         this.zPosition = data.getInt("zPosition");
         this.cityName = data.getString("cityName");
@@ -39,7 +37,5 @@ public class Claim {
         } else {
             this.city = null;
         }
-        GeometryFactory factory = new GeometryFactory();
-        this.point = factory.createPoint(new Coordinate(this.xPosition, this.zPosition));
     }
 }

@@ -10,6 +10,7 @@ import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.utils.DateUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -17,10 +18,7 @@ import org.intellij.lang.annotations.Language;
 import org.locationtech.jts.geom.*;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class CityDatabase {
@@ -116,7 +114,7 @@ public class CityDatabase {
     public static Claim createClaim(City city, Location location, boolean outpost, String playername, String playerUUID) {
         try {
             String cityName = city.getCityName();
-            DB.executeInsert("INSERT INTO `mp_claims` (`claimerName`, `claimerUUID`, `world`, `xPosition`, `zPosition`, `claimDate`, `cityName`, `outpost`) VALUES (" + Database.sqlString(playername) + ", " + Database.sqlString(playerUUID) + ", '" + location.getChunk().getWorld() + "', " + location.getChunk().getX() + ", " + location.getChunk().getZ() + ", " + DateUtil.getTimestamp() + ", '" + cityName + "', " + outpost + ");");
+            DB.executeInsert("INSERT INTO `mp_claims` (`claimerName`, `claimerUUID`, `world`, `xPosition`, `zPosition`, `claimDate`, `cityName`, `outpost`) VALUES (" + Database.sqlString(playername) + ", " + Database.sqlString(playerUUID) + ", '" + location.getChunk().getWorld().getName() + "', " + location.getChunk().getX() + ", " + location.getChunk().getZ() + ", " + DateUtil.getTimestamp() + ", '" + cityName + "', " + outpost + ");");
             city.addCityClaim(new Claim(DB.getFirstRow("SELECT * FROM `mp_claims` WHERE `cityName` = " + Database.sqlString(cityName) + " AND `xPosition` = " + location.getChunk().getX() + " AND `zPosition` = " + location.getChunk().getZ() + ";")));
             return city.getCityClaim(location);
         } catch (SQLException e) {
@@ -533,7 +531,67 @@ public class CityDatabase {
     }
 
     public static List<CityDistance> getCitiesWithinRadius(Location center, int radius) {
-        //TBD
-        return null;
+        List<CityDistance> result = new ArrayList<>();
+        int chunkRadius = (radius / 16) + 1; // Convert block radius to chunk radius
+
+        try {
+            // Query claims within a square area
+            String sql = "SELECT DISTINCT c.cityName, cl.xPosition, cl.zPosition " +
+                    "FROM mp_claims cl " +
+                    "JOIN mp_cities c ON cl.cityName = c.cityName " +
+                    "WHERE cl.world = ? " +
+                    "AND cl.xPosition BETWEEN ? AND ? " +
+                    "AND cl.zPosition BETWEEN ? AND ?";
+
+            List<DbRow> rows = DB.getResults(sql,
+                    center.getWorld().getName(),
+                    center.getChunk().getX() - chunkRadius,
+                    center.getChunk().getX() + chunkRadius,
+                    center.getChunk().getZ() - chunkRadius,
+                    center.getChunk().getZ() + chunkRadius
+            );
+
+            Map<String, Location> cityLocations = new HashMap<>();
+
+            for (DbRow row : rows) {
+                String cityName = row.getString("cityName");
+                int chunkX = row.getInt("xPosition");
+                int chunkZ = row.getInt("zPosition");
+
+                // Convert chunk coordinates to block coordinates (center of the chunk)
+                Location claimLocation = new Location(center.getWorld(),
+                        chunkX * 16 + 8,
+                        center.getY(),
+                        chunkZ * 16 + 8);
+
+                // Keep only the nearest claim for each city
+                if (!cityLocations.containsKey(cityName) ||
+                        claimLocation.distanceSquared(center) < cityLocations.get(cityName).distanceSquared(center)) {
+                    cityLocations.put(cityName, claimLocation);
+                }
+            }
+
+            // Calculate precise distances and filter by actual radius
+            for (Map.Entry<String, Location> entry : cityLocations.entrySet()) {
+                String cityName = entry.getKey();
+                Location claimLocation = entry.getValue();
+                double distance = Math.sqrt(claimLocation.distanceSquared(center));
+
+                if (distance <= radius) {
+                    Optional<City> cityOpt = getCity(cityName);
+                    if (cityOpt.isPresent()) {
+                        result.add(new CityDistance(cityOpt.get(), (int) distance));
+                    }
+                }
+            }
+
+            // Sort results by distance
+            result.sort(Comparator.comparingInt(CityDistance::getDistance));
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result;
     }
 }
