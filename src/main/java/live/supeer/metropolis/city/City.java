@@ -6,16 +6,17 @@ import live.supeer.metropolis.Database;
 import live.supeer.metropolis.Metropolis;
 import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.utils.LocationUtil;
-import live.supeer.metropolis.utils.Utilities;
 import live.supeer.metropolis.plot.Plot;
 import lombok.Getter;
 import org.bukkit.Location;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.io.WKBReader;
-import org.locationtech.jts.io.WKTReader;
+import org.bukkit.World;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.index.strtree.STRtree;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 public class City {
@@ -42,8 +43,6 @@ public class City {
     private boolean isRemoved;
     private double cityTax;
 
-    private Geometry cityBoundary;
-
     public City(DbRow data) {
         this.cityID = data.getInt("cityID");
         this.cityName = data.getString("cityName");
@@ -60,27 +59,6 @@ public class City {
         this.isRemoved = data.get("isRemoved");
         this.bonusClaims = data.getInt("bonusClaims");
         this.cityTax = data.getDbl("cityTax");
-        byte[] wkb = data.get("cityBoundary");
-        if (wkb != null) {
-            try {
-                WKBReader reader = new WKBReader();
-                this.cityBoundary = reader.read(wkb);
-            } catch (org.locationtech.jts.io.ParseException e) {
-                plugin.getLogger().warning("Failed to parse city boundary for city " + cityName);
-                this.cityBoundary = null;
-            }
-        } else {
-            this.cityBoundary = null;
-        }
-    }
-
-    public void setCityBoundary(Geometry cityBoundary) {
-        this.cityBoundary = cityBoundary;
-        // Update the database
-        DB.executeUpdateAsync(
-                "UPDATE `mp_cities` SET `cityBoundary` = ST_GeomFromText(?) WHERE `cityID` = ?",
-                cityBoundary.toText(), cityID
-        );
     }
 
     public void setCityName(String cityName) {
