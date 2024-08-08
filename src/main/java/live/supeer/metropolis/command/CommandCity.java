@@ -1997,12 +1997,17 @@ public class CommandCity extends BaseCommand {
             plugin.sendMessage(player, "messages.city.near.noCitiesFound", "%radius%", String.valueOf(radius));
             return;
         }
+        City inCity = CityDatabase.getCityByClaim(playerLocation.toBlockLocation());
 
         StringBuilder cityList = new StringBuilder();
         for (int i = 0; i < nearbyCities.size(); i++) {
             CityDistance cityDistance = nearbyCities.get(i);
             City city = cityDistance.getCity();
             int distance = cityDistance.getDistance();
+            String set = distance + "m";
+            if (inCity != null && inCity.equals(city)) {
+                set = plugin.getMessage("messages.words.here");
+            }
             String cityEntry = "§2" + city.getCityName() + " (" +
                     "§a" + distance + "m" +
                     "§2" + ")";

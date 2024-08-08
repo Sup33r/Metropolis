@@ -21,6 +21,7 @@ messages:
     on_state: "På"
     off_state: "Av"
     wilderness: "Vildmark"
+    here: "här"
   months:
     january: "januari"
     february: "februari"
