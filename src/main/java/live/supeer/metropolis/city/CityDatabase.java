@@ -530,4 +530,18 @@ public class CityDatabase {
             e.printStackTrace();
         }
     }
+
+    public static List<City> getCitiesWithinRadius(Location center, int radius) {
+        List<City> nearbyCities = new ArrayList<>();
+        for (City city : cities) {
+            Location cityLocation = city.getCitySpawn();
+            if (cityLocation != null && cityLocation.getWorld().equals(center.getWorld())) {
+                double distance = cityLocation.distance(center);
+                if (distance <= radius) {
+                    nearbyCities.add(city);
+                }
+            }
+        }
+        return nearbyCities;
+    }
 }

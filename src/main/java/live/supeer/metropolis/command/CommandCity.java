@@ -1942,4 +1942,50 @@ public class CommandCity extends BaseCommand {
         Utilities.sendMapToPlayer(player, asciiMap, city);
     }
 
+    @Subcommand("near")
+    @CommandCompletion("@nothing|@range:100-10000")
+    //Det är "good enough" nu. det inom () bör inte vara medlemstal, utan avstånd, menmen.
+    public static void onNear(Player player, @Optional Integer blocks) {
+        if (!player.hasPermission("metropolis.city.near")) {
+            plugin.sendMessage(player, "messages.error.permissionDenied");
+            return;
+        }
+
+        int radius = 3000;
+        if (blocks != null) {
+            if (!player.hasPermission("metropolis.city.near.custom")) {
+                plugin.sendMessage(player, "messages.error.permissionDenied");
+                return;
+            }
+            radius = blocks;
+        }
+
+        Location playerLocation = player.getLocation();
+        List<City> nearbyCities = CityDatabase.getCitiesWithinRadius(playerLocation, radius);
+
+        if (nearbyCities.isEmpty()) {
+            plugin.sendMessage(player, "messages.city.near.noCitiesFound", "%radius%", String.valueOf(radius));
+            return;
+        }
+
+        StringBuilder cityList = new StringBuilder();
+        for (int i = 0; i < nearbyCities.size(); i++) {
+            City city = nearbyCities.get(i);
+            String cityEntry = "§2" + city.getCityName() + " (" +
+                    "§a" + CityDatabase.getCityMemberCount(city) +
+                    "§2" + ")";
+
+            if (i == nearbyCities.size() - 2) {
+                cityEntry += " & ";
+            } else if (i < nearbyCities.size() - 2) {
+                cityEntry += ", ";
+            }
+
+            cityList.append(cityEntry);
+        }
+
+        plugin.sendMessage(player, "messages.city.near.header", "%radius%", String.valueOf(radius));
+        player.sendMessage(cityList.toString());
+    }
+
 }

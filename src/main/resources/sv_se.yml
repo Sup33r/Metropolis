@@ -291,6 +291,9 @@ messages:
           2: "<gray>f = frame, g = go, h = home, j = jukebox"
           3: "<gray>r = repair (anvil), s = switch, t = teleport, v = villager"
   city:
+    near:
+      header: "<dark_green>--- <green>Närliggande städer (%radius% meter) <dark_green>---"
+      none: "<red>Inga städer hittades i närheten."
     map:
       header: "<dark_green>--- <green>Detaljplanering: %cityname% <dark_green>---"
       legend:
@@ -378,7 +381,7 @@ messages:
       owner: "<dark_green><bold>Ägare:"
       price: "<dark_green><bold>Till salu:"
     successful:
-      bonus: "<yellow>%cityname% <gray>| <green>Staden har köpt %amount% bonusmarkbit(ar) för %cost% minemynt."
+      bonus: "<yellow>%cityname% <gray>| <green>Staden har köpt %count% bonusmarkbit(ar) för %amount% minemynt."
       outpost: "<yellow>%cityname% <gray>| <green>Staden har köpt en utpost för %amount% minemynt."
       rank:
         promoted: "<yellow>%cityname% <gray>| <green>Du har fått rollen <dark_green>%newrole%<green>."
