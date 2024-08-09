@@ -1317,7 +1317,7 @@ public class CommandCity extends BaseCommand {
             }
             if (city.getCityBalance() < Metropolis.configuration.getDistrictCreationCost()) {
                 plugin.sendMessage(
-                        player, "messages.error.city.missing.balance.districtCost", "%cityname%", city.getCityName());
+                        player, "messages.error.city.missing.balance.districtCost", "%cityname%", city.getCityName(), "%cost%", Utilities.formattedMoney(Metropolis.configuration.getDistrictCreationCost()));
                 return;
             }
             if (CityDatabase.districtExists(name, city)) {
@@ -1384,7 +1384,7 @@ public class CommandCity extends BaseCommand {
                                         + " }");
                         plugin.sendMessage(
                                 player, "messages.city.district.created", "%cityname%", city.getCityName(), "%districtname%", name);
-                        break;
+                        return;
                     }
                     }
             }
@@ -2140,9 +2140,8 @@ public class CommandCity extends BaseCommand {
             }
             districtListString.delete(districtListString.length() - 9, districtListString.length());
             plugin.sendMessage(player, "messages.city.district.list", "%districts%", districtListString.toString(), "%count%", String.valueOf(districtCount), "%cityname%", city.getCityName());
-
+            return;
         }
-        assert argument != null;
         if (argument.startsWith("-") || argument.startsWith("+")) {
             String playerName = argument.substring(1);
             OfflinePlayer targetPlayer = Bukkit.getOfflinePlayer(playerName);
@@ -2227,7 +2226,7 @@ public class CommandCity extends BaseCommand {
                     StringBuilder contacts = new StringBuilder();
                     contacts.append("<green>");
                     for (OfflinePlayer contact : district.getContactplayers()) {
-                        contacts.append(contact).append("<dark_green>, <green>");
+                        contacts.append(contact.getName()).append("<dark_green>, <green>");
                     }
                     contacts.delete(contacts.length() - 9, contacts.length());
                     if (!contacts.isEmpty()) {
@@ -2244,20 +2243,23 @@ public class CommandCity extends BaseCommand {
                 }
                 plugin.sendMessage(player, "messages.city.district.header", "%districtname%", district.getDistrictName());
                 plugin.sendMessage(player, "messages.city.district.city", "%cityname%", district.getCity().getCityName());
-                StringBuilder contacts = new StringBuilder();
-                contacts.append("<green>");
                 int contactCount = district.getContactplayers().size();
-                for (OfflinePlayer contact : district.getContactplayers()) {
-                    contacts.append(contact).append("<dark_green>, <green>");
-                }
-                contacts.delete(contacts.length() - 9, contacts.length());
-                if (!contacts.isEmpty()) {
-                    plugin.sendMessage(player, "messages.city.district.contacts", "%contacts%", contacts.toString(), "%count%", String.valueOf(contactCount));
+                if (contactCount > 0) {
+                    StringBuilder contacts = new StringBuilder();
+                    contacts.append("<green>");
+                    for (OfflinePlayer contact : district.getContactplayers()) {
+                        contacts.append(contact.getName()).append("<dark_green>, <green>");
+                        contacts.delete(contacts.length() - 9, contacts.length());
+                        if (!contacts.isEmpty()) {
+                            plugin.sendMessage(player, "messages.city.district.contacts", "%contacts%", contacts.toString(), "%count%", String.valueOf(contactCount));
+                        }
+                    }
                 }
             }
         }
 
         @Subcommand("set")
+        @CommandCompletion("@name")
         public static void onSet(Player player, String subcommand, String name) {
             City city = Utilities.hasCityPermissions(player, "metropolis.city.district.set", Role.VICE_MAYOR);
             if (city == null) {
@@ -2286,7 +2288,78 @@ public class CommandCity extends BaseCommand {
 
         @Subcommand("update")
         public static void onUpdate(Player player) {
+            City city = Utilities.hasCityPermissions(player, "metropolis.city.update.district", Role.VICE_MAYOR);
+            if (city == null) {
+                return;
+            }
+            live.supeer.metropolis.city.District district = CityDatabase.getDistrict(player.getLocation().toBlockLocation());
 
+            if (district == null) {
+                plugin.sendMessage(player, "messages.error.city.district.notInDistrict");
+                return;
+            }
+
+            if (CityDatabase.getCityByClaim(player.getLocation()) != city) {
+                plugin.sendMessage(player, "messages.error.city.district.outsideCity", "%cityname%", city.getCityName());
+                return;
+            }
+
+            if (!MetropolisListener.playerPolygons.containsKey(player.getUniqueId())) {
+                plugin.sendMessage(player, "messages.error.missing.plot");
+                return;
+            }
+
+
+            Polygon regionPolygon = MetropolisListener.playerPolygons.get(player.getUniqueId());
+            double minX = regionPolygon.getEnvelopeInternal().getMinX();
+            double maxX = regionPolygon.getEnvelopeInternal().getMaxX();
+            double minY = regionPolygon.getEnvelopeInternal().getMinY();
+            double maxY = regionPolygon.getEnvelopeInternal().getMaxY();
+            if (maxX - minX < 3 || maxY - minY < 3) {
+                plugin.sendMessage(player, "messages.error.plot.tooSmall");
+                return;
+            }
+
+            int chunkSize = 16;
+            int startX = (int) Math.floor(minX / chunkSize) * chunkSize;
+            int endX = (int) Math.floor(maxX / chunkSize) * chunkSize + chunkSize;
+            int startY = (int) Math.floor(minY / chunkSize) * chunkSize;
+            int endY = (int) Math.floor(maxY / chunkSize) * chunkSize + chunkSize;
+
+            for (int x = startX; x < endX; x += chunkSize) {
+                for (int z = startY; z < endY; z += chunkSize) {
+                    Polygon chunkPolygon = geometryFactory.createPolygon(new Coordinate[]{
+                            new Coordinate(x, z),
+                            new Coordinate(x + chunkSize, z),
+                            new Coordinate(x + chunkSize, z + chunkSize),
+                            new Coordinate(x, z + chunkSize),
+                            new Coordinate(x, z)
+                    });
+                    if (regionPolygon.intersects(chunkPolygon)) {
+                        if (CityDatabase.getClaim(new Location(player.getWorld(), x, 0, z)) == null || !Objects.equals(Objects.requireNonNull(CityDatabase.getClaim(new Location(player.getWorld(), x, 0, z))).getCityName(), HCDatabase.getHomeCityToCityname(player.getUniqueId().toString()))) {
+                            plugin.sendMessage(player, "messages.error.plot.intersectsExistingClaim");
+                            return;
+                        }
+                        if (!Utilities.containsOnlyCompletePlots(regionPolygon, -64, 319, city, player.getWorld())) {
+                            plugin.sendMessage(player, "messages.error.city.district.plotsNotCompletelyInside");
+                            return;
+                        }
+                        district.update(player, regionPolygon);
+                        Database.addLogEntry(
+                                city,
+                                "{ \"type\": \"update\", \"subtype\": \"district\", \"name\": "
+                                        + district.getDistrictName()
+                                        + ", \"player\": "
+                                        + player.getUniqueId().toString()
+                                        + ", \"districtBounds\": "
+                                        + regionPolygon.toText()
+                                        + " }");
+                        plugin.sendMessage(
+                                player, "messages.city.district.updated", "%cityname%", city.getCityName(), "%districtname%", district.getDistrictName());
+                        return;
+                    }
+                }
+            }
         }
     }
 }

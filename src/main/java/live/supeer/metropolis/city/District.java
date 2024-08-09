@@ -9,10 +9,11 @@ import live.supeer.metropolis.utils.Utilities;
 import lombok.Getter;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
-import org.locationtech.jts.geom.Coordinate;
+import org.bukkit.entity.Player;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -23,41 +24,38 @@ public class District {
 
     private final String districtName;
     private final City city;
-    private final List<OfflinePlayer> contactplayers;
-    private final Polygon districtPoints;
-    private final World world;
+    private List<OfflinePlayer> contactplayers;
+    private Polygon districtPoints;
+    private World world;
 
     public District(DbRow data) {
         this.districtName = data.getString("districtName");
         this.city = CityDatabase.getCity(data.getInt("cityId")).get();
         this.districtPoints = LocationUtil.stringToPolygon(data.getString("districtPoints"));
         String contactPlayersString = data.getString("contactPlayers");
-        this.contactplayers = contactPlayersString != null ? Utilities.stringToOfflinePlayerList(contactPlayersString) : List.of();
+        this.contactplayers = new ArrayList<>(Utilities.stringToOfflinePlayerList(contactPlayersString));
         this.world = plugin.getServer().getWorld(data.getString("world"));
     }
 
-    public boolean isPointInDistrict(double x, double z) {
-        return districtPoints.contains(geometryFactory.createPoint(new Coordinate(x, z)));
-    }
-
-    public List<OfflinePlayer> addContactPlayer(OfflinePlayer player) {
+    public void addContactPlayer(OfflinePlayer player) {
+        if (contactplayers == null) {
+            contactplayers = new ArrayList<>();
+        }
         contactplayers.add(player);
         DB.executeUpdateAsync(
                 "UPDATE `mp_districts` SET `contactPlayers` = "
                         + Database.sqlString(Utilities.offlinePlayerListToString(contactplayers))
                         + " WHERE `districtName` = "
                         + Database.sqlString(districtName) + " AND `cityID` = " + city.getCityID());
-        return contactplayers;
     }
 
-    public List<OfflinePlayer> removeContactPlayer(OfflinePlayer player) {
+    public void removeContactPlayer(OfflinePlayer player) {
         contactplayers.remove(player);
         DB.executeUpdateAsync(
                 "UPDATE `mp_districts` SET `contactPlayers` = "
                         + Database.sqlString(Utilities.offlinePlayerListToString(contactplayers))
                         + " WHERE `districtName` = "
                         + Database.sqlString(districtName) + " AND `cityID` = " + city.getCityID());
-        return contactplayers;
     }
 
     public void setDistrictName(String districtName) {
@@ -66,5 +64,31 @@ public class District {
                         + Database.sqlString(districtName)
                         + " WHERE `districtName` = "
                         + Database.sqlString(this.districtName) + " AND `cityID` = " + city.getCityID());
+    }
+
+    public void update(Player player, Polygon districtPolygon) {
+
+        try {
+            DB.executeUpdate(
+                    "UPDATE `mp_districts` SET `districtPoints` = "
+                            + Database.sqlString(LocationUtil.polygonToString(districtPolygon))
+                            + ", `districtBoundary` = ST_GeomFromText('"
+                            + districtPolygon.toText()
+                            + "')"
+                            + ", `world` = "
+                            + Database.sqlString(player.getWorld().getName())
+                            + " WHERE `districtName` = "
+                            + Database.sqlString(districtName)
+                            + " AND `cityId` = "
+                            + city.getCityID()
+                            + ";");
+
+            this.districtPoints = districtPolygon;
+            this.world = player.getWorld();
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

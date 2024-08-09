@@ -94,6 +94,9 @@ messages:
         nameError: "<red>Områdets namn måste vara mellan 3-%maxlength% tecken långt."
         notInDistrict: "<red>Du befinner dig inte i ett distrikt."
         notFound: "<red>Området hittades inte."
+        outsideCity: "<yellow>%cityname% <gray>| <red>Du kan inte skapa ett område utanför staden."
+        alreadyExists: "<yellow>%cityname% <gray>| <red>Området finns redan."
+        invalidName: "<yellow>%cityname% <gray>| <red>Områdets namn får inte vara längre än %maxlength% tecken eller innehålla några specialtecken."
       tax:
         invalidAmount: "<red>Skattesatsen måste vara ett tal mellan 0.00 - %max%."
         maxAmount: "<red>Skattesatsen får inte överstiga %max%."
@@ -144,6 +147,7 @@ messages:
         mayor: "<yellow>%cityname% <gray>| <red>Du kan inte lämna staden som borgermästare. Överväg att istället ta bort staden med /city delete <underlined>stadsnamn<reset><red>, eller byta roll med en annan medlem med kommandot /city rank <underlined>spelare<reset><red> swap."
       missing:
         balance:
+          districtCost: "<yellow>%cityname% <gray>| <red>Staden har inte råd med %amount% minemynt som det kostar att skapa ett område."
           bonusCost: "<yellow>%cityname% <gray>| <red>Staden har inte råd med %amount% minemynt som %count% bonusmarkbit(ar) kostar."
           outpostCost: "<yellow>%cityname% <gray>| <red>Staden har inte råd med 15 000 minemynt som en utpost kostar."
           goCost: "<yellow>%cityname% <gray>| <red>Staden har inte råd med 5 000 minemynt som det kostar att köpa en teleporteringspunkt till en stad."
@@ -305,6 +309,7 @@ messages:
           3: "<gray>r = repair (anvil), s = switch, t = teleport, v = villager"
   city:
     district:
+      updated: "<yellow>%cityname% <gray>| <green>Området %districtname% har uppdaterats."
       created: "<yellow>%cityname% <gray>| <green>Området %districtname% har skapats."
       contact:
         added: "<yellow>%cityname% <gray>| <green>%player% är nu kontaktperson i området."

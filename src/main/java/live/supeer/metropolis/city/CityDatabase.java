@@ -652,14 +652,17 @@ public class CityDatabase {
 
     public static District getDistrict(String districtName, City city) {
         try {
-            return new District(DB.getFirstRow("SELECT * FROM `mp_districts` WHERE `districtName` = " + Database.sqlString(districtName) + " AND `cityID` = " + city.getCityID() + ";"));
+            DbRow result = DB.getFirstRow("SELECT * FROM `mp_districts` WHERE `districtName` = " + Database.sqlString(districtName) + " AND `cityID` = " + city.getCityID() + ";");
+            if (result != null) {
+                return new District(result);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public static void deleteDistrict(District district) {
+        public static void deleteDistrict(District district) {
         try {
             DB.executeUpdate("DELETE FROM `mp_districts` WHERE `districtName` = " + Database.sqlString(district.getDistrictName()) + " AND `cityID` = " + district.getCity().getCityID() + ";");
         } catch (SQLException e) {
