@@ -482,6 +482,26 @@ public class Utilities {
         return playerString.toString();
     }
 
+    public static List<City> stringToCityList(String cityString) {
+        List<City> cities = new ArrayList<>();
+        if (cityString == null || cityString.isEmpty()) {
+            return cities;
+        }
+        String[] cityArray = cityString.split(",");
+        for (String city : cityArray) {
+            cities.add(CityDatabase.getCity(Integer.parseInt(city)).get());
+        }
+        return cities;
+    }
+
+    public static String cityListToString(List<City> cities) {
+        StringBuilder cityString = new StringBuilder();
+        for (City city : cities) {
+            cityString.append(city.getCityId()).append(",");
+        }
+        return cityString.toString();
+    }
+
     public static boolean containsOnlyCompletePlots(Polygon polygon, int yMin, int yMax, City city, World world) {
         Plot[] intersectingPlots = PlotDatabase.intersectingPlots(polygon, yMin, yMax, city, world);
 

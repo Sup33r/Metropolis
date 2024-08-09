@@ -4,10 +4,7 @@ import co.aikar.commands.PaperCommandManager;
 import co.aikar.idb.DB;
 import com.google.common.collect.ImmutableList;
 import live.supeer.metropolis.city.*;
-import live.supeer.metropolis.command.CommandCity;
-import live.supeer.metropolis.command.CommandHere;
-import live.supeer.metropolis.command.CommandHomeCity;
-import live.supeer.metropolis.command.CommandPlot;
+import live.supeer.metropolis.command.*;
 import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.plot.PlotDatabase;
@@ -62,6 +59,7 @@ public final class Metropolis extends JavaPlugin {
         LocationUtil.plugin = this;
         MetropolisListener.plugin = this;
         PlotDatabase.plugin = this;
+        CommandMetropolis.plugin = this;
         this.languageManager = new LanguageManager(this, "sv_se");
         if (!setupEconomy()) {
             this.getLogger().severe("[Metropolis] Vault not found, disabling plugin");
@@ -80,6 +78,7 @@ public final class Metropolis extends JavaPlugin {
         manager.registerCommand(new CommandCity());
         manager.registerCommand(new CommandPlot());
         manager.registerCommand(new CommandHere());
+        manager.registerCommand(new CommandMetropolis());
         this.getServer().getPluginManager().registerEvents(new CommandHomeCity(), this);
         this.getServer().getPluginManager().registerEvents(new MetropolisListener(), this);
         this.getServer().getPluginManager().registerEvents(new CityListener(), this);

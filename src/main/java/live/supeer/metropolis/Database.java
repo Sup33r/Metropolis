@@ -59,9 +59,12 @@ public class Database {
                                 `citySpawn` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `createDate` bigint(30) DEFAULT NULL,
                                 `latestNameChange` bigint(30) DEFAULT NULL,
+                                `minChunkDistance` int(11) DEFAULT 400,
+                                `minSpawnDistance` int(11) DEFAULT 2000,
                                 `enterMessage` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                 `exitMessage` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                 `motdMessage` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                                `twinCities` text COLLATE utf8mb4_unicode_ci,
                                 `isOpen` tinyint(1) DEFAULT 0,
                                 `isPublic` tinyint(1) DEFAULT 0,
                                 PRIMARY KEY (`cityId`)

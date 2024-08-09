@@ -15,10 +15,11 @@ settings:
     exitmessage: 225
     plotname: 16
     districtname: 26
-
     maxbantime: 10y
-
     citymaxtax: 10.00
+
+    minchunkdistance: 400
+    minspawndistance: 2000
 
   cooldownTime:
     invite: 180

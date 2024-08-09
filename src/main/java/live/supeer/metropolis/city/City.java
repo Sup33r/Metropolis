@@ -7,6 +7,7 @@ import live.supeer.metropolis.Metropolis;
 import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.plot.Plot;
+import live.supeer.metropolis.utils.Utilities;
 import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -30,7 +31,10 @@ public class City {
     private final List<Member> cityMembers = new ArrayList<>();
     private final List<Claim> cityClaims = new ArrayList<>();
     private final List<Plot> cityPlots = new ArrayList<>();
+    private List<City> twinCities = new ArrayList<>();
 //    private final List<Ban> cityBans = new ArrayList<>();
+    private int minChunkDistance;
+    private int minSpawnDistance;
     private int bonusClaims;
     private int cityBalance;
     private Location citySpawn;
@@ -56,7 +60,30 @@ public class City {
         this.isOpen = data.get("isOpen");
         this.isPublic = data.get("isPublic");
         this.bonusClaims = data.getInt("bonusClaims");
+        this.minChunkDistance = data.getInt("minChunkDistance");
+        this.minSpawnDistance = data.getInt("minSpawnDistance");
         this.cityTax = data.getDbl("cityTax");
+        this.twinCities = new ArrayList<>(Utilities.stringToCityList(data.getString("twinCities")));
+    }
+
+    public void addTwinCity(City city) {
+        twinCities.add(city);
+        DB.executeUpdateAsync(
+                "UPDATE `mp_cities` SET `twinCities` = "
+                        + Database.sqlString(Utilities.cityListToString(twinCities))
+                        + " WHERE `cityId` = "
+                        + cityId
+                        + ";");
+    }
+
+    public void removeTwinCity(City city) {
+        twinCities.remove(city);
+        DB.executeUpdateAsync(
+                "UPDATE `mp_cities` SET `twinCities` = "
+                        + Database.sqlString(Utilities.cityListToString(twinCities))
+                        + " WHERE `cityId` = "
+                        + cityId
+                        + ";");
     }
 
     public void setCityName(String cityName) {
@@ -84,6 +111,26 @@ public class City {
         DB.executeUpdateAsync(
                 "UPDATE `mp_cities` SET `cityBalance` = "
                         + this.cityBalance
+                        + " WHERE `cityId` = "
+                        + cityId
+                        + ";");
+    }
+
+    public void setMinChunkDistance(int minChunkDistance) {
+        this.minChunkDistance = minChunkDistance;
+        DB.executeUpdateAsync(
+                "UPDATE `mp_cities` SET `minChunkDistance` = "
+                        + minChunkDistance
+                        + " WHERE `cityId` = "
+                        + cityId
+                        + ";");
+    }
+
+    public void setMinSpawnDistance(int minSpawnDistance) {
+        this.minSpawnDistance = minSpawnDistance;
+        DB.executeUpdateAsync(
+                "UPDATE `mp_cities` SET `minSpawnDistance` = "
+                        + minSpawnDistance
                         + " WHERE `cityId` = "
                         + cityId
                         + ";");

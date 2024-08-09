@@ -31,6 +31,9 @@ public class MetropolisConfiguration {
     private final int plotNameLimit;
     private final int districtNameLimit;
 
+    private final int minChunkDistance;
+    private final int minSpawnDistance;
+
     private final double cityMaxTax;
 
     MetropolisConfiguration(Metropolis plugin) {
@@ -64,5 +67,7 @@ public class MetropolisConfiguration {
         districtNameLimit = plugin.getConfig().getInt("settings.limits.districtname");
 
         cityMaxTax = plugin.getConfig().getDouble("settings.limits.citymaxtax");
+        minChunkDistance = plugin.getConfig().getInt("settings.limits.minchunkdistance");
+        minSpawnDistance = plugin.getConfig().getInt("settings.limits.minspawndistance");
     }
 }

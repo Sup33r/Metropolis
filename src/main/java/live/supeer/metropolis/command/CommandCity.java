@@ -2483,4 +2483,67 @@ public class CommandCity extends BaseCommand {
             plugin.sendMessage(player, "messages.city.chunk.plots", "%count%", String.valueOf(plots.size()), "%plots%", plotList.toString());
         }
     }
+
+    @Subcommand("twin")
+    public static void onTwin(Player player,@Optional String argument) {
+        if (argument == null) {
+            City city = Utilities.hasCityPermissions(player, "metropolis.city.twin", null);
+            if (city == null) {
+                return;
+            }
+            List<City> twinCities = city.getTwinCities();
+            if (twinCities.isEmpty()) {
+                plugin.sendMessage(player, "messages.error.city.twin.none");
+                return;
+            }
+            StringBuilder twinCityList = new StringBuilder();
+            for (City twinCity : twinCities) {
+                twinCityList.append("<green>").append(twinCity.getCityName()).append("<dark_green>, <green>");
+            }
+            twinCityList.delete(twinCityList.length() - 9, twinCityList.length());
+            plugin.sendMessage(player, "messages.city.twin.list", "%cityname%", city.getCityName(), "%twins%", twinCityList.toString(), "%count%", String.valueOf(twinCities.size()));
+        } else {
+            City city = Utilities.hasCityPermissions(player, "metropolis.city.twin", Role.VICE_MAYOR);
+            if (city == null) {
+                return;
+            }
+            if (argument.startsWith("-") || argument.startsWith("+")) {
+                String cityName = argument.substring(1);
+                City twinCity = CityDatabase.getCity(cityName).get();
+                if (CityDatabase.getCity(cityName).isEmpty()) {
+                    plugin.sendMessage(player, "messages.error.city.twin.notFound", "%cityname%", city.getCityName());
+                    return;
+                }
+                if (twinCity.equals(city)) {
+                    plugin.sendMessage(player, "messages.error.city.twin.sameCity", "%cityname%", city.getCityName());
+                    return;
+                }
+                if (argument.startsWith("-")) {
+                    if (!player.hasPermission("metropolis.city.twin.remove")) {
+                        plugin.sendMessage(player, "messages.error.permissionDenied");
+                        return;
+                    }
+                    if (city.getTwinCities().contains(twinCity)) {
+                        city.removeTwinCity(twinCity);
+                        Database.addLogEntry(city, "{ \"type\": \"twin\", \"subtype\": \"remove\", \"twin\": \"" + twinCity.getCityName() + "\", \"player\": \"" + player.getUniqueId().toString() + "\" }");
+                        plugin.sendMessage(player, "messages.city.twin.removed", "%cityname%", city.getCityName(), "%twin%", twinCity.getCityName());
+                        return;
+                    }
+                    plugin.sendMessage(player, "messages.error.city.twin.notTwin", "%cityname%", city.getCityName(), "%twin%", twinCity.getCityName());
+                    return;
+                }
+                if (argument.startsWith("+")) {
+                    if (city.getTwinCities().contains(twinCity)) {
+                        plugin.sendMessage(player, "messages.error.city.twin.alreadyTwin", "%cityname%", city.getCityName(), "%twin%", twinCity.getCityName());
+                        return;
+                    }
+                    city.addTwinCity(twinCity);
+                    Database.addLogEntry(city, "{ \"type\": \"twin\", \"subtype\": \"add\", \"twin\": \"" + twinCity.getCityName() + "\", \"player\": \"" + player.getUniqueId().toString() + "\" }");
+                    plugin.sendMessage(player, "messages.city.twin.added", "%cityname%", city.getCityName(), "%twin%", twinCity.getCityName());
+                }
+            } else {
+                plugin.sendMessage(player, "messages.syntax.city.twin");
+            }
+        }
+    }
 }

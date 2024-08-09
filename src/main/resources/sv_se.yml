@@ -46,6 +46,7 @@ messages:
     goes: "<dark_green>--- <green>Stadsteleporteringspunkter (sida <bold>%startPage% <reset><green>av <bold>%totalPages%<reset><green>) <dark_green>---"
   syntax:
     city:
+      twin: "<gray>/city twin\n<gray>/city twin +<underlined>stadsnamn"
       district: "<gray>/city district\n/city district +<underlined>player<reset>\n<gray>/city district -<underlined>player<reset>\n<gray>/city district delete\n/city district info <underlined>namn<reset>\n<gray>/city district set name <underlined>nytt namn<reset\n<gray>/city district update"
       toggle:
         open: "<gray>Syntax: /city toggle open"
@@ -82,10 +83,17 @@ messages:
       market: "<gray>Syntax: /plot market <underlined>pris\n<gray>Syntax: /plot market <underlined>-"
       perm: "<gray>Syntax: /plot perm <underlined>spelare<reset><gray> +/-<underlined>ändring</underlined>\n<gray>Syntax: /plot perm members +/-<underlined>ändring</underlined>\n<gray>Syntax: /plot perm outsiders +/-<underlined>ändring</underlined>"
   error:
+    invalidNumber: "<red>Det angivna värdet är inte ett giltigt nummer."
     player:
       notFound: "<red>Spelaren hittades inte."
       notInCity: "<red>Spelaren är inte medlem i någon stad."
     city:
+      twin:
+        notFound: "<yellow>%cityname% <gray>| <red>Staden hittades inte."
+        none: "<red>Staden har ingen vänort."
+        sameCity: "<yellow>%cityname% <gray>| <red>Staden kan inte vara vänort med sig själv."
+        notTwin: "<yellow>%cityname% <gray>| <red>Staden är inte vänort med %twin%."
+        alreadyTwin: "<yellow>%cityname% <gray>| <red>Staden är redan vänort med %twin%."
       unclaim:
         hasPlots: "<yellow>%cityname% <gray>| <red>Det finns en eller flera tomter på markbiten. Använd /plot delete för att ta bort tomter."
         hasDistricts: "<yellow>%cityname% <gray>| <red>Det finns ett eller flera områden på markbiten. Använd /city district delete för att ta bort områden, eller /city district update för att flytta dem."
@@ -148,6 +156,8 @@ messages:
       alreadyInCity: "<red>Du är redan medlem i staden."
       notInCity: "<red>Du är inte medlem i staden."
       banned: "<red>Du är bannlyst från staden."
+      notFound: "<red>Staden hittades inte."
+      outsideCity: "<red>Du befinner dig inte i någon stad."
       banTooLong: "<red>Bannlysningen får inte vara längre än %maxtime%."
       leave:
         mayor: "<yellow>%cityname% <gray>| <red>Du kan inte lämna staden som borgermästare. Överväg att istället ta bort staden med /city delete <underlined>stadsnamn<reset><red>, eller byta roll med en annan medlem med kommandot /city rank <underlined>spelare<reset><red> swap."
@@ -314,6 +324,10 @@ messages:
           2: "<gray>f = frame, g = go, h = home, j = jukebox"
           3: "<gray>r = repair (anvil), s = switch, t = teleport, v = villager"
   city:
+    twin:
+      removed: "<yellow>%cityname% <gray>| <green>Staden %twin% har tagits bort som vänort."
+      added: "<yellow>%cityname% <gray>| <green>Staden %twin% har lagts till som vänort."
+      list: "<yellow>%cityname% <gray>| <green>Vänorter (%count%): %twins%"
     chunk:
       header: "<dark_green>--- <green>Markbit: (%chunkx%, %chunky%) <dark_green>---"
       status:
@@ -428,6 +442,10 @@ messages:
       owner: "<dark_green><bold>Ägare:"
       price: "<dark_green><bold>Till salu:"
     successful:
+      resetMinSpawnDistance: "<yellow>%cityname% <gray>| <green>Minsta avståndet mellan städer har återställts."
+      setMinSpawnDistance: "<yellow>%cityname% <gray>| <green>Minsta avståndet mellan städer har ändrats till %distance%."
+      resetMinChunkDistance: "<yellow>%cityname% <gray>| <green>Minsta avståndet mellan städer har återställts."
+      setMinChunkDistance: "<yellow>%cityname% <gray>| <green>Minsta avståndet mellan städer har ändrats till %distance%."
       unclaim: "<yellow>%cityname% <gray>| <green>Markbiten har återgått till naturen."
       bonus: "<yellow>%cityname% <gray>| <green>Staden har köpt %count% bonusmarkbit(ar) för %amount% minemynt."
       outpost: "<yellow>%cityname% <gray>| <green>Staden har köpt en utpost för %amount% minemynt."
