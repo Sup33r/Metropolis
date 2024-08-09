@@ -28,8 +28,8 @@ public class Plot {
     private static final GeometryFactory geometryFactory = new GeometryFactory();
 
 
-    private final int plotID;
-    private final int cityID;
+    private final int plotId;
+    private final int cityId;
     private String plotName;
     private String plotOwner;
     private String plotOwnerUUID;
@@ -45,13 +45,13 @@ public class Plot {
     private Location plotCenter;
     private char[] plotFlags;
     private final long plotCreationDate;
-    private World plotWorld;
+    private final World plotWorld;
     private Polygon plotPoints;
     private final City city;
 
     public Plot(DbRow data) {
-        this.plotID = data.getInt("plotId");
-        this.cityID = data.getInt("cityId");
+        this.plotId = data.getInt("plotId");
+        this.cityId = data.getInt("cityId");
         this.plotName = data.getString("plotName");
         this.plotOwner = data.getString("plotOwner");
         this.plotOwnerUUID = data.getString("plotOwnerUUID");
@@ -62,8 +62,8 @@ public class Plot {
         this.isForSale = data.get("plotIsForSale");
         this.plotPrice = data.getInt("plotPrice");
         this.plotRent = data.getInt("plotRent");
-        if (CityDatabase.getCity(cityID).isPresent()) {
-            this.city = CityDatabase.getCity(cityID).get();
+        if (CityDatabase.getCity(cityId).isPresent()) {
+            this.city = CityDatabase.getCity(cityId).get();
         } else {
             this.city = null;
         }
@@ -90,8 +90,8 @@ public class Plot {
         DB.executeUpdateAsync(
                 "UPDATE `mp_plots` SET `plotName` = "
                         + Database.sqlString(plotName)
-                        + " WHERE `plotID` = "
-                        + plotID
+                        + " WHERE `plotId` = "
+                        + plotId
                         + ";");
     }
 
@@ -100,8 +100,8 @@ public class Plot {
         DB.executeUpdateAsync(
                 "UPDATE `mp_plots` SET `plotType` = "
                         + Database.sqlString(plotType)
-                        + " WHERE `plotID` = "
-                        + plotID
+                        + " WHERE `plotId` = "
+                        + plotId
                         + ";");
     }
 
@@ -110,8 +110,8 @@ public class Plot {
         DB.executeUpdateAsync(
                 "UPDATE `mp_plots` SET `plotOwner` = "
                         + Database.sqlString(plotOwner)
-                        + " WHERE `plotID` = "
-                        + plotID
+                        + " WHERE `plotId` = "
+                        + plotId
                         + ";");
     }
 
@@ -120,8 +120,8 @@ public class Plot {
         DB.executeUpdateAsync(
                 "UPDATE `mp_plots` SET `plotOwnerUUID` = "
                         + Database.sqlString(plotOwnerUUID)
-                        + " WHERE `plotID` = "
-                        + plotID
+                        + " WHERE `plotId` = "
+                        + plotId
                         + ";");
     }
 
@@ -130,29 +130,29 @@ public class Plot {
         DB.executeUpdateAsync(
                 "UPDATE `mp_plots` SET `plotIsForSale` = "
                         + isForSale
-                        + " WHERE `plotID` = "
-                        + plotID
+                        + " WHERE `plotId` = "
+                        + plotId
                         + ";");
     }
 
     public void setPlotPrice(int plotPrice) {
         this.plotPrice = plotPrice;
         DB.executeUpdateAsync(
-                "UPDATE `mp_plots` SET `plotPrice` = " + plotPrice + " WHERE `plotID` = " + plotID + ";");
+                "UPDATE `mp_plots` SET `plotPrice` = " + plotPrice + " WHERE `plotId` = " + plotId + ";");
     }
 
     public void setPlotRent(int plotRent) {
         this.plotRent = plotRent;
         DB.executeUpdateAsync(
-                "UPDATE `mp_plots` SET `plotRent` = " + plotRent + " WHERE `plotID` = " + plotID + ";");
+                "UPDATE `mp_plots` SET `plotRent` = " + plotRent + " WHERE `plotId` = " + plotId + ";");
     }
 
     public void removePlotOwner() {
         this.plotOwner = null;
         this.plotOwnerUUID = null;
         DB.executeUpdateAsync(
-                "UPDATE `mp_plots` SET `plotOwner` = NULL, `plotOwnerUUID` = NULL WHERE `plotID` = "
-                        + plotID
+                "UPDATE `mp_plots` SET `plotOwner` = NULL, `plotOwnerUUID` = NULL WHERE `plotId` = "
+                        + plotId
                         + ";");
     }
 
@@ -190,7 +190,7 @@ public class Plot {
                             + plotPolygon.toText()
                             + "')"
                             + " WHERE `plotId` = "
-                            + plotID
+                            + plotId
                             + ";");
 
             // Update local instance variables
@@ -209,8 +209,8 @@ public class Plot {
                 DB.executeUpdate(
                         "UPDATE `mp_plots` SET `plotPermsMembers` = "
                                 + Database.sqlString(perms)
-                                + " WHERE `plotID` = "
-                                + plotID
+                                + " WHERE `plotId` = "
+                                + plotId
                                 + ";");
                 this.permsMembers = perms.toCharArray();
                 return;
@@ -218,17 +218,17 @@ public class Plot {
                 DB.executeUpdate(
                         "UPDATE `mp_plots` SET `plotPermsOutsiders` = "
                                 + Database.sqlString(perms)
-                                + " WHERE `plotID` = "
-                                + plotID
+                                + " WHERE `plotId` = "
+                                + plotId
                                 + ";");
                 this.permsOutsiders = perms.toCharArray();
                 return;
             }
             DB.executeUpdate(
                     "INSERT INTO `mp_plotperms` (`plotId`, `cityId`, `plotPerms`, `playerUUID`, `playerName`) VALUES ("
-                            + plotID
+                            + plotId
                             + ", "
-                            + cityID
+                            + cityId
                             + ", "
                             + Database.sqlString(perms)
                             + ", "
@@ -246,10 +246,10 @@ public class Plot {
     public void removePlotPerms() {
         try {
             DB.executeUpdate(
-                    "UPDATE `mp_plots` SET `plotPermsMembers` = '', `plotPermsOutsiders` = '' WHERE `plotID` = "
-                            + plotID
+                    "UPDATE `mp_plots` SET `plotPermsMembers` = '', `plotPermsOutsiders` = '' WHERE `plotId` = "
+                            + plotId
                             + ";");
-            DB.executeUpdate("DELETE FROM `mp_plotperms` WHERE `plotId` = " + plotID + ";");
+            DB.executeUpdate("DELETE FROM `mp_plotperms` WHERE `plotId` = " + plotId + ";");
             this.permsMembers = new char[] {' '};
             this.permsOutsiders = new char[] {' '};
         } catch (Exception e) {
@@ -275,22 +275,22 @@ public class Plot {
         DB.executeUpdateAsync(
                 "UPDATE `mp_plots` SET `plotFlags` = "
                         + Database.sqlString(flags)
-                        + " WHERE `plotID` = "
-                        + plotID
+                        + " WHERE `plotId` = "
+                        + plotId
                         + ";");
     }
 
     public void setKMarked(boolean kMarked) {
         this.kMarked = kMarked;
         DB.executeUpdateAsync(
-                "UPDATE `mp_plots` SET `plotKMarked` = " + kMarked + " WHERE `plotID` = " + plotID + ";");
+                "UPDATE `mp_plots` SET `plotKMarked` = " + kMarked + " WHERE `plotId` = " + plotId + ";");
     }
 
     public List<PlotPerms> getPlayerPlotPerms() {
         List<PlotPerms> plotPermsList = new ArrayList<>();
         try {
             List<DbRow> rows =
-                    DB.getResults("SELECT * FROM `mp_plotperms` WHERE `plotId` = " + plotID + ";");
+                    DB.getResults("SELECT * FROM `mp_plotperms` WHERE `plotId` = " + plotId + ";");
             for (DbRow row : rows) {
                 plotPermsList.add(new PlotPerms(row));
             }
@@ -305,7 +305,7 @@ public class Plot {
         DbRow row = null;
         try {
             row = DB.getFirstRow(
-                    "SELECT * FROM `mp_plotperms` WHERE `plotId` = " + plotID + " AND `playerUUID` = " + Database.sqlString(playerUUID) + ";"
+                    "SELECT * FROM `mp_plotperms` WHERE `plotId` = " + plotId + " AND `playerUUID` = " + Database.sqlString(playerUUID) + ";"
             );
         } catch (Exception e) {
             e.printStackTrace();

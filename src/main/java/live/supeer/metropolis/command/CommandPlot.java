@@ -6,6 +6,7 @@ import live.supeer.metropolis.Database;
 import live.supeer.metropolis.Metropolis;
 import live.supeer.metropolis.MetropolisListener;
 import live.supeer.metropolis.city.Role;
+import live.supeer.metropolis.event.PlayerEnterPlotEvent;
 import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.utils.Utilities;
 import live.supeer.metropolis.city.City;
@@ -110,7 +111,7 @@ public class CommandPlot extends BaseCommand {
                         new Coordinate(x, z)
                 });
                 if (regionPolygon.intersects(chunkPolygon)) {
-                    if (CityDatabase.getClaim(new Location(player.getWorld(), x, 0, z)) == null || !Objects.equals(Objects.requireNonNull(CityDatabase.getClaim(new Location(player.getWorld(), x, 0, z))).getCityName(), HCDatabase.getHomeCityToCityname(player.getUniqueId().toString()))) {
+                    if (CityDatabase.getClaim(new Location(player.getWorld(), x, 0, z)) == null || !Objects.equals(Objects.requireNonNull(CityDatabase.getClaim(new Location(player.getWorld(), x, 0, z))).getCity(), HCDatabase.getHomeCityToCity(player.getUniqueId().toString()))) {
                         plugin.sendMessage(player, "messages.error.plot.intersectsExistingClaim");
                         return;
                     }
@@ -135,7 +136,7 @@ public class CommandPlot extends BaseCommand {
                     Database.addLogEntry(
                             city,
                             "{ \"type\": \"create\", \"subtype\": \"plot\", \"id\": "
-                                    + plot.getPlotID()
+                                    + plot.getPlotId()
                                     + ", \"name\": "
                                     + plotname
                                     + ", \"points\": "
@@ -250,7 +251,7 @@ public class CommandPlot extends BaseCommand {
         }
         Database.addLogEntry(plot.getCity(),
                 "{ \"type\": \"delete\", \"subtype\": \"plot\", \"id\": "
-                        + plot.getPlotID()
+                        + plot.getPlotId()
                         + ", \"name\": "
                         + plot.getPlotName()
                         + ", \"player\": "
@@ -276,7 +277,7 @@ public class CommandPlot extends BaseCommand {
         Database.addLogEntry(
                 plot.getCity(),
                 "{ \"type\": \"leave\", \"subtype\": \"plot\", \"id\": "
-                        + plot.getPlotID()
+                        + plot.getPlotId()
                         + ", \"name\": "
                         + plot.getPlotName()
                         + ", \"player\": "
@@ -309,7 +310,7 @@ public class CommandPlot extends BaseCommand {
             Database.addLogEntry(
                     plot.getCity(),
                     "{ \"type\": \"plotMarket\", \"subtype\": \"remove\", \"id\": "
-                            + plot.getPlotID()
+                            + plot.getPlotId()
                             + ", \"name\": "
                             + plot.getPlotName()
                             + ", \"player\": "
@@ -341,7 +342,7 @@ public class CommandPlot extends BaseCommand {
                 Database.addLogEntry(
                         plot.getCity(),
                         "{ \"type\": \"plotMarket\", \"subtype\": \"change\", \"id\": "
-                                + plot.getPlotID()
+                                + plot.getPlotId()
                                 + ", \"name\": "
                                 + plot.getPlotName()
                                 + ", \"from\": "
@@ -367,7 +368,7 @@ public class CommandPlot extends BaseCommand {
             Database.addLogEntry(
                     plot.getCity(),
                     "{ \"type\": \"plotMarket\", \"subtype\": \"add\", \"id\": "
-                            + plot.getPlotID()
+                            + plot.getPlotId()
                             + ", \"name\": "
                             + plot.getPlotName()
                             + ", \"to\": "
@@ -404,7 +405,7 @@ public class CommandPlot extends BaseCommand {
         List<Player> players = new ArrayList<>();
         plugin.sendMessage(player, "messages.plot.list.header", "%plot%", plot.getPlotName());
         plugin.sendMessage(
-                player, "messages.plot.list.id", "%id%", String.valueOf(plot.getPlotID()));
+                player, "messages.plot.list.id", "%id%", String.valueOf(plot.getPlotId()));
         plugin.sendMessage(player, "messages.plot.list.city", "%cityname%", plot.getCity().getCityName());
         plugin.sendMessage(player, "messages.plot.list.owner", "%owner%", plot.getPlotOwner());
         if (Arrays.toString(plot.getPlotFlags()).contains("p")) {
@@ -472,7 +473,7 @@ public class CommandPlot extends BaseCommand {
             Polygon polygon = plot.getPlotPoints();
             Point point = geometryFactory.createPoint(new Coordinate(p.getLocation().getBlockX(), p.getLocation().getBlockZ()));
             if (polygon.contains(point)) {
-                if (plot.getPlotID() == plot.getPlotID()) {
+                if (plot.getPlotId() == plot.getPlotId()) {
                     if (!players.contains(p)) {
                         players.add(p);
                     }
@@ -553,11 +554,11 @@ public class CommandPlot extends BaseCommand {
         }
         Plot plot = PlotDatabase.getPlot(Integer.parseInt(plotID));
         assert plot != null;
-        if (CityDatabase.getCity(plot.getCityID()).isEmpty()) {
+        if (CityDatabase.getCity(plot.getCityId()).isEmpty()) {
             plugin.sendMessage(player, "messages.error.city.missing.city");
             return;
         }
-        City city = CityDatabase.getCity(plot.getCityID()).get();
+        City city = CityDatabase.getCity(plot.getCityId()).get();
         plugin.sendMessage(
                 player,
                 "messages.city.successful.set.plot.tp",
@@ -566,9 +567,8 @@ public class CommandPlot extends BaseCommand {
                 "%cityname%",
                 city.getCityName());
         player.teleport(plot.getPlotCenter());
-        Metropolis.playerInPlot.put(player.getUniqueId(), plot);
-        Metropolis.playerInCity.put(player.getUniqueId(), city);
-        Utilities.sendCityScoreboard(player, city, plot);
+        PlayerEnterPlotEvent enterPlotEvent = new PlayerEnterPlotEvent(player, plot);
+        Bukkit.getServer().getPluginManager().callEvent(enterPlotEvent);
     }
 
     @Subcommand("share")
@@ -596,7 +596,7 @@ public class CommandPlot extends BaseCommand {
             Database.addLogEntry(
                     plot.getCity(),
                     "{ \"type\": \"plot\", \"subtype\": \"perm\", \"id\": "
-                            + plot.getPlotID()
+                            + plot.getPlotId()
                             + ", \"name\": "
                             + plot.getPlotName()
                             + ", \"type\": "
@@ -622,7 +622,7 @@ public class CommandPlot extends BaseCommand {
             Database.addLogEntry(
                     plot.getCity(),
                     "{ \"type\": \"plot\", \"subtype\": \"perm\", \"id\": "
-                            + plot.getPlotID()
+                            + plot.getPlotId()
                             + ", \"name\": "
                             + plot.getPlotName()
                             + ", \"type\": "
@@ -734,7 +734,7 @@ public class CommandPlot extends BaseCommand {
                 Database.addLogEntry(
                         city,
                         "{ \"type\": \"plot\", \"subtype\": \"perm\", \"id\": "
-                                + plot.getPlotID()
+                                + plot.getPlotId()
                                 + ", \"name\": "
                                 + plot.getPlotName()
                                 + ", \"type\": "
@@ -793,7 +793,7 @@ public class CommandPlot extends BaseCommand {
                 Database.addLogEntry(
                         city,
                         "{ \"type\": \"plot\", \"subtype\": \"perm\", \"id\": "
-                                + plot.getPlotID()
+                                + plot.getPlotId()
                                 + ", \"name\": "
                                 + plot.getPlotName()
                                 + ", \"type\": "
@@ -831,7 +831,7 @@ public class CommandPlot extends BaseCommand {
                 Database.addLogEntry(
                         city,
                         "{ \"type\": \"plot\", \"subtype\": \"perm\", \"id\": "
-                                + plot.getPlotID()
+                                + plot.getPlotId()
                                 + ", \"name\": "
                                 + plot.getPlotName()
                                 + ", \"type\": "
@@ -870,7 +870,7 @@ public class CommandPlot extends BaseCommand {
                 Database.addLogEntry(
                         city,
                         "{ \"type\": \"plot\", \"subtype\": \"perm\", \"id\": "
-                                + plot.getPlotID()
+                                + plot.getPlotId()
                                 + ", \"name\": "
                                 + plot.getPlotName()
                                 + ", \"type\": "
@@ -896,7 +896,7 @@ public class CommandPlot extends BaseCommand {
                 Database.addLogEntry(
                         city,
                         "{ \"type\": \"plot\", \"subtype\": \"perm\", \"id\": "
-                                + plot.getPlotID()
+                                + plot.getPlotId()
                                 + ", \"name\": "
                                 + plot.getPlotName()
                                 + ", \"type\": "
@@ -1035,7 +1035,7 @@ public class CommandPlot extends BaseCommand {
                     Database.addLogEntry(
                             plot.getCity(),
                             "{ \"type\": \"plot\", \"subtype\": \"type\", \"id\": "
-                                    + plot.getPlotID()
+                                    + plot.getPlotId()
                                     + ", \"name\": "
                                     + plot.getPlotName()
                                     + ", \"from\": "
@@ -1060,7 +1060,7 @@ public class CommandPlot extends BaseCommand {
                         Database.addLogEntry(
                                 plot.getCity(),
                                 "{ \"type\": \"plot\", \"subtype\": \"type\", \"id\": "
-                                        + plot.getPlotID()
+                                        + plot.getPlotId()
                                         + ", \"name\": "
                                         + plot.getPlotName()
                                         + ", \"from\": "
@@ -1094,7 +1094,7 @@ public class CommandPlot extends BaseCommand {
                     Database.addLogEntry(
                             plot.getCity(),
                             "{ \"type\": \"plot\", \"subtype\": \"type\", \"id\": "
-                                    + plot.getPlotID()
+                                    + plot.getPlotId()
                                     + ", \"name\": "
                                     + plot.getPlotName()
                                     + ", \"from\": "
@@ -1124,7 +1124,7 @@ public class CommandPlot extends BaseCommand {
                         Database.addLogEntry(
                                 plot.getCity(),
                                 "{ \"type\": \"plot\", \"subtype\": \"type\", \"id\": "
-                                        + plot.getPlotID()
+                                        + plot.getPlotId()
                                         + ", \"name\": "
                                         + plot.getPlotName()
                                         + ", \"from\": "
@@ -1158,7 +1158,7 @@ public class CommandPlot extends BaseCommand {
                     Database.addLogEntry(
                             plot.getCity(),
                             "{ \"type\": \"plot\", \"subtype\": \"type\", \"id\": "
-                                    + plot.getPlotID()
+                                    + plot.getPlotId()
                                     + ", \"name\": "
                                     + plot.getPlotName()
                                     + ", \"from\": "
@@ -1188,7 +1188,7 @@ public class CommandPlot extends BaseCommand {
                         Database.addLogEntry(
                                 plot.getCity(),
                                 "{ \"type\": \"plot\", \"subtype\": \"type\", \"id\": "
-                                        + plot.getPlotID()
+                                        + plot.getPlotId()
                                         + ", \"name\": "
                                         + plot.getPlotName()
                                         + ", \"from\": "
@@ -1222,7 +1222,7 @@ public class CommandPlot extends BaseCommand {
                     Database.addLogEntry(
                             plot.getCity(),
                             "{ \"type\": \"plot\", \"subtype\": \"type\", \"id\": "
-                                    + plot.getPlotID()
+                                    + plot.getPlotId()
                                     + ", \"name\": "
                                     + plot.getPlotName()
                                     + ", \"from\": "
@@ -1252,7 +1252,7 @@ public class CommandPlot extends BaseCommand {
                         Database.addLogEntry(
                                 plot.getCity(),
                                 "{ \"type\": \"plot\", \"subtype\": \"type\", \"id\": "
-                                        + plot.getPlotID()
+                                        + plot.getPlotId()
                                         + ", \"name\": "
                                         + plot.getPlotName()
                                         + ", \"from\": "
@@ -1286,7 +1286,7 @@ public class CommandPlot extends BaseCommand {
                     Database.addLogEntry(
                             plot.getCity(),
                             "{ \"type\": \"plot\", \"subtype\": \"type\", \"id\": "
-                                    + plot.getPlotID()
+                                    + plot.getPlotId()
                                     + ", \"name\": "
                                     + plot.getPlotName()
                                     + ", \"from\": "
@@ -1313,7 +1313,7 @@ public class CommandPlot extends BaseCommand {
                             Database.addLogEntry(
                                     plot.getCity(),
                                     "{ \"type\": \"plot\", \"subtype\": \"type\", \"id\": "
-                                            + plot.getPlotID()
+                                            + plot.getPlotId()
                                             + ", \"name\": "
                                             + plot.getPlotName()
                                             + ", \"from\": "
@@ -1347,7 +1347,7 @@ public class CommandPlot extends BaseCommand {
                         Database.addLogEntry(
                                 plot.getCity(),
                                 "{ \"type\": \"plot\", \"subtype\": \"type\", \"id\": "
-                                        + plot.getPlotID()
+                                        + plot.getPlotId()
                                         + ", \"name\": "
                                         + plot.getPlotName()
                                         + ", \"from\": "
@@ -1411,16 +1411,16 @@ public class CommandPlot extends BaseCommand {
                 Database.addLogEntry(
                         plot.getCity(),
                         "{ \"type\": \"plot\", \"subtype\": \"name\", \"id\": "
-                                + plot.getPlotID()
+                                + plot.getPlotId()
                                 + ", \"from\": "
                                 + plot.getPlotName()
                                 + ", \"to\": "
                                 + "Tomt #"
-                                + plot.getPlotID()
+                                + plot.getPlotId()
                                 + ", \"issuer\": "
                                 + player.getUniqueId().toString()
                                 + " }");
-                plot.setPlotName("Tomt #" + plot.getPlotID());
+                plot.setPlotName("Tomt #" + plot.getPlotId());
                 Utilities.sendCityScoreboard(player, plot.getCity(), plot);
                 plugin.sendMessage(
                         player,
@@ -1439,7 +1439,7 @@ public class CommandPlot extends BaseCommand {
             Database.addLogEntry(
                     plot.getCity(),
                     "{ \"type\": \"plot\", \"subtype\": \"name\", \"id\": "
-                            + plot.getPlotID()
+                            + plot.getPlotId()
                             + ", \"from\": "
                             + plot.getPlotName()
                             + ", \"to\": "
@@ -1477,7 +1477,7 @@ public class CommandPlot extends BaseCommand {
                 Database.addLogEntry(
                         city,
                         "{ \"type\": \"plot\", \"subtype\": \"rent\", \"id\": "
-                                + plot.getPlotID()
+                                + plot.getPlotId()
                                 + ", \"name\": "
                                 + plot.getPlotName()
                                 + ", \"from\": "
@@ -1509,7 +1509,7 @@ public class CommandPlot extends BaseCommand {
                 Database.addLogEntry(
                         city,
                         "{ \"type\": \"plotMarket\", \"subtype\": \"add\", \"id\": "
-                                + plot.getPlotID()
+                                + plot.getPlotId()
                                 + ", \"name\": "
                                 + plot.getPlotName()
                                 + ", \"to\": "
@@ -1522,7 +1522,7 @@ public class CommandPlot extends BaseCommand {
             Database.addLogEntry(
                     city,
                     "{ \"type\": \"plot\", \"subtype\": \"rent\", \"id\": "
-                            + plot.getPlotID()
+                            + plot.getPlotId()
                             + ", \"name\": "
                             + plot.getPlotName()
                             + ", \"from\": "
@@ -1579,7 +1579,7 @@ public class CommandPlot extends BaseCommand {
                 Database.addLogEntry(
                         city,
                         "{ \"type\": \"plot\", \"subtype\": \"toggle\", \"id\": "
-                                + plot.getPlotID()
+                                + plot.getPlotId()
                                 + ", \"name\": "
                                 + plot.getPlotName()
                                 + ", \"item\": "
@@ -1604,7 +1604,7 @@ public class CommandPlot extends BaseCommand {
                 Database.addLogEntry(
                         city,
                         "{ \"type\": \"plot\", \"subtype\": \"toggle\", \"id\": "
-                                + plot.getPlotID()
+                                + plot.getPlotId()
                                 + ", \"name\": "
                                 + plot.getPlotName()
                                 + ", \"item\": "
@@ -1654,7 +1654,7 @@ public class CommandPlot extends BaseCommand {
                 Database.addLogEntry(
                         city,
                         "{ \"type\": \"plot\", \"subtype\": \"toggle\", \"id\": "
-                                + plot.getPlotID()
+                                + plot.getPlotId()
                                 + ", \"name\": "
                                 + plot.getPlotName()
                                 + ", \"item\": "
@@ -1679,7 +1679,7 @@ public class CommandPlot extends BaseCommand {
                 Database.addLogEntry(
                         city,
                         "{ \"type\": \"plot\", \"subtype\": \"toggle\", \"id\": "
-                                + plot.getPlotID()
+                                + plot.getPlotId()
                                 + ", \"name\": "
                                 + plot.getPlotName()
                                 + ", \"item\": "
@@ -1729,7 +1729,7 @@ public class CommandPlot extends BaseCommand {
                 Database.addLogEntry(
                         city,
                         "{ \"type\": \"plot\", \"subtype\": \"toggle\", \"id\": "
-                                + plot.getPlotID()
+                                + plot.getPlotId()
                                 + ", \"name\": "
                                 + plot.getPlotName()
                                 + ", \"item\": "
@@ -1754,7 +1754,7 @@ public class CommandPlot extends BaseCommand {
                 Database.addLogEntry(
                         city,
                         "{ \"type\": \"plot\", \"subtype\": \"toggle\", \"id\": "
-                                + plot.getPlotID()
+                                + plot.getPlotId()
                                 + ", \"name\": "
                                 + plot.getPlotName()
                                 + ", \"item\": "
@@ -1804,7 +1804,7 @@ public class CommandPlot extends BaseCommand {
                 Database.addLogEntry(
                         city,
                         "{ \"type\": \"plot\", \"subtype\": \"toggle\", \"id\": "
-                                + plot.getPlotID()
+                                + plot.getPlotId()
                                 + ", \"name\": "
                                 + plot.getPlotName()
                                 + ", \"item\": "
@@ -1839,7 +1839,7 @@ public class CommandPlot extends BaseCommand {
             Database.addLogEntry(
                     city,
                     "{ \"type\": \"plot\", \"subtype\": \"toggle\", \"id\": "
-                            + plot.getPlotID()
+                            + plot.getPlotId()
                             + ", \"name\": "
                             + plot.getPlotName()
                             + ", \"item\": "
@@ -1875,7 +1875,7 @@ public class CommandPlot extends BaseCommand {
                 Database.addLogEntry(
                         city,
                         "{ \"type\": \"plot\", \"subtype\": \"toggle\", \"id\": "
-                                + plot.getPlotID()
+                                + plot.getPlotId()
                                 + ", \"name\": "
                                 + plot.getPlotName()
                                 + ", \"item\": "
@@ -1910,7 +1910,7 @@ public class CommandPlot extends BaseCommand {
             Database.addLogEntry(
                     city,
                     "{ \"type\": \"plot\", \"subtype\": \"toggle\", \"id\": "
-                            + plot.getPlotID()
+                            + plot.getPlotId()
                             + ", \"name\": "
                             + plot.getPlotName()
                             + ", \"item\": "
@@ -1946,7 +1946,7 @@ public class CommandPlot extends BaseCommand {
                 Database.addLogEntry(
                         city,
                         "{ \"type\": \"plot\", \"subtype\": \"toggle\", \"id\": "
-                                + plot.getPlotID()
+                                + plot.getPlotId()
                                 + ", \"name\": "
                                 + plot.getPlotName()
                                 + ", \"item\": "
@@ -1981,7 +1981,7 @@ public class CommandPlot extends BaseCommand {
             Database.addLogEntry(
                     city,
                     "{ \"type\": \"plot\", \"subtype\": \"toggle\", \"id\": "
-                            + plot.getPlotID()
+                            + plot.getPlotId()
                             + ", \"name\": "
                             + plot.getPlotName()
                             + ", \"item\": "
@@ -2017,7 +2017,7 @@ public class CommandPlot extends BaseCommand {
                 Database.addLogEntry(
                         city,
                         "{ \"type\": \"plot\", \"subtype\": \"toggle\", \"id\": "
-                                + plot.getPlotID()
+                                + plot.getPlotId()
                                 + ", \"name\": "
                                 + plot.getPlotName()
                                 + ", \"item\": "
@@ -2052,7 +2052,7 @@ public class CommandPlot extends BaseCommand {
             Database.addLogEntry(
                     city,
                     "{ \"type\": \"plot\", \"subtype\": \"toggle\", \"id\": "
-                            + plot.getPlotID()
+                            + plot.getPlotId()
                             + ", \"name\": "
                             + plot.getPlotName()
                             + ", \"item\": "
@@ -2084,7 +2084,7 @@ public class CommandPlot extends BaseCommand {
                 Database.addLogEntry(
                         city,
                         "{ \"type\": \"plot\", \"subtype\": \"toggle\", \"id\": "
-                                + plot.getPlotID()
+                                + plot.getPlotId()
                                 + ", \"name\": "
                                 + plot.getPlotName()
                                 + ", \"item\": "
@@ -2107,7 +2107,7 @@ public class CommandPlot extends BaseCommand {
                 Database.addLogEntry(
                         city,
                         "{ \"type\": \"plot\", \"subtype\": \"toggle\", \"id\": "
-                                + plot.getPlotID()
+                                + plot.getPlotId()
                                 + ", \"name\": "
                                 + plot.getPlotName()
                                 + ", \"item\": "
@@ -2189,8 +2189,8 @@ public class CommandPlot extends BaseCommand {
                             || !Objects.equals(
                             Objects.requireNonNull(
                                             CityDatabase.getClaim(new Location(player.getWorld(), x, 0, z)))
-                                    .getCityName(),
-                            HCDatabase.getHomeCityToCityname(player.getUniqueId().toString()))) {
+                                    .getCity(),
+                            HCDatabase.getHomeCityToCity(player.getUniqueId().toString()))) {
                         plugin.sendMessage(player, "messages.error.plot.intersectsExistingClaim");
                         return;
                     }
@@ -2202,7 +2202,7 @@ public class CommandPlot extends BaseCommand {
                     Database.addLogEntry(
                             city,
                             "{ \"type\": \"update\", \"subtype\": \"plot\", \"id\": "
-                                    + plot.getPlotID()
+                                    + plot.getPlotId()
                                     + ", \"name\": "
                                     + plot.getPlotName()
                                     + ", \"points\": "
@@ -2283,7 +2283,7 @@ public class CommandPlot extends BaseCommand {
         Database.addLogEntry(
                 city,
                 "{ \"type\": \"buy\", \"subtype\": \"plot\", \"id\": "
-                        + plot.getPlotID()
+                        + plot.getPlotId()
                         + ", \"name\": "
                         + plot.getPlotName()
                         + ", \"player\": "

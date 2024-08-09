@@ -2,15 +2,15 @@ package live.supeer.metropolis.utils;
 
 import fr.mrmicky.fastboard.FastBoard;
 import live.supeer.metropolis.Metropolis;
-import live.supeer.metropolis.city.City;
-import live.supeer.metropolis.city.CityDatabase;
-import live.supeer.metropolis.city.Role;
+import live.supeer.metropolis.city.*;
 import live.supeer.metropolis.command.CommandCity;
 import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.plot.PlotDatabase;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Polygon;
 
 import java.text.NumberFormat;
 import java.util.*;
@@ -38,8 +38,8 @@ public class Utilities {
                         return true;
                     }
                     if (!Objects.equals(
-                            Objects.requireNonNull(CityDatabase.getClaim(chunkLocation)).getCityName(),
-                            HCDatabase.getHomeCityToCityname(player.getUniqueId().toString()))) {
+                            Objects.requireNonNull(CityDatabase.getClaim(chunkLocation)).getCity(),
+                            HCDatabase.getHomeCityToCity(player.getUniqueId().toString()))) {
                         return true;
                     }
                 }
@@ -263,11 +263,19 @@ public class Utilities {
     }
 
     public static void sendCityScoreboard(Player player, City city, Plot plot) {
+        District district = Metropolis.playerInDistrict.get(player.getUniqueId());
         FastBoard board = new FastBoard(player);
         int i = 0;
         board.updateTitle("§a             §l" + city.getCityName() + "§r             ");
         board.updateLine(i, " ");
         i = i + 1;
+        if (district != null) {
+            board.updateLine(i, plugin.getMessage("messages.city.scoreboard.district"));
+            board.updateLine(i + 1, "§a" + district.getDistrictName());
+            i = i + 2;
+            board.updateLine(i, " ");
+            i = i + 1;
+        }
         if (plot != null) {
             if (plot.isKMarked()) {
                 board.updateLine(i, plugin.getMessage("messages.city.scoreboard.placeK"));
@@ -342,6 +350,7 @@ public class Utilities {
         }
         City city = Metropolis.playerInCity.get(player.getUniqueId());
         Plot plot = Metropolis.playerInPlot.get(player.getUniqueId());
+        District district = Metropolis.playerInDistrict.get(player.getUniqueId());
         sendCityScoreboard(player, city, plot);
     }
     public static City hasCityPermissions(Player player, String permission, Role targetRole) {
@@ -450,4 +459,54 @@ public class Utilities {
 
         player.sendMessage(mapBuilder.toString());
     }
+
+    //make a method to convert a string of offline players to a list of offline players
+    public static List<OfflinePlayer> stringToOfflinePlayerList(String playerString) {
+        List<OfflinePlayer> players = new ArrayList<>();
+        if (playerString == null || playerString.isEmpty()) {
+            return players;
+        }
+        String[] playerArray = playerString.split(",");
+        for (String player : playerArray) {
+            players.add(Bukkit.getOfflinePlayer(UUID.fromString(player)));
+        }
+        return players;
+    }
+
+
+    public static String offlinePlayerListToString(List<OfflinePlayer> players) {
+        StringBuilder playerString = new StringBuilder();
+        for (OfflinePlayer player : players) {
+            playerString.append(player.getUniqueId().toString()).append(",");
+        }
+        return playerString.toString();
+    }
+
+    public static boolean containsOnlyCompletePlots(Polygon polygon, int yMin, int yMax, City city, World world) {
+        Plot[] intersectingPlots = PlotDatabase.intersectingPlots(polygon, yMin, yMax, city, world);
+
+        if (intersectingPlots == null || intersectingPlots.length == 0) {
+            // No intersecting plots, so the condition is satisfied
+            return true;
+        }
+
+        GeometryFactory geometryFactory = new GeometryFactory();
+
+        for (Plot plot : intersectingPlots) {
+            Polygon plotPolygon = plot.getPlotPoints();
+
+            if (!polygon.contains(plotPolygon)) {
+                // If any plot is not completely contained, return false
+                return false;
+            }
+        }
+
+        // All intersecting plots are completely contained
+        return true;
+    }
+
+    public static boolean isPlotCompletelyInsideDistrict(Polygon plotPolygon, Polygon districtPolygon) {
+        return districtPolygon.contains(plotPolygon);
+    }
+
 }

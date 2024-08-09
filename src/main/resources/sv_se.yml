@@ -46,6 +46,7 @@ messages:
     goes: "<dark_green>--- <green>Stadsteleporteringspunkter (sida <bold>%startPage% <reset><green>av <bold>%totalPages%<reset><green>) <dark_green>---"
   syntax:
     city:
+      district: "<gray>/city district\n/city district +<underlined>player<reset>\n<gray>/city district -<underlined>player<reset>\n<gray>/city district delete\n/city district info <underlined>namn<reset>\n<gray>/city district set name <underlined>nytt namn<reset\n<gray>/city district update"
       toggle:
         open: "<gray>Syntax: /city toggle open"
         public: "<gray>Syntax: /city toggle public"
@@ -85,6 +86,23 @@ messages:
       notFound: "<red>Spelaren hittades inte."
       notInCity: "<red>Spelaren är inte medlem i någon stad."
     city:
+      unclaim:
+        hasPlots: "<yellow>%cityname% <gray>| <red>Det finns en eller flera tomter på markbiten. Använd /plot delete för att ta bort tomter."
+        hasDistricts: "<yellow>%cityname% <gray>| <red>Det finns ett eller flera områden på markbiten. Använd /city district delete för att ta bort områden, eller /city district update för att flytta dem."
+        hasCityGo: "<yellow>%cityname% <gray>| <red>Det finns en eller flera stadsteleporteringspunkter på markbiten. Använd /city go <underlined>namn<reset><red> delete för att ta bort dem."
+        hasCitySpawn: "<yellow>%cityname% <gray>| <red>Stadens startpunkt befinner sig på markbiten. Använd /city set spawn för att flytta den."
+      notInClaim: "<yellow>%cityname% <gray>| <red>Markbiten du står på tillhör inte staden."
+      district:
+        plotsNotCompletelyInside: "<red>Någon eller några tomt(er) inom området är inte helt inom områdets gränser."
+        contactAlreadyInDistrict: "<yellow>%cityname% <gray>| <red>%player% är redan kontaktperson i området."
+        contactNotInCity: "<yellow>%cityname% <gray>| <red>%player% är inte medlem i staden."
+        contactNotInDistrict: "<yellow>%cityname% <gray>| <red>%player% är inte kontaktperson i området."
+        nameError: "<red>Områdets namn måste vara mellan 3-%maxlength% tecken långt."
+        notInDistrict: "<red>Du befinner dig inte i ett distrikt."
+        notFound: "<red>Området hittades inte."
+        outsideCity: "<yellow>%cityname% <gray>| <red>Du kan inte skapa ett område utanför staden."
+        alreadyExists: "<yellow>%cityname% <gray>| <red>Området finns redan."
+        invalidName: "<yellow>%cityname% <gray>| <red>Områdets namn får inte vara längre än %maxlength% tecken eller innehålla några specialtecken."
       tax:
         invalidAmount: "<red>Skattesatsen måste vara ett tal mellan 0.00 - %max%."
         maxAmount: "<red>Skattesatsen får inte överstiga %max%."
@@ -135,6 +153,7 @@ messages:
         mayor: "<yellow>%cityname% <gray>| <red>Du kan inte lämna staden som borgermästare. Överväg att istället ta bort staden med /city delete <underlined>stadsnamn<reset><red>, eller byta roll med en annan medlem med kommandot /city rank <underlined>spelare<reset><red> swap."
       missing:
         balance:
+          districtCost: "<yellow>%cityname% <gray>| <red>Staden har inte råd med %amount% minemynt som det kostar att skapa ett område."
           bonusCost: "<yellow>%cityname% <gray>| <red>Staden har inte råd med %amount% minemynt som %count% bonusmarkbit(ar) kostar."
           outpostCost: "<yellow>%cityname% <gray>| <red>Staden har inte råd med 15 000 minemynt som en utpost kostar."
           goCost: "<yellow>%cityname% <gray>| <red>Staden har inte råd med 5 000 minemynt som det kostar att köpa en teleporteringspunkt till en stad."
@@ -295,6 +314,29 @@ messages:
           2: "<gray>f = frame, g = go, h = home, j = jukebox"
           3: "<gray>r = repair (anvil), s = switch, t = teleport, v = villager"
   city:
+    chunk:
+      header: "<dark_green>--- <green>Markbit: (%chunkx%, %chunky%) <dark_green>---"
+      status:
+        claimed: "<dark_green>Status: <green>Detaljplanerad mark"
+        nature: "<dark_green>Status: <green>Icke detaljplanerad mark"
+      city: "<dark_green>Stad: <green>%cityname%"
+      plots: "<dark_green>Tomter på markbiten (%count%): <green>%plots%"
+    delete:
+        confirmation: "<yellow>%cityname% <gray>| <red>Är du säker på att du vill ta bort staden? Alla markbitar, områden, stadsteleporteringspunkter och mer kommer att tas bort. Skriv <dark_red>/city delete!<red> för att bekräfta."
+        success: "<yellow>%cityname% <gray>| <green>Staden har blivit borttagen."
+        others: "<aqua>Staden %cityname% har blivit borttagen."
+    district:
+      updated: "<yellow>%cityname% <gray>| <green>Området %districtname% har uppdaterats."
+      created: "<yellow>%cityname% <gray>| <green>Området %districtname% har skapats."
+      contact:
+        added: "<yellow>%cityname% <gray>| <green>%player% är nu kontaktperson i området."
+        removed: "<yellow>%cityname% <gray>| <green>%player% är inte längre kontaktperson i området."
+      header: "<dark_green>--- <green>Område: %districtname% <dark_green>---"
+      city: "<dark_green>Del av stad: <green>%cityname%"
+      contacts: "<dark_green>Kontaktpersoner (%count%): %contacts%"
+      deleted: "<yellow>%cityname% <gray>| <green>Området %districtname% har blivit borttaget."
+      nameChanged: "<yellow>%cityname% <gray>| <green>Områdets namn är nu %districtname%."
+      list: "<yellow>%cityname% <gray>| <dark_green>Områden (<green>%count%<dark_green>): %districts%"
     near:
       header: "<dark_green>--- <green>Närliggande städer (%radius% meter) <dark_green>---"
       none: "<red>Inga städer hittades i närheten."
@@ -375,6 +417,7 @@ messages:
       differentWorlds: "<red>Du kan inte markera block i olika världar."
       none: "<red>Du måste starta en markering innan du kan lägga till yttligare punkter."
     scoreboard:
+      district: "<dark_green><bold>Område:"
       plots: "<dark_green><bold>Antal tomter:"
       members: "<dark_green><bold>Antal medlemmar:"
       nature: "<dark_green><bold>Icke detaljplanerad mark"
@@ -385,6 +428,7 @@ messages:
       owner: "<dark_green><bold>Ägare:"
       price: "<dark_green><bold>Till salu:"
     successful:
+      unclaim: "<yellow>%cityname% <gray>| <green>Markbiten har återgått till naturen."
       bonus: "<yellow>%cityname% <gray>| <green>Staden har köpt %count% bonusmarkbit(ar) för %amount% minemynt."
       outpost: "<yellow>%cityname% <gray>| <green>Staden har köpt en utpost för %amount% minemynt."
       rank:

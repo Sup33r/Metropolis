@@ -10,7 +10,7 @@ public class Member {
 
     private final String playerName;
     private final String playerUUID;
-    private final int cityID;
+    private final int cityId;
     private final String cityName;
     private final Role cityRole;
     private final long joinDate;
@@ -19,12 +19,12 @@ public class Member {
     public Member(DbRow data) {
         this.playerName = data.getString("playerName");
         this.playerUUID = data.getString("playerUUID");
-        this.cityID = data.getInt("cityID");
+        this.cityId = data.getInt("cityId");
         this.cityName = data.getString("cityName");
         this.cityRole = Role.fromString(data.getString("cityRole"));
         this.joinDate = data.getLong("joinDate");
-        if (CityDatabase.getCity(cityID).isPresent()) {
-            this.city = CityDatabase.getCity(cityID).get();
+        if (CityDatabase.getCity(cityId).isPresent()) {
+            this.city = CityDatabase.getCity(cityId).get();
         } else {
             this.city = null;
         }

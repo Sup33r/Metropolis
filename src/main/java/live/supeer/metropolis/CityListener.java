@@ -5,6 +5,7 @@ import live.supeer.metropolis.city.CityDatabase;
 import live.supeer.metropolis.city.Claim;
 import live.supeer.metropolis.city.Role;
 import live.supeer.metropolis.event.*;
+import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.utils.Utilities;
 import org.bukkit.Bukkit;
@@ -32,6 +33,8 @@ public class CityListener implements Listener {
     public void onPlayerExitCity(PlayerExitCityEvent event) {
         City city = event.getCity();
         Metropolis.playerInCity.remove(event.getPlayer().getUniqueId(), city);
+        Metropolis.playerInDistrict.remove(event.getPlayer().getUniqueId());
+        Metropolis.playerInPlot.remove(event.getPlayer().getUniqueId());
         if (city.getExitMessage() != null) {
             plugin.sendMessage(event.getPlayer(), "messages.city.exit", "%cityname%", city.getCityName(), "%exit%", city.getExitMessage());
         }
@@ -55,6 +58,22 @@ public class CityListener implements Listener {
         event.getPlayer().sendMessage("You have exited the plot " + event.getPlot().getPlotName());
         Metropolis.playerInPlot.remove(event.getPlayer().getUniqueId(), event.getPlot());
         Utilities.sendCityScoreboard(event.getPlayer(), event.getPlot().getCity(), null);
+    }
+
+    @EventHandler
+    public void onPlayerEnterDistrict(PlayerEnterDistrictEvent event) {
+        event.getPlayer().sendMessage("You have entered the district " + event.getDistrict().getDistrictName());
+        Metropolis.playerInDistrict.put(event.getPlayer().getUniqueId(), event.getDistrict());
+        Plot plot = Metropolis.playerInPlot.get(event.getPlayer().getUniqueId());
+        Utilities.sendCityScoreboard(event.getPlayer(), event.getDistrict().getCity(), plot);
+    }
+
+    @EventHandler
+    public void onPlayerExitDistrict(PlayerExitDistrictEvent event) {
+        event.getPlayer().sendMessage("You have exited the district " + event.getDistrict().getDistrictName());
+        Metropolis.playerInDistrict.remove(event.getPlayer().getUniqueId(), event.getDistrict());
+        Plot plot = Metropolis.playerInPlot.get(event.getPlayer().getUniqueId());
+        Utilities.sendCityScoreboard(event.getPlayer(), event.getDistrict().getCity(), plot);
     }
 
     @EventHandler

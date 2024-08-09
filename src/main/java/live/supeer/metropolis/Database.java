@@ -49,7 +49,7 @@ public class Database {
             DB.executeUpdate(
                     """
                               CREATE TABLE IF NOT EXISTS `mp_cities` (
-                                `cityID` int(11) NOT NULL AUTO_INCREMENT,
+                                `cityId` int(11) NOT NULL AUTO_INCREMENT,
                                 `cityName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `originalMayorUUID` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `originalMayorName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -64,8 +64,7 @@ public class Database {
                                 `motdMessage` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                 `isOpen` tinyint(1) DEFAULT 0,
                                 `isPublic` tinyint(1) DEFAULT 0,
-                                `isRemoved` tinyint(1) NOT NULL,
-                                PRIMARY KEY (`cityID`)
+                                PRIMARY KEY (`cityId`)
                               ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;""");
 
             DB.executeUpdate(
@@ -73,11 +72,11 @@ public class Database {
                               CREATE TABLE IF NOT EXISTS `mp_members` (
                                 `playerName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `playerUUID` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-                                `cityID` int(11) NOT NULL,
+                                `cityId` int(11) NOT NULL,
                                 `cityName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `cityRole` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                 `joinDate` bigint(30) DEFAULT NULL,
-                                PRIMARY KEY (cityID,playerUUID)
+                                PRIMARY KEY (cityId,playerUUID)
                               ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;""");
 
             DB.executeUpdate(
@@ -85,7 +84,7 @@ public class Database {
                               CREATE TABLE IF NOT EXISTS `mp_homecities` (
                                 `playerUUID` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `playerName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-                                `cityName` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                                `cityId` int(11) DEFAULT NULL,
                                 PRIMARY KEY (`playerUUID`)
                               ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;""");
 
@@ -143,6 +142,19 @@ public class Database {
 
             DB.executeUpdate(
                     """
+                              CREATE TABLE IF NOT EXISTS `mp_districts` (
+                                `districtName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+                                `cityId` int(11) NOT NULL,
+                                `world` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL,
+                                `districtPoints` text COLLATE utf8mb4_unicode_ci NOT NULL,
+                                `districtBoundary` GEOMETRY NOT NULL,
+                                `contactPlayers` text COLLATE utf8mb4_unicode_ci,
+                                PRIMARY KEY (`districtName`, `cityId`),
+                                SPATIAL INDEX `idx_districtBoundary` (`districtBoundary`)
+                              ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;""");
+
+            DB.executeUpdate(
+                    """
                               CREATE TABLE IF NOT EXISTS `mp_plotperms` (
                                 `plotId` int(11) NOT NULL,
                                 `cityId` int(11) NOT NULL,
@@ -164,25 +176,25 @@ public class Database {
             DB.executeUpdate(
                     """
                               CREATE TABLE IF NOT EXISTS `mp_citygoes` (
-                                `cityID` int(11) NOT NULL,
+                                `cityId` int(11) NOT NULL,
                                 `goName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `goNickname` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                 `goLocation` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `isOpen` tinyint(1) DEFAULT 1,
                                 `accessLevel` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                 `createDate` bigint(30) DEFAULT NULL,
-                                 PRIMARY KEY (cityID,goName)
+                                 PRIMARY KEY (cityId,goName)
                               ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;""");
             DB.executeUpdate(
                     """
                               CREATE TABLE IF NOT EXISTS `mp_citybans` (
-                                `cityID` int(11) NOT NULL,
+                                `cityId` int(11) NOT NULL,
                                 `playerUUID` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `placeDate` bigint(30) DEFAULT NULL,
                                 `length` bigint(30) DEFAULT NULL,
                                 `reason` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                 `placeUUID` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                                 PRIMARY KEY (cityID,playerUUID)
+                                 PRIMARY KEY (cityId,playerUUID)
                               ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;""");
         } catch (SQLException exception) {
             exception.printStackTrace();
@@ -191,7 +203,7 @@ public class Database {
 
     public static void addLogEntry(City city, String logEntry) {
         try {
-            int cityId = city.getCityID();
+            int cityId = city.getCityId();
             DB.executeInsert(
                     "INSERT INTO `mp_citylogs` (`cityId`, `dateTime`, `jsonLog`) VALUES ("
                             + cityId
