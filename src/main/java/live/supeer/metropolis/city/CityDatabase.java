@@ -9,10 +9,8 @@ import live.supeer.metropolis.utils.Utilities;
 import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.utils.DateUtil;
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
+import org.bukkit.*;
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.intellij.lang.annotations.Language;
 import org.locationtech.jts.geom.*;
@@ -117,6 +115,16 @@ public class CityDatabase {
             DB.executeInsert("INSERT INTO `mp_claims` (`claimerName`, `claimerUUID`, `world`, `xPosition`, `zPosition`, `claimDate`, `cityName`, `outpost`) VALUES (" + Database.sqlString(playername) + ", " + Database.sqlString(playerUUID) + ", '" + location.getChunk().getWorld().getName() + "', " + location.getChunk().getX() + ", " + location.getChunk().getZ() + ", " + DateUtil.getTimestamp() + ", '" + cityName + "', " + outpost + ");");
             city.addCityClaim(new Claim(DB.getFirstRow("SELECT * FROM `mp_claims` WHERE `cityName` = " + Database.sqlString(cityName) + " AND `xPosition` = " + location.getChunk().getX() + " AND `zPosition` = " + location.getChunk().getZ() + ";")));
             return city.getCityClaim(location);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static District createDistrict(City city, Polygon districtPoints, String districtName, World world) {
+        try {
+            DB.executeInsert("INSERT INTO `mp_districts` (`districtName`, `cityId`, `world`, `districtPoints`, `districtBoundary`, `contactPlayers`) VALUES (" + Database.sqlString(districtName) + ", " + city.getCityID() + ", " + Database.sqlString(world.getName()) + ", " + Database.sqlString(LocationUtil.polygonToString(districtPoints)) + ", " + "ST_GeomFromText('" + districtPoints.toText() + "'), " + Database.sqlString(null) + ");");
+            return new District(DB.getFirstRow("SELECT * FROM `mp_districts` WHERE `cityId` = " + city.getCityID() + " AND `districtName` = " + Database.sqlString(districtName) + ";"));
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -594,4 +602,91 @@ public class CityDatabase {
 
         return result;
     }
+
+    public static Plot getPlotAtLocation(Location location) {
+        GeometryFactory geometryFactory = new GeometryFactory();
+        Point point = geometryFactory.createPoint(new Coordinate(location.getX(), location.getZ()));
+        int y = location.getBlockY();
+        String worldName = location.getWorld().getName();
+
+        try {
+            DbRow result = DB.getFirstRow(
+                    "SELECT * FROM `mp_plots` WHERE ST_Intersects(`plotBoundary`, ST_GeomFromText(?)) AND `plotYMin` <= ? AND `plotYMax` >= ? AND `plotCenter` LIKE ?;",
+                    point.toText()
+                    , y
+                    , y
+                    , worldName + "%"
+            );
+
+            if (result != null) {
+                return new Plot(result);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public static District getDistrict(Location location) {
+        GeometryFactory geometryFactory = new GeometryFactory();
+        Point point = geometryFactory.createPoint(new Coordinate(location.getX(), location.getZ()));
+        String worldName = location.getWorld().getName();
+
+        try {
+            DbRow result = DB.getFirstRow(
+                    "SELECT * FROM `mp_districts` WHERE ST_Contains(`districtBoundary`, ST_GeomFromText(?)) AND `world` = ?;",
+                    point.toText()
+                    , worldName
+            );
+
+            if (result != null) {
+                return new District(result);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public static District getDistrict(String districtName, City city) {
+        try {
+            return new District(DB.getFirstRow("SELECT * FROM `mp_districts` WHERE `districtName` = " + Database.sqlString(districtName) + " AND `cityID` = " + city.getCityID() + ";"));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static void deleteDistrict(District district) {
+        try {
+            DB.executeUpdate("DELETE FROM `mp_districts` WHERE `districtName` = " + Database.sqlString(district.getDistrictName()) + " AND `cityID` = " + district.getCity().getCityID() + ";");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static List<District> getDistricts(City city) {
+        List<District> districts = new ArrayList<>();
+        try {
+            var results = DB.getResults("SELECT * FROM `mp_districts` WHERE `cityID` = " + city.getCityID() + ";");
+            for (var row : results) {
+                districts.add(new District(row));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return districts;
+    }
+
+    public static boolean districtExists(String districtName, City city) {
+        try {
+            return !DB.getResults("SELECT * FROM `mp_districts` WHERE `districtName` = " + Database.sqlString(districtName) + " AND `cityID` = " + city.getCityID() + ";").isEmpty();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 }

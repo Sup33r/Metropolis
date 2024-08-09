@@ -143,6 +143,19 @@ public class Database {
 
             DB.executeUpdate(
                     """
+                              CREATE TABLE IF NOT EXISTS `mp_districts` (
+                                `districtName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+                                `cityId` int(11) NOT NULL,
+                                `world` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL,
+                                `districtPoints` text COLLATE utf8mb4_unicode_ci NOT NULL,
+                                `districtBoundary` GEOMETRY NOT NULL,
+                                `contactPlayers` text COLLATE utf8mb4_unicode_ci,
+                                PRIMARY KEY (`districtName`, `cityId`),
+                                SPATIAL INDEX `idx_districtBoundary` (`districtBoundary`)
+                              ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;""");
+
+            DB.executeUpdate(
+                    """
                               CREATE TABLE IF NOT EXISTS `mp_plotperms` (
                                 `plotId` int(11) NOT NULL,
                                 `cityId` int(11) NOT NULL,

@@ -2,6 +2,7 @@ package live.supeer.metropolis;
 
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.city.CityDatabase;
+import live.supeer.metropolis.city.District;
 import live.supeer.metropolis.city.Role;
 import live.supeer.metropolis.command.CommandCity;
 import live.supeer.metropolis.event.*;
@@ -71,7 +72,12 @@ public class MetropolisListener implements Listener {
             City city = CityDatabase.getCity(Objects.requireNonNull(CityDatabase.getClaim(player.getLocation())).getCityName()).get();
             PlayerEnterCityEvent enterCityEvent = new PlayerEnterCityEvent(event.getPlayer(), city);
             Bukkit.getServer().getPluginManager().callEvent(enterCityEvent);
+            District district = CityDatabase.getDistrict(player.getLocation());
             Plot plot = PlotDatabase.getPlotAtLocation(player.getLocation());
+            if (district != null) {
+                PlayerEnterDistrictEvent enterDistrictEvent = new PlayerEnterDistrictEvent(event.getPlayer(), district);
+                Bukkit.getServer().getPluginManager().callEvent(enterDistrictEvent);
+            }
             if (plot != null) {
                 PlayerEnterPlotEvent enterPlotEvent = new PlayerEnterPlotEvent(event.getPlayer(), plot);
                 Bukkit.getServer().getPluginManager().callEvent(enterPlotEvent);
@@ -305,6 +311,16 @@ public class MetropolisListener implements Listener {
         if (from.getX() != to.getX() || from.getZ() != to.getZ() || from.getY() != to.getY()) {
             if (Metropolis.playerInCity.containsKey(player.getUniqueId())) {
                 Plot plot = PlotDatabase.getPlotAtLocation(to);
+                District district = CityDatabase.getDistrict(to);
+                if (district == null) {
+                    if (Metropolis.playerInDistrict.containsKey(player.getUniqueId())) {
+                        PlayerExitDistrictEvent exitDistrictEvent = new PlayerExitDistrictEvent(player, Metropolis.playerInDistrict.get(player.getUniqueId()));
+                        plugin.getServer().getPluginManager().callEvent(exitDistrictEvent);
+                    }
+                } else if (!Metropolis.playerInDistrict.containsKey(player.getUniqueId())) {
+                    PlayerEnterDistrictEvent enterDistrictEvent = new PlayerEnterDistrictEvent(player, district);
+                    plugin.getServer().getPluginManager().callEvent(enterDistrictEvent);
+                }
                 if (plot == null) {
                     if (Metropolis.playerInPlot.containsKey(player.getUniqueId())) {
                         PlayerExitPlotEvent exitEvent = new PlayerExitPlotEvent(player, Metropolis.playerInPlot.get(player.getUniqueId()));
@@ -356,6 +372,16 @@ public class MetropolisListener implements Listener {
         // Check for plot changes
         if (Metropolis.playerInCity.containsKey(playerId)) {
             Plot plot = PlotDatabase.getPlotAtLocation(to);
+            District district = CityDatabase.getDistrict(to);
+            if (district == null) {
+                if (Metropolis.playerInDistrict.containsKey(playerId)) {
+                    PlayerExitDistrictEvent exitDistrictEvent = new PlayerExitDistrictEvent(player, Metropolis.playerInDistrict.get(playerId));
+                    plugin.getServer().getPluginManager().callEvent(exitDistrictEvent);
+                }
+            } else if (!Metropolis.playerInDistrict.containsKey(playerId)) {
+                PlayerEnterDistrictEvent enterDistrictEvent = new PlayerEnterDistrictEvent(player, district);
+                plugin.getServer().getPluginManager().callEvent(enterDistrictEvent);
+            }
             if (plot == null) {
                 if (Metropolis.playerInPlot.containsKey(playerId)) {
                     PlayerExitPlotEvent exitEvent = new PlayerExitPlotEvent(player, Metropolis.playerInPlot.get(playerId));

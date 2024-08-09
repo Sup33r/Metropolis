@@ -6,6 +6,7 @@ import live.supeer.metropolis.Database;
 import live.supeer.metropolis.Metropolis;
 import live.supeer.metropolis.MetropolisListener;
 import live.supeer.metropolis.city.Role;
+import live.supeer.metropolis.event.PlayerEnterPlotEvent;
 import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.utils.Utilities;
 import live.supeer.metropolis.city.City;
@@ -566,9 +567,8 @@ public class CommandPlot extends BaseCommand {
                 "%cityname%",
                 city.getCityName());
         player.teleport(plot.getPlotCenter());
-        Metropolis.playerInPlot.put(player.getUniqueId(), plot);
-        Metropolis.playerInCity.put(player.getUniqueId(), city);
-        Utilities.sendCityScoreboard(player, city, plot);
+        PlayerEnterPlotEvent enterPlotEvent = new PlayerEnterPlotEvent(player, plot);
+        Bukkit.getServer().getPluginManager().callEvent(enterPlotEvent);
     }
 
     @Subcommand("share")

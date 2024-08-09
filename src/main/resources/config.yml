@@ -14,6 +14,7 @@ settings:
     entermessage: 225
     exitmessage: 225
     plotname: 16
+    districtname: 26
 
     maxbantime: 10y
 
@@ -31,3 +32,4 @@ settings:
     bonuscost: 800
     citygocost: 10000
     outpostcost: 15000
+    districtcost: 10000

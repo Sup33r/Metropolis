@@ -7,6 +7,7 @@ import live.supeer.metropolis.AutoclaimManager;
 import live.supeer.metropolis.Database;
 import live.supeer.metropolis.Metropolis;
 import live.supeer.metropolis.MetropolisListener;
+import live.supeer.metropolis.city.District;
 import live.supeer.metropolis.event.PlayerEnterCityEvent;
 import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.utils.Utilities;
@@ -22,6 +23,9 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Polygon;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -31,6 +35,9 @@ import java.util.regex.Pattern;
 @CommandAlias("city|c")
 public class CommandCity extends BaseCommand {
     public static Metropolis plugin;
+
+    private static final GeometryFactory geometryFactory = new GeometryFactory();
+
 
     private CoreProtectAPI getCoreProtect() {
         Plugin corePlugin = plugin.getServer().getPluginManager().getPlugin("CoreProtect");
@@ -1292,7 +1299,96 @@ public class CommandCity extends BaseCommand {
         }
 
         @Subcommand("district")
-        public static void onDistrict(Player player, String name) {}
+        public static void onDistrict(Player player, String name) {
+            City city = Utilities.hasCityPermissions(player, "metropolis.city.buy.district", Role.VICE_MAYOR);
+            if (city == null) {
+                return;
+            }
+            final String regex = "[^\\p{L}_\\\\\\-]+";
+            final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
+            final Matcher matcher = pattern.matcher(name);
+            if (matcher.find()
+                    || name.matches("^[0-9].*")
+                    || name.length() > Metropolis.configuration.getDistrictNameLimit()
+                    || name.startsWith("-")) {
+                plugin.sendMessage(
+                        player, "messages.error.city.district.invalidName", "%cityname%", city.getCityName(), "%maxlength%", String.valueOf(Metropolis.configuration.getDistrictNameLimit()));
+                return;
+            }
+            if (city.getCityBalance() < Metropolis.configuration.getDistrictCreationCost()) {
+                plugin.sendMessage(
+                        player, "messages.error.city.missing.balance.districtCost", "%cityname%", city.getCityName());
+                return;
+            }
+            if (CityDatabase.districtExists(name, city)) {
+                plugin.sendMessage(
+                        player, "messages.error.city.district.alreadyExists", "%cityname%", city.getCityName());
+                return;
+            }
+            if (CityDatabase.getCityByClaim(player.getLocation()) != city) {
+                plugin.sendMessage(player, "messages.error.city.district.outsideCity", "%cityname%", city.getCityName());
+                return;
+            }
+            if (!MetropolisListener.playerPolygons.containsKey(player.getUniqueId())) {
+                plugin.sendMessage(player, "messages.error.missing.plot");
+                return;
+            }
+
+            Polygon regionPolygon = MetropolisListener.playerPolygons.get(player.getUniqueId());
+            Location[] locations = MetropolisListener.savedLocs.get(player.getUniqueId()).toArray(new Location[0]);
+            double minX = regionPolygon.getEnvelopeInternal().getMinX();
+            double maxX = regionPolygon.getEnvelopeInternal().getMaxX();
+            double minY = regionPolygon.getEnvelopeInternal().getMinY();
+            double maxY = regionPolygon.getEnvelopeInternal().getMaxY();
+            if (maxX - minX < 3 || maxY - minY < 3) {
+                plugin.sendMessage(player, "messages.error.plot.tooSmall");
+                return;
+            }
+
+            int chunkSize = 16;
+            int startX = (int) Math.floor(minX / chunkSize) * chunkSize;
+            int endX = (int) Math.floor(maxX / chunkSize) * chunkSize + chunkSize;
+            int startY = (int) Math.floor(minY / chunkSize) * chunkSize;
+            int endY = (int) Math.floor(maxY / chunkSize) * chunkSize + chunkSize;
+
+            for (int x = startX; x < endX; x += chunkSize) {
+                for (int z = startY; z < endY; z += chunkSize) {
+                    Polygon chunkPolygon = geometryFactory.createPolygon(new Coordinate[]{
+                            new Coordinate(x, z),
+                            new Coordinate(x + chunkSize, z),
+                            new Coordinate(x + chunkSize, z + chunkSize),
+                            new Coordinate(x, z + chunkSize),
+                            new Coordinate(x, z)
+                    });
+                    if (regionPolygon.intersects(chunkPolygon)) {
+                        if (CityDatabase.getClaim(new Location(player.getWorld(), x, 0, z)) == null || !Objects.equals(Objects.requireNonNull(CityDatabase.getClaim(new Location(player.getWorld(), x, 0, z))).getCityName(), HCDatabase.getHomeCityToCityname(player.getUniqueId().toString()))) {
+                            plugin.sendMessage(player, "messages.error.plot.intersectsExistingClaim");
+                            return;
+                        }
+                        if (!Utilities.containsOnlyCompletePlots(regionPolygon, -64, 319, city, player.getWorld())) {
+                            plugin.sendMessage(player, "messages.error.city.district.plotsNotCompletelyInside");
+                            return;
+                        }
+                        CityDatabase.createDistrict(city, regionPolygon, name, player.getWorld());
+                        city.removeCityBalance(Metropolis.configuration.getDistrictCreationCost());
+                        Database.addLogEntry(
+                                city,
+                                "{ \"type\": \"buy\", \"subtype\": \"district\", \"name\": "
+                                        + name
+                                        + ", \"player\": "
+                                        + player.getUniqueId().toString()
+                                        + ", \"balance\": "
+                                        + Metropolis.configuration.getDistrictCreationCost()
+                                        + ", \"districtBounds\": "
+                                        + regionPolygon.toText()
+                                        + " }");
+                        plugin.sendMessage(
+                                player, "messages.city.district.created", "%cityname%", city.getCityName(), "%districtname%", name);
+                        break;
+                    }
+                    }
+            }
+        }
 
         @Subcommand("go")
         public static void onGo(Player player, String name) {
@@ -1912,8 +2008,8 @@ public class CommandCity extends BaseCommand {
         }
     }
 
-    @Subcommand("list")
-    public static void onList(Player player, @Optional String searchterm) {
+    @Subcommand("search")
+    public static void onSearch(Player player, @Optional String searchterm) {
         if (!player.hasPermission("metropolis.city.list")) {
             plugin.sendMessage(player, "messages.error.permissionDenied");
             return;
@@ -2025,4 +2121,172 @@ public class CommandCity extends BaseCommand {
         player.sendMessage(cityList.toString());
     }
 
+    @Subcommand("district")
+    public static void onDistrict(Player player, @Optional String argument) {
+        if (argument == null) {
+            City city = Utilities.hasCityPermissions(player, "metropolis.city.district", null);
+            if (city == null) {
+                return;
+            }
+            List<live.supeer.metropolis.city.District> districtList = CityDatabase.getDistricts(city);
+            if (districtList.isEmpty()) {
+                plugin.sendMessage(player, "messages.error.city.district.none");
+                return;
+            }
+            int districtCount = districtList.size();
+            StringBuilder districtListString = new StringBuilder();
+            for (live.supeer.metropolis.city.District district : districtList) {
+                districtListString.append("<green>").append(district.getDistrictName()).append("<dark_green>, <green>");
+            }
+            districtListString.delete(districtListString.length() - 9, districtListString.length());
+            plugin.sendMessage(player, "messages.city.district.list", "%districts%", districtListString.toString(), "%count%", String.valueOf(districtCount), "%cityname%", city.getCityName());
+
+        }
+        assert argument != null;
+        if (argument.startsWith("-") || argument.startsWith("+")) {
+            String playerName = argument.substring(1);
+            OfflinePlayer targetPlayer = Bukkit.getOfflinePlayer(playerName);
+            City city = Utilities.hasCityPermissions(player, "metropolis.city.district", Role.VICE_MAYOR);
+            if (city == null) {
+                return;
+            }
+            live.supeer.metropolis.city.District district = CityDatabase.getDistrict(player.getLocation().toBlockLocation());
+            if (district == null) {
+                plugin.sendMessage(player, "messages.error.city.district.notInDistrict");
+                return;
+            }
+            if (!targetPlayer.hasPlayedBefore()) {
+                plugin.sendMessage(player, "messages.error.player.notFound", "%player%", playerName);
+                return;
+            }
+            if (!CityDatabase.memberExists(targetPlayer.getUniqueId().toString(), city)) {
+                plugin.sendMessage(player, "messages.error.city.district.contactNotInCity", "%player%", playerName, "%cityname%", city.getCityName());
+                return;
+            }
+            if (argument.startsWith("-")) {
+                if (district.getContactplayers().contains(targetPlayer)) {
+                    district.removeContactPlayer(targetPlayer);
+                    Database.addLogEntry(city, "{ \"type\": \"district\", \"subtype\": \"contactRemove\", \"district\": \"" + district.getDistrictName() + "\", \"player\": \"" + targetPlayer.getUniqueId().toString() + "\" }");
+                    plugin.sendMessage(player, "messages.city.district.contact.removed", "%player%", playerName, "%cityname%", city.getCityName());
+                    return;
+                }
+                plugin.sendMessage(player, "messages.error.city.district.contactNotInDistrict", "%player%", playerName, "%cityname%", city.getCityName());
+                return;
+            }
+            if (argument.startsWith("+")) {
+                if (district.getContactplayers().contains(targetPlayer)) {
+                    plugin.sendMessage(player, "messages.error.city.district.contactAlreadyInDistrict", "%player%", playerName, "%cityname%", city.getCityName());
+                    return;
+                }
+                district.addContactPlayer(targetPlayer);
+                Database.addLogEntry(city, "{ \"type\": \"district\", \"subtype\": \"contactAdd\", \"district\": \"" + district.getDistrictName() + "\", \"player\": \"" + targetPlayer.getUniqueId().toString() + "\" }");
+                plugin.sendMessage(player, "messages.city.district.contact.added", "%player%", playerName, "%cityname%", city.getCityName());
+            }
+
+        } else {
+            plugin.sendMessage(player,"messages.syntax.city.district");
+        }
+    }
+
+    @Subcommand("district")
+    public class District extends BaseCommand {
+        @Subcommand("delete")
+        public static void onDelete(Player player) {
+            City city = Utilities.hasCityPermissions(player, "metropolis.city.district.delete", Role.VICE_MAYOR);
+            if (city == null) {
+                return;
+            }
+            live.supeer.metropolis.city.District district = CityDatabase.getDistrict(player.getLocation().toBlockLocation());
+            if (district == null) {
+                plugin.sendMessage(player, "messages.error.city.district.notInDistrict");
+                return;
+            }
+            CityDatabase.deleteDistrict(district);
+            Metropolis.playerInDistrict.remove(player.getUniqueId());
+            Database.addLogEntry(city, "{ \"type\": \"district\", \"subtype\": \"delete\", \"district\": \"" + district.getDistrictName() + "\", \"player\": \"" + player.getUniqueId().toString() + "\" }");
+            plugin.sendMessage(player, "messages.city.district.deleted", "%districtname%", district.getDistrictName(), "%cityname%", city.getCityName());
+            Utilities.sendScoreboard(player);
+        }
+
+        @Subcommand("info")
+        public static void onInfo(Player player, @Optional String name) {
+            if (!player.hasPermission("metropolis.city.district.info")) {
+                plugin.sendMessage(player, "messages.error.permissionDenied");
+                return;
+            }
+            if (name == null) {
+                live.supeer.metropolis.city.District district = CityDatabase.getDistrict(player.getLocation().toBlockLocation());
+                if (district == null) {
+                    plugin.sendMessage(player, "messages.error.city.district.notInDistrict");
+                    return;
+                }
+                plugin.sendMessage(player, "messages.city.district.header", "%districtname%", district.getDistrictName());
+                plugin.sendMessage(player, "messages.city.district.city", "%cityname%", district.getCity().getCityName());
+                int contactCount = district.getContactplayers().size();
+                if (contactCount > 0) {
+                    StringBuilder contacts = new StringBuilder();
+                    contacts.append("<green>");
+                    for (OfflinePlayer contact : district.getContactplayers()) {
+                        contacts.append(contact).append("<dark_green>, <green>");
+                    }
+                    contacts.delete(contacts.length() - 9, contacts.length());
+                    if (!contacts.isEmpty()) {
+                        plugin.sendMessage(player, "messages.city.district.contacts", "%contacts%", contacts.toString(), "%count%", String.valueOf(contactCount));
+                    }
+                }
+            }
+            if (name != null) {
+                City city = CityDatabase.getCityByClaim(player.getLocation().toBlockLocation());
+                live.supeer.metropolis.city.District district = CityDatabase.getDistrict(name, city);
+                if (district == null) {
+                    plugin.sendMessage(player, "messages.error.city.district.notFound");
+                    return;
+                }
+                plugin.sendMessage(player, "messages.city.district.header", "%districtname%", district.getDistrictName());
+                plugin.sendMessage(player, "messages.city.district.city", "%cityname%", district.getCity().getCityName());
+                StringBuilder contacts = new StringBuilder();
+                contacts.append("<green>");
+                int contactCount = district.getContactplayers().size();
+                for (OfflinePlayer contact : district.getContactplayers()) {
+                    contacts.append(contact).append("<dark_green>, <green>");
+                }
+                contacts.delete(contacts.length() - 9, contacts.length());
+                if (!contacts.isEmpty()) {
+                    plugin.sendMessage(player, "messages.city.district.contacts", "%contacts%", contacts.toString(), "%count%", String.valueOf(contactCount));
+                }
+            }
+        }
+
+        @Subcommand("set")
+        public static void onSet(Player player, String subcommand, String name) {
+            City city = Utilities.hasCityPermissions(player, "metropolis.city.district.set", Role.VICE_MAYOR);
+            if (city == null) {
+                return;
+            }
+            if (subcommand.equalsIgnoreCase("name")) {
+                live.supeer.metropolis.city.District district = CityDatabase.getDistrict(player.getLocation().toBlockLocation());
+                if (district == null) {
+                    plugin.sendMessage(player, "messages.error.city.district.notInDistrict");
+                    return;
+                }
+                if (name.length() < 3) {
+                    plugin.sendMessage(player, "messages.error.city.district.nameError", "%maxlength%", String.valueOf(Metropolis.configuration.getDistrictNameLimit()));
+                    return;
+                }
+                if (name.length() > Metropolis.configuration.getDistrictNameLimit()) {
+                    plugin.sendMessage(player, "messages.error.city.district.nameError", "%maxlength%", String.valueOf(Metropolis.configuration.getDistrictNameLimit()));
+                    return;
+                }
+                district.setDistrictName(name);
+                Database.addLogEntry(city, "{ \"type\": \"district\", \"subtype\": \"nameChange\", \"district\": \"" + name + "\", \"player\": \"" + player.getUniqueId().toString() + "\" }");
+                plugin.sendMessage(player, "messages.city.district.nameChanged", "%districtname%", name, "%cityname%", city.getCityName());
+                Utilities.sendScoreboard(player);
+            }
+        }
+
+        @Subcommand("update")
+        public static void onUpdate(Player player) {
+
+        }
+    }
 }

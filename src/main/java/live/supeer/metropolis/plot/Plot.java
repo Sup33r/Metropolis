@@ -45,7 +45,7 @@ public class Plot {
     private Location plotCenter;
     private char[] plotFlags;
     private final long plotCreationDate;
-    private World plotWorld;
+    private final World plotWorld;
     private Polygon plotPoints;
     private final City city;
 
