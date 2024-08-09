@@ -7,8 +7,8 @@ import lombok.Getter;
 
 @Getter
 public class PlotPerms {
-    private final int plotID;
-    private final int cityID;
+    private final int plotId;
+    private final int cityId;
     private final char[] perms;
     private final String playerName;
     private final String playerUUID;
@@ -16,16 +16,16 @@ public class PlotPerms {
 
 
     public PlotPerms(DbRow data) {
-        this.plotID = data.getInt("plotId");
-        this.cityID = data.getInt("cityId");
+        this.plotId = data.getInt("plotId");
+        this.cityId = data.getInt("cityId");
         this.perms =
                 data.getString("plotPerms") == null
                         ? new char[0]
                         : data.getString("plotPerms").toCharArray();
         this.playerName = data.getString("playerName");
         this.playerUUID = data.getString("playerUUID");
-        if (CityDatabase.getCity(cityID).isPresent()) {
-            this.city = CityDatabase.getCity(cityID).get();
+        if (CityDatabase.getCity(cityId).isPresent()) {
+            this.city = CityDatabase.getCity(cityId).get();
         } else {
             this.city = null;
         }

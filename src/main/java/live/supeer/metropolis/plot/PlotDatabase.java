@@ -4,10 +4,12 @@ import co.aikar.idb.DB;
 import co.aikar.idb.DbRow;
 import live.supeer.metropolis.Database;
 import live.supeer.metropolis.Metropolis;
+import live.supeer.metropolis.city.Claim;
 import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.utils.Utilities;
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.utils.DateUtil;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -41,7 +43,7 @@ public class PlotDatabase {
         try {
             DB.executeUpdate(
                     "INSERT INTO `mp_plots` (`cityId`, `cityName`, `plotName`, `plotOwner`, `plotOwnerUUID`, `plotPoints`, `plotYMin`, `plotYMax`, `plotPermsMembers`, `plotPermsOutsiders`, `plotCenter`, `plotCreationDate`, `plotBoundary`) VALUES ("
-                            + city.getCityID()
+                            + city.getCityId()
                             + ", "
                             + Database.sqlString(city.getCityName())
                             + ", "
@@ -94,7 +96,7 @@ public class PlotDatabase {
 
     public static void deletePlot(Plot plot) {
         try {
-            DB.executeUpdate("DELETE FROM `mp_plots` WHERE `plotId` = " + plot.getPlotID() + ";");
+            DB.executeUpdate("DELETE FROM `mp_plots` WHERE `plotId` = " + plot.getPlotId() + ";");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -123,7 +125,7 @@ public class PlotDatabase {
         try {
             String polygonWKT = polygon.toText();
             List<DbRow> results = DB.getResults(
-                    "SELECT * FROM `mp_plots` WHERE ST_Intersects(`plotBoundary`, ST_GeomFromText(" + Database.sqlString(polygonWKT) + ")) AND `cityId` = " + city.getCityID() + " AND `plotYMin` <= " + yMax + " AND `plotYMax` >= " + yMin + " AND `plotCenter` LIKE " + Database.sqlString(worldName + "%") + ";");
+                    "SELECT * FROM `mp_plots` WHERE ST_Intersects(`plotBoundary`, ST_GeomFromText(" + Database.sqlString(polygonWKT) + ")) AND `cityId` = " + city.getCityId() + " AND `plotYMin` <= " + yMax + " AND `plotYMax` >= " + yMin + " AND `plotCenter` LIKE " + Database.sqlString(worldName + "%") + ";");
             return !results.isEmpty();
         } catch (Exception e) {
             e.printStackTrace();
@@ -136,7 +138,7 @@ public class PlotDatabase {
         try {
             String polygonWKT = polygon.toText();
             List<DbRow> results = DB.getResults(
-                    "SELECT * FROM `mp_plots` WHERE ST_Intersects(`plotBoundary`, ST_GeomFromText(" + Database.sqlString(polygonWKT) + ")) AND `cityId` = " + city.getCityID() + " AND `plotYMin` <= " + yMax + " AND `plotYMax` >= " + yMin + " AND `plotCenter` LIKE " + Database.sqlString(worldName + "%") + ";");
+                    "SELECT * FROM `mp_plots` WHERE ST_Intersects(`plotBoundary`, ST_GeomFromText(" + Database.sqlString(polygonWKT) + ")) AND `cityId` = " + city.getCityId() + " AND `plotYMin` <= " + yMax + " AND `plotYMax` >= " + yMin + " AND `plotCenter` LIKE " + Database.sqlString(worldName + "%") + ";");
             Plot[] plots = new Plot[results.size()];
             for (int i = 0; i < results.size(); i++) {
                 plots[i] = new Plot(results.get(i));
@@ -172,4 +174,39 @@ public class PlotDatabase {
 
         return null;
     }
+
+    public static boolean hasPlotInClaim(Claim claim) {
+        World world = claim.getClaimWorld();
+        int chunkX = claim.getXPosition();
+        int chunkZ = claim.getZPosition();
+
+        // Create a polygon representing the chunk
+        GeometryFactory geometryFactory = new GeometryFactory();
+        Coordinate[] coordinates = new Coordinate[5];
+        coordinates[0] = new Coordinate(chunkX * 16, chunkZ * 16);
+        coordinates[1] = new Coordinate((chunkX + 1) * 16, chunkZ * 16);
+        coordinates[2] = new Coordinate((chunkX + 1) * 16, (chunkZ + 1) * 16);
+        coordinates[3] = new Coordinate(chunkX * 16, (chunkZ + 1) * 16);
+        coordinates[4] = coordinates[0]; // Close the polygon
+        Polygon chunkPolygon = geometryFactory.createPolygon(coordinates);
+
+        try {
+            String polygonWKT = chunkPolygon.toText();
+            List<DbRow> results = DB.getResults(
+                    "SELECT COUNT(*) as count FROM `mp_plots` WHERE ST_Contains(ST_GeomFromText(?), ST_Centroid(`plotBoundary`)) AND `plotCenter` LIKE ?;",
+                    polygonWKT,
+                    world.getName() + "%"
+            );
+
+            if (!results.isEmpty()) {
+                int count = results.get(0).getInt("count");
+                return count > 0;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
 }

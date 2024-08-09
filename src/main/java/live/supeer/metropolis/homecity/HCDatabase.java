@@ -17,37 +17,37 @@ public class HCDatabase {
         try {
             if (hasHomeCity(uuid)) {
                 DB.executeInsert(
-                        "INSERT INTO mp_homecities (playerUUID, playerName, cityName) VALUES ("
+                        "INSERT INTO mp_homecities (playerUUID, playerName, cityId) VALUES ("
                                 + Database.sqlString(uuid)
                                 + ", "
                                 + Database.sqlString(Bukkit.getOfflinePlayer(UUID.fromString(uuid)).getName())
                                 + ", "
-                                + Database.sqlString(city.getCityName())
+                                + city.getCityId()
                                 + ");");
                 return;
             }
-            DB.executeUpdate("UPDATE mp_homecities SET cityName = " + Database.sqlString(city.getCityName()) + ", playerName = " + Database.sqlString(plugin.getServer().getOfflinePlayer(UUID.fromString(uuid)).getName()) + " WHERE playerUUID = " + Database.sqlString(uuid));
+            DB.executeUpdate("UPDATE mp_homecities SET cityId = " + city.getCityId() + ", playerName = " + Database.sqlString(plugin.getServer().getOfflinePlayer(UUID.fromString(uuid)).getName()) + " WHERE playerUUID = " + Database.sqlString(uuid));
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public static String getHomeCityToCityname(String uuid) {
+    public static int getHomeCityToCityId(String uuid) {
         try {
-            if (DB.getFirstRow("SELECT `cityName` FROM `mp_homecities` WHERE `playerUUID` = " + Database.sqlString(uuid) + ";").isEmpty())
-                return null;
-            return DB.getFirstRow("SELECT `cityName` FROM `mp_homecities` WHERE `playerUUID` = " + Database.sqlString(uuid) + ";").getString("cityName");
+            if (DB.getFirstRow("SELECT `cityId` FROM `mp_homecities` WHERE `playerUUID` = " + Database.sqlString(uuid) + ";").isEmpty())
+                return -1;
+            return DB.getFirstRow("SELECT `cityId` FROM `mp_homecities` WHERE `playerUUID` = " + Database.sqlString(uuid) + ";").getInt("cityId");
         } catch (SQLException e) {
             e.printStackTrace();
-            return null;
+            return -1;
         }
     }
 
     public static City getHomeCityToCity(String uuid) {
         try {
-            String cityName = getHomeCityToCityname(uuid);
-            if (CityDatabase.getCity(cityName).isEmpty()) return null;
-            return CityDatabase.getCity(cityName).get();
+            int cityId = getHomeCityToCityId(uuid);
+            if (CityDatabase.getCity(cityId).isEmpty()) return null;
+            return CityDatabase.getCity(cityId).get();
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -65,7 +65,7 @@ public class HCDatabase {
 
     public static void removeHomeCity(String uuid, City city) {
         try {
-            DB.executeUpdate("DELETE FROM `mp_homecities` WHERE `playerUUID` = " + Database.sqlString(uuid) + " AND `cityName` = " + Database.sqlString(city.getCityName()) + ";");
+            DB.executeUpdate("DELETE FROM `mp_homecities` WHERE `playerUUID` = " + Database.sqlString(uuid) + " AND `cityId` = " + city.getCityId() + ";");
         } catch (SQLException e) {
             e.printStackTrace();
         }

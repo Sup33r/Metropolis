@@ -86,6 +86,12 @@ messages:
       notFound: "<red>Spelaren hittades inte."
       notInCity: "<red>Spelaren är inte medlem i någon stad."
     city:
+      unclaim:
+        hasPlots: "<yellow>%cityname% <gray>| <red>Det finns en eller flera tomter på markbiten. Använd /plot delete för att ta bort tomter."
+        hasDistricts: "<yellow>%cityname% <gray>| <red>Det finns ett eller flera områden på markbiten. Använd /city district delete för att ta bort områden, eller /city district update för att flytta dem."
+        hasCityGo: "<yellow>%cityname% <gray>| <red>Det finns en eller flera stadsteleporteringspunkter på markbiten. Använd /city go <underlined>namn<reset><red> delete för att ta bort dem."
+        hasCitySpawn: "<yellow>%cityname% <gray>| <red>Stadens startpunkt befinner sig på markbiten. Använd /city set spawn för att flytta den."
+      notInClaim: "<yellow>%cityname% <gray>| <red>Markbiten du står på tillhör inte staden."
       district:
         plotsNotCompletelyInside: "<red>Någon eller några tomt(er) inom området är inte helt inom områdets gränser."
         contactAlreadyInDistrict: "<yellow>%cityname% <gray>| <red>%player% är redan kontaktperson i området."
@@ -308,6 +314,17 @@ messages:
           2: "<gray>f = frame, g = go, h = home, j = jukebox"
           3: "<gray>r = repair (anvil), s = switch, t = teleport, v = villager"
   city:
+    chunk:
+      header: "<dark_green>--- <green>Markbit: (%chunkx%, %chunky%) <dark_green>---"
+      status:
+        claimed: "<dark_green>Status: <green>Detaljplanerad mark"
+        nature: "<dark_green>Status: <green>Icke detaljplanerad mark"
+      city: "<dark_green>Stad: <green>%cityname%"
+      plots: "<dark_green>Tomter på markbiten (%count%): <green>%plots%"
+    delete:
+        confirmation: "<yellow>%cityname% <gray>| <red>Är du säker på att du vill ta bort staden? Alla markbitar, områden, stadsteleporteringspunkter och mer kommer att tas bort. Skriv <dark_red>/city delete!<red> för att bekräfta."
+        success: "<yellow>%cityname% <gray>| <green>Staden har blivit borttagen."
+        others: "<aqua>Staden %cityname% har blivit borttagen."
     district:
       updated: "<yellow>%cityname% <gray>| <green>Området %districtname% har uppdaterats."
       created: "<yellow>%cityname% <gray>| <green>Området %districtname% har skapats."
@@ -411,6 +428,7 @@ messages:
       owner: "<dark_green><bold>Ägare:"
       price: "<dark_green><bold>Till salu:"
     successful:
+      unclaim: "<yellow>%cityname% <gray>| <green>Markbiten har återgått till naturen."
       bonus: "<yellow>%cityname% <gray>| <green>Staden har köpt %count% bonusmarkbit(ar) för %amount% minemynt."
       outpost: "<yellow>%cityname% <gray>| <green>Staden har köpt en utpost för %amount% minemynt."
       rank:

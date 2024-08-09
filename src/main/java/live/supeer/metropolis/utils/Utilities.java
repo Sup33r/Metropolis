@@ -2,10 +2,7 @@ package live.supeer.metropolis.utils;
 
 import fr.mrmicky.fastboard.FastBoard;
 import live.supeer.metropolis.Metropolis;
-import live.supeer.metropolis.city.City;
-import live.supeer.metropolis.city.CityDatabase;
-import live.supeer.metropolis.city.District;
-import live.supeer.metropolis.city.Role;
+import live.supeer.metropolis.city.*;
 import live.supeer.metropolis.command.CommandCity;
 import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.plot.Plot;
@@ -41,8 +38,8 @@ public class Utilities {
                         return true;
                     }
                     if (!Objects.equals(
-                            Objects.requireNonNull(CityDatabase.getClaim(chunkLocation)).getCityName(),
-                            HCDatabase.getHomeCityToCityname(player.getUniqueId().toString()))) {
+                            Objects.requireNonNull(CityDatabase.getClaim(chunkLocation)).getCity(),
+                            HCDatabase.getHomeCityToCity(player.getUniqueId().toString()))) {
                         return true;
                     }
                 }
@@ -511,4 +508,5 @@ public class Utilities {
     public static boolean isPlotCompletelyInsideDistrict(Polygon plotPolygon, Polygon districtPolygon) {
         return districtPolygon.contains(plotPolygon);
     }
+
 }

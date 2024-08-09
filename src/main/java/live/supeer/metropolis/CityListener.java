@@ -33,6 +33,8 @@ public class CityListener implements Listener {
     public void onPlayerExitCity(PlayerExitCityEvent event) {
         City city = event.getCity();
         Metropolis.playerInCity.remove(event.getPlayer().getUniqueId(), city);
+        Metropolis.playerInDistrict.remove(event.getPlayer().getUniqueId());
+        Metropolis.playerInPlot.remove(event.getPlayer().getUniqueId());
         if (city.getExitMessage() != null) {
             plugin.sendMessage(event.getPlayer(), "messages.city.exit", "%cityname%", city.getCityName(), "%exit%", city.getExitMessage());
         }

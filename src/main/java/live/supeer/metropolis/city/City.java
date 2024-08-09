@@ -23,7 +23,7 @@ public class City {
 
     public static Metropolis plugin;
 
-    private final int cityID;
+    private final int cityId;
     private String cityName;
     private final String originalMayorName;
     private final String originalMayorUUID;
@@ -40,11 +40,10 @@ public class City {
     private String motdMessage;
     private boolean isOpen;
     private boolean isPublic;
-    private boolean isRemoved;
     private double cityTax;
 
     public City(DbRow data) {
-        this.cityID = data.getInt("cityID");
+        this.cityId = data.getInt("cityId");
         this.cityName = data.getString("cityName");
         this.originalMayorName = data.getString("originalMayorName");
         this.originalMayorUUID = data.getString("originalMayorUUID");
@@ -56,7 +55,6 @@ public class City {
         this.motdMessage = data.getString("motdMessage");
         this.isOpen = data.get("isOpen");
         this.isPublic = data.get("isPublic");
-        this.isRemoved = data.get("isRemoved");
         this.bonusClaims = data.getInt("bonusClaims");
         this.cityTax = data.getDbl("cityTax");
     }
@@ -66,8 +64,8 @@ public class City {
         DB.executeUpdateAsync(
                 "UPDATE `mp_cities` SET `cityName` = "
                         + Database.sqlString(cityName)
-                        + " WHERE `cityID` = "
-                        + cityID
+                        + " WHERE `cityId` = "
+                        + cityId
                         + ";");
     }
 
@@ -76,8 +74,8 @@ public class City {
         DB.executeUpdateAsync(
                 "UPDATE `mp_cities` SET `cityBalance` = "
                         + this.cityBalance
-                        + " WHERE `cityID` = "
-                        + cityID
+                        + " WHERE `cityId` = "
+                        + cityId
                         + ";");
     }
 
@@ -86,15 +84,15 @@ public class City {
         DB.executeUpdateAsync(
                 "UPDATE `mp_cities` SET `cityBalance` = "
                         + this.cityBalance
-                        + " WHERE `cityID` = "
-                        + cityID
+                        + " WHERE `cityId` = "
+                        + cityId
                         + ";");
     }
 
     public void removeCityMember(Member member) {
         this.cityMembers.remove(member);
         HCDatabase.removeHomeCity(member.getPlayerUUID(), this);
-        DB.executeUpdateAsync("DELETE FROM `mp_members` WHERE `cityID` = " + cityID + " AND `playerUUID` = " + Database.sqlString(member.getPlayerUUID()) + ";");
+        DB.executeUpdateAsync("DELETE FROM `mp_members` WHERE `cityId` = " + cityId + " AND `playerUUID` = " + Database.sqlString(member.getPlayerUUID()) + ";");
     }
 
     public void setCitySpawn(Location citySpawn) {
@@ -102,8 +100,8 @@ public class City {
         DB.executeUpdateAsync(
                 "UPDATE `mp_cities` SET `citySpawn` = "
                         + Database.sqlString(LocationUtil.locationToString(citySpawn))
-                        + " WHERE `cityID` = "
-                        + cityID
+                        + " WHERE `cityId` = "
+                        + cityId
                         + ";");
     }
 
@@ -111,8 +109,8 @@ public class City {
         DB.executeUpdateAsync(
                 "UPDATE `mp_cities` SET `cityTax` = "
                         + cityTax
-                        + " WHERE `cityID` = "
-                        + cityID
+                        + " WHERE `cityId` = "
+                        + cityId
                         + ";");
         this.cityTax = cityTax;
     }
@@ -122,18 +120,8 @@ public class City {
         DB.executeUpdateAsync(
                 "UPDATE `mp_cities` SET `bonusClaims` = "
                         + this.bonusClaims
-                        + " WHERE `cityID` = "
-                        + cityID
-                        + ";");
-    }
-
-    public void setCityStatus(boolean isRemoved) {
-        this.isRemoved = isRemoved;
-        DB.executeUpdateAsync(
-                "UPDATE `mp_cities` SET `isRemoved` = "
-                        + (isRemoved ? 1 : 0)
-                        + " WHERE `cityID` = "
-                        + cityID
+                        + " WHERE `cityId` = "
+                        + cityId
                         + ";");
     }
 
@@ -142,8 +130,8 @@ public class City {
         DB.executeUpdateAsync(
                 "UPDATE `mp_cities` SET `enterMessage` = "
                         + Database.sqlString(enterMessage)
-                        + " WHERE `cityID` = "
-                        + cityID
+                        + " WHERE `cityId` = "
+                        + cityId
                         + ";");
     }
 
@@ -152,8 +140,8 @@ public class City {
         DB.executeUpdateAsync(
                 "UPDATE `mp_cities` SET `exitMessage` = "
                         + Database.sqlString(exitMessage)
-                        + " WHERE `cityID` = "
-                        + cityID
+                        + " WHERE `cityId` = "
+                        + cityId
                         + ";");
     }
 
@@ -162,8 +150,8 @@ public class City {
         DB.executeUpdateAsync(
                 "UPDATE `mp_cities` SET `motdMessage` = "
                         + Database.sqlString(motdMessage)
-                        + " WHERE `cityID` = "
-                        + cityID
+                        + " WHERE `cityId` = "
+                        + cityId
                         + ";");
     }
 
@@ -184,8 +172,8 @@ public class City {
         DB.executeUpdateAsync(
                 "UPDATE `mp_cities` SET `isOpen` = "
                         + (isOpen ? 0 : 1)
-                        + " WHERE `cityID` = "
-                        + cityID
+                        + " WHERE `cityId` = "
+                        + cityId
                         + ";");
         return isOpen = !isOpen;
     }
@@ -194,8 +182,8 @@ public class City {
         DB.executeUpdateAsync(
                 "UPDATE `mp_cities` SET `isPublic` = "
                         + (isPublic ? 0 : 1)
-                        + " WHERE `cityID` = "
-                        + cityID
+                        + " WHERE `cityId` = "
+                        + cityId
                         + ";");
         return isPublic = !isPublic;
     }
@@ -210,6 +198,10 @@ public class City {
 
     public void addCityClaim(Claim claim) {
         cityClaims.add(claim);
+    }
+
+    public void removeCityClaim(Claim claim) {
+        cityClaims.remove(claim);
     }
 
     public Claim getCityClaim(Location location) {

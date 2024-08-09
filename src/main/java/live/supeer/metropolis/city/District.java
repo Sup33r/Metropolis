@@ -46,7 +46,7 @@ public class District {
                 "UPDATE `mp_districts` SET `contactPlayers` = "
                         + Database.sqlString(Utilities.offlinePlayerListToString(contactplayers))
                         + " WHERE `districtName` = "
-                        + Database.sqlString(districtName) + " AND `cityID` = " + city.getCityID());
+                        + Database.sqlString(districtName) + " AND `cityId` = " + city.getCityId());
     }
 
     public void removeContactPlayer(OfflinePlayer player) {
@@ -55,7 +55,7 @@ public class District {
                 "UPDATE `mp_districts` SET `contactPlayers` = "
                         + Database.sqlString(Utilities.offlinePlayerListToString(contactplayers))
                         + " WHERE `districtName` = "
-                        + Database.sqlString(districtName) + " AND `cityID` = " + city.getCityID());
+                        + Database.sqlString(districtName) + " AND `cityId` = " + city.getCityId());
     }
 
     public void setDistrictName(String districtName) {
@@ -63,7 +63,7 @@ public class District {
                 "UPDATE `mp_districts` SET `districtName` = "
                         + Database.sqlString(districtName)
                         + " WHERE `districtName` = "
-                        + Database.sqlString(this.districtName) + " AND `cityID` = " + city.getCityID());
+                        + Database.sqlString(this.districtName) + " AND `cityId` = " + city.getCityId());
     }
 
     public void update(Player player, Polygon districtPolygon) {
@@ -80,7 +80,7 @@ public class District {
                             + " WHERE `districtName` = "
                             + Database.sqlString(districtName)
                             + " AND `cityId` = "
-                            + city.getCityID()
+                            + city.getCityId()
                             + ";");
 
             this.districtPoints = districtPolygon;
