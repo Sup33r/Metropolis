@@ -360,7 +360,7 @@ public class Utilities {
         }
         City city = HCDatabase.getHomeCityToCity(player.getUniqueId().toString());
         if (city == null) {
-            plugin.sendMessage(player, "messages.error.missing.homecity");
+            plugin.sendMessage(player, "messages.error.missing.homeCity");
             return null;
         }
         if (targetRole != null) {

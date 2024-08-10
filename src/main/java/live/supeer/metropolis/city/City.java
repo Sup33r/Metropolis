@@ -154,6 +154,15 @@ public class City {
         DB.executeUpdateAsync("DELETE FROM `mp_members` WHERE `cityId` = " + cityId + " AND `playerUUID` = " + Database.sqlString(member.getPlayerUUID()) + ";");
     }
 
+    public void removeCityMember(String playerUUID) {
+        Member member = getCityMember(playerUUID);
+        if (member != null) {
+            this.cityMembers.remove(member);
+            HCDatabase.removeHomeCity(playerUUID, this);
+            DB.executeUpdateAsync("DELETE FROM `mp_members` WHERE `cityId` = " + cityId + " AND `playerUUID` = " + Database.sqlString(playerUUID) + ";");
+        }
+    }
+
     public void setCitySpawn(Location citySpawn) {
         this.citySpawn = citySpawn;
         DB.executeUpdateAsync(

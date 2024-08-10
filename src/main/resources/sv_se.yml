@@ -88,6 +88,12 @@ messages:
       notFound: "<red>Spelaren hittades inte."
       notInCity: "<red>Spelaren är inte medlem i någon stad."
     city:
+      kick:
+        tooShort: "<red>Anledningen är inte tillräckligt bra. Tydliggör, precisera!"
+        notInCity: "<yellow>%cityname% <gray>| <red>Spelaren är inte medlem i staden."
+        cannotKickSelf: "<yellow>%cityname% <gray>| <red>Du kan inte sparka dig själv."
+        cannotKickHigherRole: "<yellow>%cityname% <gray>| <red>Du kan inte sparka en spelare med en högre roll än din egen."
+        cannotKickMayor: "<yellow>%cityname% <gray>| <red>Du kan inte sparka borgmästaren."
       namechange:
         cooldown: "<yellow>%cityname% <gray>| <red>Du måste vänta %timeleft% innan du kan ändra stadsnamnet igen."
       maxPlotsPerMember:
@@ -330,6 +336,11 @@ messages:
           2: "<gray>f = frame, g = go, h = home, j = jukebox"
           3: "<gray>r = repair (anvil), s = switch, t = teleport, v = villager"
   city:
+    broadcast: "<yellow>%cityname% <gray>| <gold>%message%"
+    kick:
+      kickedOthers: "<yellow>%cityname% <gray>| <yellow>%playername% har blivit sparkad från staden."
+      success: "<yellow>%cityname% <gray>| <green>%player% har blivit sparkad från staden med anledningen: %reason%."
+      kicked: "<yellow>%cityname% <gray>| <yellow>Du har blivit sparkad från staden med anledningen: %reason%."
     twin:
       removed: "<yellow>%cityname% <gray>| <green>Staden %twin% har tagits bort som vänort."
       added: "<yellow>%cityname% <gray>| <green>Staden %twin% har lagts till som vänort."
@@ -387,6 +398,8 @@ messages:
       vicemayor: "Vice borgmästare"
       mayor: "Borgmästare"
     ban:
+      others: "<yellow>%cityname% <gray>| <yellow>Spelaren %player% har blivit bannlyst från staden."
+      playerBanned: "<yellow>%cityname% <gray>| <red>Du har blivit bannlyst från staden i %length%, med anledningen: %reason%."
       success: "<yellow>%cityname% <gray>| <green>Spelaren %player% har blivit bannlyst från staden i %length%, med anledningen: %reason%."
       alreadyBanned: "<yellow>%cityname% <gray>| <red>Spelaren  %player% är redan bannlyst från staden."
       none: "<yellow>%cityname% <gray>| <red>Inga spelare är bannlysta från staden."
@@ -416,6 +429,7 @@ messages:
       noData: "<red>Ingen blockdata hittades på det specificerade blocket."
       header: "<dark_green>--- <green>Blockhistorik: %location% (sida %page%/%totalpages%) <dark_green>---"
     go:
+      teleported: "<yellow>%cityname% <gray>| <green>Du har teleporterats till %name%."
       changedAccessLevel: "<yellow>%cityname% <gray>| <green>Du har ändrat tillgänglighetsnivån för teleporteringspunkten %name% till <dark_green>%accesslevel%<green>."
       changedName: "<yellow>%cityname% <gray>| <green>Namnet för stadsteleporteringspunkten %name% ändrades."
       changedDisplayname: "<yellow>%cityname% <gray>| <green>Visningsnamnet för stadsteleporteringspunkten %name% ändrades."

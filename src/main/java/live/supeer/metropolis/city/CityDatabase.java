@@ -318,7 +318,10 @@ public class CityDatabase {
 
     public static void setCityGoName(String name, City city, String newName) {
         try {
-            DB.executeUpdate("UPDATE `mp_citygoes` SET `goName` = '" + Database.sqlString(newName) + "' WHERE `cityId` = " + city.getCityId() + " AND `goName` = " + Database.sqlString(name) + ";");
+            String sql = "UPDATE `mp_citygoes` SET `goName` = " + Database.sqlString(newName) +
+                    " WHERE `cityId` = " + city.getCityId() +
+                    " AND `goName` = " + Database.sqlString(name);
+            DB.executeUpdate(sql);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -794,6 +797,7 @@ public class CityDatabase {
         }
         return false;
     }
+
 
     public static boolean isDistrictInClaim(Claim claim) {
         World world = claim.getClaimWorld();

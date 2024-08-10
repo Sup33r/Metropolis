@@ -612,7 +612,7 @@ public class CommandCity extends BaseCommand {
     }
 
     @Subcommand("go")
-    @CommandCompletion("@cityGoes @cityGo1 @cityGo2 @cityGo3")
+    @CommandCompletion("@cityGoes @cityGo1 @cityGo2 @nothing")
     public static void onGo(Player player, String[] args) {
         if (!player.hasPermission("metropolis.city.go")) {
             plugin.sendMessage(player, "messages.error.permissionDenied");
@@ -801,6 +801,7 @@ public class CommandCity extends BaseCommand {
                         city.getCityName(),
                         "%name%",
                         args[0]);
+                return;
             }
             if (args[2].equals("accesslevel")) {
                 if (!args[3].equals("-")
@@ -998,6 +999,8 @@ public class CommandCity extends BaseCommand {
             Location location = CityDatabase.getCityGoLocation(args[0], city);
             assert location != null;
             player.teleport(location);
+            String name = CityDatabase.getCityGoDisplayname(args[0], city);
+            plugin.sendMessage(player, "messages.city.go.teleported", "%cityname%", city.getCityName(), "%name%", name);
             // Istället för player.teleport här så ska vi ha en call till Mandatory, som sköter VIP
             // teleportering.
         } else {
@@ -1887,7 +1890,23 @@ public class CommandCity extends BaseCommand {
             String playerUUID = Bukkit.getOfflinePlayer(playerName).getUniqueId().toString();
             String expiryDate = DateUtil.formatDateDiff(length);
             CityDatabase.addCityBan(city, playerUUID, reason, player, placeDate, length);
-            plugin.sendMessage(player, "messages.city.ban.success", "%player%", playerName, "%cityname%", city.getCityName(), "%reason%", reason, "%length%", expiryDate);
+            if (CityDatabase.memberExists(playerUUID, city)) {
+                city.removeCityMember(city.getCityMember(playerUUID));
+            }
+            if (Bukkit.getOfflinePlayer(playerName).isOnline()) {
+                plugin.sendMessage((Player) Bukkit.getOfflinePlayer(playerName), "messages.city.ban.playerBanned", "%player%", playerName, "%cityname%", city.getCityName(), "%reason%", reason, "%length%", expiryDate);
+            }
+            for (Member member : city.getCityMembers()) {
+                Player memberPlayer = Bukkit.getPlayer(UUID.fromString(member.getPlayerUUID()));
+                if (memberPlayer == null) {
+                    continue;
+                }
+                if(member.getCityRole().hasPermission(Role.ASSISTANT)) {
+                    plugin.sendMessage(memberPlayer, "messages.city.ban.success", "%player%", playerName, "%cityname%", city.getCityName(), "%reason%", reason, "%length%", expiryDate);
+                    continue;
+                }
+                plugin.sendMessage(memberPlayer, "messages.city.ban.others", "%player%", playerName, "%cityname%", city.getCityName());
+            }
 
             // Log the ban
             Database.addLogEntry(city, "{ \"type\": \"ban\", \"subtype\": \"city\", \"player\": " + playerUUID + ", \"placer\": " + player.getUniqueId().toString() + ", \"reason\": \"" + reason + "\", \"length\": \"" + length + "\" }");
@@ -2581,6 +2600,78 @@ public class CommandCity extends BaseCommand {
             } else {
                 plugin.sendMessage(player, "messages.syntax.city.twin");
             }
+        }
+    }
+
+    @Subcommand("kick")
+    public static void onKick(Player player, String playerName, String reason) {
+        City city = Utilities.hasCityPermissions(player, "metropolis.city.kick", Role.ASSISTANT);
+        if (city == null) {
+            return;
+        }
+        Role role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
+        assert role != null;
+        OfflinePlayer targetPlayer = Bukkit.getOfflinePlayer(playerName);
+        if (!targetPlayer.hasPlayedBefore()) {
+            plugin.sendMessage(player, "messages.error.player.notFound", "%player%", playerName);
+            return;
+        }
+        if (reason.length() < 4) {
+            plugin.sendMessage(player, "messages.error.city.kick.tooShort");
+            return;
+        }
+        if (!CityDatabase.memberExists(targetPlayer.getUniqueId().toString(), city)) {
+            plugin.sendMessage(player, "messages.error.city.kick.notInCity", "%cityname%", city.getCityName());
+            return;
+        }
+        if (targetPlayer.getUniqueId() == player.getUniqueId()) {
+            plugin.sendMessage(player, "messages.error.city.kick.cannotKickSelf", "%cityname%", city.getCityName());
+            return;
+        }
+        //if targetPlayer has higher role
+        Role targetRole = CityDatabase.getCityRole(city, targetPlayer.getUniqueId().toString());
+        if (targetRole == null) {
+            plugin.sendMessage(player, "messages.error.city.kick.notInCity", "%cityname%", city.getCityName());
+            return;
+        }
+        if (targetRole.getPermissionLevel() >= role.getPermissionLevel()) {
+            plugin.sendMessage(player, "messages.error.city.kick.cannotKickHigherRole", "%cityname%", city.getCityName());
+            return;
+        }
+        if (targetRole.equals(Role.MAYOR)) {
+            plugin.sendMessage(player, "messages.error.city.kick.cannotKickMayor", "%cityname%", city.getCityName());
+            return;
+        }
+        if (targetPlayer.isOnline()) {
+            plugin.sendMessage((Player) targetPlayer, "messages.city.kick.kicked", "%cityname%", city.getCityName(), "%reason%", reason);
+        }
+        city.removeCityMember(targetPlayer.getUniqueId().toString());
+        for (Member member : city.getCityMembers()) {
+            Player memberPlayer = Bukkit.getPlayer(UUID.fromString(member.getPlayerUUID()));
+            if (memberPlayer == null) {
+                continue;
+            }
+            if(member.getCityRole().hasPermission(Role.ASSISTANT)) {
+                plugin.sendMessage(memberPlayer, "messages.city.kick.success", "%cityname%", city.getCityName(), "%playername%", targetPlayer.getName());
+                continue;
+            }
+            plugin.sendMessage(memberPlayer, "messages.city.kick.kickedOthers", "%cityname%", city.getCityName(), "%playername%", targetPlayer.getName());
+        }
+        Database.addLogEntry(city, "{ \"type\": \"kick\", \"player\": \"" + targetPlayer.getUniqueId().toString() + "\", \"issuer\": \"" + player.getUniqueId().toString() + "\", \"reason\": \"" + reason + "\" }");
+    }
+
+    @Subcommand("broadcast")
+    public static void onBroadcast(Player player, String message) {
+        City city = Utilities.hasCityPermissions(player, "metropolis.city.broadcast", Role.ASSISTANT);
+        if (city == null) {
+            return;
+        }
+        for (Member member : city.getCityMembers()) {
+            Player targetPlayer = Bukkit.getPlayer(UUID.fromString(member.getPlayerUUID()));
+            if (targetPlayer == null) {
+                continue;
+            }
+            plugin.sendMessage(targetPlayer, "messages.city.broadcast", "%cityname%", city.getCityName(), "%message%", message);
         }
     }
 }
