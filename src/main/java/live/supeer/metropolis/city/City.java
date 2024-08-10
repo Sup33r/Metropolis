@@ -45,6 +45,7 @@ public class City {
     private boolean isOpen;
     private boolean isPublic;
     private double cityTax;
+    private int maxPlotsPerMember;
 
     public City(DbRow data) {
         this.cityId = data.getInt("cityId");
@@ -64,6 +65,7 @@ public class City {
         this.minSpawnDistance = data.getInt("minSpawnDistance");
         this.cityTax = data.getDbl("cityTax");
         this.twinCities = new ArrayList<>(Utilities.stringToCityList(data.getString("twinCities")));
+        this.maxPlotsPerMember = data.getInt("maxPlotsPerMember");
     }
 
     public void addTwinCity(City city) {
@@ -91,6 +93,16 @@ public class City {
         DB.executeUpdateAsync(
                 "UPDATE `mp_cities` SET `cityName` = "
                         + Database.sqlString(cityName)
+                        + " WHERE `cityId` = "
+                        + cityId
+                        + ";");
+    }
+
+    public void setMaxPlotsPerMember(int maxPlotsPerMember) {
+        this.maxPlotsPerMember = maxPlotsPerMember;
+        DB.executeUpdateAsync(
+                "UPDATE `mp_cities` SET `maxPlotsPerMember` = "
+                        + maxPlotsPerMember
                         + " WHERE `cityId` = "
                         + cityId
                         + ";");

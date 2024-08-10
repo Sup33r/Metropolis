@@ -79,7 +79,14 @@ public class CityDatabase {
 
     public static City newCity(String cityName, Player player) {
         try {
-            DB.executeUpdate("INSERT INTO `mp_cities` (`cityName`, `originalMayorUUID`, `originalMayorName`, `cityBalance`, `citySpawn`, `createDate`) VALUES (" + Database.sqlString(cityName) + ", " + Database.sqlString(player.getUniqueId().toString()) + ", " + Database.sqlString(player.getName()) + ", " + Metropolis.configuration.getCityStartingBalance() + ", " + Database.sqlString(LocationUtil.locationToString(player.getLocation())) + ", " + DateUtil.getTimestamp() + ", );");
+            DB.executeUpdate("INSERT INTO `mp_cities` (`cityName`, `originalMayorUUID`, `originalMayorName`, `cityBalance`, `citySpawn`, `createDate`) VALUES (" +
+                    Database.sqlString(cityName) + ", " +
+                    Database.sqlString(player.getUniqueId().toString()) + ", " +
+                    Database.sqlString(player.getName()) + ", " +
+                    Metropolis.configuration.getCityStartingBalance() + ", " +
+                    Database.sqlString(LocationUtil.locationToString(player.getLocation())) + ", " +
+                    DateUtil.getTimestamp() + ");");
+
             City city = new City(DB.getFirstRow("SELECT * FROM `mp_cities` WHERE `cityName` = " + Database.sqlString(cityName) + ";"));
             cities.add(city);
             newMember(city, player);
@@ -873,4 +880,5 @@ public class CityDatabase {
 
         return spawnChunkX == claim.getXPosition() && spawnChunkZ == claim.getZPosition();
     }
+
 }

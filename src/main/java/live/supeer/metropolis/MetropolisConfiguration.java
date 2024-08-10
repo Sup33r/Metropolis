@@ -30,6 +30,7 @@ public class MetropolisConfiguration {
     private final int cityExitMessageLimit;
     private final int plotNameLimit;
     private final int districtNameLimit;
+    private final int maxAmountOfPlots;
 
     private final int minChunkDistance;
     private final int minSpawnDistance;
@@ -65,6 +66,7 @@ public class MetropolisConfiguration {
         cityExitMessageLimit = plugin.getConfig().getInt("settings.limits.exitmessage");
         plotNameLimit = plugin.getConfig().getInt("settings.limits.plotname");
         districtNameLimit = plugin.getConfig().getInt("settings.limits.districtname");
+        maxAmountOfPlots = plugin.getConfig().getInt("settings.limits.maxamountofplots");
 
         cityMaxTax = plugin.getConfig().getDouble("settings.limits.citymaxtax");
         minChunkDistance = plugin.getConfig().getInt("settings.limits.minchunkdistance");

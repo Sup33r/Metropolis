@@ -65,6 +65,7 @@ public class Database {
                                 `exitMessage` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                 `motdMessage` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                 `twinCities` text COLLATE utf8mb4_unicode_ci,
+                                `maxPlotsPerMember` int(11) DEFAULT -1,
                                 `isOpen` tinyint(1) DEFAULT 0,
                                 `isPublic` tinyint(1) DEFAULT 0,
                                 PRIMARY KEY (`cityId`)

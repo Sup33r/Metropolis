@@ -88,6 +88,9 @@ messages:
       notFound: "<red>Spelaren hittades inte."
       notInCity: "<red>Spelaren är inte medlem i någon stad."
     city:
+      maxPlotsPerMember:
+        invalidAmount: "<red>Antalet tomter per medlem måste vara ett positivt heltal."
+        maxAmount: "<red>Antalet tomter per medlem får inte överstiga %max%."
       twin:
         notFound: "<yellow>%cityname% <gray>| <red>Staden hittades inte."
         none: "<red>Staden har ingen vänort."
@@ -188,6 +191,7 @@ messages:
           alreadyNoType: "<yellow>%cityname% <gray>| <red>Tomten har redan ingen typ."
           invalidType: "<yellow>%cityname% <gray>| <red>Tomttypen hittades inte. Använd /plot set type för att se alla typer."
         owner:
+          tooManyPlots: "<yellow>%cityname% <gray>| <red>Du äger redan för många tomter i staden."
           notForSale: "<yellow>%cityname% <gray>| <red>Tomten är inte till salu."
           notOwner: "<yellow>%cityname% <gray>| <red>Du är inte ägare till tomten."
           alreadyNoOwner: "<yellow>%cityname% <gray>| <red>Tomten har redan ingen ägare."
@@ -329,7 +333,7 @@ messages:
       added: "<yellow>%cityname% <gray>| <green>Staden %twin% har lagts till som vänort."
       list: "<yellow>%cityname% <gray>| <green>Vänorter (%count%): %twins%"
     chunk:
-      header: "<dark_green>--- <green>Markbit: (%chunkx%, %chunky%) <dark_green>---"
+      header: "<dark_green>--- <green>Markbit: (%chunkx%, %chunkz%) <dark_green>---"
       status:
         claimed: "<dark_green>Status: <green>Detaljplanerad mark"
         nature: "<dark_green>Status: <green>Icke detaljplanerad mark"
@@ -442,6 +446,9 @@ messages:
       owner: "<dark_green><bold>Ägare:"
       price: "<dark_green><bold>Till salu:"
     successful:
+      maxPlotsPerMember:
+        removed: "<yellow>%cityname% <gray>| <green>Maxgränsen för antal tomter per medlem har tagits bort."
+        set: "<yellow>%cityname% <gray>| <green>Maxgränsen för antal tomter per medlem har ändrats till %amount%."
       resetMinSpawnDistance: "<yellow>%cityname% <gray>| <green>Minsta avståndet mellan städer har återställts."
       setMinSpawnDistance: "<yellow>%cityname% <gray>| <green>Minsta avståndet mellan städer har ändrats till %distance%."
       resetMinChunkDistance: "<yellow>%cityname% <gray>| <green>Minsta avståndet mellan städer har återställts."

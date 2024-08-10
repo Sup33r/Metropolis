@@ -2273,6 +2273,14 @@ public class CommandPlot extends BaseCommand {
                     city.getCityName());
             return;
         }
+        if (city.getMaxPlotsPerMember() != -1 && PlotDatabase.getPlayerPlotCount(player) >= city.getMaxPlotsPerMember()) {
+            plugin.sendMessage(
+                    player,
+                    "messages.error.plot.set.owner.tooManyPlots",
+                    "%cityname%",
+                    city.getCityName());
+            return;
+        }
         if (economy.getBalance(player) < plot.getPlotPrice()) {
             plugin.sendMessage(
                     player, "messages.error.missing.playerBalance", "%cityname%", city.getCityName());

@@ -18,6 +18,8 @@ settings:
     maxbantime: 10y
     citymaxtax: 10.00
 
+    maxamountofplots: 500
+
     minchunkdistance: 400
     minspawndistance: 2000
 

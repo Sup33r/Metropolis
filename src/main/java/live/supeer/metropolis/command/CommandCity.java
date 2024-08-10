@@ -3,15 +3,12 @@ package live.supeer.metropolis.command;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation .*;
 import co.aikar.commands.annotation.Optional;
-import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import live.supeer.metropolis.AutoclaimManager;
 import live.supeer.metropolis.Database;
 import live.supeer.metropolis.Metropolis;
 import live.supeer.metropolis.MetropolisListener;
-import live.supeer.metropolis.city.District;
 import live.supeer.metropolis.event.PlayerEnterCityEvent;
 import live.supeer.metropolis.event.PlayerExitCityEvent;
-import live.supeer.metropolis.event.PlayerExitPlotEvent;
 import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.plot.PlotDatabase;
 import live.supeer.metropolis.utils.LocationUtil;
@@ -23,7 +20,6 @@ import net.coreprotect.CoreProtect;
 import net.coreprotect.CoreProtectAPI;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -215,7 +211,7 @@ public class CommandCity extends BaseCommand {
             plugin.sendMessage(player, "messages.error.city.claimExists");
             return;
         }
-        if (Utilities.isCloseToOtherCity(player, player.getLocation(), "newcity")) {
+        if (Utilities.cannotClaimOrCreateCity(player.getLocation().toBlockLocation(), null)) {
             plugin.sendMessage(player, "messages.error.city.tooCloseToOtherCity");
             return;
         }
@@ -319,7 +315,7 @@ public class CommandCity extends BaseCommand {
                         plugin.sendMessage(player, "messages.error.missing.claimCost", "%cityname%", city.getCityName(), "%cost%", ""+Metropolis.configuration.getCityClaimCost());
                         return;
                     }
-                    if (Utilities.isCloseToOtherCity(player, player.getLocation(), "city")) {
+                    if (Utilities.cannotClaimOrCreateCity(player.getLocation().toBlockLocation(), city)) {
                         plugin.sendMessage(player, "messages.error.city.tooCloseToOtherCity");
                         return;
                     }
@@ -384,7 +380,7 @@ public class CommandCity extends BaseCommand {
             plugin.sendMessage(player, "messages.error.missing.claimCost", "%cityname%", city.getCityName(), "%cost%", ""+Metropolis.configuration.getCityClaimCost());
             return;
         }
-        if (Utilities.isCloseToOtherCity(player, player.getLocation(), "city")) {
+        if (Utilities.cannotClaimOrCreateCity(player.getLocation().toBlockLocation(), city)) {
             plugin.sendMessage(player, "messages.error.city.tooCloseToOtherCity");
             return;
         }
@@ -1248,6 +1244,47 @@ public class CommandCity extends BaseCommand {
                             + " }");
             city.setCityTax(tax);
             plugin.sendMessage(player, "messages.city.successful.set.tax", "%cityname%", city.getCityName(), "%tax%", String.valueOf(tax));
+        }
+
+        @Subcommand("maxplotspermember")
+        public static void onMaxPlotsPerMember(Player player, String argument) {
+            City city = Utilities.hasCityPermissions(player, "metropolis.city.set.maxplotspermember", Role.VICE_MAYOR);
+            if (city == null) {
+                return;
+            }
+            if (argument.equals("-")) {
+                city.setMaxPlotsPerMember(-1);
+                Database.addLogEntry(
+                        city,
+                        "{ \"type\": \"set\", \"subtype\": \"maxPlotsPerMember\", \"from\": "
+                                + city.getMaxPlotsPerMember()
+                                + ", \"to\": "
+                                + -1
+                                + ", \"player\": "
+                                + player.getUniqueId().toString()
+                                + " }");
+                plugin.sendMessage(player, "messages.city.successful.maxPlotsPerMember.removed", "%cityname%", city.getCityName());
+                return;
+            }
+            if (!argument.matches("[0-9]+")) {
+                plugin.sendMessage(player, "messages.error.city.maxPlotsPerMember.invalidAmount");
+                return;
+            }
+            int maxPlotsPerMember = Integer.parseInt(argument);
+            if (maxPlotsPerMember > Metropolis.configuration.getMaxAmountOfPlots()) {
+                plugin.sendMessage(player, "messages.error.city.maxPlotsPerMember.maxAmount", "%max%", String.valueOf(Metropolis.configuration.getMaxAmountOfPlots()));
+            }
+            Database.addLogEntry(
+                    city,
+                    "{ \"type\": \"set\", \"subtype\": \"maxPlotsPerMember\", \"from\": "
+                            + city.getMaxPlotsPerMember()
+                            + ", \"to\": "
+                            + maxPlotsPerMember
+                            + ", \"player\": "
+                            + player.getUniqueId().toString()
+                            + " }");
+            city.setMaxPlotsPerMember(maxPlotsPerMember);
+            plugin.sendMessage(player, "messages.city.successful.maxPlotsPerMember.set", "%cityname%", city.getCityName(), "%amount%", String.valueOf(maxPlotsPerMember));
         }
     }
 
@@ -2509,11 +2546,11 @@ public class CommandCity extends BaseCommand {
             }
             if (argument.startsWith("-") || argument.startsWith("+")) {
                 String cityName = argument.substring(1);
-                City twinCity = CityDatabase.getCity(cityName).get();
                 if (CityDatabase.getCity(cityName).isEmpty()) {
                     plugin.sendMessage(player, "messages.error.city.twin.notFound", "%cityname%", city.getCityName());
                     return;
                 }
+                City twinCity = CityDatabase.getCity(cityName).get();
                 if (twinCity.equals(city)) {
                     plugin.sendMessage(player, "messages.error.city.twin.sameCity", "%cityname%", city.getCityName());
                     return;
