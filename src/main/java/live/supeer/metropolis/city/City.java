@@ -9,15 +9,15 @@ import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.utils.Utilities;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Location;
-import org.bukkit.World;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.index.strtree.STRtree;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
 @Getter
 public class City {
@@ -42,8 +42,11 @@ public class City {
     private String enterMessage;
     private String exitMessage;
     private String motdMessage;
+    private String taxLevel;
     private boolean isOpen;
     private boolean isPublic;
+    private boolean isTaxExempt;
+    private boolean isReserve;
     private double cityTax;
     private int maxPlotsPerMember;
 
@@ -60,12 +63,29 @@ public class City {
         this.motdMessage = data.getString("motdMessage");
         this.isOpen = data.get("isOpen");
         this.isPublic = data.get("isPublic");
+        this.isTaxExempt = data.get("isTaxExempt");
+        this.isReserve = data.get("isReserve");
         this.bonusClaims = data.getInt("bonusClaims");
         this.minChunkDistance = data.getInt("minChunkDistance");
         this.minSpawnDistance = data.getInt("minSpawnDistance");
         this.cityTax = data.getDbl("cityTax");
         this.twinCities = new ArrayList<>(Utilities.stringToCityList(data.getString("twinCities")));
         this.maxPlotsPerMember = data.getInt("maxPlotsPerMember");
+        this.taxLevel = data.getString("taxLevel");
+    }
+
+    public void setTaxLevel(Role role) {
+        if (role == null) {
+            this.taxLevel = "none";
+        } else {
+            this.taxLevel = role.toString();
+        }
+        DB.executeUpdateAsync(
+                "UPDATE `mp_cities` SET `taxLevel` = "
+                        + Database.sqlString(taxLevel)
+                        + " WHERE `cityId` = "
+                        + cityId
+                        + ";");
     }
 
     public void addTwinCity(City city) {
@@ -163,6 +183,26 @@ public class City {
         }
     }
 
+    public void setAsReserve() {
+        this.isReserve = true;
+        DB.executeUpdateAsync(
+                "UPDATE `mp_cities` SET `isReserve` = "
+                        + 1
+                        + " WHERE `cityId` = "
+                        + cityId
+                        + ";");
+    }
+
+    public void setAsNotReserve() {
+        this.isReserve = false;
+        DB.executeUpdateAsync(
+                "UPDATE `mp_cities` SET `isReserve` = "
+                        + 0
+                        + " WHERE `cityId` = "
+                        + cityId
+                        + ";");
+    }
+
     public void setCitySpawn(Location citySpawn) {
         this.citySpawn = citySpawn;
         DB.executeUpdateAsync(
@@ -201,6 +241,14 @@ public class City {
                         + " WHERE `cityId` = "
                         + cityId
                         + ";");
+    }
+
+    public int calculateCost() {
+        int baseCost = 100000;
+        int claimCost = 500 * this.cityClaims.size();
+        int balanceCost = Math.max(0, -this.cityBalance);
+
+        return baseCost + claimCost + balanceCost;
     }
 
     public void setExitMessage(String exitMessage) {
@@ -254,6 +302,95 @@ public class City {
                         + cityId
                         + ";");
         return isPublic = !isPublic;
+    }
+
+    public boolean cityCouldGoUnder(int days) {
+        if (isTaxExempt) {
+            return false;
+        }
+        return cityClaims.size() * Metropolis.configuration.getStateTax() * days > cityBalance;
+    }
+
+    public boolean hasNegativeBalance() {
+        return cityBalance < 0;
+    }
+
+    public void drawStateTaxes() {
+        try {
+            if (isTaxExempt) {
+                return;
+            }
+            int tax = cityClaims.size() * Metropolis.configuration.getStateTax();
+            cityBalance -= tax;
+            DB.executeUpdate(
+                    "UPDATE `mp_cities` SET `cityBalance` = "
+                            + cityBalance
+                            + " WHERE `cityId` = "
+                            + cityId
+                            + ";");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean canBecomeReserve() {
+        if (cityMembers.size() >= 20) {
+            return true;
+        }
+        if (cityClaims.size() >= 25) {
+            return true;
+        }
+        return false;
+    }
+
+    public void drawCityTaxes() {
+        if (isTaxExempt) {
+            return;
+        }
+        Economy economy = Metropolis.getEconomy();
+        if (economy == null) {
+            return;
+        }
+        for (Member member : cityMembers) {
+            try {
+                double tax = cityTax;
+                if (Objects.equals(taxLevel, "none") || tax == 0) {
+                    return;
+                }
+                tax = tax / 100;
+                Role role = member.getCityRole();
+                Role cityRole = Role.fromString(taxLevel);
+                if (role == null) {
+                    plugin.getServer().broadcast(Component.text("Role null"));
+                    continue;
+                }
+                if (Objects.requireNonNull(CityDatabase.memberCityList(member.getPlayerUUID())).size() > 1) {
+                    tax = tax / 2;
+                }
+                if (role.getPermissionLevel() < cityRole.getPermissionLevel()) {
+                    plugin.getServer().broadcast(Component.text("Role check"));
+
+                    continue;
+                }
+                OfflinePlayer player = Metropolis.getPlugin().getServer().getOfflinePlayer(member.getPlayerUUID());
+                if (economy.getBalance(player) == 0) {
+                    plugin.getServer().broadcast(Component.text("Player " + player.getName() + " has no money"));
+                    continue;
+                }
+                double playerBalance = economy.getBalance(player);
+                int taxAmount = (int) (playerBalance * tax);
+                economy.withdrawPlayer(player, taxAmount);
+                cityBalance += taxAmount;
+                DB.executeUpdate(
+                        "UPDATE `mp_cities` SET `cityBalance` = "
+                                + cityBalance
+                                + " WHERE `cityId` = "
+                                + cityId
+                                + ";");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 //    public void addCityBan(Ban ban) {

@@ -21,7 +21,11 @@ public class CityListener implements Listener {
     public void onPlayerEnterCity(PlayerEnterCityEvent event) {
         City city = event.getCity();
         if (city.getEnterMessage() != null) {
-            plugin.sendMessage(event.getPlayer(), "messages.city.enter", "%cityname%", city.getCityName(), "%enter%", city.getEnterMessage());
+            if (city.isReserve()) {
+                plugin.sendMessage(event.getPlayer(), "messages.city.enter.reserve", "%cityname%", city.getCityName(), "%enter%", city.getExitMessage());
+            } else {
+                plugin.sendMessage(event.getPlayer(), "messages.city.enter.reserve", "%cityname%", city.getCityName(), "%enter%", city.getExitMessage());
+            }
         }
         Metropolis.playerInCity.put(event.getPlayer().getUniqueId(), city);
         Utilities.sendCityScoreboard(event.getPlayer(), city, null);
@@ -35,8 +39,13 @@ public class CityListener implements Listener {
         Metropolis.playerInCity.remove(event.getPlayer().getUniqueId(), city);
         Metropolis.playerInDistrict.remove(event.getPlayer().getUniqueId());
         Metropolis.playerInPlot.remove(event.getPlayer().getUniqueId());
+
         if (city.getExitMessage() != null) {
-            plugin.sendMessage(event.getPlayer(), "messages.city.exit", "%cityname%", city.getCityName(), "%exit%", city.getExitMessage());
+            if (city.isReserve()) {
+                plugin.sendMessage(event.getPlayer(), "messages.city.exit.reserve", "%cityname%", city.getCityName(), "%exit%", city.getExitMessage());
+            } else {
+                plugin.sendMessage(event.getPlayer(), "messages.city.exit.reserve", "%cityname%", city.getCityName(), "%exit%", city.getExitMessage());
+            }
         }
 
         if(event.isToNature()) {

@@ -64,10 +64,13 @@ public class Database {
                                 `enterMessage` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                 `exitMessage` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                 `motdMessage` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                                `taxLevel` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                 `twinCities` text COLLATE utf8mb4_unicode_ci,
                                 `maxPlotsPerMember` int(11) DEFAULT -1,
+                                `isTaxExempt` tinyint(1) DEFAULT 0,
                                 `isOpen` tinyint(1) DEFAULT 0,
                                 `isPublic` tinyint(1) DEFAULT 0,
+                                `isReserve` tinyint(1) DEFAULT 0,
                                 PRIMARY KEY (`cityId`)
                               ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;""");
 

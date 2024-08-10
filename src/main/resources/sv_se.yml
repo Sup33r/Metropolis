@@ -22,6 +22,7 @@ messages:
     off_state: "Av"
     wilderness: "Vildmark"
     here: "här"
+    and: "och"
   months:
     january: "januari"
     february: "februari"
@@ -45,6 +46,8 @@ messages:
   list:
     goes: "<dark_green>--- <green>Stadsteleporteringspunkter (sida <bold>%startPage% <reset><green>av <bold>%totalPages%<reset><green>) <dark_green>---"
   syntax:
+    admin:
+      balance: "<gray>Syntax: /metropolis balance <underlined>stad</underlined> +/-<underlined>belopp"
     city:
       twin: "<gray>/city twin\n<gray>/city twin +<underlined>stadsnamn"
       district: "<gray>/city district\n/city district +<underlined>player<reset>\n<gray>/city district -<underlined>player<reset>\n<gray>/city district delete\n/city district info <underlined>namn<reset>\n<gray>/city district set name <underlined>nytt namn<reset\n<gray>/city district update"
@@ -88,6 +91,9 @@ messages:
       notFound: "<red>Spelaren hittades inte."
       notInCity: "<red>Spelaren är inte medlem i någon stad."
     city:
+      reserve: "<red>Staden är ett naturreservat och kan därför inte modifieras. /city info för mer information."
+      taxLevel:
+        invalidRole: "<red>Rollen hittades inte."
       kick:
         tooShort: "<red>Anledningen är inte tillräckligt bra. Tydliggör, precisera!"
         notInCity: "<yellow>%cityname% <gray>| <red>Spelaren är inte medlem i staden."
@@ -336,6 +342,39 @@ messages:
           2: "<gray>f = frame, g = go, h = home, j = jukebox"
           3: "<gray>r = repair (anvil), s = switch, t = teleport, v = villager"
   city:
+    becameReserve: "<aqua>Staden %cityname% har gått under och blivit ett naturreservat."
+    wentUnder: "<aqua>Staden %cityname% har gått under."
+    warning:
+      lowBalance: "<dark_red><bold>VARNING: <reset><red>Stadskassan för <bold>%cityname%</bold> är farligt låg, och staden riskerar att GÅ UNDER om dess stadskassa inte fylls på innan skatterna dras."
+    cityMemberships: "<aqua><bold>Dina stadsmedlemskap: </bold>%cities%"
+    homeCity: "<aqua><bold>Hemstad: </bold>%cityname%"
+    cityInfo:
+      header: "<dark_green>--- <green>Stad: %cityname% (%claims%/%maxclaims%, varav %bonus% bonus) <dark_green>---"
+      role: "<dark_green>Du är <green>%role%<dark_green> i staden."
+      motd: "<dark_green>MOTD: <green>%motd%"
+      membersPlots: "<dark_green>Medlemmar: <green>%members%<dark_green>     Tomter: <green>%plots%"
+      bansTwins: "<dark_green>Bannlysningar: <green>%bans%<dark_green>     Vänorter: <green>%twins%"
+      openPublic: "<dark_green>Öppen: <green>%open%<dark_green>     Offentlig: <green>%public%"
+      founded: "<dark_green>Grundades: <green>%founded% av %by%"
+      balance: "<dark_green>Stadskassa: <green>%balance% minemynt"
+      tax: "<dark_green>Skattesats: <green>%tax%%<dark_green>, betalas av <green>%payedBy%"
+      stateTax: "<dark_green>Stadsskatt: <green>%tax% minemynt"
+      maxPlotsPerMember: "<dark_green>Max tomter per medlem: <green>%maxplots%"
+      minChunkDistance: "<dark_green>Gräns till andra markbitar: <green>%distance% block"
+      minSpawnDistance: "<dark_green>Gräns till andra startpunkter: <green>%distance% block"
+      spawnpoint: "<dark_green>Startpunkt: <green>%spawnpoint%"
+      mayors: "<dark_green>Borgmästare (<green>%count%<dark_green>): <green>%mayors%"
+      viceMayors: "<dark_green>Vice borgmästare (<green>%count%<dark_green>): <green>%vicemayors%"
+      assistants: "<dark_green>Assistenter (<green>%count%<dark_green>): <green>%assistants%"
+      inbjudare: "<dark_green>Inbjudare (<green>%count%<dark_green>): <green>%inviters%"
+      reserve: "<yellow>Staden är ett naturreservat. Om du vill ta över den kostar det %cost% minemynt. Kontakta en administratör för mer information."
+      roles:
+        member: "medlemmar"
+        inviter: "inbjudare"
+        assistant: "assistenter"
+        vicemayor: "vice borgmästare"
+        mayor: "borgmästare"
+        none: "ingen"
     broadcast: "<yellow>%cityname% <gray>| <gold>%message%"
     kick:
       kickedOthers: "<yellow>%cityname% <gray>| <yellow>%playername% har blivit sparkad från staden."
@@ -397,6 +436,8 @@ messages:
       assistant: "Assistent"
       vicemayor: "Vice borgmästare"
       mayor: "Borgmästare"
+      all: "Alla"
+      none: "Ingen"
     ban:
       others: "<yellow>%cityname% <gray>| <yellow>Spelaren %player% har blivit bannlyst från staden."
       playerBanned: "<yellow>%cityname% <gray>| <red>Du har blivit bannlyst från staden i %length%, med anledningen: %reason%."
@@ -437,9 +478,15 @@ messages:
     invite:
       invited: "<yellow>%cityname% <gray>| <yellow>%player% har blivit inbjuden till staden av %inviter%."
       inviteMessage: "<hover:show_text:'<green>/city join %cityname%'><click:run_command:/city join %cityname%><yellow>%cityname% <gray>| <green>Du har blivit inbjuden till staden av %inviter%.</click></hover>\n<hover:show_text:'<green>/city join %cityname%'><click:run_command:/city join %cityname%><green>Skriv /city join %cityname% för att gå med, eller <dark_green><underlined>Klicka här >>"
-    enter: "<yellow>%cityname% <gray>|<aqua> %enter%"
-    exit: "<yellow>%cityname% <gray>|<aqua> %exit%"
-    motd: "<yellow>%cityname% <gray>|<yellow> %motd%"
+    enter:
+        normal: "<yellow>%cityname% <gray>|<aqua> %enter%"
+        reserve: "<yellow>%cityname% <light_purple>-- Naturreservat <gray>|<aqua> %enter%"
+    exit:
+      normal: "<yellow>%cityname% <gray>|<aqua> %exit%"
+      reserve: "<yellow>%cityname% <light_purple>-- Naturreservat <gray>|<aqua> %exit%"
+    motd:
+      normal: "<yellow>%cityname% <gray>|<yellow> %motd%"
+      reserve: "<yellow>%cityname% <light_purple>-- Naturreservat <gray>|<yellow> %motd%"
     balance: "<yellow>%cityname% <gray>|<green> Stadskassa: %balance% minemynt."
     price: "<dark_green>--- <green>Prislista städer <dark_green>--- \n<dark_green>Ny stad: <green>%city% minemynt\n<dark_green>Överta markbit: <green>%chunk% minemynt\n<dark_green>Bonusmarkbit: <green>%bonus% minemynt\n<dark_green>Stadsteleporteringspunkt: <green>%go% minemynt\n<dark_green>Utpost: <green>%outpost% minemynt"
     markings:
@@ -462,6 +509,10 @@ messages:
       owner: "<dark_green><bold>Ägare:"
       price: "<dark_green><bold>Till salu:"
     successful:
+      taxCollected: "<aqua>Dags att betala skatt! :)"
+      taxLevel:
+        removed: "<yellow>%cityname% <gray>| <green>Ingen betalar skatt längre. (yippie!)"
+        set: "<yellow>%cityname% <gray>| <green>Skattebetalning sker nu av %role% och nedåt."
       maxPlotsPerMember:
         removed: "<yellow>%cityname% <gray>| <green>Maxgränsen för antal tomter per medlem har tagits bort."
         set: "<yellow>%cityname% <gray>| <green>Maxgränsen för antal tomter per medlem har ändrats till %amount%."

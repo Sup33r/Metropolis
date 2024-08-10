@@ -27,6 +27,7 @@ settings:
     invite: 180
     namechange: 2592000
   city:
+    statetax: 4
     creationcost: 500000
     startingbalance: 200000
     gocost: 5000
@@ -36,3 +37,4 @@ settings:
     citygocost: 10000
     outpostcost: 15000
     districtcost: 10000
+    startingtaxlevel: "mayor"

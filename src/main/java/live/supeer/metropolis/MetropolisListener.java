@@ -87,8 +87,14 @@ public class MetropolisListener implements Listener {
             for (City city : memberCities) {
                 String cityMotd = city.getMotdMessage();
                 if (cityMotd != null) {
-                    plugin.sendMessage(
-                            player, "messages.city.motd", "%cityname%", city.getCityName(), "%motd%", cityMotd);
+                    if (city.isReserve()) {
+                        plugin.sendMessage(player, "messages.city.motd.reserve", "%cityname%", city.getCityName(), "%motd%", cityMotd);
+                    } else {
+                        plugin.sendMessage(player, "messages.city.motd.normal", "%cityname%", city.getCityName(), "%motd%", cityMotd);
+                    }
+                }
+                if (city.cityCouldGoUnder(1)) {
+                    plugin.sendMessage(player, "messages.city.warning.lowBalance", "%cityname%", city.getCityName());
                 }
             }
         }

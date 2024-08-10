@@ -77,13 +77,15 @@ public class CityDatabase {
 
     public static City newCity(String cityName, Player player) {
         try {
-            DB.executeUpdate("INSERT INTO `mp_cities` (`cityName`, `originalMayorUUID`, `originalMayorName`, `cityBalance`, `citySpawn`, `createDate`) VALUES (" +
+            DB.executeUpdate("INSERT INTO `mp_cities` (`cityName`, `originalMayorUUID`, `originalMayorName`, `cityBalance`, `citySpawn`, `createDate`, `taxLevel`) VALUES (" +
                     Database.sqlString(cityName) + ", " +
                     Database.sqlString(player.getUniqueId().toString()) + ", " +
                     Database.sqlString(player.getName()) + ", " +
                     Metropolis.configuration.getCityStartingBalance() + ", " +
                     Database.sqlString(LocationUtil.locationToString(player.getLocation())) + ", " +
-                    DateUtil.getTimestamp() + ");");
+                    DateUtil.getTimestamp() + ", " +
+                    Database.sqlString(Metropolis.configuration.getStartingTaxLevel()) +
+                    ");");
 
             City city = new City(DB.getFirstRow("SELECT * FROM `mp_cities` WHERE `cityName` = " + Database.sqlString(cityName) + ";"));
             cities.add(city);
@@ -387,6 +389,28 @@ public class CityDatabase {
         }
         return null;
     }
+
+    public static void drawTaxes() {
+        for (City city : cities) {
+            city.drawCityTaxes();
+            city.drawStateTaxes();
+            if (city.hasNegativeBalance()) {
+                if (city.canBecomeReserve()) {
+                    city.setAsNotReserve();
+                    for (Player player : Bukkit.getOnlinePlayers()) {
+                        plugin.sendMessage(player, "messages.city.becameReserve","%cityname%" , city.getCityName());
+                    }
+                } else {
+                    for (Player player : Bukkit.getOnlinePlayers()) {
+                        plugin.sendMessage(player, "messages.city.wentUnder","%cityname%" , city.getCityName());
+                    }
+                    deleteCity(city);
+                }
+            }
+        }
+    }
+
+
 
 
     public static Role getCityRole(City city, String playerUUID) {

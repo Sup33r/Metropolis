@@ -10,6 +10,12 @@ import java.util.regex.Pattern;
 public class DateUtil {
     public static Metropolis plugin;
 
+    public static String getMonthName(int month) {
+        String[] months = {"january", "february", "march", "april", "may", "june",
+                "july", "august", "september", "october", "november", "december"};
+        return months[month];
+    }
+
     private static final Pattern timePattern = Pattern.compile("(?:([0-9]+)\\s*y[a-z]*[,\\s]*)?" + "(?:([0-9]+)\\s*mo[a-z]*[,\\s]*)?" + "(?:([0-9]+)\\s*w[a-z]*[,\\s]*)?" + "(?:([0-9]+)\\s*d[a-z]*[,\\s]*)?" + "(?:([0-9]+)\\s*h[a-z]*[,\\s]*)?" + "(?:([0-9]+)\\s*m[a-z]*[,\\s]*)?" + "(?:([0-9]+)\\s*(?:s[a-z]*)?)?", Pattern.CASE_INSENSITIVE);
     private static final int maxYears = 100000;
 
@@ -258,5 +264,20 @@ public class DateUtil {
                 + String.format("%02d", date.get(Calendar.HOUR_OF_DAY))
                 + ":"
                 + String.format("%02d", date.get(Calendar.MINUTE));
+    }
+
+    public static String formatDate(long timestamp) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(timestamp * 1000L); // Convert seconds to milliseconds
+
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        int month = calendar.get(Calendar.MONTH);
+        int year = calendar.get(Calendar.YEAR);
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        int minute = calendar.get(Calendar.MINUTE);
+
+        String monthName = plugin.getMessage("messages.months." + DateUtil.getMonthName(month).toLowerCase());
+
+        return String.format("%d %s %d, %02d:%02d", day, monthName, year, hour, minute);
     }
 }

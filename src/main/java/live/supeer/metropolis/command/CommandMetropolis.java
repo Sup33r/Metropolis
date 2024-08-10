@@ -3,19 +3,106 @@ package live.supeer.metropolis.command;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.CommandAlias;
 import co.aikar.commands.annotation.Default;
+import co.aikar.commands.annotation.Optional;
 import co.aikar.commands.annotation.Subcommand;
+import live.supeer.metropolis.Database;
 import live.supeer.metropolis.Metropolis;
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.city.CityDatabase;
+import live.supeer.metropolis.city.Role;
+import live.supeer.metropolis.utils.Utilities;
 import org.bukkit.entity.Player;
+
+import java.util.Arrays;
 
 @CommandAlias("metropolis | mp")
 public class CommandMetropolis extends BaseCommand {
     public static Metropolis plugin;
 
+    @Subcommand("taxcollect")
+    public void onTaxCollect(Player player) {
+        if (player.hasPermission("metropolis.admin.taxcollect")) {
+            CityDatabase.drawTaxes();
+            for (Player players : plugin.getServer().getOnlinePlayers()) {
+                plugin.sendMessage(players, "messages.city.successful.taxCollected");
+            }
+        } else {
+            plugin.sendMessage(player, "messages.error.permissionDenied");
+        }
+    }
+
 
     @Subcommand("city")
     public class City extends BaseCommand {
+
+
+        @Subcommand("balance")
+        public void onCityBalance(Player player, String cityName, @Optional String argument) {
+            if (player.hasPermission("metropolis.admin.city.balance")) {
+                live.supeer.metropolis.city.City city = CityDatabase.getCity(cityName).get();
+                if (CityDatabase.getCity(cityName).isEmpty()) {
+                    plugin.sendMessage(player, "messages.error.city.notFound");
+                    return;
+                }
+                if (argument == null) {
+                    plugin.sendMessage(player,"messages.syntax.admin.balance");
+                    return;
+                }
+                if (argument.startsWith("+")) {
+                    if (argument.substring(1).replaceAll("[0-9]", "").matches("[^0-9]")
+                            || argument.length() == 1) {
+                        plugin.sendMessage(player, "messages.syntax.admin.balance");
+                        return;
+                    }
+                    int inputBalance = Integer.parseInt(argument.replaceAll("[^0-9]", ""));
+                    CityDatabase.addCityBalance(city, inputBalance);
+                    Database.addLogEntry(
+                            city,
+                            "{ \"type\": \"cityBank\", \"subtype\": \"deposit\", \"balance\": "
+                                    + inputBalance
+                                    + ", \"player\": "
+                                    + player.getUniqueId().toString()
+                                    + " }");
+                    plugin.sendMessage(
+                            player,
+                            "messages.city.successful.deposit",
+                            "%amount%",
+                            Utilities.formattedMoney(inputBalance),
+                            "%cityname%",
+                            cityName);
+                    return;
+                }
+                if (argument.startsWith("-")) {
+                    if (argument.substring(1).replaceAll("[0-9]", "").matches("[^0-9]")
+                            || argument.length() == 1) {
+                        plugin.sendMessage(player, "messages.syntax.admin.balance");
+                        return;
+                    }
+                    int inputBalance = Integer.parseInt(argument.replaceAll("[^0-9]", ""));
+                    String inputBalanceFormatted = Utilities.formattedMoney(inputBalance);
+                    int cityBalance = city.getCityBalance();
+                    CityDatabase.removeCityBalance(city, inputBalance);
+                    Database.addLogEntry(
+                            city,
+                            "{ \"type\": \"cityBank\", \"subtype\": \"withdraw\", \"balance\": "
+                                    + inputBalance
+                                    + ", \"player\": "
+                                    + player.getUniqueId().toString()
+                                    + "\" }");
+                    plugin.sendMessage(
+                            player,
+                            "messages.city.successful.withdraw",
+                            "%amount%",
+                            inputBalanceFormatted,
+                            "%cityname%",
+                            city.getCityName());
+                    return;
+                }
+                plugin.sendMessage(player, "messages.syntax.admin.balance");
+            } else {
+                plugin.sendMessage(player, "messages.error.permissionDenied");
+            }
+        }
 
 
         @Subcommand("set")

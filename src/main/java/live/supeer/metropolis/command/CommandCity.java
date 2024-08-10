@@ -65,7 +65,114 @@ public class CommandCity extends BaseCommand {
 
     @Subcommand("info")
     @Default
-    public static void onInfo(Player player, @Optional String cityName) {}
+    public static void onInfo(Player player, @Optional String cityName) {
+        City city;
+        if (cityName == null) {
+            if (HCDatabase.hasHomeCity(player.getUniqueId().toString())) {
+                plugin.sendMessage(player, "messages.error.missing.homeCity");
+                return;
+            }
+            city = HCDatabase.getHomeCityToCity(player.getUniqueId().toString());
+            if (city == null) {
+                plugin.sendMessage(player, "messages.error.missing.city");
+                return;
+            }
+
+            // Get the list of cities the player is a member of
+            List<City> memberCities = CityDatabase.memberCityList(player.getUniqueId().toString());
+
+            // Create the formatted string
+            StringBuilder cityList = new StringBuilder();
+            int size = memberCities.size();
+
+            if (size == 1) {
+                cityList.append(memberCities.get(0).getCityName());
+            } else if (size == 2) {
+                cityList.append(memberCities.get(0).getCityName())
+                        .append(" & ")
+                        .append(memberCities.get(1).getCityName());
+            } else if (size > 2) {
+                for (int i = 0; i < size; i++) {
+                    if (i == size - 1) {
+                        cityList.append("& ").append(memberCities.get(i).getCityName());
+                    } else if (i == size - 2) {
+                        cityList.append(memberCities.get(i).getCityName()).append(" ");
+                    } else {
+                        cityList.append(memberCities.get(i).getCityName()).append(", ");
+                    }
+                }
+            }
+
+            plugin.sendMessage(player, "messages.city.cityMemberships", "%cities%", cityList.toString());
+            plugin.sendMessage(player,"messages.city.homeCity", "%cityname%", city.getCityName());
+            player.sendMessage("");
+        } else {
+            if (CityDatabase.getCity(cityName).isEmpty()) {
+                plugin.sendMessage(player, "messages.error.missing.city");
+                return;
+            }
+            city = CityDatabase.getCity(cityName).get();
+        }
+        Role role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
+
+
+        plugin.sendMessage(player, "messages.city.cityInfo.header", "%cityname%", city.getCityName(), "%claims%", String.valueOf(city.getCityClaims().size()), "%maxclaims%", String.valueOf(((city.getCityMembers().size() * 20) + city.getBonusClaims())), "%bonus%", String.valueOf(city.getBonusClaims()));
+        if (role != null) {
+            plugin.sendMessage(player, "messages.city.cityInfo.role", "%role%", Objects.requireNonNull(plugin.getMessage("messages.city.roles." + role.getRoleName())).toLowerCase());
+        }
+        if (city.getMotdMessage() != null)  {
+            plugin.sendMessage(player, "messages.city.cityInfo.motd", "%motd%", city.getMotdMessage());
+        }
+        String bans = CityDatabase.getCityBans(city) == null ? "0" : String.valueOf(Objects.requireNonNull(CityDatabase.getCityBans(city)).size());
+        plugin.sendMessage(player, "messages.city.cityInfo.membersPlots", "%members%", String.valueOf(city.getCityMembers().size()), "%plots%", String.valueOf(city.getCityPlots().size()));
+        plugin.sendMessage(player, "messages.city.cityInfo.bansTwins", "%bans%", bans, "%twins%", String.valueOf(city.getTwinCities().size()));
+        String cityOpen = city.isOpen() ? plugin.getMessage("messages.words.yes_word") : plugin.getMessage("messages.words.no_word");
+        String cityPublic = city.isPublic() ? plugin.getMessage("messages.words.yes_word") : plugin.getMessage("messages.words.no_word");
+        String founderName = Bukkit.getOfflinePlayer(UUID.fromString(city.getOriginalMayorUUID())).getName();
+        plugin.sendMessage(player, "messages.city.cityInfo.openPublic", "%open%", cityOpen, "%public%", cityPublic);
+        plugin.sendMessage(player, "messages.city.cityInfo.founded", "%founded%", DateUtil.formatDate(city.getCityCreationDate()), "%by%" , founderName);
+        plugin.sendMessage(player, "messages.city.cityInfo.balance", "%balance%", Utilities.formattedMoney(CityDatabase.getCityBalance(city)));
+        plugin.sendMessage(player, "messages.city.cityInfo.tax", "%tax%", String.valueOf(city.getCityTax()), "%payedBy%", Utilities.taxPayedBy(city.getTaxLevel()));
+        plugin.sendMessage(player, "messages.city.cityInfo.stateTax", "%tax%", String.valueOf(city.getCityClaims().size()*Metropolis.configuration.getStateTax()));
+        plugin.sendMessage(player, "messages.city.cityInfo.maxPlotsPerMember", "%maxplots%", String.valueOf(city.getMaxPlotsPerMember()));
+        plugin.sendMessage(player, "messages.city.cityInfo.minChunkDistance", "%distance%", String.valueOf(city.getMinChunkDistance()));
+        plugin.sendMessage(player, "messages.city.cityInfo.minSpawnDistance", "%distance%", String.valueOf(city.getMinSpawnDistance()));
+        if (city.isPublic() || city.getCityMember(player.getUniqueId().toString()) != null) {
+            plugin.sendMessage(player, "messages.city.cityInfo.spawnpoint", "%spawnpoint%", LocationUtil.formatLocation(city.getCitySpawn()));
+        }
+        List<String> mayors = new ArrayList<>();
+        List<String> viceMayors = new ArrayList<>();
+        List<String> assistants = new ArrayList<>();
+        List<String> inviters = new ArrayList<>();
+        for (Member member : city.getCityMembers()) {
+            Role memberRole = CityDatabase.getCityRole(city, member.getPlayerUUID());
+            if (memberRole == Role.MAYOR) {
+                mayors.add(Bukkit.getOfflinePlayer(UUID.fromString(member.getPlayerUUID())).getName());
+            } else if (memberRole == Role.VICE_MAYOR) {
+                viceMayors.add(Bukkit.getOfflinePlayer(UUID.fromString(member.getPlayerUUID())).getName());
+            } else if (memberRole == Role.ASSISTANT) {
+                assistants.add(Bukkit.getOfflinePlayer(UUID.fromString(member.getPlayerUUID())).getName());
+            } else if (memberRole == Role.INVITER) {
+                inviters.add(Bukkit.getOfflinePlayer(UUID.fromString(member.getPlayerUUID())).getName());
+            }
+        }
+        if (!mayors.isEmpty()) {
+            plugin.sendMessage(player, "messages.city.cityInfo.mayors","%count%",String.valueOf(mayors.size()), "%mayors%", Utilities.formatStringList(mayors));
+        }
+        if (!viceMayors.isEmpty()) {
+            plugin.sendMessage(player, "messages.city.cityInfo.viceMayors","%count%",String.valueOf(viceMayors.size()), "%vicemayors%", Utilities.formatStringList(viceMayors));
+        }
+        if (!assistants.isEmpty()) {
+            plugin.sendMessage(player, "messages.city.cityInfo.assistants","%count%",String.valueOf(assistants.size()), "%assistants%", Utilities.formatStringList(assistants));
+        }
+        if (!inviters.isEmpty()) {
+            plugin.sendMessage(player, "messages.city.cityInfo.inviters","%count%",String.valueOf(inviters.size()), "%inviters%", Utilities.formatStringList(inviters));
+        }
+        player.sendMessage("");
+        if (city.isReserve()) {
+            plugin.sendMessage(player, "messages.city.cityInfo.reserve", "%cost%", Utilities.formattedMoney(city.calculateCost()));
+        }
+    }
 
     @Subcommand("bank")
     public static void onBank(Player player, @Optional String[] args) {
@@ -82,6 +189,10 @@ public class CommandCity extends BaseCommand {
             City city = HCDatabase.getHomeCityToCity(player.getUniqueId().toString());
             if (city == null) {
                 plugin.sendMessage(player, "messages.error.missing.city");
+                return;
+            }
+            if (city.isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
                 return;
             }
             String cityBalance = Utilities.formattedMoney(CityDatabase.getCityBalance(city));
@@ -105,7 +216,10 @@ public class CommandCity extends BaseCommand {
                 return;
             }
             City city = CityDatabase.getCity(cityName).get();
-
+            if (city.isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
+                return;
+            }
             if (economy.getBalance(player) < inputBalance) {
                 plugin.sendMessage(
                         player, "messages.error.missing.playerBalance", "%cityname%", city.getCityName());
@@ -139,6 +253,10 @@ public class CommandCity extends BaseCommand {
             }
             City city = Utilities.hasCityPermissions(player,"metropolis.city.bank.withdraw", Role.VICE_MAYOR);
             if (city == null) {
+                return;
+            }
+            if (city.isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
                 return;
             }
             int inputBalance = Integer.parseInt(args[0].replaceAll("[^0-9]", ""));
@@ -293,6 +411,10 @@ public class CommandCity extends BaseCommand {
 
         if (city == null) {
             plugin.sendMessage(player, "messages.error.missing.city");
+            return;
+        }
+        if (city.isReserve()) {
+            plugin.sendMessage(player, "messages.error.city.reserve");
             return;
         }
 
@@ -461,6 +583,10 @@ public class CommandCity extends BaseCommand {
             plugin.sendMessage(player, "messages.error.city.banned");
             return;
         }
+        if (city.isReserve()) {
+            plugin.sendMessage(player, "messages.error.city.reserve");
+            return;
+        }
         if (!city.isOpen() && (!player.hasPermission("metropolis.admin.city.join") || !invites.containsKey(player) || invites.get(player) == null || !invites.get(player).equals(city))) {
             plugin.sendMessage(player, "messages.error.city.closed", "%cityname%", city.getCityName());
             return;
@@ -511,7 +637,10 @@ public class CommandCity extends BaseCommand {
             plugin.sendMessage(player, "messages.error.missing.player");
             return;
         }
-
+        if (city.isReserve()) {
+            plugin.sendMessage(player, "messages.error.city.reserve");
+            return;
+        }
         HashMap<UUID, City> uuidCityHashMap = new HashMap<>() {{put(inviteePlayer.getUniqueId(), city);}};
         if (CityDatabase.memberExists(inviteePlayer.getUniqueId().toString(), city)) {
             plugin.sendMessage(player, "messages.error.city.alreadyInACity");
@@ -629,6 +758,10 @@ public class CommandCity extends BaseCommand {
         if (role == null) {
             plugin.sendMessage(
                     player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
+            return;
+        }
+        if (city.isReserve()) {
+            plugin.sendMessage(player, "messages.error.city.reserve");
             return;
         }
         boolean isInviter = role.equals(Role.INVITER) || role.equals(Role.ASSISTANT) || role.equals(Role.VICE_MAYOR) || role.equals(Role.MAYOR);
@@ -1032,6 +1165,10 @@ public class CommandCity extends BaseCommand {
             if (city == null) {
                 return;
             }
+            if (city.isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
+                return;
+            }
             if (message.equals("-")) {
                 city.setEnterMessage(null);
                 Database.addLogEntry(
@@ -1073,6 +1210,10 @@ public class CommandCity extends BaseCommand {
             if (city == null) {
                 return;
             }
+            if (city.isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
+                return;
+            }
             if (message.equals("-")) {
                 city.setExitMessage(null);
                 Database.addLogEntry(
@@ -1112,6 +1253,10 @@ public class CommandCity extends BaseCommand {
         public static void onMotd(Player player, String message) {
             City city = Utilities.hasCityPermissions(player, "metropolis.city.set.motd", Role.VICE_MAYOR);
             if (city == null) {
+                return;
+            }
+            if (city.isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
                 return;
             }
             if (message.equals("-")) {
@@ -1178,6 +1323,10 @@ public class CommandCity extends BaseCommand {
             if (city == null) {
                 return;
             }
+            if (city.isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
+                return;
+            }
             if (name.isEmpty() || name.length() > Metropolis.configuration.getCityNameLimit()) {
                 plugin.sendMessage(player, "messages.error.city.nameLength","%maxlength%", String.valueOf(Metropolis.configuration.getCityNameLimit()));
                 return;
@@ -1224,6 +1373,10 @@ public class CommandCity extends BaseCommand {
             if (city == null) {
                 return;
             }
+            if (city.isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
+                return;
+            }
             double maxTax = Metropolis.configuration.getCityMaxTax();
             if (tax < 0) {
                 plugin.sendMessage(player, "messages.error.city.tax.invalidAmount", "%max%", String.valueOf(maxTax));
@@ -1253,6 +1406,10 @@ public class CommandCity extends BaseCommand {
         public static void onMaxPlotsPerMember(Player player, String argument) {
             City city = Utilities.hasCityPermissions(player, "metropolis.city.set.maxplotspermember", Role.VICE_MAYOR);
             if (city == null) {
+                return;
+            }
+            if (city.isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
                 return;
             }
             if (argument.equals("-")) {
@@ -1289,6 +1446,56 @@ public class CommandCity extends BaseCommand {
             city.setMaxPlotsPerMember(maxPlotsPerMember);
             plugin.sendMessage(player, "messages.city.successful.maxPlotsPerMember.set", "%cityname%", city.getCityName(), "%amount%", String.valueOf(maxPlotsPerMember));
         }
+
+        @Subcommand("taxlevel")
+        @CommandCompletion("@taxLevel")
+        public static void onTaxLevel(Player player, String argument) {
+            City city = Utilities.hasCityPermissions(player, "metropolis.city.set.taxlevel", Role.VICE_MAYOR);
+            if (city == null) {
+                return;
+            }
+            if (city.isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
+                return;
+            }
+            if (argument.equals("-")) {
+                city.setTaxLevel(null);
+                Database.addLogEntry(
+                        city,
+                        "{ \"type\": \"set\", \"subtype\": \"taxLevel\", \"from\": "
+                                + city.getTaxLevel()
+                                + ", \"to\": "
+                                + "none"
+                                + ", \"player\": "
+                                + player.getUniqueId().toString()
+                                + " }");
+                plugin.sendMessage(player, "messages.city.successful.taxLevel.removed", "%cityname%", city.getCityName());
+                return;
+            }
+            if (!argument.equals("member") && !argument.equals("inviter") && !argument.equals("assistant") && !argument.equals("vicemayor") && !argument.equals("mayor") && !argument.equals("all")) {
+                plugin.sendMessage(player, "messages.error.city.taxlevel.invalidRole");
+                return;
+            }
+            String role;
+            if (argument.equals("all")) {
+                argument = "mayor";
+                role = plugin.getMessage("messages.city.roles.mayor");
+            } else {
+                role = plugin.getMessage("messages.city.roles." + argument);
+            }
+            argument = argument.toLowerCase();
+            Database.addLogEntry(
+                    city,
+                    "{ \"type\": \"set\", \"subtype\": \"taxLevel\", \"from\": "
+                            + city.getTaxLevel()
+                            + ", \"to\": "
+                            + argument
+                            + ", \"player\": "
+                            + player.getUniqueId().toString()
+                            + " }");
+            city.setTaxLevel(Role.fromString(argument));
+            plugin.sendMessage(player, "messages.city.successful.taxLevel.set", "%cityname%", city.getCityName(), "%role%", role);
+        }
     }
 
     @Subcommand("buy")
@@ -1310,6 +1517,10 @@ public class CommandCity extends BaseCommand {
         public static void onBonus(Player player, int count) {
             City city = Utilities.hasCityPermissions(player, "metropolis.city.buy.bonus", Role.VICE_MAYOR);
             if (city == null) {
+                return;
+            }
+            if (city.isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
                 return;
             }
             if (count < 1) {
@@ -1345,6 +1556,10 @@ public class CommandCity extends BaseCommand {
         public static void onDistrict(Player player, String name) {
             City city = Utilities.hasCityPermissions(player, "metropolis.city.buy.district", Role.VICE_MAYOR);
             if (city == null) {
+                return;
+            }
+            if (city.isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
                 return;
             }
             final String regex = "[^\\p{L}_\\\\\\-]+";
@@ -1439,6 +1654,10 @@ public class CommandCity extends BaseCommand {
             if (city == null) {
                 return;
             }
+            if (city.isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
+                return;
+            }
             final String regex = "[^\\p{L}_0-9\\\\-]+";
             final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
             final Matcher matcher = pattern.matcher(name);
@@ -1485,6 +1704,10 @@ public class CommandCity extends BaseCommand {
         public static void onOutpost(Player player) {
             City city = Utilities.hasCityPermissions(player, "metropolis.city.buy.outpost", Role.VICE_MAYOR);
             if (city == null) {
+                return;
+            }
+            if (city.isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
                 return;
             }
             if (city.getCityBalance() < Metropolis.configuration.getCityOutpostCost()) {
@@ -1632,6 +1855,10 @@ public class CommandCity extends BaseCommand {
     public static void onHelpop(Player player, String message) {
         City city = Utilities.hasCityPermissions(player, "metropolis.city.helpop", Role.MEMBER);
         if (city == null) {
+            return;
+        }
+        if (city.isReserve()) {
+            plugin.sendMessage(player, "messages.error.city.reserve");
             return;
         }
         if (message.length() < 5) {
@@ -1822,6 +2049,10 @@ public class CommandCity extends BaseCommand {
         if (city == null) {
             return;
         }
+        if (city.isReserve()) {
+            plugin.sendMessage(player, "messages.error.city.reserve");
+            return;
+        }
         List<Ban> bannedPlayers = CityDatabase.getCityBans(city);
         if (playerName == null && args == null) {
             if (bannedPlayers == null || bannedPlayers.isEmpty()) {
@@ -1920,6 +2151,10 @@ public class CommandCity extends BaseCommand {
     public static void onRank(Player player , String playerName, String rank) {
         City city = Utilities.hasCityPermissions(player, "metropolis.city.rank", Role.VICE_MAYOR);
         if (city == null) {
+            return;
+        }
+        if (city.isReserve()) {
+            plugin.sendMessage(player, "messages.error.city.reserve");
             return;
         }
         Role role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
@@ -2042,6 +2277,10 @@ public class CommandCity extends BaseCommand {
             if (city == null) {
                 return;
             }
+            if (city.isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
+                return;
+            }
             if (city.toggleOpen()) {
                 plugin.sendMessage(player, "messages.city.toggle.open", "%cityname%", city.getCityName());
                 Database.addLogEntry(city, "{ \"type\": \"city\", \"subtype\": \"toggleOpen\", \"state\": \"open\", \"player\": \"" + player.getUniqueId().toString() + "\" }");
@@ -2055,6 +2294,10 @@ public class CommandCity extends BaseCommand {
         public static void onPublic(Player player) {
             City city = Utilities.hasCityPermissions(player, "metropolis.city.toggle.public", Role.VICE_MAYOR);
             if (city == null) {
+                return;
+            }
+            if (city.isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
                 return;
             }
             if (city.togglePublic()) {
@@ -2187,6 +2430,10 @@ public class CommandCity extends BaseCommand {
             if (city == null) {
                 return;
             }
+            if (city.isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
+                return;
+            }
             List<live.supeer.metropolis.city.District> districtList = CityDatabase.getDistricts(city);
             if (districtList.isEmpty()) {
                 plugin.sendMessage(player, "messages.error.city.district.none");
@@ -2252,6 +2499,10 @@ public class CommandCity extends BaseCommand {
         public static void onDelete(Player player) {
             City city = Utilities.hasCityPermissions(player, "metropolis.city.district.delete", Role.VICE_MAYOR);
             if (city == null) {
+                return;
+            }
+            if (city.isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
                 return;
             }
             live.supeer.metropolis.city.District district = CityDatabase.getDistrict(player.getLocation().toBlockLocation());
@@ -2324,6 +2575,10 @@ public class CommandCity extends BaseCommand {
             if (city == null) {
                 return;
             }
+            if (city.isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
+                return;
+            }
             if (subcommand.equalsIgnoreCase("name")) {
                 live.supeer.metropolis.city.District district = CityDatabase.getDistrict(player.getLocation().toBlockLocation());
                 if (district == null) {
@@ -2349,6 +2604,10 @@ public class CommandCity extends BaseCommand {
         public static void onUpdate(Player player) {
             City city = Utilities.hasCityPermissions(player, "metropolis.city.update.district", Role.VICE_MAYOR);
             if (city == null) {
+                return;
+            }
+            if (city.isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
                 return;
             }
             live.supeer.metropolis.city.District district = CityDatabase.getDistrict(player.getLocation().toBlockLocation());
@@ -2428,6 +2687,10 @@ public class CommandCity extends BaseCommand {
         if (city == null) {
             return;
         }
+        if (city.isReserve()) {
+            plugin.sendMessage(player, "messages.error.city.reserve");
+            return;
+        }
         Claim claim = CityDatabase.getClaim(player.getLocation());
         if (claim == null || !claim.getCity().equals(city)) {
             plugin.sendMessage(player, "messages.error.city.notInClaim", "%cityname%", city.getCityName());
@@ -2467,6 +2730,10 @@ public class CommandCity extends BaseCommand {
         if (city == null) {
             return;
         }
+        if (city.isReserve()) {
+            plugin.sendMessage(player, "messages.error.city.reserve");
+            return;
+        }
 
         plugin.sendMessage(player, "messages.city.delete.confirmation", "%cityname%", city.getCityName());
     }
@@ -2476,6 +2743,10 @@ public class CommandCity extends BaseCommand {
     public static void onDeleteConfirm(Player player) {
         City city = Utilities.hasCityPermissions(player, "metropolis.city.delete", Role.MAYOR);
         if (city == null) {
+            return;
+        }
+        if (city.isReserve()) {
+            plugin.sendMessage(player, "messages.error.city.reserve");
             return;
         }
         Metropolis.playerInCity.remove(player.getUniqueId(), city);
@@ -2547,6 +2818,10 @@ public class CommandCity extends BaseCommand {
             if (city == null) {
                 return;
             }
+            if (city.isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
+                return;
+            }
             List<City> twinCities = city.getTwinCities();
             if (twinCities.isEmpty()) {
                 plugin.sendMessage(player, "messages.error.city.twin.none");
@@ -2609,6 +2884,10 @@ public class CommandCity extends BaseCommand {
         if (city == null) {
             return;
         }
+        if (city.isReserve()) {
+            plugin.sendMessage(player, "messages.error.city.reserve");
+            return;
+        }
         Role role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
         assert role != null;
         OfflinePlayer targetPlayer = Bukkit.getOfflinePlayer(playerName);
@@ -2664,6 +2943,10 @@ public class CommandCity extends BaseCommand {
     public static void onBroadcast(Player player, String message) {
         City city = Utilities.hasCityPermissions(player, "metropolis.city.broadcast", Role.ASSISTANT);
         if (city == null) {
+            return;
+        }
+        if (city.isReserve()) {
+            plugin.sendMessage(player, "messages.error.city.reserve");
             return;
         }
         for (Member member : city.getCityMembers()) {

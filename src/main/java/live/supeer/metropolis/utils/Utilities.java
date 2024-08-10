@@ -262,11 +262,18 @@ public class Utilities {
                 && currentChar != 'v';
     }
 
+    private static String getFormattedTitle(String cityName) {
+        int nameLength = cityName.length();
+        int spaces = Math.max(5, 15 - (nameLength - 4));
+        String spaceString = " ".repeat(spaces);
+        return "§a" + spaceString + "§l" + cityName + "§r" + spaceString;
+    }
+
     public static void sendCityScoreboard(Player player, City city, Plot plot) {
         District district = Metropolis.playerInDistrict.get(player.getUniqueId());
         FastBoard board = new FastBoard(player);
         int i = 0;
-        board.updateTitle("§a             §l" + city.getCityName() + "§r             ");
+        board.updateTitle(getFormattedTitle(city.getCityName()));
         board.updateLine(i, " ");
         i = i + 1;
         if (district != null) {
@@ -572,6 +579,52 @@ public class Utilities {
         }
 
         return false;
+    }
+
+    public static String taxPayedBy(String role) {
+        switch (role) {
+            case "mayor":
+                return plugin.getMessage("messages.city.cityInfo.roles.mayor") + ", " + plugin.getMessage("messages.city.cityInfo.roles.vicemayor") + ", " + plugin.getMessage("messages.city.cityInfo.roles.assistant") + ", " + plugin.getMessage("messages.city.cityInfo.roles.inviter") + " " + plugin.getMessage("messages.words.and") + " " + plugin.getMessage("messages.city.cityInfo.roles.member");
+            case "vicemayor":
+                return plugin.getMessage("messages.city.cityInfo.roles.vicemayor") + ", " + plugin.getMessage("messages.city.cityInfo.roles.assistant") + ", " + plugin.getMessage("messages.city.cityInfo.roles.inviter") + " " + plugin.getMessage("messages.words.and") + " " + plugin.getMessage("messages.city.cityInfo.roles.member");
+            case "assistant":
+                return plugin.getMessage("messages.city.cityInfo.roles.assistant") + ", " + plugin.getMessage("messages.city.cityInfo.roles.inviter") + " " + plugin.getMessage("messages.words.and") + " " + plugin.getMessage("messages.city.cityInfo.roles.member");
+            case "inviter":
+                return plugin.getMessage("messages.city.cityInfo.roles.inviter") + " " + plugin.getMessage("messages.words.and") + " " + plugin.getMessage("messages.city.cityInfo.roles.member");
+            case "none":
+                return plugin.getMessage("messages.city.cityInfo.roles.none");
+            default:
+                return plugin.getMessage("messages.city.cityInfo.roles.member");
+        }
+    }
+
+    public static String formatStringList(List<String> items) {
+        if (items == null || items.isEmpty()) {
+            return "";
+        }
+
+        int size = items.size();
+
+        if (size == 1) {
+            return items.get(0);
+        }
+
+        if (size == 2) {
+            return String.format("%s & %s", items.get(0), items.get(1));
+        }
+
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < size - 1; i++) {
+            result.append(items.get(i));
+            if (i < size - 2) {
+                result.append(", ");
+            } else {
+                result.append(" & ");
+            }
+        }
+        result.append(items.get(size - 1));
+
+        return result.toString();
     }
 
 }

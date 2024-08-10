@@ -21,6 +21,7 @@ public class MetropolisConfiguration {
     private final int inviteCooldown;
     private final int nameChangeCooldown;
     private final String maxBanTime;
+    private final String startingTaxLevel;
 
     private final int cityNameLimit;
     private final int cityGoNameLimit;
@@ -31,6 +32,7 @@ public class MetropolisConfiguration {
     private final int plotNameLimit;
     private final int districtNameLimit;
     private final int maxAmountOfPlots;
+    private final int stateTax;
 
     private final int minChunkDistance;
     private final int minSpawnDistance;
@@ -57,6 +59,8 @@ public class MetropolisConfiguration {
         districtCreationCost = plugin.getConfig().getInt("settings.city.districtcost");
         nameChangeCooldown = plugin.getConfig().getInt("settings.cooldownTime.namechange");
         maxBanTime = plugin.getConfig().getString("settings.limits.maxbantime");
+        startingTaxLevel = plugin.getConfig().getString("settings.city.startingtaxlevel");
+        stateTax = plugin.getConfig().getInt("settings.city.statetax");
 
         cityNameLimit = plugin.getConfig().getInt("settings.limits.cityname");
         cityGoDisplayNameLimit = plugin.getConfig().getInt("settings.limits.citygodisplayname");

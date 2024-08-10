@@ -71,6 +71,10 @@ public class CommandPlot extends BaseCommand {
         if (city == null) {
             return;
         }
+        if (city.isReserve()) {
+            plugin.sendMessage(player, "messages.error.city.reserve");
+            return;
+        }
         if (!MetropolisListener.playerPolygons.containsKey(player.getUniqueId())) {
             plugin.sendMessage(player, "messages.error.missing.plot");
             return;
@@ -164,16 +168,6 @@ public class CommandPlot extends BaseCommand {
         }
     }
 
-    @Subcommand("get")
-    public static void onGet(Player player) {
-        Plot plot = PlotDatabase.getPlotAtLocation(player.getLocation().toBlockLocation());
-        if (plot == null) {
-            plugin.sendMessage(player, "messages.error.plot.notInPlot");
-            return;
-        }
-        player.sendMessage(plot.getPlotName());
-    }
-
     @Subcommand("expand")
     public static void onExpand(Player player, String[] args) {
         if (!player.hasPermission("metropolis.plot.expand")) {
@@ -249,6 +243,10 @@ public class CommandPlot extends BaseCommand {
         if (plot == null) {
             return;
         }
+        if (plot.getCity().isReserve()) {
+            plugin.sendMessage(player, "messages.error.city.reserve");
+            return;
+        }
         Database.addLogEntry(plot.getCity(),
                 "{ \"type\": \"delete\", \"subtype\": \"plot\", \"id\": "
                         + plot.getPlotId()
@@ -271,6 +269,10 @@ public class CommandPlot extends BaseCommand {
     public static void onLeave(Player player) {
         Plot plot = Utilities.hasPlotPermissions(player, "metropolis.plot.leave", null, true);
         if (plot == null) {
+            return;
+        }
+        if (plot.getCity().isReserve()) {
+            plugin.sendMessage(player, "messages.error.city.reserve");
             return;
         }
         plot.removePlotOwner();
@@ -296,6 +298,10 @@ public class CommandPlot extends BaseCommand {
     public static void onMarket(Player player, String arg) {
         Plot plot = Utilities.hasPlotPermissions(player, "metropolis.plot.market", Role.INVITER, true);
         if (plot == null) {
+            return;
+        }
+        if (plot.getCity().isReserve()) {
+            plugin.sendMessage(player, "messages.error.city.reserve");
             return;
         }
         if (arg.equals("-")) {
@@ -574,6 +580,10 @@ public class CommandPlot extends BaseCommand {
         if (plot == null) {
             return;
         }
+        if (plot.getCity().isReserve()) {
+            plugin.sendMessage(player, "messages.error.city.reserve");
+            return;
+        }
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(sharePlayer);
         if (!offlinePlayer.hasPlayedBefore()) {
             plugin.sendMessage(player, "messages.error.player.notFound");
@@ -642,9 +652,12 @@ public class CommandPlot extends BaseCommand {
         if (city == null) {
             return;
         }
-
         Plot plot = PlotDatabase.getPlotAtLocation(player.getLocation());
         if (plot == null) {
+            return;
+        }
+        if (plot.getCity().isReserve()) {
+            plugin.sendMessage(player, "messages.error.city.reserve");
             return;
         }
         Role role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
@@ -938,6 +951,10 @@ public class CommandPlot extends BaseCommand {
             if (plot == null) {
                 return;
             }
+            if (plot.getCity().isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
+                return;
+            }
             boolean isMayor = Objects.equals(CityDatabase.getCityRole(plot.getCity(), player.getUniqueId().toString()), Role.MAYOR);
             if (plot.isKMarked() && isMayor) {
                 plugin.sendMessage(
@@ -1001,6 +1018,10 @@ public class CommandPlot extends BaseCommand {
         public static void onType(Player player, String type) {
             Plot plot = Utilities.hasPlotPermissions(player, "metropolis.plot.set.type", Role.ASSISTANT, false);
             if (plot == null) {
+                return;
+            }
+            if (plot.getCity().isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
                 return;
             }
             Role role = CityDatabase.getCityRole(plot.getCity(), player.getUniqueId().toString());
@@ -1381,6 +1402,10 @@ public class CommandPlot extends BaseCommand {
             if (plot == null) {
                 return;
             }
+            if (plot.getCity().isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
+                return;
+            }
             Role role = CityDatabase.getCityRole(plot.getCity(), player.getUniqueId().toString());
             assert role != null;
             boolean isMayor = role.equals(Role.MAYOR);
@@ -1454,6 +1479,10 @@ public class CommandPlot extends BaseCommand {
         public static void onRent(Player player, String rent) {
             Plot plot = Utilities.hasPlotPermissions(player, "metropolis.plot.set.rent", Role.ASSISTANT, false);
             if (plot == null) {
+                return;
+            }
+            if (plot.getCity().isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
                 return;
             }
             City city = plot.getCity();
@@ -1566,6 +1595,10 @@ public class CommandPlot extends BaseCommand {
             if (plot == null) {
                 return;
             }
+            if (plot.getCity().isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
+                return;
+            }
             City city = plot.getCity();
             if (plot.hasFlag('p')) {
                 Database.addLogEntry(
@@ -1631,6 +1664,10 @@ public class CommandPlot extends BaseCommand {
         public static void onAnimals(Player player) {
             Plot plot = Utilities.hasPlotPermissions(player, "metropolis.plot.toggle.animals", Role.ASSISTANT, false);
             if (plot == null) {
+                return;
+            }
+            if (plot.getCity().isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
                 return;
             }
             City city = plot.getCity();
@@ -1708,6 +1745,10 @@ public class CommandPlot extends BaseCommand {
             if (plot == null) {
                 return;
             }
+            if (plot.getCity().isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
+                return;
+            }
             City city = plot.getCity();
             Role role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
             assert role != null;
@@ -1781,6 +1822,10 @@ public class CommandPlot extends BaseCommand {
         public static void onMeeting(Player player) {
             Plot plot = Utilities.hasPlotPermissions(player, "metropolis.plot.toggle.meeting", Role.ASSISTANT, false);
             if (plot == null) {
+                return;
+            }
+            if (plot.getCity().isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
                 return;
             }
             City city = plot.getCity();
@@ -1862,6 +1907,10 @@ public class CommandPlot extends BaseCommand {
             if (plot == null) {
                 return;
             }
+            if (plot.getCity().isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
+                return;
+            }
             City city = plot.getCity();
             if (plot.hasFlag('x')) {
                 Database.addLogEntry(
@@ -1931,6 +1980,10 @@ public class CommandPlot extends BaseCommand {
             }
             Plot plot = PlotDatabase.getPlotAtLocation(player.getLocation());
             if (plot == null) {
+                return;
+            }
+            if (plot.getCity().isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
                 return;
             }
             City city = plot.getCity();
@@ -2004,6 +2057,10 @@ public class CommandPlot extends BaseCommand {
             if (plot == null) {
                 return;
             }
+            if (plot.getCity().isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
+                return;
+            }
             City city = plot.getCity();
             if (plot.hasFlag('l')) {
                 Database.addLogEntry(
@@ -2071,6 +2128,10 @@ public class CommandPlot extends BaseCommand {
             if (plot == null) {
                 return;
             }
+            if (plot.getCity().isReserve()) {
+                plugin.sendMessage(player, "messages.error.city.reserve");
+                return;
+            }
             City city = plot.getCity();
             if (plot.isKMarked()) {
                 Database.addLogEntry(
@@ -2126,6 +2187,10 @@ public class CommandPlot extends BaseCommand {
     public static void onUpdate(Player player) {
         Plot plot = Utilities.hasPlotPermissions(player, "metropolis.plot.update", Role.VICE_MAYOR, false);
         if (plot == null) {
+            return;
+        }
+        if (plot.getCity().isReserve()) {
+            plugin.sendMessage(player, "messages.error.city.reserve");
             return;
         }
         City city = plot.getCity();
@@ -2235,6 +2300,10 @@ public class CommandPlot extends BaseCommand {
         }
         Plot plot = PlotDatabase.getPlotAtLocation(player.getLocation());
         if (plot == null) {
+            return;
+        }
+        if (plot.getCity().isReserve()) {
+            plugin.sendMessage(player, "messages.error.city.reserve");
             return;
         }
         City city = plot.getCity();
