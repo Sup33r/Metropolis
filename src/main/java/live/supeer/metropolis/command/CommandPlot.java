@@ -502,37 +502,33 @@ public class CommandPlot extends BaseCommand {
             plugin.sendMessage(player, "messages.error.permissionDenied");
             return;
         }
+
         @Deprecated Player p = Bukkit.getOfflinePlayer(playerName).getPlayer();
         if (p == null) {
             plugin.sendMessage(player, "messages.error.player.notFound");
             return;
         }
-        if (CityDatabase.memberCityList(p.getUniqueId().toString()) == null
-                || Objects.requireNonNull(CityDatabase.memberCityList(p.getUniqueId().toString())).length
-                == 0) {
+
+        List<City> memberCities = CityDatabase.memberCityList(p.getUniqueId().toString());
+        if (memberCities == null || memberCities.isEmpty()) {
             plugin.sendMessage(player, "messages.error.city.notInCity");
             return;
         }
-        StringBuilder stringBuilder = new StringBuilder();
-        for (String c :
-                Objects.requireNonNull(CityDatabase.memberCityList(p.getUniqueId().toString()))) {
-            if (CityDatabase.getCity(c).isEmpty()) {
-                return;
-            }
-            City city = CityDatabase.getCity(c).get();
+
+        for (City city : memberCities) {
+            StringBuilder stringBuilder = new StringBuilder();
             for (Plot plot : city.getCityPlots()) {
                 if (plot.getPlotOwner().equals(p.getName())) {
                     stringBuilder.append("§a").append(plot.getPlotName()).append("§2,§a ");
                 }
             }
-            if (stringBuilder.toString().isEmpty()) {
-                return;
+
+            if (!stringBuilder.toString().isEmpty()) {
+                player.sendMessage(
+                        "§a§l" + city.getCityName() + "§2: §a" +
+                                stringBuilder.substring(0, stringBuilder.length() - 4) // Remove trailing ", "
+                );
             }
-            player.sendMessage(
-                    "§a§l"
-                            + city.getCityName()
-                            + "§2: §a"
-                            + stringBuilder.substring(0, stringBuilder.toString().length()));
         }
     }
 
@@ -968,11 +964,7 @@ public class CommandPlot extends BaseCommand {
                 plugin.sendMessage(player, "messages.error.player.notFound");
                 return;
             }
-            if (!Arrays.stream(
-                            Objects.requireNonNull(
-                                    CityDatabase.memberCityList(offlinePlayer.getUniqueId().toString())))
-                    .toList()
-                    .contains(plot.getCity().getCityName())) {
+            if (!Objects.requireNonNull(CityDatabase.memberCityList(offlinePlayer.getUniqueId().toString())).contains(plot.getCity())) {
                 if (!plot.getPlotType().equals("vacation")) {
                     plugin.sendMessage(
                             player,
@@ -2269,6 +2261,14 @@ public class CommandPlot extends BaseCommand {
             plugin.sendMessage(
                     player,
                     "messages.error.plot.set.owner.notForSale",
+                    "%cityname%",
+                    city.getCityName());
+            return;
+        }
+        if (city.getMaxPlotsPerMember() != -1 && PlotDatabase.getPlayerPlotCount(player) >= city.getMaxPlotsPerMember()) {
+            plugin.sendMessage(
+                    player,
+                    "messages.error.plot.set.owner.tooManyPlots",
                     "%cityname%",
                     city.getCityName());
             return;

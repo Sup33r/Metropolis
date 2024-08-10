@@ -15,6 +15,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.List;
 import java.util.Objects;
 
 @CommandAlias("homecity|hc")
@@ -84,65 +86,24 @@ public class CommandHomeCity extends BaseCommand implements Listener {
     }
 
     private static void playerGui(Player player) {
-        String[] cityNames = CityDatabase.memberCityList(player.getUniqueId().toString());
-        if (cityNames == null) {
-            plugin.sendMessage(player,"messages.error.missing.membership");
+        List<City> cityList = CityDatabase.memberCityList(player.getUniqueId().toString());
+        if (cityList == null || cityList.isEmpty()) {
+            plugin.sendMessage(player, "messages.error.missing.membership");
             return;
         }
-        if (CityDatabase.getPlayerCityCount(player.getUniqueId().toString()) < 1) {
-            plugin.sendMessage(player,"messages.error.missing.membership");
-            return;
-        }
-        if (cityNames.length == 1) {
-            Inventory gui = Bukkit.createInventory(player, 9, "§8Homecity");
-            for (int j = 0; j < cityNames[0].length(); j++) {
-                if (j < 9) {
-                    ItemStack item = BannerUtil.letterBanner(String.valueOf(cityNames[0].charAt(j)), cityNames[0]);
-                    gui.setItem(j, item);
-                }
 
-            }
-            player.openInventory(gui);
-        }
-        if (cityNames.length == 2) {
-            Inventory gui = Bukkit.createInventory(player, 9+9, "§8Homecity");
-            for (int i = 0; i < cityNames[0].length(); i++) {
-                if (i < 9) {
-                    ItemStack item = BannerUtil.letterBanner(String.valueOf(cityNames[0].charAt(i)), cityNames[0]);
-                    gui.setItem(i, item);
-                }
+        int inventorySize = Math.min(cityList.size(), 3) * 9;
+        Inventory gui = Bukkit.createInventory(player, inventorySize, "§8Homecity");
 
+        for (int i = 0; i < cityList.size() && i < 3; i++) {
+            City city = cityList.get(i);
+            String cityName = city.getCityName();
+            for (int j = 0; j < cityName.length() && j < 9; j++) {
+                ItemStack item = BannerUtil.letterBanner(String.valueOf(cityName.charAt(j)), cityName);
+                gui.setItem(i * 9 + j, item);
             }
-            for (int i = 0; i < cityNames[1].length(); i++) {
-                if (i < 9) {
-                    ItemStack item = BannerUtil.letterBanner(String.valueOf(cityNames[1].charAt(i)), cityNames[1]);
-                    gui.setItem(i+9, item);
-                }
-            }
-            player.openInventory(gui);
         }
-        if (cityNames.length == 3) {
-            Inventory gui = Bukkit.createInventory(player, 9+9+9, "§8Homecity");
-            for (int i = 0; i < cityNames[0].length(); i++) {
-                if (i < 9) {
-                    ItemStack item = BannerUtil.letterBanner(String.valueOf(cityNames[0].charAt(i)), cityNames[0]);
-                    gui.setItem(i, item);
-                }
 
-            }
-            for (int i = 0; i < cityNames[1].length(); i++) {
-                if (i < 9) {
-                    ItemStack item = BannerUtil.letterBanner(String.valueOf(cityNames[1].charAt(i)), cityNames[1]);
-                    gui.setItem(i+9, item);
-                }
-            }
-            for (int i = 0; i < cityNames[2].length(); i++) {
-                if (i < 9) {
-                    ItemStack item = BannerUtil.letterBanner(String.valueOf(cityNames[2].charAt(i)), cityNames[2]);
-                    gui.setItem(i+18, item);
-                }
-            }
-            player.openInventory(gui);
-        }
+        player.openInventory(gui);
     }
 }

@@ -482,6 +482,26 @@ public class Utilities {
         return playerString.toString();
     }
 
+    public static List<City> stringToCityList(String cityString) {
+        List<City> cities = new ArrayList<>();
+        if (cityString == null || cityString.isEmpty()) {
+            return cities;
+        }
+        String[] cityArray = cityString.split(",");
+        for (String city : cityArray) {
+            cities.add(CityDatabase.getCity(Integer.parseInt(city)).get());
+        }
+        return cities;
+    }
+
+    public static String cityListToString(List<City> cities) {
+        StringBuilder cityString = new StringBuilder();
+        for (City city : cities) {
+            cityString.append(city.getCityId()).append(",");
+        }
+        return cityString.toString();
+    }
+
     public static boolean containsOnlyCompletePlots(Polygon polygon, int yMin, int yMax, City city, World world) {
         Plot[] intersectingPlots = PlotDatabase.intersectingPlots(polygon, yMin, yMax, city, world);
 
@@ -505,8 +525,53 @@ public class Utilities {
         return true;
     }
 
-    public static boolean isPlotCompletelyInsideDistrict(Polygon plotPolygon, Polygon districtPolygon) {
-        return districtPolygon.contains(plotPolygon);
+    public static boolean cannotClaimOrCreateCity(Location location, City city) {
+        int minSpawnDistance;
+        int minChunkDistance;
+
+        if (city == null) {
+            minSpawnDistance = Metropolis.configuration.getMinSpawnDistance();
+            minChunkDistance = Metropolis.configuration.getMinChunkDistance();
+        } else {
+            minSpawnDistance = city.getMinSpawnDistance();
+            minChunkDistance = city.getMinChunkDistance();
+        }
+
+        Location chunkCenter = new Location(location.getWorld(),
+                location.getChunk().getX() * 16 + 8,
+                location.getY(),
+                location.getChunk().getZ() * 16 + 8);
+
+        List<CityDistance> nearbyCities = CityDatabase.getCitiesWithinRadius(chunkCenter, Math.max(minChunkDistance, minSpawnDistance));
+
+        for (CityDistance cityDistance : nearbyCities) {
+            City existingCity = cityDistance.getCity();
+            int distance = cityDistance.getDistance();
+
+            if (city == null) {
+                if (distance < minSpawnDistance) {
+                    return true;
+                }
+
+                if (distance < minChunkDistance) {
+                    return true;
+                }
+            } else {
+                boolean isTwin = existingCity.getTwinCities().contains(city);
+
+                if (!isTwin) {
+                    if (distance < minSpawnDistance) {
+                        return true;
+                    }
+
+                    if (distance < minChunkDistance) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
 }

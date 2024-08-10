@@ -133,6 +133,15 @@ public class PlotDatabase {
         return false;
     }
 
+    public static int getPlayerPlotCount(Player player) {
+        try {
+            return DB.getResults("SELECT * FROM `mp_plots` WHERE `plotOwnerUUID` = " + Database.sqlString(player.getUniqueId().toString()) + ";").size();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
     public static Plot[] intersectingPlots(Polygon polygon, int yMin, int yMax, City city, World world) {
         String worldName = world.getName();
         try {

@@ -34,9 +34,11 @@ public class HCDatabase {
 
     public static int getHomeCityToCityId(String uuid) {
         try {
-            if (DB.getFirstRow("SELECT `cityId` FROM `mp_homecities` WHERE `playerUUID` = " + Database.sqlString(uuid) + ";").isEmpty())
+            var row = DB.getFirstRow("SELECT `cityId` FROM `mp_homecities` WHERE `playerUUID` = " + Database.sqlString(uuid) + ";");
+            if (row == null || row.isEmpty()) {
                 return -1;
-            return DB.getFirstRow("SELECT `cityId` FROM `mp_homecities` WHERE `playerUUID` = " + Database.sqlString(uuid) + ";").getInt("cityId");
+            }
+            return row.getInt("cityId");
         } catch (SQLException e) {
             e.printStackTrace();
             return -1;
@@ -46,8 +48,8 @@ public class HCDatabase {
     public static City getHomeCityToCity(String uuid) {
         try {
             int cityId = getHomeCityToCityId(uuid);
-            if (CityDatabase.getCity(cityId).isEmpty()) return null;
-            return CityDatabase.getCity(cityId).get();
+            if (cityId == -1) return null;
+            return CityDatabase.getCity(cityId).orElse(null);
         } catch (Exception e) {
             e.printStackTrace();
             return null;

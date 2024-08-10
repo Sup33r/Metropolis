@@ -118,8 +118,7 @@ public class CityListener implements Listener {
             player.sendMessage("Chunk is already claimed");
             return false;
         }
-        if (Utilities.isCloseToOtherCity(player, location, "city")) {
-            player.sendMessage("Too close to another city");
+        if (Utilities.cannotClaimOrCreateCity(player.getLocation().toBlockLocation(), city)) {
             return false;
         }
         if (CityDatabase.getCityRole(city, player.getUniqueId().toString()) == null) {

@@ -15,14 +15,17 @@ settings:
     exitmessage: 225
     plotname: 16
     districtname: 26
-
     maxbantime: 10y
-
     citymaxtax: 10.00
+
+    maxamountofplots: 500
+
+    minchunkdistance: 400
+    minspawndistance: 2000
 
   cooldownTime:
     invite: 180
-    namechange: 43200
+    namechange: 2592000
   city:
     creationcost: 500000
     startingbalance: 200000

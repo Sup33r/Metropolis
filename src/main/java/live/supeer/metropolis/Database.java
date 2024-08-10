@@ -58,10 +58,14 @@ public class Database {
                                 `bonusClaims` int(11) DEFAULT 0,
                                 `citySpawn` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `createDate` bigint(30) DEFAULT NULL,
-                                `latestNameChange` bigint(30) DEFAULT NULL,
+                                `latestNameChange` bigint(30) DEFAULT 0,
+                                `minChunkDistance` int(11) DEFAULT 400,
+                                `minSpawnDistance` int(11) DEFAULT 2000,
                                 `enterMessage` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                 `exitMessage` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                 `motdMessage` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                                `twinCities` text COLLATE utf8mb4_unicode_ci,
+                                `maxPlotsPerMember` int(11) DEFAULT -1,
                                 `isOpen` tinyint(1) DEFAULT 0,
                                 `isPublic` tinyint(1) DEFAULT 0,
                                 PRIMARY KEY (`cityId`)
@@ -98,7 +102,7 @@ public class Database {
                                 `xPosition` mediumint(9) NOT NULL,
                                 `zPosition` mediumint(9) NOT NULL,
                                 `claimDate` bigint(30) DEFAULT NULL,
-                                `cityName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+                                `cityId` int(11) NOT NULL,
                                 `outpost` tinyint(1) DEFAULT '0',
                                 PRIMARY KEY (`claimId`)
                               ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;""");

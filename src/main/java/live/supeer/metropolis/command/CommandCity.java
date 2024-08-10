@@ -3,15 +3,12 @@ package live.supeer.metropolis.command;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation .*;
 import co.aikar.commands.annotation.Optional;
-import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import live.supeer.metropolis.AutoclaimManager;
 import live.supeer.metropolis.Database;
 import live.supeer.metropolis.Metropolis;
 import live.supeer.metropolis.MetropolisListener;
-import live.supeer.metropolis.city.District;
 import live.supeer.metropolis.event.PlayerEnterCityEvent;
 import live.supeer.metropolis.event.PlayerExitCityEvent;
-import live.supeer.metropolis.event.PlayerExitPlotEvent;
 import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.plot.PlotDatabase;
 import live.supeer.metropolis.utils.LocationUtil;
@@ -23,7 +20,6 @@ import net.coreprotect.CoreProtect;
 import net.coreprotect.CoreProtectAPI;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -215,7 +211,7 @@ public class CommandCity extends BaseCommand {
             plugin.sendMessage(player, "messages.error.city.claimExists");
             return;
         }
-        if (Utilities.isCloseToOtherCity(player, player.getLocation(), "newcity")) {
+        if (Utilities.cannotClaimOrCreateCity(player.getLocation().toBlockLocation(), null)) {
             plugin.sendMessage(player, "messages.error.city.tooCloseToOtherCity");
             return;
         }
@@ -319,7 +315,7 @@ public class CommandCity extends BaseCommand {
                         plugin.sendMessage(player, "messages.error.missing.claimCost", "%cityname%", city.getCityName(), "%cost%", ""+Metropolis.configuration.getCityClaimCost());
                         return;
                     }
-                    if (Utilities.isCloseToOtherCity(player, player.getLocation(), "city")) {
+                    if (Utilities.cannotClaimOrCreateCity(player.getLocation().toBlockLocation(), city)) {
                         plugin.sendMessage(player, "messages.error.city.tooCloseToOtherCity");
                         return;
                     }
@@ -384,7 +380,7 @@ public class CommandCity extends BaseCommand {
             plugin.sendMessage(player, "messages.error.missing.claimCost", "%cityname%", city.getCityName(), "%cost%", ""+Metropolis.configuration.getCityClaimCost());
             return;
         }
-        if (Utilities.isCloseToOtherCity(player, player.getLocation(), "city")) {
+        if (Utilities.cannotClaimOrCreateCity(player.getLocation().toBlockLocation(), city)) {
             plugin.sendMessage(player, "messages.error.city.tooCloseToOtherCity");
             return;
         }
@@ -469,7 +465,7 @@ public class CommandCity extends BaseCommand {
             plugin.sendMessage(player, "messages.error.city.closed", "%cityname%", city.getCityName());
             return;
         }
-        if (Objects.requireNonNull(CityDatabase.memberCityList(player.getUniqueId().toString())).length
+        if (Objects.requireNonNull(CityDatabase.memberCityList(player.getUniqueId().toString())).size()
                 >= 3) {
             plugin.sendMessage(player, "messages.error.city.maxCityCount");
             return;
@@ -1193,14 +1189,14 @@ public class CommandCity extends BaseCommand {
             }
 
             int latestNameChange = CityDatabase.getLatestNameChange(city);
-            int cooldownTime = plugin.getConfig().getInt("settings.cooldownTime.namechange"); // Time in seconds
+            int cooldownTime = Metropolis.configuration.getNameChangeCooldown();
 
             if (latestNameChange != 0) {
                 int currentTime = (int) (System.currentTimeMillis() / 1000); // Convert to seconds
                 int timeSinceLastChange = currentTime - latestNameChange;
 
                 if (timeSinceLastChange < cooldownTime) {
-                    plugin.sendMessage(player, "messages.error.namechange.cooldown", "%timeleft%", DateUtil.formatTimeFromSeconds(cooldownTime - timeSinceLastChange));
+                    plugin.sendMessage(player, "messages.error.city.namechange.cooldown","%cityname%", city.getCityName(), "%timeleft%", DateUtil.formatTimeFromSeconds(cooldownTime - timeSinceLastChange));
                     return;
                 }
             }
@@ -1248,6 +1244,47 @@ public class CommandCity extends BaseCommand {
                             + " }");
             city.setCityTax(tax);
             plugin.sendMessage(player, "messages.city.successful.set.tax", "%cityname%", city.getCityName(), "%tax%", String.valueOf(tax));
+        }
+
+        @Subcommand("maxplotspermember")
+        public static void onMaxPlotsPerMember(Player player, String argument) {
+            City city = Utilities.hasCityPermissions(player, "metropolis.city.set.maxplotspermember", Role.VICE_MAYOR);
+            if (city == null) {
+                return;
+            }
+            if (argument.equals("-")) {
+                city.setMaxPlotsPerMember(-1);
+                Database.addLogEntry(
+                        city,
+                        "{ \"type\": \"set\", \"subtype\": \"maxPlotsPerMember\", \"from\": "
+                                + city.getMaxPlotsPerMember()
+                                + ", \"to\": "
+                                + -1
+                                + ", \"player\": "
+                                + player.getUniqueId().toString()
+                                + " }");
+                plugin.sendMessage(player, "messages.city.successful.maxPlotsPerMember.removed", "%cityname%", city.getCityName());
+                return;
+            }
+            if (!argument.matches("[0-9]+")) {
+                plugin.sendMessage(player, "messages.error.city.maxPlotsPerMember.invalidAmount");
+                return;
+            }
+            int maxPlotsPerMember = Integer.parseInt(argument);
+            if (maxPlotsPerMember > Metropolis.configuration.getMaxAmountOfPlots()) {
+                plugin.sendMessage(player, "messages.error.city.maxPlotsPerMember.maxAmount", "%max%", String.valueOf(Metropolis.configuration.getMaxAmountOfPlots()));
+            }
+            Database.addLogEntry(
+                    city,
+                    "{ \"type\": \"set\", \"subtype\": \"maxPlotsPerMember\", \"from\": "
+                            + city.getMaxPlotsPerMember()
+                            + ", \"to\": "
+                            + maxPlotsPerMember
+                            + ", \"player\": "
+                            + player.getUniqueId().toString()
+                            + " }");
+            city.setMaxPlotsPerMember(maxPlotsPerMember);
+            plugin.sendMessage(player, "messages.city.successful.maxPlotsPerMember.set", "%cityname%", city.getCityName(), "%amount%", String.valueOf(maxPlotsPerMember));
         }
     }
 
@@ -2481,6 +2518,69 @@ public class CommandCity extends BaseCommand {
             }
             plotList.delete(plotList.length() - 9, plotList.length());
             plugin.sendMessage(player, "messages.city.chunk.plots", "%count%", String.valueOf(plots.size()), "%plots%", plotList.toString());
+        }
+    }
+
+    @Subcommand("twin")
+    public static void onTwin(Player player,@Optional String argument) {
+        if (argument == null) {
+            City city = Utilities.hasCityPermissions(player, "metropolis.city.twin", null);
+            if (city == null) {
+                return;
+            }
+            List<City> twinCities = city.getTwinCities();
+            if (twinCities.isEmpty()) {
+                plugin.sendMessage(player, "messages.error.city.twin.none");
+                return;
+            }
+            StringBuilder twinCityList = new StringBuilder();
+            for (City twinCity : twinCities) {
+                twinCityList.append("<green>").append(twinCity.getCityName()).append("<dark_green>, <green>");
+            }
+            twinCityList.delete(twinCityList.length() - 9, twinCityList.length());
+            plugin.sendMessage(player, "messages.city.twin.list", "%cityname%", city.getCityName(), "%twins%", twinCityList.toString(), "%count%", String.valueOf(twinCities.size()));
+        } else {
+            City city = Utilities.hasCityPermissions(player, "metropolis.city.twin", Role.VICE_MAYOR);
+            if (city == null) {
+                return;
+            }
+            if (argument.startsWith("-") || argument.startsWith("+")) {
+                String cityName = argument.substring(1);
+                if (CityDatabase.getCity(cityName).isEmpty()) {
+                    plugin.sendMessage(player, "messages.error.city.twin.notFound", "%cityname%", city.getCityName());
+                    return;
+                }
+                City twinCity = CityDatabase.getCity(cityName).get();
+                if (twinCity.equals(city)) {
+                    plugin.sendMessage(player, "messages.error.city.twin.sameCity", "%cityname%", city.getCityName());
+                    return;
+                }
+                if (argument.startsWith("-")) {
+                    if (!player.hasPermission("metropolis.city.twin.remove")) {
+                        plugin.sendMessage(player, "messages.error.permissionDenied");
+                        return;
+                    }
+                    if (city.getTwinCities().contains(twinCity)) {
+                        city.removeTwinCity(twinCity);
+                        Database.addLogEntry(city, "{ \"type\": \"twin\", \"subtype\": \"remove\", \"twin\": \"" + twinCity.getCityName() + "\", \"player\": \"" + player.getUniqueId().toString() + "\" }");
+                        plugin.sendMessage(player, "messages.city.twin.removed", "%cityname%", city.getCityName(), "%twin%", twinCity.getCityName());
+                        return;
+                    }
+                    plugin.sendMessage(player, "messages.error.city.twin.notTwin", "%cityname%", city.getCityName(), "%twin%", twinCity.getCityName());
+                    return;
+                }
+                if (argument.startsWith("+")) {
+                    if (city.getTwinCities().contains(twinCity)) {
+                        plugin.sendMessage(player, "messages.error.city.twin.alreadyTwin", "%cityname%", city.getCityName(), "%twin%", twinCity.getCityName());
+                        return;
+                    }
+                    city.addTwinCity(twinCity);
+                    Database.addLogEntry(city, "{ \"type\": \"twin\", \"subtype\": \"add\", \"twin\": \"" + twinCity.getCityName() + "\", \"player\": \"" + player.getUniqueId().toString() + "\" }");
+                    plugin.sendMessage(player, "messages.city.twin.added", "%cityname%", city.getCityName(), "%twin%", twinCity.getCityName());
+                }
+            } else {
+                plugin.sendMessage(player, "messages.syntax.city.twin");
+            }
         }
     }
 }
