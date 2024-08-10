@@ -148,8 +148,7 @@ public final class Metropolis extends JavaPlugin {
         manager.getCommandCompletions().registerCompletion("plotType", c -> ImmutableList.of("church", "farm", "shop", "vacation"));
         manager.getCommandCompletions().registerCompletion("cityRoles", c -> ImmutableList.of("vicemayor", "assistant", "inviter", "member", "swap", "-", "member"));
         manager.getCommandCompletions().registerCompletion("cityGo1", c -> ImmutableList.of("delete", "set"));
-        manager.getCommandCompletions().registerCompletion("cityGo2", c -> ImmutableList.of("set"));
-        manager.getCommandCompletions().registerCompletion("cityGo3", c -> ImmutableList.of("displayname", "accesslevel"));
+        manager.getCommandCompletions().registerCompletion("cityGo2", c -> ImmutableList.of("displayname", "accesslevel","name"));
         manager.getCommandCompletions().registerCompletion("cityGoes", c -> {
             Player player = c.getPlayer();
             if (player == null) {

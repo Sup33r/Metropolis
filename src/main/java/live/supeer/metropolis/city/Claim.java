@@ -18,7 +18,7 @@ public class Claim {
     private final World claimWorld;
     private final int xPosition;
     private final int zPosition;
-    private final String cityName;
+    private final int cityId;
     private final long claimDate;
     private final boolean outpost;
     private final City city;
@@ -29,11 +29,11 @@ public class Claim {
         this.claimWorld = plugin.getServer().getWorld(data.getString("world"));
         this.xPosition = data.getInt("xPosition");
         this.zPosition = data.getInt("zPosition");
-        this.cityName = data.getString("cityName");
+        this.cityId = data.getInt("cityId");
         this.claimDate = data.getLong("claimDate");
         this.outpost = data.get("outpost");
-        if (CityDatabase.getCity(cityName).isPresent()) {
-            this.city = CityDatabase.getCity(cityName).get();
+        if (CityDatabase.getCity(cityId).isPresent()) {
+            this.city = CityDatabase.getCity(cityId).get();
         } else {
             this.city = null;
         }

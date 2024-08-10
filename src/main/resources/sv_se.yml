@@ -88,6 +88,8 @@ messages:
       notFound: "<red>Spelaren hittades inte."
       notInCity: "<red>Spelaren är inte medlem i någon stad."
     city:
+      namechange:
+        cooldown: "<yellow>%cityname% <gray>| <red>Du måste vänta %timeleft% innan du kan ändra stadsnamnet igen."
       maxPlotsPerMember:
         invalidAmount: "<red>Antalet tomter per medlem måste vara ett positivt heltal."
         maxAmount: "<red>Antalet tomter per medlem får inte överstiga %max%."
@@ -474,6 +476,7 @@ messages:
         self: "<green>Du skapade staden %cityname%."
       claim: "<yellow>%cityname% <gray>|<green> Markbit övertagen för %amount% minemynt."
       set:
+        name: "<yellow>%cityname% <gray>|<green> Stadens namn är nu %cityname%."
         tax: "<yellow>%cityname% <gray>|<green> Skattesatsen är nu %tax%."
         spawn: "<yellow>%cityname% <gray>|<green> Stadens startpunkt ändrades."
         enter:

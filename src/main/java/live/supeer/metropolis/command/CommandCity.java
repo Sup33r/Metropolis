@@ -465,7 +465,7 @@ public class CommandCity extends BaseCommand {
             plugin.sendMessage(player, "messages.error.city.closed", "%cityname%", city.getCityName());
             return;
         }
-        if (Objects.requireNonNull(CityDatabase.memberCityList(player.getUniqueId().toString())).length
+        if (Objects.requireNonNull(CityDatabase.memberCityList(player.getUniqueId().toString())).size()
                 >= 3) {
             plugin.sendMessage(player, "messages.error.city.maxCityCount");
             return;
@@ -1189,14 +1189,14 @@ public class CommandCity extends BaseCommand {
             }
 
             int latestNameChange = CityDatabase.getLatestNameChange(city);
-            int cooldownTime = plugin.getConfig().getInt("settings.cooldownTime.namechange"); // Time in seconds
+            int cooldownTime = Metropolis.configuration.getNameChangeCooldown();
 
             if (latestNameChange != 0) {
                 int currentTime = (int) (System.currentTimeMillis() / 1000); // Convert to seconds
                 int timeSinceLastChange = currentTime - latestNameChange;
 
                 if (timeSinceLastChange < cooldownTime) {
-                    plugin.sendMessage(player, "messages.error.namechange.cooldown", "%timeleft%", DateUtil.formatTimeFromSeconds(cooldownTime - timeSinceLastChange));
+                    plugin.sendMessage(player, "messages.error.city.namechange.cooldown","%cityname%", city.getCityName(), "%timeleft%", DateUtil.formatTimeFromSeconds(cooldownTime - timeSinceLastChange));
                     return;
                 }
             }

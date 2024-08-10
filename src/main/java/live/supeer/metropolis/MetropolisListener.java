@@ -64,12 +64,7 @@ public class MetropolisListener implements Listener {
     public static void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         if (CityDatabase.getClaim(player.getLocation()) != null) {
-            if (CityDatabase.getCity(Objects.requireNonNull(CityDatabase.getClaim(player.getLocation())).getCityName()).isEmpty()) {
-                Utilities.sendNatureScoreboard(player);
-                Metropolis.playerInCity.remove(player.getUniqueId());
-                return;
-            }
-            City city = CityDatabase.getCity(Objects.requireNonNull(CityDatabase.getClaim(player.getLocation())).getCityName()).get();
+            City city = Objects.requireNonNull(CityDatabase.getClaim(player.getLocation().toBlockLocation())).getCity();
             PlayerEnterCityEvent enterCityEvent = new PlayerEnterCityEvent(event.getPlayer(), city);
             Bukkit.getServer().getPluginManager().callEvent(enterCityEvent);
             District district = CityDatabase.getDistrict(player.getLocation());
@@ -86,10 +81,10 @@ public class MetropolisListener implements Listener {
             Utilities.sendNatureScoreboard(player);
             Metropolis.playerInCity.remove(player.getUniqueId());
         }
-        String[] list = CityDatabase.memberCityList(player.getUniqueId().toString());
-        for (int i = 0; i < Objects.requireNonNull(list).length; i++) {
-            if (CityDatabase.getCity(list[i]).isPresent()) {
-                City city = CityDatabase.getCity(list[i]).get();
+
+        List<City> memberCities = CityDatabase.memberCityList(player.getUniqueId().toString());
+        if (memberCities != null) {
+            for (City city : memberCities) {
                 String cityMotd = city.getMotdMessage();
                 if (cityMotd != null) {
                     plugin.sendMessage(
@@ -134,11 +129,12 @@ public class MetropolisListener implements Listener {
             if (event.getMaterial() == Material.STICK) {
                 if (CommandCity.blockEnabled.contains(player)) {
                     event.setCancelled(true);
-                    if (CityDatabase.getClaim(event.getClickedBlock().getLocation()) == null || CityDatabase.getCity(Objects.requireNonNull(CityDatabase.getClaim(event.getClickedBlock().getLocation())).getCityName()).isEmpty()) {
+                    if (CityDatabase.getClaim(event.getClickedBlock().getLocation()) == null) {
                         plugin.sendMessage(player, "messages.error.permissionDenied");
                         return;
                     }
-                    City city = CityDatabase.getCity(Objects.requireNonNull(CityDatabase.getClaim(event.getClickedBlock().getLocation())).getCityName()).get();
+                    City city = CityDatabase.getCityByClaim(event.getClickedBlock().getLocation());
+                    assert city != null;
                     Role role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
                     assert role != null;
                     Plot plot = PlotDatabase.getPlotAtLocation(event.getClickedBlock().getLocation());
@@ -238,11 +234,11 @@ public class MetropolisListener implements Listener {
         if (event.getBlock().getType().equals(Material.DIRT)) {
             if (CommandCity.blockEnabled.contains(player)) {
                 event.setCancelled(true);
-                if (CityDatabase.getClaim(event.getBlockPlaced().getLocation()) == null || CityDatabase.getCity(Objects.requireNonNull(CityDatabase.getClaim(event.getBlockPlaced().getLocation())).getCityName()).isEmpty()) {
+                if (CityDatabase.getClaim(event.getBlockPlaced().getLocation()) == null) {
                     plugin.sendMessage(player, "messages.error.permissionDenied");
                     return;
                 }
-                City city = CityDatabase.getCity(Objects.requireNonNull(CityDatabase.getClaim(event.getBlockPlaced().getLocation())).getCityName()).get();
+                City city = CityDatabase.getCityByClaim(event.getBlockPlaced().getLocation());
                 Role role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
                 assert role != null;
                 Plot plot = PlotDatabase.getPlotAtLocation(event.getBlockPlaced().getLocation());
@@ -292,15 +288,15 @@ public class MetropolisListener implements Listener {
                 City fromCity = Metropolis.playerInCity.get(player.getUniqueId());
                 PlayerExitCityEvent exitCityEvent = new PlayerExitCityEvent(player, fromCity, true);
                 Bukkit.getServer().getPluginManager().callEvent(exitCityEvent);
-            } else if (Metropolis.playerInCity.containsKey(player.getUniqueId()) && CityDatabase.getClaim(to) != null && Metropolis.playerInCity.get(player.getUniqueId()) != CityDatabase.getCity(Objects.requireNonNull(CityDatabase.getClaim(to)).getCityName()).get()) {
+            } else if (Metropolis.playerInCity.containsKey(player.getUniqueId()) && CityDatabase.getClaim(to) != null && Metropolis.playerInCity.get(player.getUniqueId()) != CityDatabase.getCityByClaim(to)) {
                 City fromCity = Metropolis.playerInCity.get(player.getUniqueId());
-                City toCity = CityDatabase.getCity(Objects.requireNonNull(CityDatabase.getClaim(to)).getCityName()).get();
+                City toCity = CityDatabase.getCityByClaim(to);
                 PlayerExitCityEvent exitCityEvent = new PlayerExitCityEvent(player, fromCity, false);
                 Bukkit.getServer().getPluginManager().callEvent(exitCityEvent);
                 PlayerEnterCityEvent enterCityEvent = new PlayerEnterCityEvent(player, toCity);
                 Bukkit.getServer().getPluginManager().callEvent(enterCityEvent);
             } else if (!Metropolis.playerInCity.containsKey(player.getUniqueId()) && CityDatabase.getClaim(to) != null) {
-                City toCity = CityDatabase.getCity(Objects.requireNonNull(CityDatabase.getClaim(to)).getCityName()).get();
+                City toCity = CityDatabase.getCityByClaim(to);
                 PlayerEnterCityEvent enterCityEvent = new PlayerEnterCityEvent(player, toCity);
                 Bukkit.getServer().getPluginManager().callEvent(enterCityEvent);
             }
@@ -355,7 +351,7 @@ public class MetropolisListener implements Listener {
                 PlayerExitCityEvent exitCityEvent = new PlayerExitCityEvent(player, fromCity, true);
                 Bukkit.getServer().getPluginManager().callEvent(exitCityEvent);
             } else {
-                City toCity = CityDatabase.getCity(Objects.requireNonNull(CityDatabase.getClaim(to)).getCityName()).get();
+                City toCity = CityDatabase.getCityByClaim(to);
                 if (!fromCity.equals(toCity)) {
                     PlayerExitCityEvent exitCityEvent = new PlayerExitCityEvent(player, fromCity, false);
                     Bukkit.getServer().getPluginManager().callEvent(exitCityEvent);
@@ -364,7 +360,7 @@ public class MetropolisListener implements Listener {
                 }
             }
         } else if (CityDatabase.getClaim(to) != null) {
-            City toCity = CityDatabase.getCity(Objects.requireNonNull(CityDatabase.getClaim(to)).getCityName()).get();
+            City toCity = CityDatabase.getCityByClaim(to);
             PlayerEnterCityEvent enterCityEvent = new PlayerEnterCityEvent(player, toCity);
             Bukkit.getServer().getPluginManager().callEvent(enterCityEvent);
         }
@@ -413,7 +409,7 @@ public class MetropolisListener implements Listener {
                 PlayerExitCityEvent exitCityEvent = new PlayerExitCityEvent(player, fromCity, true);
                 Bukkit.getServer().getPluginManager().callEvent(exitCityEvent);
             } else {
-                City toCity = CityDatabase.getCity(Objects.requireNonNull(CityDatabase.getClaim(to)).getCityName()).get();
+                City toCity = CityDatabase.getCityByClaim(to);
                 if (!fromCity.equals(toCity)) {
                     PlayerExitCityEvent exitCityEvent = new PlayerExitCityEvent(player, fromCity, false);
                     Bukkit.getServer().getPluginManager().callEvent(exitCityEvent);
@@ -422,7 +418,7 @@ public class MetropolisListener implements Listener {
                 }
             }
         } else if (CityDatabase.getClaim(to) != null) {
-            City toCity = CityDatabase.getCity(Objects.requireNonNull(CityDatabase.getClaim(to)).getCityName()).get();
+            City toCity = CityDatabase.getCityByClaim(to);
             PlayerEnterCityEvent enterCityEvent = new PlayerEnterCityEvent(player, toCity);
             Bukkit.getServer().getPluginManager().callEvent(enterCityEvent);
         }
