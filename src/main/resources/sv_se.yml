@@ -47,7 +47,7 @@ messages:
     goes: "<dark_green>--- <green>Stadsteleporteringspunkter (sida <bold>%startPage% <reset><green>av <bold>%totalPages%<reset><green>) <dark_green>---"
   syntax:
     admin:
-      balance: "<gray>Syntax: /metropolis balance <underlined>stad</underlined> +/-<underlined>belopp"
+      balance: "<gray>Syntax: /metropolis balance +/-<underlined>belopp</underlined> <underlined>stad"
     city:
       twin: "<gray>/city twin\n<gray>/city twin +<underlined>stadsnamn"
       district: "<gray>/city district\n/city district +<underlined>player<reset>\n<gray>/city district -<underlined>player<reset>\n<gray>/city district delete\n/city district info <underlined>namn<reset>\n<gray>/city district set name <underlined>nytt namn<reset\n<gray>/city district update"
@@ -479,8 +479,8 @@ messages:
       invited: "<yellow>%cityname% <gray>| <yellow>%player% har blivit inbjuden till staden av %inviter%."
       inviteMessage: "<hover:show_text:'<green>/city join %cityname%'><click:run_command:/city join %cityname%><yellow>%cityname% <gray>| <green>Du har blivit inbjuden till staden av %inviter%.</click></hover>\n<hover:show_text:'<green>/city join %cityname%'><click:run_command:/city join %cityname%><green>Skriv /city join %cityname% för att gå med, eller <dark_green><underlined>Klicka här >>"
     enter:
-        normal: "<yellow>%cityname% <gray>|<aqua> %enter%"
-        reserve: "<yellow>%cityname% <light_purple>-- Naturreservat <gray>|<aqua> %enter%"
+      normal: "<yellow>%cityname% <gray>|<aqua> %enter%"
+      reserve: "<yellow>%cityname% <light_purple>-- Naturreservat <gray>|<aqua> %enter%"
     exit:
       normal: "<yellow>%cityname% <gray>|<aqua> %exit%"
       reserve: "<yellow>%cityname% <light_purple>-- Naturreservat <gray>|<aqua> %exit%"

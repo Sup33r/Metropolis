@@ -93,7 +93,7 @@ public class MetropolisListener implements Listener {
                         plugin.sendMessage(player, "messages.city.motd.normal", "%cityname%", city.getCityName(), "%motd%", cityMotd);
                     }
                 }
-                if (city.cityCouldGoUnder(1)) {
+                if (!city.isReserve() && city.cityCouldGoUnder(1)) {
                     plugin.sendMessage(player, "messages.city.warning.lowBalance", "%cityname%", city.getCityName());
                 }
             }

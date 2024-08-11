@@ -234,6 +234,38 @@ public class CityDatabase {
         return cityList;
     }
 
+    public static List<City> getCities(Player player) {
+        List<City> cityList = new ArrayList<>();
+        try {
+            var results = DB.getResults("SELECT * FROM `mp_cities`;");
+            for (var row : results) {
+                City city = new City(row);
+                if (city.getCityMember(player.getUniqueId().toString()) != null || city.isPublic()) {
+                    cityList.add(city);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return cityList;
+    }
+
+    public static List<String> getCitynames(Player player) {
+        List<String> cityList = new ArrayList<>();
+        try {
+            var results = DB.getResults("SELECT * FROM `mp_cities`;");
+            for (var row : results) {
+                City city = new City(row);
+                if (player.hasPermission("metropolis.admin.city.list") || city.getCityMember(player.getUniqueId().toString()) != null || city.isPublic()) {
+                    cityList.add(city.getCityName());
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return cityList;
+    }
+
     public static List<String> getCityGoNames(City city, Role role) {
         if (role.equals(Role.MEMBER)) {
             try {
@@ -391,12 +423,14 @@ public class CityDatabase {
     }
 
     public static void drawTaxes() {
-        for (City city : cities) {
+        Iterator<City> iterator = cities.iterator();
+        while (iterator.hasNext()) {
+            City city = iterator.next();
             city.drawCityTaxes();
             city.drawStateTaxes();
-            if (city.hasNegativeBalance()) {
+            if (city.hasNegativeBalance() && !city.isReserve()) {
                 if (city.canBecomeReserve()) {
-                    city.setAsNotReserve();
+                    city.setAsReserve();
                     for (Player player : Bukkit.getOnlinePlayers()) {
                         plugin.sendMessage(player, "messages.city.becameReserve","%cityname%" , city.getCityName());
                     }
@@ -404,9 +438,13 @@ public class CityDatabase {
                     for (Player player : Bukkit.getOnlinePlayers()) {
                         plugin.sendMessage(player, "messages.city.wentUnder","%cityname%" , city.getCityName());
                     }
+                    iterator.remove();
                     deleteCity(city);
                 }
             }
+        }
+        for (Player players : plugin.getServer().getOnlinePlayers()) {
+            plugin.sendMessage(players, "messages.city.successful.taxCollected");
         }
     }
 

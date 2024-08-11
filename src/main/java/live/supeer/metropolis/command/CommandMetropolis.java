@@ -1,10 +1,7 @@
 package live.supeer.metropolis.command;
 
 import co.aikar.commands.BaseCommand;
-import co.aikar.commands.annotation.CommandAlias;
-import co.aikar.commands.annotation.Default;
-import co.aikar.commands.annotation.Optional;
-import co.aikar.commands.annotation.Subcommand;
+import co.aikar.commands.annotation.*;
 import live.supeer.metropolis.Database;
 import live.supeer.metropolis.Metropolis;
 import live.supeer.metropolis.city.City;
@@ -23,9 +20,6 @@ public class CommandMetropolis extends BaseCommand {
     public void onTaxCollect(Player player) {
         if (player.hasPermission("metropolis.admin.taxcollect")) {
             CityDatabase.drawTaxes();
-            for (Player players : plugin.getServer().getOnlinePlayers()) {
-                plugin.sendMessage(players, "messages.city.successful.taxCollected");
-            }
         } else {
             plugin.sendMessage(player, "messages.error.permissionDenied");
         }
@@ -37,7 +31,8 @@ public class CommandMetropolis extends BaseCommand {
 
 
         @Subcommand("balance")
-        public void onCityBalance(Player player, String cityName, @Optional String argument) {
+        @CommandCompletion("@nothing @cityNames")
+        public void onCityBalance(Player player, String argument, String cityName) {
             if (player.hasPermission("metropolis.admin.city.balance")) {
                 live.supeer.metropolis.city.City city = CityDatabase.getCity(cityName).get();
                 if (CityDatabase.getCity(cityName).isEmpty()) {
@@ -109,6 +104,7 @@ public class CommandMetropolis extends BaseCommand {
         public class Set extends BaseCommand {
 
             @Subcommand("minchunkdistance")
+            @CommandCompletion("@nothing @cityNames")
             public void onSetMinChunkDistance(Player player, String distance, String cityName) {
                 if (player.hasPermission("metropolis.admin.city.set.minchunkdistance")) {
                     live.supeer.metropolis.city.City city = CityDatabase.getCity(cityName).get();
@@ -133,6 +129,7 @@ public class CommandMetropolis extends BaseCommand {
             }
 
             @Subcommand("minspawndistance")
+            @CommandCompletion("@nothing @cityNames")
             public void onSetMinSpawnDistance(Player player, String distance, String cityName) {
                 if (player.hasPermission("metropolis.admin.city.set.minspawndistance")) {
                     live.supeer.metropolis.city.City city = CityDatabase.getCity(cityName).get();

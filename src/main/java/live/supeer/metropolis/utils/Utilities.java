@@ -553,14 +553,19 @@ public class Utilities {
 
         for (CityDistance cityDistance : nearbyCities) {
             City existingCity = cityDistance.getCity();
+            if (existingCity == null || existingCity.equals(city)) {
+                continue;
+            }
             int distance = cityDistance.getDistance();
 
             if (city == null) {
                 if (distance < minSpawnDistance) {
+                    plugin.logger.warning("1");
                     return true;
                 }
 
                 if (distance < minChunkDistance) {
+                    plugin.logger.warning("2");
                     return true;
                 }
             } else {
@@ -568,10 +573,12 @@ public class Utilities {
 
                 if (!isTwin) {
                     if (distance < minSpawnDistance) {
+                        plugin.logger.warning("3");
                         return true;
                     }
 
                     if (distance < minChunkDistance) {
+                        plugin.logger.warning("4");
                         return true;
                     }
                 }
