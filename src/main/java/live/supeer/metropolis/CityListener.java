@@ -22,9 +22,9 @@ public class CityListener implements Listener {
         City city = event.getCity();
         if (city.getEnterMessage() != null) {
             if (city.isReserve()) {
-                plugin.sendMessage(event.getPlayer(), "messages.city.enter.reserve", "%cityname%", city.getCityName(), "%enter%", city.getExitMessage());
+                plugin.sendMessage(event.getPlayer(), "messages.city.enter.reserve", "%cityname%", city.getCityName(), "%enter%", city.getEnterMessage());
             } else {
-                plugin.sendMessage(event.getPlayer(), "messages.city.enter.reserve", "%cityname%", city.getCityName(), "%enter%", city.getExitMessage());
+                plugin.sendMessage(event.getPlayer(), "messages.city.enter.normal", "%cityname%", city.getCityName(), "%enter%", city.getExitMessage());
             }
         }
         Metropolis.playerInCity.put(event.getPlayer().getUniqueId(), city);
@@ -44,7 +44,7 @@ public class CityListener implements Listener {
             if (city.isReserve()) {
                 plugin.sendMessage(event.getPlayer(), "messages.city.exit.reserve", "%cityname%", city.getCityName(), "%exit%", city.getExitMessage());
             } else {
-                plugin.sendMessage(event.getPlayer(), "messages.city.exit.reserve", "%cityname%", city.getCityName(), "%exit%", city.getExitMessage());
+                plugin.sendMessage(event.getPlayer(), "messages.city.exit.normal", "%cityname%", city.getCityName(), "%exit%", city.getExitMessage());
             }
         }
 

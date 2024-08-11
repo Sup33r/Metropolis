@@ -351,42 +351,50 @@ public class City {
         if (economy == null) {
             return;
         }
+        Role cityRole = Role.fromString(taxLevel);
+        if (Objects.equals(taxLevel, "none") || cityTax == 0 || cityRole == null) {
+            return;
+        }
+
         for (Member member : cityMembers) {
             try {
-                double tax = cityTax;
-                if (Objects.equals(taxLevel, "none") || tax == 0) {
-                    return;
-                }
-                tax = tax / 100;
-                Role role = member.getCityRole();
-                Role cityRole = Role.fromString(taxLevel);
-                if (role == null) {
-                    plugin.getServer().broadcast(Component.text("Role null"));
+                Role memberRole = member.getCityRole();
+                if (memberRole == null) {
+                    plugin.getServer().broadcast(Component.text("Role null for member: " + member.getPlayerName()));
                     continue;
                 }
-                if (Objects.requireNonNull(CityDatabase.memberCityList(member.getPlayerUUID())).size() > 1) {
-                    tax = tax / 2;
-                }
-                if (role.getPermissionLevel() < cityRole.getPermissionLevel()) {
-                    plugin.getServer().broadcast(Component.text("Role check"));
 
-                    continue;
+                // Check if the member should pay tax based on their role
+                if (memberRole.getPermissionLevel() >= cityRole.getPermissionLevel()) {
+                    double taxRate = cityTax / 100.0; // Convert percentage to decimal
+
+                    // Reduce tax rate for members in multiple cities
+                    if (Objects.requireNonNull(CityDatabase.memberCityList(member.getPlayerUUID())).size() > 1) {
+                        taxRate /= 2;
+                    }
+
+                    OfflinePlayer player = Metropolis.getPlugin().getServer().getOfflinePlayer(member.getPlayerUUID());
+                    double playerBalance = economy.getBalance(player);
+
+                    if (playerBalance > 0) {
+                        double taxAmount = playerBalance * taxRate;
+                        int roundedTaxAmount = (int) Math.round(taxAmount); // Round to nearest integer
+
+                        if (roundedTaxAmount > 0) {
+                            economy.withdrawPlayer(player, roundedTaxAmount);
+                            cityBalance += roundedTaxAmount;
+
+                            // Update city balance in database
+                            DB.executeUpdateAsync(
+                                    "UPDATE `mp_cities` SET `cityBalance` = "
+                                            + cityBalance
+                                            + " WHERE `cityId` = "
+                                            + cityId
+                                            + ";"
+                            );
+                        }
+                    }
                 }
-                OfflinePlayer player = Metropolis.getPlugin().getServer().getOfflinePlayer(member.getPlayerUUID());
-                if (economy.getBalance(player) == 0) {
-                    plugin.getServer().broadcast(Component.text("Player " + player.getName() + " has no money"));
-                    continue;
-                }
-                double playerBalance = economy.getBalance(player);
-                int taxAmount = (int) (playerBalance * tax);
-                economy.withdrawPlayer(player, taxAmount);
-                cityBalance += taxAmount;
-                DB.executeUpdate(
-                        "UPDATE `mp_cities` SET `cityBalance` = "
-                                + cityBalance
-                                + " WHERE `cityId` = "
-                                + cityId
-                                + ";");
             } catch (Exception e) {
                 e.printStackTrace();
             }

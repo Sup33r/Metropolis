@@ -2372,7 +2372,7 @@ public class CommandCity extends BaseCommand {
     }
 
     @Subcommand("near")
-    @CommandCompletion("@nothing|@range:100-10000")
+    @CommandCompletion("@nothing @range:100-10000")
     public static void onNear(Player player, @Optional Integer blocks) {
         if (!player.hasPermission("metropolis.city.near")) {
             plugin.sendMessage(player, "messages.error.permissionDenied");

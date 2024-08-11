@@ -34,6 +34,10 @@ public class MetropolisConfiguration {
     private final int maxAmountOfPlots;
     private final int stateTax;
 
+    private final int taxTimeHour;
+    private final int taxTimeMinute;
+    private final int taxTimeSecond;
+
     private final int minChunkDistance;
     private final int minSpawnDistance;
 
@@ -75,5 +79,9 @@ public class MetropolisConfiguration {
         cityMaxTax = plugin.getConfig().getDouble("settings.limits.citymaxtax");
         minChunkDistance = plugin.getConfig().getInt("settings.limits.minchunkdistance");
         minSpawnDistance = plugin.getConfig().getInt("settings.limits.minspawndistance");
+
+        taxTimeHour = plugin.getConfig().getInt("settings.taxtime.hour");
+        taxTimeMinute = plugin.getConfig().getInt("settings.taxtime.minute");
+        taxTimeSecond = plugin.getConfig().getInt("settings.taxtime.second");
     }
 }

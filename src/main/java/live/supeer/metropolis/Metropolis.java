@@ -21,6 +21,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.UUID;
@@ -85,6 +86,7 @@ public final class Metropolis extends JavaPlugin {
         Database.initialize();
         Database.synchronize();
         registerCompletions(manager);
+        scheduleDailyTaxCollection();
     }
 
     @Override
@@ -168,5 +170,32 @@ public final class Metropolis extends JavaPlugin {
 
             return CityDatabase.getCityGoNames(city, role);
         });
+        manager.getCommandCompletions().registerCompletion("cityNames", c -> {
+            Player player = c.getPlayer();
+            if (player == null) {
+                return Collections.emptyList();
+            }
+
+            return CityDatabase.getCitynames(player);
+        });
+    }
+
+    public void scheduleDailyTaxCollection() {
+        Calendar now = Calendar.getInstance();
+
+        Calendar nextRun = Calendar.getInstance();
+        nextRun.set(Calendar.HOUR_OF_DAY, configuration.getTaxTimeHour());
+        nextRun.set(Calendar.MINUTE, configuration.getTaxTimeMinute());
+        nextRun.set(Calendar.SECOND, configuration.getTaxTimeSecond());
+
+        if (now.after(nextRun)) {
+            nextRun.add(Calendar.DAY_OF_MONTH, 1);
+        }
+
+        long initialDelay = nextRun.getTimeInMillis() - now.getTimeInMillis();
+
+        getServer().getScheduler().runTaskTimer(this, () -> {
+            getServer().getScheduler().runTask(this, CityDatabase::drawTaxes);
+        }, initialDelay / 50, 24 * 60 * 60 * 20); // Convert to ticks (20 ticks = 1 second)
     }
 }
