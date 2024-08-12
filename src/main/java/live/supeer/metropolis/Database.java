@@ -85,7 +85,17 @@ public class Database {
                                 `joinDate` bigint(30) DEFAULT NULL,
                                 PRIMARY KEY (cityId,playerUUID)
                               ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;""");
-
+            DB.executeUpdate(
+                    """
+                              CREATE TABLE IF NOT EXISTS `mp_cells` (
+                                `plotId` int(11) NOT NULL,
+                                `cellId` int(11) NOT NULL AUTO_INCREMENT,
+                                `location` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+                                `signLocation` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                                `signSide` tinyint(1) DEFAULT 0,
+                                `prisonerUUID` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                                PRIMARY KEY (cellId,plotId)
+                              ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;""");
             DB.executeUpdate(
                     """
                               CREATE TABLE IF NOT EXISTS `mp_homecities` (

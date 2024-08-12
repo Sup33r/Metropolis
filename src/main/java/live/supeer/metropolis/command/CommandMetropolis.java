@@ -4,13 +4,9 @@ import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
 import live.supeer.metropolis.Database;
 import live.supeer.metropolis.Metropolis;
-import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.city.CityDatabase;
-import live.supeer.metropolis.city.Role;
 import live.supeer.metropolis.utils.Utilities;
 import org.bukkit.entity.Player;
-
-import java.util.Arrays;
 
 @CommandAlias("metropolis | mp")
 public class CommandMetropolis extends BaseCommand {
@@ -19,7 +15,7 @@ public class CommandMetropolis extends BaseCommand {
     @Subcommand("taxcollect")
     public void onTaxCollect(Player player) {
         if (player.hasPermission("metropolis.admin.taxcollect")) {
-            CityDatabase.drawTaxes();
+            CityDatabase.collectTaxes();
         } else {
             plugin.sendMessage(player, "messages.error.permissionDenied");
         }

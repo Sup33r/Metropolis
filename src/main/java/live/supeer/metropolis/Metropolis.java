@@ -56,6 +56,8 @@ public final class Metropolis extends JavaPlugin {
         Claim.plugin = this;
         District.plugin = this;
         City.plugin = this;
+        Cell.plugin = this;
+        JailManager.plugin = this;
         Member.plugin = this;
         LocationUtil.plugin = this;
         MetropolisListener.plugin = this;
@@ -133,6 +135,15 @@ public final class Metropolis extends JavaPlugin {
         return null;
     }
 
+    public Component getMessageComponent(@NotNull String key, String... replacements) {
+        String message = this.languageManager.getValue(key, "sv_se", replacements);
+
+        if (message != null && !message.isEmpty()) {
+            return languageManager.getMiniMessage().deserialize(message);
+        }
+        return null;
+    }
+
     public String getRawMessage(@NotNull String key, String... replacements) {
         return this.languageManager.getValue(key, "sv_se", replacements);
     }
@@ -195,7 +206,7 @@ public final class Metropolis extends JavaPlugin {
         long initialDelay = nextRun.getTimeInMillis() - now.getTimeInMillis();
 
         getServer().getScheduler().runTaskTimer(this, () -> {
-            getServer().getScheduler().runTask(this, CityDatabase::drawTaxes);
+            getServer().getScheduler().runTask(this, CityDatabase::collectTaxes);
         }, initialDelay / 50, 24 * 60 * 60 * 20); // Convert to ticks (20 ticks = 1 second)
     }
 }

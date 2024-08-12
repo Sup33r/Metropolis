@@ -86,6 +86,12 @@ messages:
       market: "<gray>Syntax: /plot market <underlined>pris\n<gray>Syntax: /plot market <underlined>-"
       perm: "<gray>Syntax: /plot perm <underlined>spelare<reset><gray> +/-<underlined>ändring</underlined>\n<gray>Syntax: /plot perm members +/-<underlined>ändring</underlined>\n<gray>Syntax: /plot perm outsiders +/-<underlined>ändring</underlined>"
   error:
+    cell:
+      notFound: "<red>Cellen hittades inte."
+      noCells: "<red>Det finns inga celler på tomten."
+      noCell: "<red>Du har ingen pågående cell."
+    jail:
+      notJail: "<red>Tomten är inte av typen fängelse."
     invalidNumber: "<red>Det angivna värdet är inte ett giltigt nummer."
     player:
       notFound: "<red>Spelaren hittades inte."
@@ -341,6 +347,26 @@ messages:
           1: "<gray>a = animal, b = block, c = container, e = enderpearl"
           2: "<gray>f = frame, g = go, h = home, j = jukebox"
           3: "<gray>r = repair (anvil), s = switch, t = teleport, v = villager"
+  cell:
+    banned: "<green>Du har bannlyst spelaren."
+    updated: "<green>Cellen har uppdaterats."
+    teleported: "<green>Du har teleporterats till Cell #%id%."
+    cancelled: "<red>Cellskapandet har avbrutits."
+    sign:
+      set: "<green>Cellskylten har satts."
+      alreadyExists: "<red>Det finns redan en cellskylt på denna plats. Försök igen, eller avbryt med /plot cell cancel."
+      occupied:
+        row0: "<dark_gray>Här avtjänar"
+        row1: "<black>%playername%"
+        row2: "<dark_gray>sitt straff."
+        row3: " "
+      empty:
+        row0: " "
+        row1: "<dark_gray>Tom cell"
+        row2: "<dark_gray>Cell ID: %id%"
+        row3: " "
+    created: "<green>Cellen har påbörjats med id #%id%."
+    clickSign: "<green>För att slutföra cellen, klicka på skylten som ska anslutas."
   city:
     becameReserve: "<aqua>Staden %cityname% har gått under och blivit ett naturreservat."
     wentUnder: "<aqua>Staden %cityname% har gått under."

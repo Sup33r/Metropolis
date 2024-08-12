@@ -2,9 +2,7 @@ package live.supeer.metropolis.command;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
-import live.supeer.metropolis.Database;
-import live.supeer.metropolis.Metropolis;
-import live.supeer.metropolis.MetropolisListener;
+import live.supeer.metropolis.*;
 import live.supeer.metropolis.city.Role;
 import live.supeer.metropolis.event.PlayerEnterPlotEvent;
 import live.supeer.metropolis.utils.LocationUtil;
@@ -15,6 +13,10 @@ import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.plot.PlotDatabase;
 import live.supeer.metropolis.plot.PlotPerms;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
@@ -2371,5 +2373,178 @@ public class CommandPlot extends BaseCommand {
                 String.valueOf(plot.getPlotPrice()));
         plot.setForSale(false);
         plot.setPlotPrice(0);
+    }
+
+    @Subcommand("cell")
+    public class CellCommands extends BaseCommand {
+
+        @Subcommand("new")
+        public void onNewCell(Player player) {
+            if (!player.hasPermission("metropolis.admin.cell.new")) {
+                plugin.sendMessage(player, "messages.error.permissionDenied");
+                return;
+            }
+            Plot plot = PlotDatabase.getPlotAtLocation(player.getLocation().toBlockLocation());
+            if (plot == null) {
+                return;
+            }
+            if (!plot.isJail()) {
+                plugin.sendMessage(player, "messages.error.jail.notJail");
+                return;
+            }
+
+            Location cellLocation = player.getLocation().toBlockLocation();
+            Cell cell = JailManager.createCell(plot,cellLocation);
+            plugin.sendMessage(player,"messages.cell.created", "%id%", String.valueOf(cell.getCellId()));
+            plugin.sendMessage(player, "messages.cell.clickSign");
+
+            MetropolisListener.waitingForSignClick.put(player.getUniqueId(), cell);
+        }
+
+        @Subcommand("cancel")
+        public void onCancel(Player player) {
+            if (!player.hasPermission("metropolis.admin.cell.cancel")) {
+                plugin.sendMessage(player, "messages.error.permissionDenied");
+                return;
+            }
+            Cell cell = MetropolisListener.waitingForSignClick.get(player.getUniqueId());
+            if (cell == null) {
+                plugin.sendMessage(player, "messages.error.cell.noCell");
+                return;
+            }
+            JailManager.deleteCell(cell);
+            MetropolisListener.waitingForSignClick.remove(player.getUniqueId());
+            plugin.sendMessage(player, "messages.cell.cancelled");
+        }
+
+        @Subcommand("list")
+        public void onList(Player player) {
+            if (!player.hasPermission("metropolis.admin.cell.list")) {
+                plugin.sendMessage(player, "messages.error.permissionDenied");
+                return;
+            }
+            Plot plot = PlotDatabase.getPlotAtLocation(player.getLocation().toBlockLocation());
+            if (plot == null) {
+                return;
+            }
+            if (!plot.isJail()) {
+                plugin.sendMessage(player, "messages.error.jail.notJail");
+                return;
+            }
+
+            List<Cell> cells = JailManager.getCellsForPlot(plot);
+            if (cells.isEmpty()) {
+                plugin.sendMessage(player, "messages.error.cell.noCells");
+                return;
+            }
+
+            cells.sort((c1, c2) -> {
+                if (c1.getSignLocation() == null && c2.getSignLocation() != null) return -1;
+                if (c1.getSignLocation() != null && c2.getSignLocation() == null) return 1;
+                return Integer.compare(c1.getCellId(), c2.getCellId());
+            });
+
+            plugin.sendMessage(player, "messages.cell.list.header");
+
+            for (Cell cell : cells) {
+                Component message;
+                if (cell.getSignLocation() == null) {
+                    message = Component.text("Cell #" + cell.getCellId() + " (Invalid - No sign)")
+                            .color(NamedTextColor.RED);
+                } else {
+                    message = Component.text("Cell #" + cell.getCellId())
+                            .color(NamedTextColor.GREEN);
+                }
+
+                message = message.clickEvent(ClickEvent.runCommand("/plot cell tp " + cell.getCellId()))
+                        .hoverEvent(HoverEvent.showText(Component.text("Click to teleport")));
+
+                player.sendMessage(message);
+            }
+        }
+
+        @Subcommand("tp")
+        public void onTp(Player player, int cellId) {
+            if (!player.hasPermission("metropolis.admin.cell.tp")) {
+                plugin.sendMessage(player, "messages.error.permissionDenied");
+                return;
+            }
+            Plot plot = PlotDatabase.getPlotAtLocation(player.getLocation().toBlockLocation());
+            if (plot == null) {
+                return;
+            }
+            if (!plot.isJail()) {
+                plugin.sendMessage(player, "messages.error.jail.notJail");
+                return;
+            }
+
+            List<Cell> cells = JailManager.getCellsForPlot(plot);
+            Cell targetCell = cells.stream()
+                    .filter(cell -> cell.getCellId() == cellId)
+                    .findFirst()
+                    .orElse(null);
+
+            if (targetCell == null) {
+                plugin.sendMessage(player, "messages.error.cell.notFound");
+                return;
+            }
+
+            player.teleport(targetCell.getLocation());
+            plugin.sendMessage(player, "messages.cell.teleported", "%id%", String.valueOf(cellId));
+        }
+
+        @Subcommand("update")
+        public void onUpdate(Player player, int cellId) {
+            if (!player.hasPermission("metropolis.admin.cell.update")) {
+                plugin.sendMessage(player, "messages.error.permissionDenied");
+                return;
+            }
+            Plot plot = PlotDatabase.getPlotAtLocation(player.getLocation().toBlockLocation());
+            if (plot == null) {
+                return;
+            }
+            if (!plot.isJail()) {
+                plugin.sendMessage(player, "messages.error.jail.notJail");
+                return;
+            }
+
+            if (!JailManager.cellExists(cellId)) {
+                plugin.sendMessage(player, "messages.error.cell.notFound");
+                return;
+            }
+            Cell cell = JailManager.getCell(cellId);
+            cell.setLocation(player.getLocation().toBlockLocation());
+            plugin.sendMessage(player, "messages.cell.updated", "%id%", String.valueOf(cellId));
+        }
+
+
+        // Just to see if it works.
+//        @Subcommand("ban")
+//        public void onBan(Player player, Player target) {
+//            if (!player.hasPermission("metropolis.admin.cell.ban")) {
+//                plugin.sendMessage(player, "messages.error.permissionDenied");
+//                return;
+//            }
+//            Plot plot = PlotDatabase.getPlotAtLocation(player.getLocation().toBlockLocation());
+//            if (plot == null) {
+//                return;
+//            }
+//            if (!plot.isJail()) {
+//                plugin.sendMessage(player, "messages.error.jail.notJail");
+//                return;
+//            }
+//
+//            if (target == null) {
+//                plugin.sendMessage(player, "messages.error.playerNotFound");
+//                return;
+//            }
+//
+//            Cell cell = JailManager.getRandomEmptyCell();
+//            target.teleport(cell.getLocation());
+//            cell.setPrisonerUUID(target.getUniqueId().toString());
+//            JailManager.displayOccupiedCell(cell);
+//            plugin.sendMessage(player, "messages.cell.banned", "%player%", target.getName());
+//
+//        }
     }
 }

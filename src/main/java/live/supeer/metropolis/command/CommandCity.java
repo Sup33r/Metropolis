@@ -1885,7 +1885,7 @@ public class CommandCity extends BaseCommand {
     }
 
     @Subcommand("leave")
-    public static void onLeave(Player player, String cityname) throws SQLException {
+    public static void onLeave(Player player, String cityname) {
         City city = Utilities.hasCityPermissions(player, "metropolis.city.leave", Role.MEMBER);
         if (city == null) {
             return;
@@ -1894,7 +1894,7 @@ public class CommandCity extends BaseCommand {
 //            plugin.sendMessage(player, "messages.error.city.notInCity");
 //            return;
 //        }
-        if (Objects.equals(CityDatabase.getCityRole(city, player.getUniqueId().toString()), Role.MAYOR)) {
+        if (Objects.equals(CityDatabase.getCityRole(city, player.getUniqueId().toString()), Role.MAYOR) && !city.isReserve()) {
             plugin.sendMessage(player, "messages.error.city.leave.mayor", "%cityname%", cityname);
             return;
         }

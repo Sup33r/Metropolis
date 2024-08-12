@@ -5,14 +5,12 @@ import co.aikar.idb.DbRow;
 import live.supeer.metropolis.Database;
 import live.supeer.metropolis.Metropolis;
 import live.supeer.metropolis.utils.LocationUtil;
-import live.supeer.metropolis.utils.Utilities;
 import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.utils.DateUtil;
 import org.bukkit.*;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.intellij.lang.annotations.Language;
 import org.locationtech.jts.geom.*;
 
 import java.sql.SQLException;
@@ -422,7 +420,7 @@ public class CityDatabase {
         return null;
     }
 
-    public static void drawTaxes() {
+    public static void collectTaxes() {
         Iterator<City> iterator = cities.iterator();
         while (iterator.hasNext()) {
             City city = iterator.next();

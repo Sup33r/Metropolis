@@ -11,6 +11,7 @@ import live.supeer.metropolis.plot.PlotDatabase;
 import live.supeer.metropolis.utils.DateUtil;
 import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.utils.Utilities;
+import org.bukkit.block.Sign;
 import org.bukkit.event.player.*;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
@@ -60,6 +61,8 @@ public class MetropolisListener implements Listener {
 
     public static HashMap<UUID, List<Location>> savedLocs = new HashMap<>();
 
+    public static HashMap<UUID, Cell> waitingForSignClick = new HashMap<>();
+
     @EventHandler
     public static void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
@@ -108,6 +111,22 @@ public class MetropolisListener implements Listener {
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         Player player = event.getPlayer();
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK && Objects.requireNonNull(event.getClickedBlock()).getState() instanceof Sign) {
+            if (!waitingForSignClick.containsKey(player.getUniqueId())) {
+                return;
+            }
+            event.setCancelled(true);
+            if (JailManager.signAlreadyExists(event.getClickedBlock().getLocation())) {
+                plugin.sendMessage(player, "messages.cell.sign.alreadyExists");
+                return;
+            }
+            Cell cell = waitingForSignClick.get(player.getUniqueId());
+            JailManager.UpdateCellSign(cell, event.getClickedBlock().getLocation(), ((Sign) event.getClickedBlock().getState()).getInteractableSideFor(player));
+            plugin.sendMessage(player, "messages.cell.sign.set");
+            JailManager.displaySignEmptyCell(cell);
+            waitingForSignClick.remove(player.getUniqueId());
+        }
+
         if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
             if (event.getMaterial() == Material.STICK) {
                 event.setCancelled(true);

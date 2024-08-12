@@ -47,6 +47,7 @@ public class Plot {
     private final long plotCreationDate;
     private final World plotWorld;
     private Polygon plotPoints;
+    private boolean isJail;
     private final City city;
 
     public Plot(DbRow data) {
@@ -83,6 +84,7 @@ public class Plot {
         this.plotCreationDate = data.getLong("plotCreationDate");
         this.plotPoints = LocationUtil.stringToPolygon(data.getString("plotPoints"));
         this.plotWorld = plotCenter.getWorld();
+        this.isJail = plotType != null && plotType.equalsIgnoreCase("jail");
     }
 
     public void setPlotName(String plotName) {
@@ -97,6 +99,7 @@ public class Plot {
 
     public void setPlotType(String plotType) {
         this.plotType = plotType;
+        this.isJail = plotType != null && plotType.equalsIgnoreCase("jail");
         DB.executeUpdateAsync(
                 "UPDATE `mp_plots` SET `plotType` = "
                         + Database.sqlString(plotType)
