@@ -6,6 +6,7 @@ sql:
   password:
 
 settings:
+  locale: sv_se
   limits:
     cityname: 16
     citygoname: 42

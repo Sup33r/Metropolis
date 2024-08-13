@@ -29,7 +29,6 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
 
-import java.sql.SQLException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -2569,7 +2568,7 @@ public class CommandCity extends BaseCommand {
         }
 
         @Subcommand("set")
-        @CommandCompletion("@name")
+        @CommandCompletion("name")
         public static void onSet(Player player, String subcommand, String name) {
             City city = Utilities.hasCityPermissions(player, "metropolis.city.district.set", Role.VICE_MAYOR);
             if (city == null) {

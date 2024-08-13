@@ -28,6 +28,8 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 public final class Metropolis extends JavaPlugin {
+    private MetropolisAPI api;
+
     public static HashMap<UUID, City> playerInCity = new HashMap<>();
     public static HashMap<UUID, Plot> playerInPlot = new HashMap<>();
     public static HashMap<UUID, District> playerInDistrict = new HashMap<>();
@@ -89,6 +91,9 @@ public final class Metropolis extends JavaPlugin {
         Database.synchronize();
         registerCompletions(manager);
         scheduleDailyTaxCollection();
+
+        this.api = new MetropolisAPI(this);
+
     }
 
     @Override
@@ -107,6 +112,10 @@ public final class Metropolis extends JavaPlugin {
         }
         econ = rsp.getProvider();
         return econ != null;
+    }
+
+    public MetropolisAPI getAPI() {
+        return this.api;
     }
 
     public static Economy getEconomy() {
@@ -157,7 +166,6 @@ public final class Metropolis extends JavaPlugin {
     }
 
     public static void registerCompletions(PaperCommandManager manager) {
-        manager.getCommandCompletions().registerCompletion("name", c -> ImmutableList.of("name"));
         manager.getCommandCompletions().registerCompletion("plotType", c -> ImmutableList.of("church", "farm", "shop", "vacation"));
         manager.getCommandCompletions().registerCompletion("cityRoles", c -> ImmutableList.of("vicemayor", "assistant", "inviter", "member", "swap", "-", "member"));
         manager.getCommandCompletions().registerCompletion("cityGo1", c -> ImmutableList.of("delete", "set"));
