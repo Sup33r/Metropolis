@@ -44,7 +44,6 @@ public final class Metropolis extends JavaPlugin {
         return plugin;
     }
 
-    @Override
     public void onEnable() {
         plugin = this;
         this.logger = getLogger();
