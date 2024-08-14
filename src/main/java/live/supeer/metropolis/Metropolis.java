@@ -37,8 +37,12 @@ public final class Metropolis extends JavaPlugin {
     public static MetropolisConfiguration configuration;
     @Getter
     private static Metropolis plugin;
-    private LanguageManager languageManager;
+    private static LanguageManager languageManager;
     private static Economy econ = null;
+
+    public static Metropolis getInstance() {
+        return plugin;
+    }
 
     @Override
     public void onEnable() {
@@ -122,9 +126,8 @@ public final class Metropolis extends JavaPlugin {
         return econ;
     }
 
-    public void sendMessage(
-            @NotNull CommandSender sender, @NotNull String key, String... replacements) {
-        String message = this.languageManager.getValue(key, getLocale(sender), replacements);
+    public static void sendMessage(@NotNull CommandSender sender, @NotNull String key, String... replacements) {
+        String message = languageManager.getValue(key, getLocale(sender), replacements);
 
         if (message != null && !message.isEmpty()) {
             Component component = languageManager.getMiniMessage().deserialize(message);
@@ -132,8 +135,8 @@ public final class Metropolis extends JavaPlugin {
         }
     }
 
-    public String getMessage(@NotNull String key, String... replacements) {
-        String message = this.languageManager.getValue(key, "sv_se", replacements);
+    public static String getMessage(@NotNull String key, String... replacements) {
+        String message = languageManager.getValue(key, "sv_se", replacements);
 
         if (message != null && !message.isEmpty()) {
             // Deserialize MiniMessage to a Component
@@ -144,8 +147,8 @@ public final class Metropolis extends JavaPlugin {
         return null;
     }
 
-    public Component getMessageComponent(@NotNull String key, String... replacements) {
-        String message = this.languageManager.getValue(key, "sv_se", replacements);
+    public static Component getMessageComponent(@NotNull String key, String... replacements) {
+        String message = languageManager.getValue(key, "sv_se", replacements);
 
         if (message != null && !message.isEmpty()) {
             return languageManager.getMiniMessage().deserialize(message);
@@ -153,15 +156,15 @@ public final class Metropolis extends JavaPlugin {
         return null;
     }
 
-    public String getRawMessage(@NotNull String key, String... replacements) {
-        return this.languageManager.getValue(key, "sv_se", replacements);
+    public static String getRawMessage(@NotNull String key, String... replacements) {
+        return languageManager.getValue(key, "sv_se", replacements);
     }
 
-    private @NotNull String getLocale(@NotNull CommandSender sender) {
+    private static @NotNull String getLocale(@NotNull CommandSender sender) {
         if (sender instanceof Player) {
             return ((Player) sender).getLocale();
         } else {
-            return this.getConfig().getString("settings.locale", "sv_se");
+            return Metropolis.getInstance().getConfig().getString("settings.locale", "sv_se");
         }
     }
 

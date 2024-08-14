@@ -91,13 +91,13 @@ public class MetropolisListener implements Listener {
                 String cityMotd = city.getMotdMessage();
                 if (cityMotd != null) {
                     if (city.isReserve()) {
-                        plugin.sendMessage(player, "messages.city.motd.reserve", "%cityname%", city.getCityName(), "%motd%", cityMotd);
+                        Metropolis.sendMessage(player, "messages.city.motd.reserve", "%cityname%", city.getCityName(), "%motd%", cityMotd);
                     } else {
-                        plugin.sendMessage(player, "messages.city.motd.normal", "%cityname%", city.getCityName(), "%motd%", cityMotd);
+                        Metropolis.sendMessage(player, "messages.city.motd.normal", "%cityname%", city.getCityName(), "%motd%", cityMotd);
                     }
                 }
                 if (!city.isReserve() && city.cityCouldGoUnder(1)) {
-                    plugin.sendMessage(player, "messages.city.warning.lowBalance", "%cityname%", city.getCityName());
+                    Metropolis.sendMessage(player, "messages.city.warning.lowBalance", "%cityname%", city.getCityName());
                 }
             }
         }
@@ -117,12 +117,12 @@ public class MetropolisListener implements Listener {
             }
             event.setCancelled(true);
             if (JailManager.signAlreadyExists(event.getClickedBlock().getLocation())) {
-                plugin.sendMessage(player, "messages.cell.sign.alreadyExists");
+                Metropolis.sendMessage(player, "messages.cell.sign.alreadyExists");
                 return;
             }
             Cell cell = waitingForSignClick.get(player.getUniqueId());
             JailManager.UpdateCellSign(cell, event.getClickedBlock().getLocation(), ((Sign) event.getClickedBlock().getState()).getInteractableSideFor(player));
-            plugin.sendMessage(player, "messages.cell.sign.set");
+            Metropolis.sendMessage(player, "messages.cell.sign.set");
             JailManager.displaySignEmptyCell(cell);
             waitingForSignClick.remove(player.getUniqueId());
         }
@@ -137,7 +137,7 @@ public class MetropolisListener implements Listener {
                 playerYMax.remove(player.getUniqueId());
                 playerYMin.remove(player.getUniqueId());
                 playerPolygons.remove(player.getUniqueId());
-                plugin.sendMessage(
+                Metropolis.sendMessage(
                         player,
                         "messages.city.markings.new",
                         "%world%",
@@ -155,7 +155,7 @@ public class MetropolisListener implements Listener {
                 if (CommandCity.blockEnabled.contains(player)) {
                     event.setCancelled(true);
                     if (CityDatabase.getClaim(event.getClickedBlock().getLocation()) == null) {
-                        plugin.sendMessage(player, "messages.error.permissionDenied");
+                        Metropolis.sendMessage(player, "messages.error.permissionDenied");
                         return;
                     }
                     City city = CityDatabase.getCityByClaim(event.getClickedBlock().getLocation());
@@ -168,7 +168,7 @@ public class MetropolisListener implements Listener {
                             coreProtectInteractCheck(player, event);
                             return;
                         } else {
-                            plugin.sendMessage(
+                            Metropolis.sendMessage(
                                     player,
                                     "messages.error.city.permissionDenied",
                                     "%cityname%",
@@ -180,7 +180,7 @@ public class MetropolisListener implements Listener {
                             || Objects.equals(role, Role.VICE_MAYOR)
                             || Objects.equals(role, Role.MAYOR);
                     if (!isAssistant) {
-                        plugin.sendMessage(
+                        Metropolis.sendMessage(
                                 player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
                         return;
                     }
@@ -189,12 +189,12 @@ public class MetropolisListener implements Listener {
                 }
                 event.setCancelled(true);
                 if (savedPlayers.contains(player)) {
-                    plugin.sendMessage(player, "messages.city.markings.finished");
+                    Metropolis.sendMessage(player, "messages.city.markings.finished");
                     return;
                 }
                 if (savedLocs.get(player.getUniqueId()) == null
                         || savedLocs.get(player.getUniqueId()).isEmpty()) {
-                    plugin.sendMessage(player, "messages.city.markings.none");
+                    Metropolis.sendMessage(player, "messages.city.markings.none");
                     return;
                 }
                 if (!savedLocs.get(player.getUniqueId()).isEmpty()
@@ -202,7 +202,7 @@ public class MetropolisListener implements Listener {
                         .get(player.getUniqueId())
                         .get(savedLocs.get(player.getUniqueId()).size() - 1)
                         .equals(event.getClickedBlock().getLocation())) {
-                    plugin.sendMessage(player, "messages.city.markings.sameBlock");
+                    Metropolis.sendMessage(player, "messages.city.markings.sameBlock");
                     return;
                 }
                 if (!savedLocs.get(player.getUniqueId()).isEmpty()
@@ -211,11 +211,11 @@ public class MetropolisListener implements Listener {
                         .get(0)
                         .getWorld()
                         .equals(event.getClickedBlock().getWorld())) {
-                    plugin.sendMessage(player, "messages.city.markings.differentWorlds");
+                    Metropolis.sendMessage(player, "messages.city.markings.differentWorlds");
                     return;
                 }
 
-                plugin.sendMessage(
+                Metropolis.sendMessage(
                         player,
                         "messages.city.markings.add",
                         "%world%",
@@ -245,7 +245,7 @@ public class MetropolisListener implements Listener {
                         }
                     }
                     playerPolygons.put(player.getUniqueId(), regionPolygon);
-                    plugin.sendMessage(player, "messages.city.markings.finish");
+                    Metropolis.sendMessage(player, "messages.city.markings.finish");
                     savedPlayers.add(player);
                 }
                 savedLocs.get(player.getUniqueId()).add(event.getClickedBlock().getLocation());
@@ -260,7 +260,7 @@ public class MetropolisListener implements Listener {
             if (CommandCity.blockEnabled.contains(player)) {
                 event.setCancelled(true);
                 if (CityDatabase.getClaim(event.getBlockPlaced().getLocation()) == null) {
-                    plugin.sendMessage(player, "messages.error.permissionDenied");
+                    Metropolis.sendMessage(player, "messages.error.permissionDenied");
                     return;
                 }
                 City city = CityDatabase.getCityByClaim(event.getBlockPlaced().getLocation());
@@ -272,7 +272,7 @@ public class MetropolisListener implements Listener {
                         coreProtectPlaceCheck(player, event);
                         return;
                     } else {
-                        plugin.sendMessage(
+                        Metropolis.sendMessage(
                                 player,
                                 "messages.error.city.permissionDenied",
                                 "%cityname%",
@@ -284,7 +284,7 @@ public class MetropolisListener implements Listener {
                         || Objects.equals(role, Role.VICE_MAYOR)
                         || Objects.equals(role, Role.MAYOR);
                 if (!isAssistant) {
-                    plugin.sendMessage(
+                    Metropolis.sendMessage(
                             player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
                     return;
                 }
@@ -366,7 +366,7 @@ public class MetropolisListener implements Listener {
         if(AutoclaimManager.isAutoclaiming(player)) {
             final String cityname = AutoclaimManager.getAutoclaimInfo(player).getCity().getCityName();
             AutoclaimManager.stopAutoclaim(player);
-            plugin.sendMessage(player, "messages.city.autoclaim.stopped", "%cityname%", cityname);
+            Metropolis.sendMessage(player, "messages.city.autoclaim.stopped", "%cityname%", cityname);
         }
 
         // Check for city changes
@@ -424,7 +424,7 @@ public class MetropolisListener implements Listener {
         if(AutoclaimManager.isAutoclaiming(player)) {
             final String cityname = AutoclaimManager.getAutoclaimInfo(player).getCity().getCityName();
             AutoclaimManager.stopAutoclaim(player);
-            plugin.sendMessage(player, "messages.city.autoclaim.stopped", "%cityname%", cityname);
+            Metropolis.sendMessage(player, "messages.city.autoclaim.stopped", "%cityname%", cityname);
         }
 
         // Check for city changes
@@ -470,13 +470,13 @@ public class MetropolisListener implements Listener {
             return;
         }
         if (getCoreProtect().blockLookup(event.getClickedBlock(), 0).isEmpty()) {
-            plugin.sendMessage(player, "messages.city.blockhistory.noData");
+            Metropolis.sendMessage(player, "messages.city.blockhistory.noData");
             return;
         }
         int itemsPerPage = 8;
         int start = 0;
         player.sendMessage("");
-        plugin.sendMessage(
+        Metropolis.sendMessage(
                 player,
                 "messages.city.blockhistory.header",
                 "%location%",
@@ -547,13 +547,13 @@ public class MetropolisListener implements Listener {
             return;
         }
         if (getCoreProtect().blockLookup(event.getBlockPlaced(), 0).isEmpty()) {
-            plugin.sendMessage(player, "messages.city.blockhistory.noData");
+            Metropolis.sendMessage(player, "messages.city.blockhistory.noData");
             return;
         }
         int itemsPerPage = 8;
         int start = 0;
         player.sendMessage("");
-        plugin.sendMessage(
+        Metropolis.sendMessage(
                 player,
                 "messages.city.blockhistory.header",
                 "%location%",

@@ -3,7 +3,6 @@ package live.supeer.metropolis.utils;
 import fr.mrmicky.fastboard.FastBoard;
 import live.supeer.metropolis.Metropolis;
 import live.supeer.metropolis.city.*;
-import live.supeer.metropolis.command.CommandCity;
 import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.plot.PlotDatabase;
@@ -158,9 +157,9 @@ public class Utilities {
             // check if the flag is valid
             if (isValidPerm(currentChar)) {
                 if (flagType.equals("plot")) {
-                    plugin.sendMessage(player, "messages.error.plot.perm.notFound");
+                    Metropolis.sendMessage(player, "messages.error.plot.perm.notFound");
                 } else {
-                    plugin.sendMessage(player, "messages.error.city.perm.notFound");
+                    Metropolis.sendMessage(player, "messages.error.city.perm.notFound");
                 }
                 return null;
             }
@@ -195,9 +194,9 @@ public class Utilities {
         // don't change if there's nothing to change
         if (flagsNew.toString().equals(new String(flagsOriginal))) {
             if (flagType.equals("plot")) {
-                plugin.sendMessage(player, "messages.error.plot.perm.noChange");
+                Metropolis.sendMessage(player, "messages.error.plot.perm.noChange");
             } else {
-                plugin.sendMessage(player, "messages.error.city.perm.noChange");
+                Metropolis.sendMessage(player, "messages.error.city.perm.noChange");
             }
             return null;
         }
@@ -217,9 +216,9 @@ public class Utilities {
         for (char flag : flags.toCharArray()) {
             if (isValidPerm(flag)) {
                 if (flagType.equals("plot")) {
-                    plugin.sendMessage(player, "messages.error.plot.perm.notFound");
+                    Metropolis.sendMessage(player, "messages.error.plot.perm.notFound");
                 } else {
-                    plugin.sendMessage(player, "messages.error.city.perm.notFound");
+                    Metropolis.sendMessage(player, "messages.error.city.perm.notFound");
                 }
                 return null;
             }
@@ -277,7 +276,7 @@ public class Utilities {
         board.updateLine(i, " ");
         i = i + 1;
         if (district != null) {
-            board.updateLine(i, plugin.getMessage("messages.city.scoreboard.district"));
+            board.updateLine(i, Metropolis.getMessage("messages.city.scoreboard.district"));
             board.updateLine(i + 1, "§a" + district.getDistrictName());
             i = i + 2;
             board.updateLine(i, " ");
@@ -285,44 +284,44 @@ public class Utilities {
         }
         if (plot != null) {
             if (plot.isKMarked()) {
-                board.updateLine(i, plugin.getMessage("messages.city.scoreboard.placeK"));
+                board.updateLine(i, Metropolis.getMessage("messages.city.scoreboard.placeK"));
             } else {
-                board.updateLine(i, plugin.getMessage("messages.city.scoreboard.place"));
+                board.updateLine(i, Metropolis.getMessage("messages.city.scoreboard.place"));
             }
             board.updateLine(i + 1, "§a" + plot.getPlotName());
             i = i + 2;
             board.updateLine(i, " ");
             i = i + 1;
             if (plot.getPlotType() != null) {
-                board.updateLine(i, plugin.getMessage("messages.city.scoreboard.type"));
+                board.updateLine(i, Metropolis.getMessage("messages.city.scoreboard.type"));
                 String type = plot.getPlotType();
                 if (type.equals("church")) {
-                    type = plugin.getMessage("messages.plot.type.church");
+                    type = Metropolis.getMessage("messages.plot.type.church");
                 }
                 if (type.equals("farm")) {
-                    type = plugin.getMessage("messages.plot.type.farm");
+                    type = Metropolis.getMessage("messages.plot.type.farm");
                 }
                 if (type.equals("shop")) {
-                    type = plugin.getMessage("messages.plot.type.shop");
+                    type = Metropolis.getMessage("messages.plot.type.shop");
                 }
                 if (type.equals("vacation")) {
-                    type = plugin.getMessage("messages.plot.type.vacation");
+                    type = Metropolis.getMessage("messages.plot.type.vacation");
                 }
                 if (type.equals("jail")) {
-                    type = plugin.getMessage("messages.plot.type.jail");
+                    type = Metropolis.getMessage("messages.plot.type.jail");
                 }
                 board.updateLine(i + 1, "§a" + type);
                 board.updateLine(i + 2, " ");
                 i = i + 3;
             }
             if (plot.getPlotOwner() != null) {
-                board.updateLine(i, plugin.getMessage("messages.city.scoreboard.owner"));
+                board.updateLine(i, Metropolis.getMessage("messages.city.scoreboard.owner"));
                 board.updateLine(i + 1, "§a" + plot.getPlotOwner());
                 board.updateLine(i + 2, " ");
                 i = i + 3;
             }
             if (plot.isForSale()) {
-                board.updateLine(i, plugin.getMessage("messages.city.scoreboard.price"));
+                board.updateLine(i, Metropolis.getMessage("messages.city.scoreboard.price"));
                 board.updateLine(i + 1, "§a" + Utilities.formattedMoney(plot.getPlotPrice()) + " minemynt");
                 if (plot.getPlotRent() != 0) {
                     board.updateLine(i + 2, "§aTR: " + Utilities.formattedMoney(plot.getPlotRent()) + " minemynt");
@@ -332,13 +331,13 @@ public class Utilities {
                 board.removeLine(board.size() - 1);
             }
         } else {
-            board.updateLine(i, plugin.getMessage("messages.city.scoreboard.members"));
+            board.updateLine(i, Metropolis.getMessage("messages.city.scoreboard.members"));
             i = i + 1;
             board.updateLine(i, "§a" + city.getCityMembers().size());
             i = i + 1;
             board.updateLine(i, " ");
             i = i + 1;
-            board.updateLine(i, plugin.getMessage("messages.city.scoreboard.plots"));
+            board.updateLine(i, Metropolis.getMessage("messages.city.scoreboard.plots"));
             i = i + 1;
             board.updateLine(i, "§a" + city.getCityPlots().size());
         }
@@ -346,8 +345,8 @@ public class Utilities {
 
     public static void sendNatureScoreboard(Player player) {
         FastBoard board = new FastBoard(player);
-        board.updateTitle(plugin.getMessage("messages.city.scoreboard.nature"));
-        board.updateLine(0, plugin.getMessage("messages.city.scoreboard.pvp_on"));
+        board.updateTitle(Metropolis.getMessage("messages.city.scoreboard.nature"));
+        board.updateLine(0, Metropolis.getMessage("messages.city.scoreboard.pvp_on"));
     }
 
     public static void sendScoreboard(Player player) {
@@ -362,22 +361,22 @@ public class Utilities {
     }
     public static City hasCityPermissions(Player player, String permission, Role targetRole) {
         if (!player.hasPermission(permission)) {
-            plugin.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendMessage(player, "messages.error.permissionDenied");
             return null;
         }
         City city = HCDatabase.getHomeCityToCity(player.getUniqueId().toString());
         if (city == null) {
-            plugin.sendMessage(player, "messages.error.missing.homeCity");
+            Metropolis.sendMessage(player, "messages.error.missing.homeCity");
             return null;
         }
         if (targetRole != null) {
             Role role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
             if (role == null) {
-                plugin.sendMessage(player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
+                Metropolis.sendMessage(player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
                 return null;
             }
             if (role.getPermissionLevel() < targetRole.getPermissionLevel()) {
-                plugin.sendMessage(player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
+                Metropolis.sendMessage(player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
                 return null;
             }
         }
@@ -385,12 +384,12 @@ public class Utilities {
     }
     public static Plot hasPlotPermissions(Player player, String permission, Role targetRole, boolean isOwner) {
         if (permission != null && !player.hasPermission(permission)) {
-            plugin.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendMessage(player, "messages.error.permissionDenied");
             return null;
         }
         Plot plot = PlotDatabase.getPlotAtLocation(player.getLocation());
         if (plot == null) {
-            plugin.sendMessage(player, "messages.error.plot.notInPlot");
+            Metropolis.sendMessage(player, "messages.error.plot.notInPlot");
             return null;
         }
         Role role = CityDatabase.getCityRole(plot.getCity(), player.getUniqueId().toString());
@@ -403,15 +402,15 @@ public class Utilities {
                     return plot;
                 }
             }
-            plugin.sendMessage(player, "messages.error.plot.permissionDenied");
+            Metropolis.sendMessage(player, "messages.error.plot.permissionDenied");
             return null;
         } else {
             if (role == null) {
-                plugin.sendMessage(player, "messages.error.plot.permissionDenied");
+                Metropolis.sendMessage(player, "messages.error.plot.permissionDenied");
                 return null;
             }
             if (role.getPermissionLevel() < targetRole.getPermissionLevel()) {
-                plugin.sendMessage(player, "messages.error.plot.permissionDenied");
+                Metropolis.sendMessage(player, "messages.error.plot.permissionDenied");
                 return null;
             }
         }
@@ -449,11 +448,11 @@ public class Utilities {
     }
 
     public static void sendMapToPlayer(Player player, String[][] asciiMap, City city) {
-        CommandCity.plugin.sendMessage(player, "messages.city.map.header", "%cityname%", city != null ? city.getCityName() : CommandCity.plugin.getMessage("messages.words.wilderness"));
+        Metropolis.sendMessage(player, "messages.city.map.header", "%cityname%", city != null ? city.getCityName() : Metropolis.getMessage("messages.words.wilderness"));
         if (city == null) {
-            CommandCity.plugin.sendMessage(player, "messages.city.map.legend.wilderness");
+            Metropolis.sendMessage(player, "messages.city.map.legend.wilderness");
         } else {
-            CommandCity.plugin.sendMessage(player, "messages.city.map.legend.city", "%cityname%", city.getCityName());
+            Metropolis.sendMessage(player, "messages.city.map.legend.city", "%cityname%", city.getCityName());
         }
 
         StringBuilder mapBuilder = new StringBuilder();
@@ -591,17 +590,17 @@ public class Utilities {
     public static String taxPayedBy(String role) {
         switch (role) {
             case "mayor":
-                return plugin.getMessage("messages.city.cityInfo.roles.mayor") + ", " + plugin.getMessage("messages.city.cityInfo.roles.vicemayor") + ", " + plugin.getMessage("messages.city.cityInfo.roles.assistant") + ", " + plugin.getMessage("messages.city.cityInfo.roles.inviter") + " " + plugin.getMessage("messages.words.and") + " " + plugin.getMessage("messages.city.cityInfo.roles.member");
+                return Metropolis.getMessage("messages.city.cityInfo.roles.mayor") + ", " + Metropolis.getMessage("messages.city.cityInfo.roles.vicemayor") + ", " + Metropolis.getMessage("messages.city.cityInfo.roles.assistant") + ", " + Metropolis.getMessage("messages.city.cityInfo.roles.inviter") + " " + Metropolis.getMessage("messages.words.and") + " " + Metropolis.getMessage("messages.city.cityInfo.roles.member");
             case "vicemayor":
-                return plugin.getMessage("messages.city.cityInfo.roles.vicemayor") + ", " + plugin.getMessage("messages.city.cityInfo.roles.assistant") + ", " + plugin.getMessage("messages.city.cityInfo.roles.inviter") + " " + plugin.getMessage("messages.words.and") + " " + plugin.getMessage("messages.city.cityInfo.roles.member");
+                return Metropolis.getMessage("messages.city.cityInfo.roles.vicemayor") + ", " + Metropolis.getMessage("messages.city.cityInfo.roles.assistant") + ", " + Metropolis.getMessage("messages.city.cityInfo.roles.inviter") + " " + Metropolis.getMessage("messages.words.and") + " " + Metropolis.getMessage("messages.city.cityInfo.roles.member");
             case "assistant":
-                return plugin.getMessage("messages.city.cityInfo.roles.assistant") + ", " + plugin.getMessage("messages.city.cityInfo.roles.inviter") + " " + plugin.getMessage("messages.words.and") + " " + plugin.getMessage("messages.city.cityInfo.roles.member");
+                return Metropolis.getMessage("messages.city.cityInfo.roles.assistant") + ", " + Metropolis.getMessage("messages.city.cityInfo.roles.inviter") + " " + Metropolis.getMessage("messages.words.and") + " " + Metropolis.getMessage("messages.city.cityInfo.roles.member");
             case "inviter":
-                return plugin.getMessage("messages.city.cityInfo.roles.inviter") + " " + plugin.getMessage("messages.words.and") + " " + plugin.getMessage("messages.city.cityInfo.roles.member");
+                return Metropolis.getMessage("messages.city.cityInfo.roles.inviter") + " " + Metropolis.getMessage("messages.words.and") + " " + Metropolis.getMessage("messages.city.cityInfo.roles.member");
             case "none":
-                return plugin.getMessage("messages.city.cityInfo.roles.none");
+                return Metropolis.getMessage("messages.city.cityInfo.roles.none");
             default:
-                return plugin.getMessage("messages.city.cityInfo.roles.member");
+                return Metropolis.getMessage("messages.city.cityInfo.roles.member");
         }
     }
 

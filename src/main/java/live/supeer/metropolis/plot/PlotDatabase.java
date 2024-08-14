@@ -4,6 +4,7 @@ import co.aikar.idb.DB;
 import co.aikar.idb.DbRow;
 import live.supeer.metropolis.Database;
 import live.supeer.metropolis.Metropolis;
+import live.supeer.metropolis.city.CityDatabase;
 import live.supeer.metropolis.city.Claim;
 import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.utils.Utilities;
@@ -160,28 +161,7 @@ public class PlotDatabase {
     }
 
     public static Plot getPlotAtLocation(Location location) {
-        GeometryFactory geometryFactory = new GeometryFactory();
-        Point point = geometryFactory.createPoint(new Coordinate(location.getX(), location.getZ()));
-        int y = location.getBlockY();
-        String worldName = location.getWorld().getName();
-
-        try {
-            DbRow result = DB.getFirstRow(
-                    "SELECT * FROM `mp_plots` WHERE ST_Intersects(`plotBoundary`, ST_GeomFromText(?)) AND `plotYMin` <= ? AND `plotYMax` >= ? AND `plotCenter` LIKE ?;",
-                    point.toText()
-                    , y
-                    , y
-                    , worldName + "%"
-            );
-
-            if (result != null) {
-                return new Plot(result);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return null;
+        return CityDatabase.getPlotAtLocation(location);
     }
 
     public static boolean hasPlotInClaim(Claim claim) {

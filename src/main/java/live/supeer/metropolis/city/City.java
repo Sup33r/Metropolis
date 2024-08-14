@@ -15,9 +15,7 @@ import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Getter
 public class City {
@@ -31,7 +29,7 @@ public class City {
     private final List<Member> cityMembers = new ArrayList<>();
     private final List<Claim> cityClaims = new ArrayList<>();
     private final List<Plot> cityPlots = new ArrayList<>();
-    private List<City> twinCities = new ArrayList<>();
+    private List<City> twinCities;
 //    private final List<Ban> cityBans = new ArrayList<>();
     private int minChunkDistance;
     private int minSpawnDistance;

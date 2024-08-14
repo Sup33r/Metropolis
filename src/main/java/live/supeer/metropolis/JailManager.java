@@ -4,8 +4,6 @@ import co.aikar.idb.DB;
 import co.aikar.idb.DbRow;
 import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.utils.LocationUtil;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.block.Sign;
 import org.bukkit.block.sign.Side;
@@ -110,10 +108,10 @@ public class JailManager {
         }
         Sign sign = (Sign) cell.getSignLocation().getBlock().getState();
         Side side = cell.isSignSide() ? Side.BACK : Side.FRONT;
-        sign.getSide(side).line(0, Objects.requireNonNull(plugin.getMessageComponent("messages.cell.sign.empty.row0")));
-        sign.getSide(side).line(1, Objects.requireNonNull(plugin.getMessageComponent("messages.cell.sign.empty.row1")));
-        sign.getSide(side).line(2, Objects.requireNonNull(plugin.getMessageComponent("messages.cell.sign.empty.row2", "%id%", String.valueOf(cell.getCellId()))));
-        sign.getSide(side).line(3, Objects.requireNonNull(plugin.getMessageComponent("messages.cell.sign.empty.row3")));
+        sign.getSide(side).line(0, Objects.requireNonNull(Metropolis.getMessageComponent("messages.cell.sign.empty.row0")));
+        sign.getSide(side).line(1, Objects.requireNonNull(Metropolis.getMessageComponent("messages.cell.sign.empty.row1")));
+        sign.getSide(side).line(2, Objects.requireNonNull(Metropolis.getMessageComponent("messages.cell.sign.empty.row2", "%id%", String.valueOf(cell.getCellId()))));
+        sign.getSide(side).line(3, Objects.requireNonNull(Metropolis.getMessageComponent("messages.cell.sign.empty.row3")));
         sign.setWaxed(true);
         sign.update();
     }
@@ -124,10 +122,10 @@ public class JailManager {
         }
         Sign sign = (Sign) cell.getSignLocation().getBlock().getState();
         Side side = cell.isSignSide() ? Side.BACK : Side.FRONT;
-        sign.getSide(side).line(0, Objects.requireNonNull(plugin.getMessageComponent("messages.cell.sign.occupied.row0")));
-        sign.getSide(side).line(1, Objects.requireNonNull(plugin.getMessageComponent("messages.cell.sign.occupied.row1", "%playername%", plugin.getServer().getOfflinePlayer(UUID.fromString(cell.getPrisonerUUID())).getName())));
-        sign.getSide(side).line(2, Objects.requireNonNull(plugin.getMessageComponent("messages.cell.sign.occupied.row2")));
-        sign.getSide(side).line(3, Objects.requireNonNull(plugin.getMessageComponent("messages.cell.sign.occupied.row3")));
+        sign.getSide(side).line(0, Objects.requireNonNull(Metropolis.getMessageComponent("messages.cell.sign.occupied.row0")));
+        sign.getSide(side).line(1, Objects.requireNonNull(Metropolis.getMessageComponent("messages.cell.sign.occupied.row1", "%playername%", plugin.getServer().getOfflinePlayer(UUID.fromString(cell.getPrisonerUUID())).getName())));
+        sign.getSide(side).line(2, Objects.requireNonNull(Metropolis.getMessageComponent("messages.cell.sign.occupied.row2")));
+        sign.getSide(side).line(3, Objects.requireNonNull(Metropolis.getMessageComponent("messages.cell.sign.occupied.row3")));
         sign.setWaxed(true);
         sign.update();
     }

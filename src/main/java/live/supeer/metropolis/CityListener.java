@@ -22,9 +22,9 @@ public class CityListener implements Listener {
         City city = event.getCity();
         if (city.getEnterMessage() != null) {
             if (city.isReserve()) {
-                plugin.sendMessage(event.getPlayer(), "messages.city.enter.reserve", "%cityname%", city.getCityName(), "%enter%", city.getEnterMessage());
+                Metropolis.sendMessage(event.getPlayer(), "messages.city.enter.reserve", "%cityname%", city.getCityName(), "%enter%", city.getEnterMessage());
             } else {
-                plugin.sendMessage(event.getPlayer(), "messages.city.enter.normal", "%cityname%", city.getCityName(), "%enter%", city.getExitMessage());
+                Metropolis.sendMessage(event.getPlayer(), "messages.city.enter.normal", "%cityname%", city.getCityName(), "%enter%", city.getExitMessage());
             }
         }
         Metropolis.playerInCity.put(event.getPlayer().getUniqueId(), city);
@@ -42,9 +42,9 @@ public class CityListener implements Listener {
 
         if (city.getExitMessage() != null) {
             if (city.isReserve()) {
-                plugin.sendMessage(event.getPlayer(), "messages.city.exit.reserve", "%cityname%", city.getCityName(), "%exit%", city.getExitMessage());
+                Metropolis.sendMessage(event.getPlayer(), "messages.city.exit.reserve", "%cityname%", city.getCityName(), "%exit%", city.getExitMessage());
             } else {
-                plugin.sendMessage(event.getPlayer(), "messages.city.exit.normal", "%cityname%", city.getCityName(), "%exit%", city.getExitMessage());
+                Metropolis.sendMessage(event.getPlayer(), "messages.city.exit.normal", "%cityname%", city.getCityName(), "%exit%", city.getExitMessage());
             }
         }
 
@@ -108,13 +108,13 @@ public class CityListener implements Listener {
                 AutoclaimManager.decrementAutoclaimCount(player);
                 PlayerEnterCityEvent enterCityEvent = new PlayerEnterCityEvent(player, city);
                 Bukkit.getServer().getPluginManager().callEvent(enterCityEvent);
-                plugin.sendMessage(player, "messages.city.autoclaim.claimed",
+                Metropolis.sendMessage(player, "messages.city.autoclaim.claimed",
                         "%amount%", String.valueOf(Metropolis.configuration.getCityClaimCost()),
                         "%remaining%", String.valueOf(AutoclaimManager.getAutoclaimInfo(player).getCount()), "%cityname%", city.getCityName());
             }
         } else {
             AutoclaimManager.stopAutoclaim(player);
-            plugin.sendMessage(player, "messages.city.autoclaim.unclaimable");
+            Metropolis.sendMessage(player, "messages.city.autoclaim.unclaimable");
         }
     }
 
@@ -135,7 +135,7 @@ public class CityListener implements Listener {
             return false;
         }
         if (!Utilities.cityCanClaim(city)) {
-            plugin.sendMessage(player, "messages.error.city.maxClaims", "%cityname%", city.getCityName());
+            Metropolis.sendMessage(player, "messages.error.city.maxClaims", "%cityname%", city.getCityName());
             return false;
         }
         if (!CityDatabase.getCityRole(city, player.getUniqueId().toString()).hasPermission(Role.ASSISTANT)) {

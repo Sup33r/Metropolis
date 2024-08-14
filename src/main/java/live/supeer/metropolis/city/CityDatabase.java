@@ -75,15 +75,14 @@ public class CityDatabase {
 
     public static City newCity(String cityName, Player player) {
         try {
-            DB.executeUpdate("INSERT INTO `mp_cities` (`cityName`, `originalMayorUUID`, `originalMayorName`, `cityBalance`, `citySpawn`, `createDate`, `taxLevel`) VALUES (" +
-                    Database.sqlString(cityName) + ", " +
-                    Database.sqlString(player.getUniqueId().toString()) + ", " +
-                    Database.sqlString(player.getName()) + ", " +
-                    Metropolis.configuration.getCityStartingBalance() + ", " +
-                    Database.sqlString(LocationUtil.locationToString(player.getLocation())) + ", " +
-                    DateUtil.getTimestamp() + ", " +
-                    Database.sqlString(Metropolis.configuration.getStartingTaxLevel()) +
-                    ");");
+            DB.executeUpdate("INSERT INTO `mp_cities` (`cityName`, `originalMayorUUID`, `originalMayorName`, `cityBalance`, `citySpawn`, `createDate`, `taxLevel`) VALUES (?,?,?,?,?,?,?)",
+                    Database.sqlString(cityName),
+                    Database.sqlString(player.getUniqueId().toString()),
+                    Database.sqlString(player.getName()),
+                    Metropolis.configuration.getCityStartingBalance(),
+                    Database.sqlString(LocationUtil.locationToString(player.getLocation())),
+                    DateUtil.getTimestamp(),
+                    Database.sqlString(Metropolis.configuration.getStartingTaxLevel()));
 
             City city = new City(DB.getFirstRow("SELECT * FROM `mp_cities` WHERE `cityName` = " + Database.sqlString(cityName) + ";"));
             cities.add(city);
@@ -99,15 +98,15 @@ public class CityDatabase {
     public static void newMember(City city, Player player) {
         try {
             String cityName = city.getCityName();
-            DB.executeUpdate("INSERT INTO `mp_members` (`playerName`, `playerUUID`, `cityId`, `cityName`, `cityRole`, `joinDate`) VALUES (" + Database.sqlString(player.getName()) + ", " + Database.sqlString(player.getUniqueId().toString()) + ", " + city.getCityId() + ", " + Database.sqlString(cityName) + ", " + Database.sqlString(Role.MEMBER.getRoleName()) + ", " + DateUtil.getTimestamp() + ");");
+            DB.executeUpdate("INSERT INTO `mp_members` (`playerName`, `playerUUID`, `cityId`, `cityName`, `cityRole`, `joinDate`) VALUES (?,?,?,?,?,?)",
+                    Database.sqlString(player.getName()),
+                    Database.sqlString(player.getUniqueId().toString()),
+                    city.getCityId(),
+                    Database.sqlString(cityName),
+                    Database.sqlString(Role.MEMBER.getRoleName()),
+                    DateUtil.getTimestamp());
             city.addCityMember(
-                    new Member(
-                            DB.getFirstRow(
-                                    "SELECT * FROM `mp_members` WHERE `cityId` = "
-                                            + city.getCityId()
-                                            + " AND `playerUUID` = "
-                                            + Database.sqlString(player.getUniqueId().toString())
-                                            + ";")));
+                    new Member(DB.getFirstRow("SELECT * FROM `mp_members` WHERE `cityId` = " + city.getCityId() + " AND `playerUUID` = " + Database.sqlString(player.getUniqueId().toString()) + ";")));
             HCDatabase.setHomeCity(player.getUniqueId().toString(), city);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -116,7 +115,14 @@ public class CityDatabase {
 
     public static Claim createClaim(City city, Location location, boolean outpost, String playername, String playerUUID) {
         try {
-            DB.executeInsert("INSERT INTO `mp_claims` (`claimerName`, `claimerUUID`, `world`, `xPosition`, `zPosition`, `claimDate`, `cityId`, `outpost`) VALUES (" + Database.sqlString(playername) + ", " + Database.sqlString(playerUUID) + ", '" + location.getChunk().getWorld().getName() + "', " + location.getChunk().getX() + ", " + location.getChunk().getZ() + ", " + DateUtil.getTimestamp() + ", '" + city.getCityId() + "', " + outpost + ");");
+            DB.executeInsert("INSERT INTO `mp_claims` (`claimerName`, `claimerUUID`, `world`, `xPosition`, `zPosition`, `claimDate`, `cityId`, `outpost`) VALUES (?,?,?,?,?,?,?,?)", Database.sqlString(playername),
+                    Database.sqlString(playerUUID),
+                    location.getChunk().getWorld().getName(),
+                    location.getChunk().getX(),
+                    location.getChunk().getZ(),
+                    DateUtil.getTimestamp(),
+                    city.getCityId(),
+                    outpost);
             city.addCityClaim(new Claim(DB.getFirstRow("SELECT * FROM `mp_claims` WHERE `cityId` = " + city.getCityId() + " AND `xPosition` = " + location.getChunk().getX() + " AND `zPosition` = " + location.getChunk().getZ() + ";")));
             return city.getCityClaim(location);
         } catch (SQLException e) {
@@ -127,7 +133,13 @@ public class CityDatabase {
 
     public static District createDistrict(City city, Polygon districtPoints, String districtName, World world) {
         try {
-            DB.executeInsert("INSERT INTO `mp_districts` (`districtName`, `cityId`, `world`, `districtPoints`, `districtBoundary`, `contactPlayers`) VALUES (" + Database.sqlString(districtName) + ", " + city.getCityId() + ", " + Database.sqlString(world.getName()) + ", " + Database.sqlString(LocationUtil.polygonToString(districtPoints)) + ", " + "ST_GeomFromText('" + districtPoints.toText() + "'), " + Database.sqlString(null) + ");");
+            DB.executeInsert("INSERT INTO `mp_districts` (`districtName`, `cityId`, `world`, `districtPoints`, `districtBoundary`, `contactPlayers`) VALUES (?,?,?,?,?,?)",
+                    Database.sqlString(districtName),
+                    city.getCityId(),
+                    Database.sqlString(world.getName()),
+                    Database.sqlString(LocationUtil.polygonToString(districtPoints)),
+                    "ST_GeomFromText('" + districtPoints.toText() + "')",
+                    Database.sqlString(null));
             return new District(DB.getFirstRow("SELECT * FROM `mp_districts` WHERE `cityId` = " + city.getCityId() + " AND `districtName` = " + Database.sqlString(districtName) + ";"));
         } catch (SQLException e) {
             e.printStackTrace();
@@ -137,7 +149,11 @@ public class CityDatabase {
 
     public static void newCityGo(Location location, String name, City city) {
         try {
-            DB.executeInsert("INSERT INTO `mp_citygoes` (`cityId`, `goName`, `goLocation`, `createDate`) VALUES (" + city.getCityId() + ", " + Database.sqlString(name) + ", " + Database.sqlString(LocationUtil.locationToString(location)) + ", " + DateUtil.getTimestamp() + ");");
+            DB.executeInsert("INSERT INTO `mp_citygoes` (`cityId`, `goName`, `goLocation`, `createDate`) VALUES (?,?,?,?)",
+                    city.getCityId(),
+                    Database.sqlString(name),
+                    Database.sqlString(LocationUtil.locationToString(location)),
+                    DateUtil.getTimestamp() + ");");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -430,11 +446,11 @@ public class CityDatabase {
                 if (city.canBecomeReserve()) {
                     city.setAsReserve();
                     for (Player player : Bukkit.getOnlinePlayers()) {
-                        plugin.sendMessage(player, "messages.city.becameReserve","%cityname%" , city.getCityName());
+                        Metropolis.sendMessage(player, "messages.city.becameReserve","%cityname%" , city.getCityName());
                     }
                 } else {
                     for (Player player : Bukkit.getOnlinePlayers()) {
-                        plugin.sendMessage(player, "messages.city.wentUnder","%cityname%" , city.getCityName());
+                        Metropolis.sendMessage(player, "messages.city.wentUnder","%cityname%" , city.getCityName());
                     }
                     iterator.remove();
                     deleteCity(city);
@@ -442,7 +458,7 @@ public class CityDatabase {
             }
         }
         for (Player players : plugin.getServer().getOnlinePlayers()) {
-            plugin.sendMessage(players, "messages.city.successful.taxCollected");
+            Metropolis.sendMessage(players, "messages.city.successful.taxCollected");
         }
     }
 
@@ -653,7 +669,13 @@ public class CityDatabase {
 
     public static void addCityBan(City city, String playerUUID, String reason, Player placer, long placeDate, long length) {
         try {
-            DB.executeUpdate("INSERT INTO `mp_citybans` (`cityId`, `playerUUID`, `placeDate`, `length`, `reason`, `placeUUID`) VALUES (" + city.getCityId() + ", " + Database.sqlString(playerUUID) + ", " + placeDate + ", " + length + ", " + Database.sqlString(reason) + ", " + Database.sqlString(placer.getUniqueId().toString()) + ");");
+            DB.executeUpdate("INSERT INTO `mp_citybans` (`cityId`, `playerUUID`, `placeDate`, `length`, `reason`, `placeUUID`) VALUES (?,?,?,?,?,?)",
+                    city.getCityId(),
+                    Database.sqlString(playerUUID),
+                    placeDate,
+                    length,
+                    Database.sqlString(reason),
+                    Database.sqlString(placer.getUniqueId().toString()));
         } catch (SQLException e) {
             e.printStackTrace();
         }
