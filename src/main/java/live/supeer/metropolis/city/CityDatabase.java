@@ -34,6 +34,7 @@ public class CityDatabase {
             plugin.getLogger().info("Loaded city " + city.getCityName());
             loadMembers(city);
             loadClaims(city);
+            loadDistricts(city);
             loadPlots(city);
         }
     }
@@ -69,6 +70,15 @@ public class CityDatabase {
         for (DbRow plot : plots) {
             Plot plot1 = new Plot(plot);
             rCity.addCityPlot(plot1);
+        }
+    }
+
+    private static void loadDistricts(City rCity) throws SQLException {
+        int cityId = rCity.getCityId();
+        var districts = DB.getResults("SELECT * FROM `mp_districts` WHERE `cityId` = '" + cityId + "';");
+        for (DbRow district : districts) {
+            District district1 = new District(district);
+            rCity.addCityDistrict(district1);
         }
     }
 
@@ -237,7 +247,7 @@ public class CityDatabase {
             if (results.size() >= count)
                 break;
         }
-        
+
         return results;
     }
 

@@ -258,6 +258,7 @@ public class CommandPlot extends BaseCommand {
                         + player.getUniqueId().toString()
                         + " }");
         PlotDatabase.deletePlot(plot);
+        plot.getCity().removeCityPlot(plot);
         Metropolis.sendMessage(
                 player,
                 "messages.city.successful.set.delete.plot",

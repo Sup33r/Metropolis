@@ -115,7 +115,7 @@ public class CommandCity extends BaseCommand {
         Role role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
 
 
-        Metropolis.sendMessage(player, "messages.city.cityInfo.header", "%cityname%", city.getCityName(), "%claims%", String.valueOf(city.getCityClaims().size()), "%maxclaims%", String.valueOf(((city.getCityMembers().size() * 20) + city.getBonusClaims())), "%bonus%", String.valueOf(city.getBonusClaims()));
+        Metropolis.sendMessage(player, "messages.city.cityInfo.header", "%cityname%", city.getCityName(), "%claims%", String.valueOf(city.getCityClaims()), "%maxclaims%", String.valueOf(((city.getCityMembers().size() * 20) + city.getBonusClaims())), "%bonus%", String.valueOf(city.getBonusClaims()));
         if (role != null) {
             Metropolis.sendMessage(player, "messages.city.cityInfo.role", "%role%", Objects.requireNonNull(Metropolis.getMessage("messages.city.roles." + role.getRoleName())).toLowerCase());
         }
@@ -132,7 +132,7 @@ public class CommandCity extends BaseCommand {
         Metropolis.sendMessage(player, "messages.city.cityInfo.founded", "%founded%", DateUtil.formatDate(city.getCityCreationDate()), "%by%" , founderName);
         Metropolis.sendMessage(player, "messages.city.cityInfo.balance", "%balance%", Utilities.formattedMoney(CityDatabase.getCityBalance(city)));
         Metropolis.sendMessage(player, "messages.city.cityInfo.tax", "%tax%", String.valueOf(city.getCityTax()), "%payedBy%", Utilities.taxPayedBy(city.getTaxLevel()));
-        Metropolis.sendMessage(player, "messages.city.cityInfo.stateTax", "%tax%", String.valueOf(city.getCityClaims().size()*Metropolis.configuration.getStateTax()));
+        Metropolis.sendMessage(player, "messages.city.cityInfo.stateTax", "%tax%", String.valueOf(city.getCityClaims()*Metropolis.configuration.getStateTax()));
         Metropolis.sendMessage(player, "messages.city.cityInfo.maxPlotsPerMember", "%maxplots%", String.valueOf(city.getMaxPlotsPerMember()));
         Metropolis.sendMessage(player, "messages.city.cityInfo.minChunkDistance", "%distance%", String.valueOf(city.getMinChunkDistance()));
         Metropolis.sendMessage(player, "messages.city.cityInfo.minSpawnDistance", "%distance%", String.valueOf(city.getMinSpawnDistance()));
@@ -2510,6 +2510,7 @@ public class CommandCity extends BaseCommand {
                 return;
             }
             CityDatabase.deleteDistrict(district);
+            city.removeCityDistrict(district);
             Metropolis.playerInDistrict.remove(player.getUniqueId());
             Database.addLogEntry(city, "{ \"type\": \"district\", \"subtype\": \"delete\", \"district\": \"" + district.getDistrictName() + "\", \"player\": \"" + player.getUniqueId().toString() + "\" }");
             Metropolis.sendMessage(player, "messages.city.district.deleted", "%districtname%", district.getDistrictName(), "%cityname%", city.getCityName());

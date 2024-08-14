@@ -102,12 +102,20 @@ public class JailManager {
         }
     }
 
+    public static void displaySign(Cell cell) {
+        if (cell.getPrisonerUUID() == null) {
+            displaySignEmptyCell(cell);
+        } else {
+            displayOccupiedCell(cell);
+        }
+    }
+
     public static void displaySignEmptyCell(Cell cell) {
         if (cell.getSignLocation() == null) {
             return;
         }
         Sign sign = (Sign) cell.getSignLocation().getBlock().getState();
-        Side side = cell.isSignSide() ? Side.BACK : Side.FRONT;
+        Side side = cell.getSignSide();
         sign.getSide(side).line(0, Objects.requireNonNull(Metropolis.getMessageComponent("messages.cell.sign.empty.row0")));
         sign.getSide(side).line(1, Objects.requireNonNull(Metropolis.getMessageComponent("messages.cell.sign.empty.row1")));
         sign.getSide(side).line(2, Objects.requireNonNull(Metropolis.getMessageComponent("messages.cell.sign.empty.row2", "%id%", String.valueOf(cell.getCellId()))));
@@ -121,7 +129,7 @@ public class JailManager {
             return;
         }
         Sign sign = (Sign) cell.getSignLocation().getBlock().getState();
-        Side side = cell.isSignSide() ? Side.BACK : Side.FRONT;
+        Side side = cell.getSignSide();
         sign.getSide(side).line(0, Objects.requireNonNull(Metropolis.getMessageComponent("messages.cell.sign.occupied.row0")));
         sign.getSide(side).line(1, Objects.requireNonNull(Metropolis.getMessageComponent("messages.cell.sign.occupied.row1", "%playername%", plugin.getServer().getOfflinePlayer(UUID.fromString(cell.getPrisonerUUID())).getName())));
         sign.getSide(side).line(2, Objects.requireNonNull(Metropolis.getMessageComponent("messages.cell.sign.occupied.row2")));
