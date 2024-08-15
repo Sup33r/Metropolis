@@ -48,26 +48,6 @@ public final class Metropolis extends JavaPlugin {
         plugin = this;
         this.logger = getLogger();
         configuration = new MetropolisConfiguration(this);
-        Utilities.plugin = this;
-        DateUtil.plugin = this;
-        CommandCity.plugin = this;
-        CommandPlot.plugin = this;
-        CommandHomeCity.plugin = this;
-        CommandHere.plugin = this;
-        Database.plugin = this;
-        HCDatabase.plugin = this;
-        CityDatabase.plugin = this;
-        CityListener.plugin = this;
-        Claim.plugin = this;
-        District.plugin = this;
-        City.plugin = this;
-        Cell.plugin = this;
-        JailManager.plugin = this;
-        Member.plugin = this;
-        LocationUtil.plugin = this;
-        MetropolisListener.plugin = this;
-        PlotDatabase.plugin = this;
-        CommandMetropolis.plugin = this;
         this.languageManager = new LanguageManager(this, "sv_se");
         if (!setupEconomy()) {
             this.getLogger().severe("[Metropolis] Vault not found, disabling plugin");
