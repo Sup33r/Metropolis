@@ -26,7 +26,7 @@ public class CommandHomeCity extends BaseCommand implements Listener {
     @Default
     public static void onHomeCity(Player player, @Optional String cityname) {
         if (!player.hasPermission("metropolis.homecity")) {
-            plugin.sendMessage(player,"messages.error.permissionDenied");
+            Metropolis.sendMessage(player,"messages.error.permissionDenied");
             return;
         }
         if (cityname == null) {
@@ -35,22 +35,22 @@ public class CommandHomeCity extends BaseCommand implements Listener {
             if (CityDatabase.getCity(cityname).isPresent()) {
                 City city = CityDatabase.getCity(cityname).get();
                 if (CityDatabase.getCityRole(city,player.getUniqueId().toString()) == null) {
-                    plugin.sendMessage(player,"messages.error.missing.membership");
+                    Metropolis.sendMessage(player,"messages.error.missing.membership");
                     return;
                 }
                 if (Objects.equals(CityDatabase.getCityRole(city,player.getUniqueId().toString()),"mayor") || Objects.equals(CityDatabase.getCityRole(city,player.getUniqueId().toString()),"vicemayor") || Objects.equals(CityDatabase.getCityRole(city,player.getUniqueId().toString()),"assistant") || Objects.equals(CityDatabase.getCityRole(city,player.getUniqueId().toString()),"inviter") || Objects.equals(CityDatabase.getCityRole(city,player.getUniqueId().toString()),"member")) {
                     if (CityDatabase.getPlayerCityCount(player.getUniqueId().toString()) < 1) {
-                        plugin.sendMessage(player,"messages.error.missing.homeCity");
+                        Metropolis.sendMessage(player,"messages.error.missing.homeCity");
                         return;
                     }
                     HCDatabase.setHomeCity(player.getUniqueId().toString(),city);
-                    plugin.sendMessage(player,"messages.save.membership","%cityname%",city.getCityName());
+                    Metropolis.sendMessage(player,"messages.save.membership","%cityname%",city.getCityName());
                 } else {
-                    plugin.sendMessage(player,"messages.error.missing.membership");
+                    Metropolis.sendMessage(player,"messages.error.missing.membership");
                 }
 
             } else {
-                plugin.sendMessage(player,"messages.error.missing.city");
+                Metropolis.sendMessage(player,"messages.error.missing.city");
             }
         }
     }
@@ -80,7 +80,7 @@ public class CommandHomeCity extends BaseCommand implements Listener {
             Player player = (Player) e.getWhoClicked();
 
             HCDatabase.setHomeCity(player.getUniqueId().toString(),city);
-            plugin.sendMessage(player,"messages.save.membership","%cityname%",cityname);
+            Metropolis.sendMessage(player,"messages.save.membership","%cityname%",cityname);
             player.closeInventory();
         }
     }
@@ -88,7 +88,7 @@ public class CommandHomeCity extends BaseCommand implements Listener {
     private static void playerGui(Player player) {
         List<City> cityList = CityDatabase.memberCityList(player.getUniqueId().toString());
         if (cityList == null || cityList.isEmpty()) {
-            plugin.sendMessage(player, "messages.error.missing.membership");
+            Metropolis.sendMessage(player, "messages.error.missing.membership");
             return;
         }
 

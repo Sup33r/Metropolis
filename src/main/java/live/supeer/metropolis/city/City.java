@@ -5,6 +5,7 @@ import co.aikar.idb.DbRow;
 import live.supeer.metropolis.Database;
 import live.supeer.metropolis.Metropolis;
 import live.supeer.metropolis.homecity.HCDatabase;
+import live.supeer.metropolis.octree.Octree;
 import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.utils.Utilities;
@@ -13,11 +14,10 @@ import net.kyori.adventure.text.Component;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Getter
 public class City {
@@ -29,9 +29,13 @@ public class City {
     private final String originalMayorName;
     private final String originalMayorUUID;
     private final List<Member> cityMembers = new ArrayList<>();
-    private final List<Claim> cityClaims = new ArrayList<>();
+
+    private int cityClaims;
+    private final Map<World, Octree<Claim>> claimOctree = new HashMap<>();
+
     private final List<Plot> cityPlots = new ArrayList<>();
-    private List<City> twinCities = new ArrayList<>();
+    private final List<District> cityDistricts = new ArrayList<>();
+    private List<City> twinCities;
 //    private final List<Ban> cityBans = new ArrayList<>();
     private int minChunkDistance;
     private int minSpawnDistance;
@@ -245,7 +249,7 @@ public class City {
 
     public int calculateCost() {
         int baseCost = 100000;
-        int claimCost = 500 * this.cityClaims.size();
+        int claimCost = 500 * this.cityClaims;
         int balanceCost = Math.max(0, -this.cityBalance);
 
         return baseCost + claimCost + balanceCost;
@@ -308,7 +312,7 @@ public class City {
         if (isTaxExempt) {
             return false;
         }
-        return cityClaims.size() * Metropolis.configuration.getStateTax() * days > cityBalance;
+        return cityClaims * Metropolis.configuration.getStateTax() * days > cityBalance;
     }
 
     public boolean hasNegativeBalance() {
@@ -320,7 +324,7 @@ public class City {
             if (isTaxExempt) {
                 return;
             }
-            int tax = cityClaims.size() * Metropolis.configuration.getStateTax();
+            int tax = cityClaims * Metropolis.configuration.getStateTax();
             cityBalance -= tax;
             DB.executeUpdate(
                     "UPDATE `mp_cities` SET `cityBalance` = "
@@ -337,7 +341,7 @@ public class City {
         if (cityMembers.size() >= 20) {
             return true;
         }
-        if (cityClaims.size() >= 25) {
+        if (cityClaims >= 25) {
             return true;
         }
         return false;
@@ -410,25 +414,39 @@ public class City {
 //    }
 
     public void addCityClaim(Claim claim) {
-        cityClaims.add(claim);
+        cityClaims++;
+        var octree = claimOctree.computeIfAbsent(claim.getClaimWorld(), world -> new Octree<>());
+        octree.put(claim.getXPosition(), 0, claim.getZPosition(), claim);
     }
 
     public void removeCityClaim(Claim claim) {
-        cityClaims.remove(claim);
+        cityClaims--;
+        var octree = claimOctree.get(claim.getClaimWorld());
+        if (octree != null)
+            octree.remove(claim.getXPosition(), 0, claim.getZPosition());
     }
 
     public Claim getCityClaim(Location location) {
-        for (Claim claim : cityClaims) {
-            if (claim.getClaimWorld().equals(location.getWorld())
-                    && claim.getXPosition() == location.getChunk().getX()
-                    && claim.getZPosition() == location.getChunk().getZ()) {
-                return claim;
-            }
-        }
-        return null;
+        var octree = claimOctree.get(location.getWorld());
+        if (octree == null)
+            return null;
+
+        return octree.get(location.getChunk().getX(), 0, location.getChunk().getZ());
     }
 
     public void addCityPlot(Plot plot) {
         cityPlots.add(plot);
+    }
+
+    public void removeCityPlot(Plot plot) {
+        cityPlots.remove(plot);
+    }
+
+    public void addCityDistrict(District district) {
+        cityDistricts.add(district);
+    }
+
+    public void removeCityDistrict(District district) {
+        cityDistricts.remove(district);
     }
 }

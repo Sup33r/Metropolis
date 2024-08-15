@@ -20,7 +20,7 @@ public class Cell {
     private Location location;
     private String prisonerUUID;
     private Location signLocation;
-    private boolean signSide;
+    private Side signSide;
 
     public Cell(DbRow data) {
         this.cellId = data.getInt("cellId");
@@ -28,14 +28,12 @@ public class Cell {
         this.location = LocationUtil.stringToLocation(data.getString("location"));
         this.prisonerUUID = data.getString("prisonerUUID") != null ? data.getString("prisonerUUID") : null;
         this.signLocation = data.getString("signLocation") != null ? LocationUtil.stringToLocation(data.getString("signLocation")) : null;
-        this.signSide = data.get("signSide");
+        this.signSide = Side.valueOf(data.getString("signSide"));
     }
 
     public void setSignSide(Side side) {
         try {
-            int sideValue = side == Side.BACK ? 0 : 1;
-            this.signSide = side == Side.BACK;
-            DB.executeUpdate("UPDATE mp_cells SET signSide = ? WHERE cellId = ?", sideValue, this.cellId);
+            DB.executeUpdate("UPDATE mp_cells SET signSide = ? WHERE cellId = ?", side.toString(), this.cellId);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -37,34 +37,17 @@ public final class Metropolis extends JavaPlugin {
     public static MetropolisConfiguration configuration;
     @Getter
     private static Metropolis plugin;
-    private LanguageManager languageManager;
+    private static LanguageManager languageManager;
     private static Economy econ = null;
 
-    @Override
+    public static Metropolis getInstance() {
+        return plugin;
+    }
+
     public void onEnable() {
         plugin = this;
         this.logger = getLogger();
         configuration = new MetropolisConfiguration(this);
-        Utilities.plugin = this;
-        DateUtil.plugin = this;
-        CommandCity.plugin = this;
-        CommandPlot.plugin = this;
-        CommandHomeCity.plugin = this;
-        CommandHere.plugin = this;
-        Database.plugin = this;
-        HCDatabase.plugin = this;
-        CityDatabase.plugin = this;
-        CityListener.plugin = this;
-        Claim.plugin = this;
-        District.plugin = this;
-        City.plugin = this;
-        Cell.plugin = this;
-        JailManager.plugin = this;
-        Member.plugin = this;
-        LocationUtil.plugin = this;
-        MetropolisListener.plugin = this;
-        PlotDatabase.plugin = this;
-        CommandMetropolis.plugin = this;
         this.languageManager = new LanguageManager(this, "sv_se");
         if (!setupEconomy()) {
             this.getLogger().severe("[Metropolis] Vault not found, disabling plugin");
@@ -122,9 +105,8 @@ public final class Metropolis extends JavaPlugin {
         return econ;
     }
 
-    public void sendMessage(
-            @NotNull CommandSender sender, @NotNull String key, String... replacements) {
-        String message = this.languageManager.getValue(key, getLocale(sender), replacements);
+    public static void sendMessage(@NotNull CommandSender sender, @NotNull String key, String... replacements) {
+        String message = languageManager.getValue(key, getLocale(sender), replacements);
 
         if (message != null && !message.isEmpty()) {
             Component component = languageManager.getMiniMessage().deserialize(message);
@@ -132,8 +114,8 @@ public final class Metropolis extends JavaPlugin {
         }
     }
 
-    public String getMessage(@NotNull String key, String... replacements) {
-        String message = this.languageManager.getValue(key, "sv_se", replacements);
+    public static String getMessage(@NotNull String key, String... replacements) {
+        String message = languageManager.getValue(key, "sv_se", replacements);
 
         if (message != null && !message.isEmpty()) {
             // Deserialize MiniMessage to a Component
@@ -144,8 +126,8 @@ public final class Metropolis extends JavaPlugin {
         return null;
     }
 
-    public Component getMessageComponent(@NotNull String key, String... replacements) {
-        String message = this.languageManager.getValue(key, "sv_se", replacements);
+    public static Component getMessageComponent(@NotNull String key, String... replacements) {
+        String message = languageManager.getValue(key, "sv_se", replacements);
 
         if (message != null && !message.isEmpty()) {
             return languageManager.getMiniMessage().deserialize(message);
@@ -153,15 +135,15 @@ public final class Metropolis extends JavaPlugin {
         return null;
     }
 
-    public String getRawMessage(@NotNull String key, String... replacements) {
-        return this.languageManager.getValue(key, "sv_se", replacements);
+    public static String getRawMessage(@NotNull String key, String... replacements) {
+        return languageManager.getValue(key, "sv_se", replacements);
     }
 
-    private @NotNull String getLocale(@NotNull CommandSender sender) {
+    private static @NotNull String getLocale(@NotNull CommandSender sender) {
         if (sender instanceof Player) {
             return ((Player) sender).getLocale();
         } else {
-            return this.getConfig().getString("settings.locale", "sv_se");
+            return Metropolis.getInstance().getConfig().getString("settings.locale", "sv_se");
         }
     }
 

@@ -17,7 +17,7 @@ public class CommandMetropolis extends BaseCommand {
         if (player.hasPermission("metropolis.admin.taxcollect")) {
             CityDatabase.collectTaxes();
         } else {
-            plugin.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendMessage(player, "messages.error.permissionDenied");
         }
     }
 
@@ -32,17 +32,17 @@ public class CommandMetropolis extends BaseCommand {
             if (player.hasPermission("metropolis.admin.city.balance")) {
                 live.supeer.metropolis.city.City city = CityDatabase.getCity(cityName).get();
                 if (CityDatabase.getCity(cityName).isEmpty()) {
-                    plugin.sendMessage(player, "messages.error.city.notFound");
+                    Metropolis.sendMessage(player, "messages.error.city.notFound");
                     return;
                 }
                 if (argument == null) {
-                    plugin.sendMessage(player,"messages.syntax.admin.balance");
+                    Metropolis.sendMessage(player,"messages.syntax.admin.balance");
                     return;
                 }
                 if (argument.startsWith("+")) {
                     if (argument.substring(1).replaceAll("[0-9]", "").matches("[^0-9]")
                             || argument.length() == 1) {
-                        plugin.sendMessage(player, "messages.syntax.admin.balance");
+                        Metropolis.sendMessage(player, "messages.syntax.admin.balance");
                         return;
                     }
                     int inputBalance = Integer.parseInt(argument.replaceAll("[^0-9]", ""));
@@ -54,7 +54,7 @@ public class CommandMetropolis extends BaseCommand {
                                     + ", \"player\": "
                                     + player.getUniqueId().toString()
                                     + " }");
-                    plugin.sendMessage(
+                    Metropolis.sendMessage(
                             player,
                             "messages.city.successful.deposit",
                             "%amount%",
@@ -66,7 +66,7 @@ public class CommandMetropolis extends BaseCommand {
                 if (argument.startsWith("-")) {
                     if (argument.substring(1).replaceAll("[0-9]", "").matches("[^0-9]")
                             || argument.length() == 1) {
-                        plugin.sendMessage(player, "messages.syntax.admin.balance");
+                        Metropolis.sendMessage(player, "messages.syntax.admin.balance");
                         return;
                     }
                     int inputBalance = Integer.parseInt(argument.replaceAll("[^0-9]", ""));
@@ -80,7 +80,7 @@ public class CommandMetropolis extends BaseCommand {
                                     + ", \"player\": "
                                     + player.getUniqueId().toString()
                                     + "\" }");
-                    plugin.sendMessage(
+                    Metropolis.sendMessage(
                             player,
                             "messages.city.successful.withdraw",
                             "%amount%",
@@ -89,9 +89,9 @@ public class CommandMetropolis extends BaseCommand {
                             city.getCityName());
                     return;
                 }
-                plugin.sendMessage(player, "messages.syntax.admin.balance");
+                Metropolis.sendMessage(player, "messages.syntax.admin.balance");
             } else {
-                plugin.sendMessage(player, "messages.error.permissionDenied");
+                Metropolis.sendMessage(player, "messages.error.permissionDenied");
             }
         }
 
@@ -105,22 +105,22 @@ public class CommandMetropolis extends BaseCommand {
                 if (player.hasPermission("metropolis.admin.city.set.minchunkdistance")) {
                     live.supeer.metropolis.city.City city = CityDatabase.getCity(cityName).get();
                     if (CityDatabase.getCity(cityName).isEmpty()) {
-                        plugin.sendMessage(player, "messages.error.city.notFound");
+                        Metropolis.sendMessage(player, "messages.error.city.notFound");
                         return;
                     }
                     if (distance.equals("-")) {
                         city.setMinChunkDistance(Metropolis.configuration.getMinChunkDistance());
-                        plugin.sendMessage(player, "messages.city.successful.resetMinChunkDistance","%cityname%", city.getCityName());
+                        Metropolis.sendMessage(player, "messages.city.successful.resetMinChunkDistance","%cityname%", city.getCityName());
                         return;
                     }
                     if (distance.matches("[0-9]+")) {
                         city.setMinChunkDistance(Integer.parseInt(distance));
-                        plugin.sendMessage(player, "messages.city.successful.setMinChunkDistance", "%distance%", distance, "%cityname%", city.getCityName());
+                        Metropolis.sendMessage(player, "messages.city.successful.setMinChunkDistance", "%distance%", distance, "%cityname%", city.getCityName());
                         return;
                     }
-                    plugin.sendMessage(player, "messages.error.invalidNumber");
+                    Metropolis.sendMessage(player, "messages.error.invalidNumber");
                 } else {
-                    plugin.sendMessage(player, "messages.error.permissionDenied");
+                    Metropolis.sendMessage(player, "messages.error.permissionDenied");
                 }
             }
 
@@ -130,22 +130,22 @@ public class CommandMetropolis extends BaseCommand {
                 if (player.hasPermission("metropolis.admin.city.set.minspawndistance")) {
                     live.supeer.metropolis.city.City city = CityDatabase.getCity(cityName).get();
                     if (CityDatabase.getCity(cityName).isEmpty()) {
-                        plugin.sendMessage(player, "messages.error.city.notFound");
+                        Metropolis.sendMessage(player, "messages.error.city.notFound");
                         return;
                     }
                     if (distance.equals("-")) {
                         city.setMinSpawnDistance(Metropolis.configuration.getMinSpawnDistance());
-                        plugin.sendMessage(player, "messages.city.successful.resetMinSpawnDistance","%cityname%", city.getCityName());
+                        Metropolis.sendMessage(player, "messages.city.successful.resetMinSpawnDistance","%cityname%", city.getCityName());
                         return;
                     }
                     if (distance.matches("[0-9]+")) {
                         city.setMinSpawnDistance(Integer.parseInt(distance));
-                        plugin.sendMessage(player, "messages.city.successful.setMinSpawnDistance", "%distance%", distance, "%cityname%", city.getCityName());
+                        Metropolis.sendMessage(player, "messages.city.successful.setMinSpawnDistance", "%distance%", distance, "%cityname%", city.getCityName());
                         return;
                     }
-                    plugin.sendMessage(player, "messages.error.invalidNumber");
+                    Metropolis.sendMessage(player, "messages.error.invalidNumber");
                 } else {
-                    plugin.sendMessage(player, "messages.error.permissionDenied");
+                    Metropolis.sendMessage(player, "messages.error.permissionDenied");
                 }
             }
         }
