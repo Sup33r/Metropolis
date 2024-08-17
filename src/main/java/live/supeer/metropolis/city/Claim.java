@@ -10,8 +10,6 @@ import org.locationtech.jts.geom.Point;
 
 @Getter
 public class Claim {
-    public static Metropolis plugin;
-
     private final int claimId;
     private final String claimerUUID;
     private final String claimerName;
@@ -26,7 +24,7 @@ public class Claim {
         this.claimId = data.getInt("claimId");
         this.claimerUUID = data.getString("claimerUUID");
         this.claimerName = data.getString("claimerName");
-        this.claimWorld = plugin.getServer().getWorld(data.getString("world"));
+        this.claimWorld = Metropolis.getInstance().getServer().getWorld(data.getString("world"));
         this.xPosition = data.getInt("xPosition");
         this.zPosition = data.getInt("zPosition");
         this.cityId = data.getInt("cityId");

@@ -6,8 +6,6 @@ import lombok.Getter;
 
 @Getter
 public class Member {
-    public static Metropolis plugin;
-
     private final String playerName;
     private final String playerUUID;
     private final int cityId;

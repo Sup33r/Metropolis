@@ -16,9 +16,6 @@ import java.util.*;
 
 
 public class Utilities {
-    public static Metropolis plugin;
-
-
     public static String formattedMoney(Integer money) {
         NumberFormat formatter = NumberFormat.getInstance(Locale.US);
         formatter.setGroupingUsed(true);
@@ -283,6 +280,10 @@ public class Utilities {
             i = i + 1;
         }
         if (plot != null) {
+            if (plot.hasFlag('c')) {
+                board.updateLine(i, Metropolis.getMessage("messages.city.scoreboard.meeting"));
+                i = i + 1;
+            }
             if (plot.isKMarked()) {
                 board.updateLine(i, Metropolis.getMessage("messages.city.scoreboard.placeK"));
             } else {
@@ -418,7 +419,7 @@ public class Utilities {
     }
 
     public static boolean cityCanClaim(City city) {
-        return city.getCityClaims().size() < city.getCityMembers().size() * 20 + city.getBonusClaims();
+        return city.getCityClaims() < city.getCityMembers().size() * 20 + city.getBonusClaims();
     }
 
     public static String[][] generateAsciiMap(Player player, int centerX, int centerZ, City playerCity) {
@@ -559,12 +560,10 @@ public class Utilities {
 
             if (city == null) {
                 if (distance < minSpawnDistance) {
-                    plugin.logger.warning("1");
                     return true;
                 }
 
                 if (distance < minChunkDistance) {
-                    plugin.logger.warning("2");
                     return true;
                 }
             } else {
@@ -572,12 +571,10 @@ public class Utilities {
 
                 if (!isTwin) {
                     if (distance < minSpawnDistance) {
-                        plugin.logger.warning("3");
                         return true;
                     }
 
                     if (distance < minChunkDistance) {
-                        plugin.logger.warning("4");
                         return true;
                     }
                 }

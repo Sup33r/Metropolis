@@ -6,5 +6,5 @@ authors: [ Supeeer ]
 description: A kinda cool plugin
 website: supeer.live
 depend:
-  - Vault
+  - Apied
   - CoreProtect

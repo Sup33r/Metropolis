@@ -1,6 +1,5 @@
 package live.supeer.metropolis.utils;
 
-import live.supeer.metropolis.Metropolis;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.locationtech.jts.geom.Coordinate;
@@ -10,8 +9,6 @@ import org.locationtech.jts.geom.Polygon;
 import java.util.Arrays;
 
 public class LocationUtil {
-    public static Metropolis plugin;
-
     public static String formatLocation(Location location) {
         return "(["
                 + location.getWorld().getName()

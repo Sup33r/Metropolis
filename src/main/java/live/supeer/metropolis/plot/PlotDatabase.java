@@ -23,8 +23,6 @@ import java.awt.*;
 import java.util.List;
 
 public class PlotDatabase {
-    public static Metropolis plugin;
-
     public static Plot createPlot(Player player, Polygon plotPolygon, String plotName, City city, int minY, int maxY, World world) {
         if (plotName == null) {
             int plotAmount = getPlotAmount() + 1;
@@ -36,7 +34,7 @@ public class PlotDatabase {
         if (minY == 0 && maxY == 0) {
             minY = 0;
             maxY = 256;
-            plugin.getLogger().warning("PlotDatabase.createPlot: minY and maxY was 0, setting to 0 and 256");
+            Metropolis.getInstance().getLogger().warning("PlotDatabase.createPlot: minY and maxY was 0, setting to 0 and 256");
         }
         int centerX = (int) (plotPolygon.getEnvelopeInternal().getMinX() + plotPolygon.getEnvelopeInternal().getWidth() / 2);
         int centerZ = (int) (plotPolygon.getEnvelopeInternal().getMinY() + plotPolygon.getEnvelopeInternal().getHeight() / 2);

@@ -7,14 +7,9 @@ import live.supeer.metropolis.city.*;
 import live.supeer.metropolis.command.*;
 import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.plot.Plot;
-import live.supeer.metropolis.plot.PlotDatabase;
-import live.supeer.metropolis.utils.DateUtil;
-import live.supeer.metropolis.utils.LocationUtil;
-import live.supeer.metropolis.utils.Utilities;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.milkbowl.vault.economy.Economy;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -28,8 +23,6 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 public final class Metropolis extends JavaPlugin {
-    private MetropolisAPI api;
-
     public static HashMap<UUID, City> playerInCity = new HashMap<>();
     public static HashMap<UUID, Plot> playerInPlot = new HashMap<>();
     public static HashMap<UUID, District> playerInDistrict = new HashMap<>();
@@ -38,7 +31,6 @@ public final class Metropolis extends JavaPlugin {
     @Getter
     private static Metropolis plugin;
     private static LanguageManager languageManager;
-    private static Economy econ = null;
 
     public static Metropolis getInstance() {
         return plugin;
@@ -48,12 +40,7 @@ public final class Metropolis extends JavaPlugin {
         plugin = this;
         this.logger = getLogger();
         configuration = new MetropolisConfiguration(this);
-        this.languageManager = new LanguageManager(this, "sv_se");
-        if (!setupEconomy()) {
-            this.getLogger().severe("[Metropolis] Vault not found, disabling plugin");
-            getServer().getPluginManager().disablePlugin(this);
-            return;
-        }
+        languageManager = new LanguageManager(this, "sv_se");
         if (getServer().getPluginManager().getPlugin("CoreProtect") == null) {
             this.getLogger().severe("[Metropolis] CoreProtect not found, disabling plugin");
             getServer().getPluginManager().disablePlugin(this);
@@ -75,34 +62,19 @@ public final class Metropolis extends JavaPlugin {
         registerCompletions(manager);
         scheduleDailyTaxCollection();
 
-        this.api = new MetropolisAPI(this);
+        MetropolisAPI.setPlugin(this);
 
+        if (getServer().getPluginManager().getPlugin("Apied") != null) {
+            getLogger().info("Apied found!");
+        } else {
+            getLogger().warning("Apied not found. disabling plugin");
+            getServer().getPluginManager().disablePlugin(this);
+        }
     }
 
     @Override
     public void onDisable() {
         DB.close();
-    }
-
-    private boolean setupEconomy() {
-        if (getServer().getPluginManager().getPlugin("Vault") == null) {
-            return false;
-        }
-        RegisteredServiceProvider<Economy> rsp =
-                getServer().getServicesManager().getRegistration(Economy.class);
-        if (rsp == null) {
-            return false;
-        }
-        econ = rsp.getProvider();
-        return econ != null;
-    }
-
-    public MetropolisAPI getAPI() {
-        return this.api;
-    }
-
-    public static Economy getEconomy() {
-        return econ;
     }
 
     public static void sendMessage(@NotNull CommandSender sender, @NotNull String key, String... replacements) {

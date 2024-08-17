@@ -18,7 +18,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class CityDatabase {
-    public static Metropolis plugin;
     private static final List<City> cities = new ArrayList<>();
 
     public static void initDBSync() throws SQLException {
@@ -31,7 +30,7 @@ public class CityDatabase {
         for (DbRow dbRow : dbRows) {
             City city = new City(dbRow);
             cities.add(city);
-            plugin.getLogger().info("Loaded city " + city.getCityName());
+            Metropolis.getInstance().getLogger().info("Loaded city " + city.getCityName());
             loadMembers(city);
             loadClaims(city);
             loadDistricts(city);
@@ -60,7 +59,7 @@ public class CityDatabase {
         for (DbRow claim : claims) {
             Claim claim1 = new Claim(claim);
             rCity.addCityClaim(claim1);
-            plugin.getLogger().info("Loaded claim " + claim1.getXPosition() + " | " + claim1.getZPosition() + "  |  " + claim1.getClaimWorld() + " for city " + rCity.getCityName());
+            Metropolis.getInstance().getLogger().info("Loaded claim " + claim1.getXPosition() + " | " + claim1.getZPosition() + "  |  " + claim1.getClaimWorld() + " for city " + rCity.getCityName());
         }
     }
 
@@ -97,7 +96,7 @@ public class CityDatabase {
             City city = new City(DB.getFirstRow("SELECT * FROM `mp_cities` WHERE `cityName` = " + Database.sqlString(cityName) + ";"));
             cities.add(city);
             newMember(city, player);
-            plugin.getLogger().info(player.getName() + " created a new city: " + cityName);
+            Metropolis.getInstance().getLogger().info(player.getName() + " created a new city: " + cityName);
             return city;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -460,7 +459,7 @@ public class CityDatabase {
                 }
             }
         }
-        for (Player players : plugin.getServer().getOnlinePlayers()) {
+        for (Player players : Metropolis.getInstance().getServer().getOnlinePlayers()) {
             Metropolis.sendMessage(players, "messages.city.successful.taxCollected");
         }
     }

@@ -21,8 +21,6 @@ import java.util.Objects;
 
 @CommandAlias("homecity|hc")
 public class CommandHomeCity extends BaseCommand implements Listener {
-    public static Metropolis plugin;
-
     @Default
     public static void onHomeCity(Player player, @Optional String cityname) {
         if (!player.hasPermission("metropolis.homecity")) {

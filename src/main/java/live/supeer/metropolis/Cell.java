@@ -13,8 +13,6 @@ import org.bukkit.block.sign.Side;
 
 @Getter
 public class Cell {
-    public static Metropolis plugin;
-
     private int cellId;
     private Plot jailPlot;
     private Location location;

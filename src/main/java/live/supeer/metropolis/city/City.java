@@ -2,6 +2,8 @@ package live.supeer.metropolis.city;
 
 import co.aikar.idb.DB;
 import co.aikar.idb.DbRow;
+import live.supeer.apied.ApiedAPI;
+import live.supeer.apied.MPlayer;
 import live.supeer.metropolis.Database;
 import live.supeer.metropolis.Metropolis;
 import live.supeer.metropolis.homecity.HCDatabase;
@@ -10,20 +12,13 @@ import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.utils.Utilities;
 import lombok.Getter;
-import net.kyori.adventure.text.Component;
-import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
-import org.bukkit.entity.Player;
 
 import java.util.*;
 
 @Getter
 public class City {
-
-    public static Metropolis plugin;
-
     private final int cityId;
     private String cityName;
     private final String originalMayorName;
@@ -351,10 +346,6 @@ public class City {
         if (isTaxExempt) {
             return;
         }
-        Economy economy = Metropolis.getEconomy();
-        if (economy == null) {
-            return;
-        }
         Role cityRole = Role.fromString(taxLevel);
         if (Objects.equals(taxLevel, "none") || cityTax == 0 || cityRole == null) {
             return;
@@ -364,7 +355,6 @@ public class City {
             try {
                 Role memberRole = member.getCityRole();
                 if (memberRole == null) {
-                    plugin.getServer().broadcast(Component.text("Role null for member: " + member.getPlayerName()));
                     continue;
                 }
 
@@ -377,15 +367,15 @@ public class City {
                         taxRate /= 2;
                     }
 
-                    OfflinePlayer player = Metropolis.getPlugin().getServer().getOfflinePlayer(member.getPlayerUUID());
-                    double playerBalance = economy.getBalance(player);
+                    MPlayer mPlayer = ApiedAPI.getPlayer(UUID.fromString(member.getPlayerUUID()));
+                    int playerBalance = mPlayer.getBalance();
 
                     if (playerBalance > 0) {
                         double taxAmount = playerBalance * taxRate;
                         int roundedTaxAmount = (int) Math.round(taxAmount); // Round to nearest integer
 
                         if (roundedTaxAmount > 0) {
-                            economy.withdrawPlayer(player, roundedTaxAmount);
+                            mPlayer.removeBalance(roundedTaxAmount, "{ \"type\": \"city\", \"subtype\": \"tax\", \"cityId\": " + cityId +"}");
                             cityBalance += roundedTaxAmount;
 
                             // Update city balance in database
@@ -448,5 +438,14 @@ public class City {
 
     public void removeCityDistrict(District district) {
         cityDistricts.remove(district);
+    }
+
+    public boolean isMember(UUID uuid) {
+        for (Member member : cityMembers) {
+            if (member.getPlayerUUID().equals(uuid.toString())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

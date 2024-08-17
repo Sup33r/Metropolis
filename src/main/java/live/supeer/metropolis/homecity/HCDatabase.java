@@ -11,8 +11,6 @@ import java.sql.SQLException;
 import java.util.UUID;
 
 public class HCDatabase {
-    public static Metropolis plugin;
-
     public static void setHomeCity(String uuid, City city) {
         try {
             if (hasHomeCity(uuid)) {
@@ -26,7 +24,7 @@ public class HCDatabase {
                                 + ");");
                 return;
             }
-            DB.executeUpdate("UPDATE mp_homecities SET cityId = " + city.getCityId() + ", playerName = " + Database.sqlString(plugin.getServer().getOfflinePlayer(UUID.fromString(uuid)).getName()) + " WHERE playerUUID = " + Database.sqlString(uuid));
+            DB.executeUpdate("UPDATE mp_homecities SET cityId = " + city.getCityId() + ", playerName = " + Database.sqlString(Metropolis.getInstance().getServer().getOfflinePlayer(UUID.fromString(uuid)).getName()) + " WHERE playerUUID = " + Database.sqlString(uuid));
         } catch (SQLException e) {
             e.printStackTrace();
         }

@@ -10,8 +10,6 @@ import org.bukkit.entity.Player;
 
 @CommandAlias("metropolis | mp")
 public class CommandMetropolis extends BaseCommand {
-    public static Metropolis plugin;
-
     @Subcommand("taxcollect")
     public void onTaxCollect(Player player) {
         if (player.hasPermission("metropolis.admin.taxcollect")) {

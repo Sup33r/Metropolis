@@ -10,8 +10,6 @@ import java.sql.SQLException;
 
 public class Database {
 
-    public static Metropolis plugin;
-
     public static void initialize() {
         try {
             BukkitDB.createHikariDatabase(
@@ -24,8 +22,8 @@ public class Database {
                             + Metropolis.configuration.getSqlPort());
             createTables();
         } catch (Exception e) {
-            plugin.getLogger().warning("Failed to initialize database, disabling plugin.");
-            plugin.getServer().getPluginManager().disablePlugin(plugin);
+            Metropolis.getInstance().getLogger().warning("Failed to initialize database, disabling plugin.");
+            Metropolis.getInstance().getServer().getPluginManager().disablePlugin(Metropolis.getInstance());
         }
     }
 
@@ -34,8 +32,8 @@ public class Database {
             CityDatabase.initDBSync();
         } catch (Exception exception) {
             exception.printStackTrace();
-            plugin.getLogger().warning("Failed to synchronize database, disabling plugin.");
-            plugin.getServer().getPluginManager().disablePlugin(plugin);
+            Metropolis.getInstance().getLogger().warning("Failed to synchronize database, disabling plugin.");
+            Metropolis.getInstance().getServer().getPluginManager().disablePlugin(Metropolis.getInstance());
         }
     }
 

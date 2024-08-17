@@ -15,7 +15,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
 public class CityListener implements Listener {
-    public static Metropolis plugin;
 
     @EventHandler
     public void onPlayerEnterCity(PlayerEnterCityEvent event) {

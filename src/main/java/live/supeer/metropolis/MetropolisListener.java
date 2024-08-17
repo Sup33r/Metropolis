@@ -31,10 +31,9 @@ import java.util.*;
 import java.util.List;
 
 public class MetropolisListener implements Listener {
-    static Metropolis plugin;
 
     private CoreProtectAPI getCoreProtect() {
-        Plugin corePlugin = plugin.getServer().getPluginManager().getPlugin("CoreProtect");
+        Plugin corePlugin = Metropolis.getInstance().getServer().getPluginManager().getPlugin("CoreProtect");
 
         // Check that CoreProtect is loaded
         if (!(corePlugin instanceof CoreProtect)) {
@@ -336,22 +335,22 @@ public class MetropolisListener implements Listener {
                 if (district == null) {
                     if (Metropolis.playerInDistrict.containsKey(player.getUniqueId())) {
                         PlayerExitDistrictEvent exitDistrictEvent = new PlayerExitDistrictEvent(player, Metropolis.playerInDistrict.get(player.getUniqueId()));
-                        plugin.getServer().getPluginManager().callEvent(exitDistrictEvent);
+                        Metropolis.getInstance().getServer().getPluginManager().callEvent(exitDistrictEvent);
                     }
                 } else if (!Metropolis.playerInDistrict.containsKey(player.getUniqueId())) {
                     PlayerEnterDistrictEvent enterDistrictEvent = new PlayerEnterDistrictEvent(player, district);
-                    plugin.getServer().getPluginManager().callEvent(enterDistrictEvent);
+                    Metropolis.getInstance().getServer().getPluginManager().callEvent(enterDistrictEvent);
                 }
                 if (plot == null) {
                     if (Metropolis.playerInPlot.containsKey(player.getUniqueId())) {
                         PlayerExitPlotEvent exitEvent = new PlayerExitPlotEvent(player, Metropolis.playerInPlot.get(player.getUniqueId()));
-                        plugin.getServer().getPluginManager().callEvent(exitEvent);
+                        Metropolis.getInstance().getServer().getPluginManager().callEvent(exitEvent);
                     }
                     return;
                 }
                 if (!Metropolis.playerInPlot.containsKey(player.getUniqueId())) {
                     PlayerEnterPlotEvent enterEvent = new PlayerEnterPlotEvent(player, plot);
-                    plugin.getServer().getPluginManager().callEvent(enterEvent);
+                    Metropolis.getInstance().getServer().getPluginManager().callEvent(enterEvent);
                 }
             }
         }
@@ -397,20 +396,20 @@ public class MetropolisListener implements Listener {
             if (district == null) {
                 if (Metropolis.playerInDistrict.containsKey(playerId)) {
                     PlayerExitDistrictEvent exitDistrictEvent = new PlayerExitDistrictEvent(player, Metropolis.playerInDistrict.get(playerId));
-                    plugin.getServer().getPluginManager().callEvent(exitDistrictEvent);
+                    Metropolis.getInstance().getServer().getPluginManager().callEvent(exitDistrictEvent);
                 }
             } else if (!Metropolis.playerInDistrict.containsKey(playerId)) {
                 PlayerEnterDistrictEvent enterDistrictEvent = new PlayerEnterDistrictEvent(player, district);
-                plugin.getServer().getPluginManager().callEvent(enterDistrictEvent);
+                Metropolis.getInstance().getServer().getPluginManager().callEvent(enterDistrictEvent);
             }
             if (plot == null) {
                 if (Metropolis.playerInPlot.containsKey(playerId)) {
                     PlayerExitPlotEvent exitEvent = new PlayerExitPlotEvent(player, Metropolis.playerInPlot.get(playerId));
-                    plugin.getServer().getPluginManager().callEvent(exitEvent);
+                    Metropolis.getInstance().getServer().getPluginManager().callEvent(exitEvent);
                 }
             } else if (!Metropolis.playerInPlot.containsKey(playerId)) {
                 PlayerEnterPlotEvent enterEvent = new PlayerEnterPlotEvent(player, plot);
-                plugin.getServer().getPluginManager().callEvent(enterEvent);
+                Metropolis.getInstance().getServer().getPluginManager().callEvent(enterEvent);
             }
         }
     }
@@ -454,11 +453,11 @@ public class MetropolisListener implements Listener {
             if (plot == null) {
                 if (Metropolis.playerInPlot.containsKey(playerId)) {
                     PlayerExitPlotEvent exitEvent = new PlayerExitPlotEvent(player, Metropolis.playerInPlot.get(playerId));
-                    plugin.getServer().getPluginManager().callEvent(exitEvent);
+                    Metropolis.getInstance().getServer().getPluginManager().callEvent(exitEvent);
                 }
             } else if (!Metropolis.playerInPlot.containsKey(playerId)) {
                 PlayerEnterPlotEvent enterEvent = new PlayerEnterPlotEvent(player, plot);
-                plugin.getServer().getPluginManager().callEvent(enterEvent);
+                Metropolis.getInstance().getServer().getPluginManager().callEvent(enterEvent);
             }
         }
     }

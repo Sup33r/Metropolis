@@ -524,6 +524,7 @@ messages:
       differentWorlds: "<red>Du kan inte markera block i olika världar."
       none: "<red>Du måste starta en markering innan du kan lägga till yttligare punkter."
     scoreboard:
+      meeting: "<dark_red><bold>Möte aktiverat"
       district: "<dark_green><bold>Område:"
       plots: "<dark_green><bold>Antal tomter:"
       members: "<dark_green><bold>Antal medlemmar:"

@@ -318,4 +318,18 @@ public class Plot {
         }
         return new PlotPerms(row);
     }
+
+    public List<Player> playersInPlot() {
+        List<Player> players = new ArrayList<>();
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            Polygon polygon = getPlotPoints();
+            Point point = geometryFactory.createPoint(new Coordinate(p.getLocation().getBlockX(), p.getLocation().getBlockZ()));
+            if (polygon.contains(point)) {
+                if (!players.contains(p)) {
+                    players.add(p);
+                }
+            }
+        }
+        return players;
+    }
 }

@@ -7,8 +7,6 @@ import live.supeer.metropolis.Metropolis;
 
 @CommandAlias("here")
 public class CommandHere extends BaseCommand {
-    public static Metropolis plugin;
-
     @Default
     public void onHere() {
         // Code here

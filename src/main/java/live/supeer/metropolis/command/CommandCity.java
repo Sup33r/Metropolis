@@ -3,6 +3,8 @@ package live.supeer.metropolis.command;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation .*;
 import co.aikar.commands.annotation.Optional;
+import live.supeer.apied.ApiedAPI;
+import live.supeer.apied.MPlayer;
 import live.supeer.metropolis.AutoclaimManager;
 import live.supeer.metropolis.Database;
 import live.supeer.metropolis.Metropolis;
@@ -18,7 +20,6 @@ import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.utils.DateUtil;
 import net.coreprotect.CoreProtect;
 import net.coreprotect.CoreProtectAPI;
-import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -35,13 +36,11 @@ import java.util.regex.Pattern;
 
 @CommandAlias("city|c")
 public class CommandCity extends BaseCommand {
-    public static Metropolis plugin;
-
     private static final GeometryFactory geometryFactory = new GeometryFactory();
 
 
     private CoreProtectAPI getCoreProtect() {
-        Plugin corePlugin = plugin.getServer().getPluginManager().getPlugin("CoreProtect");
+        Plugin corePlugin = Metropolis.getInstance().getServer().getPluginManager().getPlugin("CoreProtect");
 
         // Check that CoreProtect is loaded
         if (!(corePlugin instanceof CoreProtect)) {
@@ -179,7 +178,7 @@ public class CommandCity extends BaseCommand {
             Metropolis.sendMessage(player, "messages.error.permissionDenied");
             return;
         }
-        Economy economy = Metropolis.getEconomy();
+        MPlayer mPlayer = ApiedAPI.getPlayer(player);
         if (args.length == 0) {
             if (HCDatabase.getHomeCityToCity(player.getUniqueId().toString()) == null) {
                 Metropolis.sendMessage(player, "messages.error.missing.homeCity");
@@ -219,13 +218,13 @@ public class CommandCity extends BaseCommand {
                 Metropolis.sendMessage(player, "messages.error.city.reserve");
                 return;
             }
-            if (economy.getBalance(player) < inputBalance) {
+            if (mPlayer.getBalance() < inputBalance) {
                 Metropolis.sendMessage(
                         player, "messages.error.missing.playerBalance", "%cityname%", city.getCityName());
                 return;
             }
 
-            economy.withdrawPlayer(player, inputBalance);
+            mPlayer.removeBalance(inputBalance, "{ \"type\": \"city\", \"subtype\": \"deposit\", \"cityId\": " + city.getCityId() + "}");
             CityDatabase.addCityBalance(city, inputBalance);
             Database.addLogEntry(
                     city,
@@ -282,7 +281,7 @@ public class CommandCity extends BaseCommand {
                             + ", \"reason\": \""
                             + reason
                             + "\" }");
-            economy.depositPlayer(player, inputBalance);
+            mPlayer.addBalance(inputBalance, "{ \"type\": \"city\", \"subtype\": \"withdraw\", \"cityId\": " + city.getCityId() + "}");
             Metropolis.sendMessage(
                     player,
                     "messages.city.successful.withdraw",
@@ -299,7 +298,7 @@ public class CommandCity extends BaseCommand {
 
     @Subcommand("new")
     public static void onNew(Player player, String cityName) {
-        Economy economy = Metropolis.getEconomy();
+        MPlayer mPlayer = ApiedAPI.getPlayer(player);
         if (!player.hasPermission("metropolis.city.new")) {
             Metropolis.sendMessage(player, "messages.error.permissionDenied");
             return;
@@ -308,7 +307,7 @@ public class CommandCity extends BaseCommand {
             Metropolis.sendMessage(player, "messages.error.city.maxCityCount");
             return;
         }
-        if (economy.getBalance(player) < Metropolis.configuration.getCityCreationCost()) {
+        if (mPlayer.getBalance() < Metropolis.configuration.getCityCreationCost()) {
             Metropolis.sendMessage(player, "messages.error.city.missing.balance.cityCost");
             return;
         }
@@ -377,7 +376,7 @@ public class CommandCity extends BaseCommand {
                         + ", \"player\": "
                         + player.getUniqueId().toString()
                         + " }");
-        economy.withdrawPlayer(player, Metropolis.configuration.getCityCreationCost());
+        mPlayer.removeBalance(Metropolis.configuration.getCityCreationCost(), "{ \"type\": \"city\", \"subtype\": \"new\", \"cityId\": " + city.getCityId() + "}");
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
             if (onlinePlayer.hasPermission("metropolis.city.new")) {
                 if (onlinePlayer == player) {
@@ -549,15 +548,15 @@ public class CommandCity extends BaseCommand {
                     player,
                     "messages.city.price",
                     "%city%",
-                    Utilities.formattedMoney(plugin.getConfig().getInt("settings.city.creationcost")),
+                    Utilities.formattedMoney(Metropolis.getInstance().getConfig().getInt("settings.city.creationcost")),
                     "%chunk%",
-                    Utilities.formattedMoney(plugin.getConfig().getInt("settings.city.claimcost")),
+                    Utilities.formattedMoney(Metropolis.getInstance().getConfig().getInt("settings.city.claimcost")),
                     "%bonus%",
-                    Utilities.formattedMoney(plugin.getConfig().getInt("settings.city.bonuscost")),
+                    Utilities.formattedMoney(Metropolis.getInstance().getConfig().getInt("settings.city.bonuscost")),
                     "%go%",
-                    Utilities.formattedMoney(plugin.getConfig().getInt("settings.city.citygocost")),
+                    Utilities.formattedMoney(Metropolis.getInstance().getConfig().getInt("settings.city.citygocost")),
                     "%outpost%",
-                    Utilities.formattedMoney(plugin.getConfig().getInt("settings.city.outpostcost")));
+                    Utilities.formattedMoney(Metropolis.getInstance().getConfig().getInt("settings.city.outpostcost")));
         } else {
             Metropolis.sendMessage(player, "messages.error.permissionDenied");
         }
@@ -691,7 +690,7 @@ public class CommandCity extends BaseCommand {
                             }
                         }
                     });
-            inviteCooldownTask.get(uuidCityHashMap).runTaskTimer(plugin, 20, 20);
+            inviteCooldownTask.get(uuidCityHashMap).runTaskTimer(Metropolis.getInstance(), 20, 20);
         } else {
             if (inviteCooldownTime.get(uuidCityHashMap) > 0) {
                 Metropolis.sendMessage(
@@ -734,7 +733,7 @@ public class CommandCity extends BaseCommand {
                                 }
                             }
                         });
-                inviteCooldownTask.get(uuidCityHashMap).runTaskTimer(plugin, 20, 20);
+                inviteCooldownTask.get(uuidCityHashMap).runTaskTimer(Metropolis.getInstance(), 20, 20);
             }
         }
     }
@@ -2060,7 +2059,7 @@ public class CommandCity extends BaseCommand {
             }
             StringBuilder bannedPlayersList = new StringBuilder().append("§4");
             for (Ban ban : bannedPlayers) {
-                bannedPlayersList.append(plugin.getServer().getOfflinePlayer(UUID.fromString(ban.getPlayerUUID())).getName()).append("§c, §4");
+                bannedPlayersList.append(Metropolis.getInstance().getServer().getOfflinePlayer(UUID.fromString(ban.getPlayerUUID())).getName()).append("§c, §4");
             }
             Metropolis.sendMessage(player, "messages.city.ban.header", "%cityname%", city.getCityName());
             player.sendMessage(bannedPlayersList.delete(bannedPlayersList.length()-4,bannedPlayersList.length())+"");
@@ -2713,7 +2712,7 @@ public class CommandCity extends BaseCommand {
             return;
         }
         PlayerExitCityEvent exitEvent = new PlayerExitCityEvent(player, city,true);
-        plugin.getServer().getPluginManager().callEvent(exitEvent);
+        Metropolis.getInstance().getServer().getPluginManager().callEvent(exitEvent);
         CityDatabase.deleteClaim(claim);
         Metropolis.sendMessage(player, "messages.city.successful.unclaim", "%cityname%", city.getCityName());
         Database.addLogEntry(

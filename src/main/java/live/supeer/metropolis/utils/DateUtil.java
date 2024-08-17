@@ -8,8 +8,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DateUtil {
-    public static Metropolis plugin;
-
     public static String getMonthName(int month) {
         String[] months = {"january", "february", "march", "april", "may", "june",
                 "july", "august", "september", "october", "november", "december"};

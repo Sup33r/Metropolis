@@ -2,6 +2,8 @@ package live.supeer.metropolis.command;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
+import live.supeer.apied.ApiedAPI;
+import live.supeer.apied.MPlayer;
 import live.supeer.metropolis.*;
 import live.supeer.metropolis.city.Role;
 import live.supeer.metropolis.event.PlayerEnterPlotEvent;
@@ -19,24 +21,19 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
-import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 @CommandAlias("plot")
 public class CommandPlot extends BaseCommand {
-    public static Metropolis plugin;
     private static final GeometryFactory geometryFactory = new GeometryFactory();
-
 
     @Default
     @CatchUnknown
@@ -411,7 +408,6 @@ public class CommandPlot extends BaseCommand {
             return;
         }
         Role role = CityDatabase.getCityRole(plot.getCity(), player.getUniqueId().toString());
-        List<Player> players = new ArrayList<>();
         Metropolis.sendMessage(player, "messages.plot.list.header", "%plot%", plot.getPlotName());
         Metropolis.sendMessage(
                 player, "messages.plot.list.id", "%id%", String.valueOf(plot.getPlotId()));
@@ -478,17 +474,7 @@ public class CommandPlot extends BaseCommand {
                     "%z%",
                     String.valueOf(plot.getPlotCenter().getBlockZ()));
         }
-        for (Player p : Bukkit.getOnlinePlayers()) {
-            Polygon polygon = plot.getPlotPoints();
-            Point point = geometryFactory.createPoint(new Coordinate(p.getLocation().getBlockX(), p.getLocation().getBlockZ()));
-            if (polygon.contains(point)) {
-                if (plot.getPlotId() == plot.getPlotId()) {
-                    if (!players.contains(p)) {
-                        players.add(p);
-                    }
-                }
-            }
-        }
+        List<Player> players = plot.playersInPlot();
         if (!players.isEmpty()) {
             StringBuilder stringBuilder = new StringBuilder();
             for (Player p : players) {
@@ -2320,7 +2306,7 @@ public class CommandPlot extends BaseCommand {
                     player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
             return;
         }
-        Economy economy = Metropolis.getEconomy();
+        MPlayer mPlayer = ApiedAPI.getPlayer(player);
         if (plot.getPlotOwner() != null) {
             Metropolis.sendMessage(
                     player,
@@ -2345,12 +2331,12 @@ public class CommandPlot extends BaseCommand {
                     city.getCityName());
             return;
         }
-        if (economy.getBalance(player) < plot.getPlotPrice()) {
+        if (mPlayer.getBalance() < plot.getPlotPrice()) {
             Metropolis.sendMessage(
                     player, "messages.error.missing.playerBalance", "%cityname%", city.getCityName());
             return;
         }
-        economy.withdrawPlayer(player, plot.getPlotPrice());
+        mPlayer.removeBalance(plot.getPlotPrice(), "{ \"type\": \"plot\", \"subtype\": \"buy\", \"plotId\": " + plot.getPlotId() + "}");
         city.addCityBalance(plot.getPlotPrice());
         Database.addLogEntry(
                 city,

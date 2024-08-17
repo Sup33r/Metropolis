@@ -18,10 +18,7 @@ import java.util.List;
 
 @Getter
 public class District {
-    public static Metropolis plugin;
     private static final GeometryFactory geometryFactory = new GeometryFactory();
-
-
     private final String districtName;
     private final City city;
     private List<OfflinePlayer> contactplayers;
@@ -34,7 +31,7 @@ public class District {
         this.districtPoints = LocationUtil.stringToPolygon(data.getString("districtPoints"));
         String contactPlayersString = data.getString("contactPlayers");
         this.contactplayers = new ArrayList<>(Utilities.stringToOfflinePlayerList(contactPlayersString));
-        this.world = plugin.getServer().getWorld(data.getString("world"));
+        this.world = Metropolis.getInstance().getServer().getWorld(data.getString("world"));
     }
 
     public void addContactPlayer(OfflinePlayer player) {
