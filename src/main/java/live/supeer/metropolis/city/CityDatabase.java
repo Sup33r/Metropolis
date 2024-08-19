@@ -4,6 +4,7 @@ import co.aikar.idb.DB;
 import co.aikar.idb.DbRow;
 import live.supeer.metropolis.Database;
 import live.supeer.metropolis.Metropolis;
+import live.supeer.metropolis.event.CityDeletionEvent;
 import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.plot.Plot;
@@ -85,14 +86,13 @@ public class CityDatabase {
     public static City newCity(String cityName, Player player) {
         try {
             DB.executeUpdate("INSERT INTO `mp_cities` (`cityName`, `originalMayorUUID`, `originalMayorName`, `cityBalance`, `citySpawn`, `createDate`, `taxLevel`) VALUES (?,?,?,?,?,?,?)",
-                    Database.sqlString(cityName),
-                    Database.sqlString(player.getUniqueId().toString()),
-                    Database.sqlString(player.getName()),
+                    cityName,
+                    player.getUniqueId().toString(),
+                    player.getName(),
                     Metropolis.configuration.getCityStartingBalance(),
-                    Database.sqlString(LocationUtil.locationToString(player.getLocation())),
+                    LocationUtil.locationToString(player.getLocation()),
                     DateUtil.getTimestamp(),
-                    Database.sqlString(Metropolis.configuration.getStartingTaxLevel()));
-
+                    Metropolis.configuration.getStartingTaxLevel());
             City city = new City(DB.getFirstRow("SELECT * FROM `mp_cities` WHERE `cityName` = " + Database.sqlString(cityName) + ";"));
             cities.add(city);
             newMember(city, player);
@@ -108,11 +108,11 @@ public class CityDatabase {
         try {
             String cityName = city.getCityName();
             DB.executeUpdate("INSERT INTO `mp_members` (`playerName`, `playerUUID`, `cityId`, `cityName`, `cityRole`, `joinDate`) VALUES (?,?,?,?,?,?)",
-                    Database.sqlString(player.getName()),
-                    Database.sqlString(player.getUniqueId().toString()),
+                    player.getName(),
+                    player.getUniqueId().toString(),
                     city.getCityId(),
-                    Database.sqlString(cityName),
-                    Database.sqlString(Role.MEMBER.getRoleName()),
+                    cityName,
+                    Role.MEMBER.getRoleName(),
                     DateUtil.getTimestamp());
             city.addCityMember(
                     new Member(DB.getFirstRow("SELECT * FROM `mp_members` WHERE `cityId` = " + city.getCityId() + " AND `playerUUID` = " + Database.sqlString(player.getUniqueId().toString()) + ";")));
@@ -124,8 +124,9 @@ public class CityDatabase {
 
     public static Claim createClaim(City city, Location location, boolean outpost, String playername, String playerUUID) {
         try {
-            DB.executeInsert("INSERT INTO `mp_claims` (`claimerName`, `claimerUUID`, `world`, `xPosition`, `zPosition`, `claimDate`, `cityId`, `outpost`) VALUES (?,?,?,?,?,?,?,?)", Database.sqlString(playername),
-                    Database.sqlString(playerUUID),
+            DB.executeInsert("INSERT INTO `mp_claims` (`claimerName`, `claimerUUID`, `world`, `xPosition`, `zPosition`, `claimDate`, `cityId`, `outpost`) VALUES (?,?,?,?,?,?,?,?)",
+                    playername,
+                    playerUUID,
                     location.getChunk().getWorld().getName(),
                     location.getChunk().getX(),
                     location.getChunk().getZ(),
@@ -143,12 +144,12 @@ public class CityDatabase {
     public static District createDistrict(City city, Polygon districtPoints, String districtName, World world) {
         try {
             DB.executeInsert("INSERT INTO `mp_districts` (`districtName`, `cityId`, `world`, `districtPoints`, `districtBoundary`, `contactPlayers`) VALUES (?,?,?,?,?,?)",
-                    Database.sqlString(districtName),
+                    districtName,
                     city.getCityId(),
-                    Database.sqlString(world.getName()),
-                    Database.sqlString(LocationUtil.polygonToString(districtPoints)),
+                    world.getName(),
+                    LocationUtil.polygonToString(districtPoints),
                     "ST_GeomFromText('" + districtPoints.toText() + "')",
-                    Database.sqlString(null));
+                    "NULL");
             return new District(DB.getFirstRow("SELECT * FROM `mp_districts` WHERE `cityId` = " + city.getCityId() + " AND `districtName` = " + Database.sqlString(districtName) + ";"));
         } catch (SQLException e) {
             e.printStackTrace();
@@ -160,8 +161,8 @@ public class CityDatabase {
         try {
             DB.executeInsert("INSERT INTO `mp_citygoes` (`cityId`, `goName`, `goLocation`, `createDate`) VALUES (?,?,?,?)",
                     city.getCityId(),
-                    Database.sqlString(name),
-                    Database.sqlString(LocationUtil.locationToString(location)),
+                    name,
+                    LocationUtil.locationToString(location),
                     DateUtil.getTimestamp() + ");");
         } catch (SQLException e) {
             e.printStackTrace();
@@ -455,6 +456,8 @@ public class CityDatabase {
                         Metropolis.sendMessage(player, "messages.city.wentUnder","%cityname%" , city.getCityName());
                     }
                     iterator.remove();
+                    CityDeletionEvent deletionEvent = new CityDeletionEvent(city);
+                    Metropolis.getInstance().getServer().getPluginManager().callEvent(deletionEvent);
                     deleteCity(city);
                 }
             }
@@ -462,6 +465,7 @@ public class CityDatabase {
         for (Player players : Metropolis.getInstance().getServer().getOnlinePlayers()) {
             Metropolis.sendMessage(players, "messages.city.successful.taxCollected");
         }
+        Metropolis.getInstance().logger.info("Taxes collected");
     }
 
 

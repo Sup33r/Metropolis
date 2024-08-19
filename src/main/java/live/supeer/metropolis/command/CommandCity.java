@@ -9,8 +9,7 @@ import live.supeer.metropolis.AutoclaimManager;
 import live.supeer.metropolis.Database;
 import live.supeer.metropolis.Metropolis;
 import live.supeer.metropolis.MetropolisListener;
-import live.supeer.metropolis.event.PlayerEnterCityEvent;
-import live.supeer.metropolis.event.PlayerExitCityEvent;
+import live.supeer.metropolis.event.*;
 import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.plot.PlotDatabase;
 import live.supeer.metropolis.utils.LocationUtil;
@@ -334,6 +333,8 @@ public class CommandCity extends BaseCommand {
 
         City city = CityDatabase.newCity(cityName, player);
         assert city != null;
+        CityCreationEvent creationEvent = new CityCreationEvent( city);
+        Metropolis.getInstance().getServer().getPluginManager().callEvent(creationEvent);
         Database.addLogEntry(
                 city,
                 "{ \"type\": \"create\", \"subtype\": \"city\", \"name\": "
@@ -365,6 +366,8 @@ public class CommandCity extends BaseCommand {
         Claim claim = CityDatabase.createClaim(city, player.getLocation(), false, player.getName(), player.getUniqueId().toString());
         PlayerEnterCityEvent enterCityEvent = new PlayerEnterCityEvent(player, city);
         Bukkit.getServer().getPluginManager().callEvent(enterCityEvent);
+        CityJoinEvent joinEvent = new CityJoinEvent(player, city);
+        Metropolis.getInstance().getServer().getPluginManager().callEvent(joinEvent);
         assert claim != null;
         Database.addLogEntry(
                 city,
@@ -600,6 +603,8 @@ public class CommandCity extends BaseCommand {
         }
         CityDatabase.newMember(city, player);
         invites.remove(player, city);
+        CityJoinEvent joinEvent = new CityJoinEvent(player, city);
+        Metropolis.getInstance().getServer().getPluginManager().callEvent(joinEvent);
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
             if (CityDatabase.memberExists(player.getUniqueId().toString(), city)) {
                 if (onlinePlayer == player) {
@@ -1897,6 +1902,8 @@ public class CommandCity extends BaseCommand {
             return;
         }
         city.removeCityMember(city.getCityMember(player.getUniqueId().toString()));
+        CityLeaveEvent leaveEvent = new CityLeaveEvent(player, city);
+        Metropolis.getInstance().getServer().getPluginManager().callEvent(leaveEvent);
         Database.addLogEntry(
                 city,
                 "{ \"type\": \"leave\", \"player\": "
@@ -2121,6 +2128,8 @@ public class CommandCity extends BaseCommand {
             CityDatabase.addCityBan(city, playerUUID, reason, player, placeDate, length);
             if (CityDatabase.memberExists(playerUUID, city)) {
                 city.removeCityMember(city.getCityMember(playerUUID));
+                CityLeaveEvent leaveEvent = new CityLeaveEvent(player, city);
+                Metropolis.getInstance().getServer().getPluginManager().callEvent(leaveEvent);
             }
             if (Bukkit.getOfflinePlayer(playerName).isOnline()) {
                 Metropolis.sendMessage((Player) Bukkit.getOfflinePlayer(playerName), "messages.city.ban.playerBanned", "%player%", playerName, "%cityname%", city.getCityName(), "%reason%", reason, "%length%", expiryDate);
@@ -2757,7 +2766,8 @@ public class CommandCity extends BaseCommand {
         }
         String cityName = city.getCityName();
         CityDatabase.deleteCity(city);
-
+        CityDeletionEvent deletionEvent = new CityDeletionEvent(city);
+        Metropolis.getInstance().getServer().getPluginManager().callEvent(deletionEvent);
         Database.addLogEntry(city, "{ \"type\": \"city\", \"subtype\": \"delete\", \"city\": \"" + cityName + "\", \"player\": \"" + player.getUniqueId().toString() + "\" }");
 
         for (Player p : Bukkit.getOnlinePlayers()) {
@@ -2924,6 +2934,8 @@ public class CommandCity extends BaseCommand {
             Metropolis.sendMessage((Player) targetPlayer, "messages.city.kick.kicked", "%cityname%", city.getCityName(), "%reason%", reason);
         }
         city.removeCityMember(targetPlayer.getUniqueId().toString());
+        CityLeaveEvent leaveEvent = new CityLeaveEvent(player, city);
+        Metropolis.getInstance().getServer().getPluginManager().callEvent(leaveEvent);
         for (Member member : city.getCityMembers()) {
             Player memberPlayer = Bukkit.getPlayer(UUID.fromString(member.getPlayerUUID()));
             if (memberPlayer == null) {

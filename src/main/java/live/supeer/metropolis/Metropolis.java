@@ -3,10 +3,13 @@ package live.supeer.metropolis;
 import co.aikar.commands.PaperCommandManager;
 import co.aikar.idb.DB;
 import com.google.common.collect.ImmutableList;
+import live.supeer.apied.ExpiringBan;
+import live.supeer.apied.MPlayerManager;
 import live.supeer.metropolis.city.*;
 import live.supeer.metropolis.command.*;
 import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.plot.Plot;
+import live.supeer.metropolis.utils.DateUtil;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -16,10 +19,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Logger;
 
 public final class Metropolis extends JavaPlugin {
@@ -70,6 +70,8 @@ public final class Metropolis extends JavaPlugin {
             getLogger().warning("Apied not found. disabling plugin");
             getServer().getPluginManager().disablePlugin(this);
         }
+
+        scheduleUnbans();
     }
 
     @Override
@@ -120,12 +122,12 @@ public final class Metropolis extends JavaPlugin {
     }
 
     public static void registerCompletions(PaperCommandManager manager) {
-        manager.getCommandCompletions().registerCompletion("plotType", c -> ImmutableList.of("church", "farm", "shop", "vacation"));
-        manager.getCommandCompletions().registerCompletion("cityRoles", c -> ImmutableList.of("vicemayor", "assistant", "inviter", "member", "swap", "-", "member"));
-        manager.getCommandCompletions().registerCompletion("cityGo1", c -> ImmutableList.of("delete", "set"));
-        manager.getCommandCompletions().registerCompletion("cityGo2", c -> ImmutableList.of("displayname", "accesslevel","name"));
-        manager.getCommandCompletions().registerCompletion("taxLevel", c -> ImmutableList.of("member", "inviter", "assistant", "vicemayor", "mayor", "all", "-"));
-        manager.getCommandCompletions().registerCompletion("cityGoes", c -> {
+        manager.getCommandCompletions().registerAsyncCompletion("plotType", c -> ImmutableList.of("church", "farm", "shop", "vacation"));
+        manager.getCommandCompletions().registerAsyncCompletion("cityRoles", c -> ImmutableList.of("vicemayor", "assistant", "inviter", "member", "swap", "-", "member"));
+        manager.getCommandCompletions().registerAsyncCompletion("cityGo1", c -> ImmutableList.of("delete", "set"));
+        manager.getCommandCompletions().registerAsyncCompletion("cityGo2", c -> ImmutableList.of("displayname", "accesslevel","name"));
+        manager.getCommandCompletions().registerAsyncCompletion("taxLevel", c -> ImmutableList.of("member", "inviter", "assistant", "vicemayor", "mayor", "all", "-"));
+        manager.getCommandCompletions().registerAsyncCompletion("cityGoes", c -> {
             Player player = c.getPlayer();
             if (player == null) {
                 return Collections.emptyList();
@@ -143,7 +145,7 @@ public final class Metropolis extends JavaPlugin {
 
             return CityDatabase.getCityGoNames(city, role);
         });
-        manager.getCommandCompletions().registerCompletion("cityNames", c -> {
+        manager.getCommandCompletions().registerAsyncCompletion("cityNames", c -> {
             Player player = c.getPlayer();
             if (player == null) {
                 return Collections.emptyList();
@@ -170,5 +172,36 @@ public final class Metropolis extends JavaPlugin {
         getServer().getScheduler().runTaskTimer(this, () -> {
             getServer().getScheduler().runTask(this, CityDatabase::collectTaxes);
         }, initialDelay / 50, 24 * 60 * 60 * 20); // Convert to ticks (20 ticks = 1 second)
+    }
+
+    public void scheduleUnbans() {
+        //get the date + 24 hours
+        long date = DateUtil.getTimestamp() + 86400;
+        List<ExpiringBan> expiringBans = MPlayerManager.getExpiringBans(date);
+        //make bukkit runnable on the time that it expires
+        for (ExpiringBan ban : expiringBans) {
+            long banTime = ban.getUnbanTime();
+            UUID uuid = ban.getPlayerUUID();
+            getServer().getScheduler().runTaskLater(this, () -> {
+                MPlayerManager.removeBan(uuid);
+                Player player = getServer().getPlayer(uuid);
+                if (player != null) {
+                    player.sendMessage("HEJ!!");
+                }
+            }, (banTime - date) * 20);
+        }
+    }
+
+    public void scheduleUnban(ExpiringBan expiringBan) {
+        long date = DateUtil.getTimestamp() + 86400;
+        long banTime = expiringBan.getUnbanTime();
+        UUID uuid = expiringBan.getPlayerUUID();
+        getServer().getScheduler().runTaskLater(this, () -> {
+            MPlayerManager.removeBan(uuid);
+            Player player = getServer().getPlayer(uuid);
+            if (player != null) {
+                player.sendMessage("HEJ");
+            }
+        }, (banTime - date) * 20);
     }
 }

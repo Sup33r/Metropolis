@@ -1,5 +1,8 @@
 package live.supeer.metropolis;
 
+import live.supeer.apied.ApiedAPI;
+import live.supeer.apied.MPlayer;
+import live.supeer.apied.MPlayerManager;
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.city.CityDatabase;
 import live.supeer.metropolis.city.District;
@@ -65,6 +68,22 @@ public class MetropolisListener implements Listener {
     @EventHandler
     public static void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
+        MPlayer mPlayer = ApiedAPI.getPlayer(player);
+        if (mPlayer.isBanned()) {
+            if (!JailManager.hasCell(player.getUniqueId().toString())) {
+                Cell cell = JailManager.getRandomEmptyCell();
+                cell.setPrisonerUUID(player.getUniqueId().toString());
+                player.teleport(cell.getLocation());
+                JailManager.displaySign(cell);
+                if (JailManager.banExpiresSoon(player.getUniqueId())) {
+                    Metropolis.getInstance().scheduleUnban(MPlayerManager.getExpiringBan(player.getUniqueId()));
+                }
+            } else {
+                Cell cell = JailManager.getCellForPrisoner(player.getUniqueId().toString());
+                player.teleport(cell.getLocation());
+            }
+            JailManager.sendJailMessage(player);
+        }
         if (CityDatabase.getClaim(player.getLocation()) != null) {
             City city = Objects.requireNonNull(CityDatabase.getClaim(player.getLocation().toBlockLocation())).getCity();
             PlayerEnterCityEvent enterCityEvent = new PlayerEnterCityEvent(event.getPlayer(), city);
@@ -83,20 +102,21 @@ public class MetropolisListener implements Listener {
             Utilities.sendNatureScoreboard(player);
             Metropolis.playerInCity.remove(player.getUniqueId());
         }
-
-        List<City> memberCities = CityDatabase.memberCityList(player.getUniqueId().toString());
-        if (memberCities != null) {
-            for (City city : memberCities) {
-                String cityMotd = city.getMotdMessage();
-                if (cityMotd != null) {
-                    if (city.isReserve()) {
-                        Metropolis.sendMessage(player, "messages.city.motd.reserve", "%cityname%", city.getCityName(), "%motd%", cityMotd);
-                    } else {
-                        Metropolis.sendMessage(player, "messages.city.motd.normal", "%cityname%", city.getCityName(), "%motd%", cityMotd);
+        if (!mPlayer.isBanned()) {
+            List<City> memberCities = CityDatabase.memberCityList(player.getUniqueId().toString());
+            if (memberCities != null) {
+                for (City city : memberCities) {
+                    String cityMotd = city.getMotdMessage();
+                    if (cityMotd != null) {
+                        if (city.isReserve()) {
+                            Metropolis.sendMessage(player, "messages.city.motd.reserve", "%cityname%", city.getCityName(), "%motd%", cityMotd);
+                        } else {
+                            Metropolis.sendMessage(player, "messages.city.motd.normal", "%cityname%", city.getCityName(), "%motd%", cityMotd);
+                        }
                     }
-                }
-                if (!city.isReserve() && city.cityCouldGoUnder(1)) {
-                    Metropolis.sendMessage(player, "messages.city.warning.lowBalance", "%cityname%", city.getCityName());
+                    if (!city.isReserve() && city.cityCouldGoUnder(1)) {
+                        Metropolis.sendMessage(player, "messages.city.warning.lowBalance", "%cityname%", city.getCityName());
+                    }
                 }
             }
         }

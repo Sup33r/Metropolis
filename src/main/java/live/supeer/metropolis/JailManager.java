@@ -2,11 +2,16 @@ package live.supeer.metropolis;
 
 import co.aikar.idb.DB;
 import co.aikar.idb.DbRow;
+import live.supeer.apied.ApiedAPI;
+import live.supeer.apied.MPlayer;
+import live.supeer.apied.MPlayerManager;
 import live.supeer.metropolis.plot.Plot;
+import live.supeer.metropolis.utils.DateUtil;
 import live.supeer.metropolis.utils.LocationUtil;
 import org.bukkit.Location;
 import org.bukkit.block.Sign;
 import org.bukkit.block.sign.Side;
+import org.bukkit.entity.Player;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -48,6 +53,14 @@ public class JailManager {
                 cells.add(new Cell(row));
             }
             return cells;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static boolean hasCell(String prisonerUUID) {
+        try {
+            return DB.getFirstRow("SELECT * FROM mp_cells WHERE prisonerUUID = ?", prisonerUUID) != null;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -137,6 +150,16 @@ public class JailManager {
         sign.update();
     }
 
+    public static void sendJailMessage(Player player) {
+        if (!hasCell(player.getUniqueId().toString())) {
+            return;
+        }
+        long expiry = MPlayerManager.getBanLength(player.getUniqueId());
+        String reason = MPlayerManager.getBanReason(player.getUniqueId());
+        Cell cell = getCellForPrisoner(player.getUniqueId().toString());
+        Metropolis.sendMessage(player, "messages.cell.jailMessage", "%player%", player.getName(), "%jail%", cell.getJailPlot().getPlotName(), "%city%", cell.getJailPlot().getCity().getCityName(), "%expiry%", DateUtil.niceDate(expiry), "%reason%", reason);
+    }
+
     public static boolean signAlreadyExists(Location location) {
         try {
             return DB.getFirstRow("SELECT * FROM mp_cells WHERE signLocation = ?", LocationUtil.locationToString(location)) != null;
@@ -156,6 +179,27 @@ public class JailManager {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static void handleUnban(UUID playerUUID) {
+        if (hasCell(playerUUID.toString())) {
+            MPlayer player = ApiedAPI.getPlayer(playerUUID);
+            if (player == null) {
+                return;
+            }
+            player.setBanned(false);
+            Cell cell = getCellForPrisoner(playerUUID.toString());
+            releasePlayerFromCell(playerUUID.toString());
+            displaySign(cell);
+        }
+    }
+
+    public static boolean banExpiresSoon(UUID playerUUID) {
+        if (!MPlayerManager.isBanned(playerUUID)) {
+            return false;
+        }
+        //time left is less than 24 hours
+        return MPlayerManager.getBanLength(playerUUID) - System.currentTimeMillis() < 86400000;
     }
 
 }
