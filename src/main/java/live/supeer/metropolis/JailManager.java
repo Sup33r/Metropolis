@@ -195,11 +195,13 @@ public class JailManager {
     }
 
     public static boolean banExpiresSoon(UUID playerUUID) {
+        Metropolis.getInstance().logger.info("Checking if ban expires soon for " + playerUUID);
         if (!MPlayerManager.isBanned(playerUUID)) {
             return false;
         }
+        Metropolis.getInstance().logger.info(MPlayerManager.getBanLength(playerUUID) + " - " + DateUtil.getTimestamp() + " < 86400");
         //time left is less than 24 hours
-        return MPlayerManager.getBanLength(playerUUID) - System.currentTimeMillis() < 86400000;
+        return MPlayerManager.getBanLength(playerUUID) - DateUtil.getTimestamp() < 86400;
     }
 
 }

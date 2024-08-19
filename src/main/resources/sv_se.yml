@@ -348,6 +348,7 @@ messages:
           2: "<gray>f = frame, g = go, h = home, j = jukebox"
           3: "<gray>r = repair (anvil), s = switch, t = teleport, v = villager"
   cell:
+    expired: "<aqua>Din bannlysning har löpt ut.</aqua>"
     jailMessage: "<dark_green>--- <green>Bannlysning <dark_green>---\n<dark_green>Spelare: <green>%player%</green></dark_green>\n<dark_green>Placering: <green>%jail% (%city%)</green></dark_green>\n<dark_green>Utgångsdatum: <green>%expiry%</green></dark_green>\n<dark_green>Anledning: <green>%reason%</green></dark_green>"
     banned: "<green>Du har bannlyst spelaren."
     updated: "<green>Cellen har uppdaterats."

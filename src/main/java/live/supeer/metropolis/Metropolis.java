@@ -3,7 +3,9 @@ package live.supeer.metropolis;
 import co.aikar.commands.PaperCommandManager;
 import co.aikar.idb.DB;
 import com.google.common.collect.ImmutableList;
+import live.supeer.apied.ApiedAPI;
 import live.supeer.apied.ExpiringBan;
+import live.supeer.apied.MPlayer;
 import live.supeer.apied.MPlayerManager;
 import live.supeer.metropolis.city.*;
 import live.supeer.metropolis.command.*;
@@ -18,14 +20,17 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.logging.Logger;
 
 public final class Metropolis extends JavaPlugin {
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(Metropolis.class);
     public static HashMap<UUID, City> playerInCity = new HashMap<>();
     public static HashMap<UUID, Plot> playerInPlot = new HashMap<>();
     public static HashMap<UUID, District> playerInDistrict = new HashMap<>();
+    public static List<UUID> scheduledForUnban = new ArrayList<>();
     public Logger logger = null;
     public static MetropolisConfiguration configuration;
     @Getter
@@ -70,8 +75,6 @@ public final class Metropolis extends JavaPlugin {
             getLogger().warning("Apied not found. disabling plugin");
             getServer().getPluginManager().disablePlugin(this);
         }
-
-        scheduleUnbans();
     }
 
     @Override
@@ -174,34 +177,23 @@ public final class Metropolis extends JavaPlugin {
         }, initialDelay / 50, 24 * 60 * 60 * 20); // Convert to ticks (20 ticks = 1 second)
     }
 
-    public void scheduleUnbans() {
-        //get the date + 24 hours
-        long date = DateUtil.getTimestamp() + 86400;
-        List<ExpiringBan> expiringBans = MPlayerManager.getExpiringBans(date);
-        //make bukkit runnable on the time that it expires
-        for (ExpiringBan ban : expiringBans) {
-            long banTime = ban.getUnbanTime();
-            UUID uuid = ban.getPlayerUUID();
-            getServer().getScheduler().runTaskLater(this, () -> {
-                MPlayerManager.removeBan(uuid);
-                Player player = getServer().getPlayer(uuid);
-                if (player != null) {
-                    player.sendMessage("HEJ!!");
-                }
-            }, (banTime - date) * 20);
-        }
-    }
-
     public void scheduleUnban(ExpiringBan expiringBan) {
-        long date = DateUtil.getTimestamp() + 86400;
         long banTime = expiringBan.getUnbanTime();
         UUID uuid = expiringBan.getPlayerUUID();
+        if (scheduledForUnban.contains(uuid)) {
+            return;
+        }
+        scheduledForUnban.add(uuid);
         getServer().getScheduler().runTaskLater(this, () -> {
-            MPlayerManager.removeBan(uuid);
             Player player = getServer().getPlayer(uuid);
             if (player != null) {
-                player.sendMessage("HEJ");
+                MPlayer mPlayer = ApiedAPI.getPlayer(player);
+                Cell cell = JailManager.getCellForPrisoner(player.getUniqueId().toString());
+                cell.setPrisonerUUID(null);
+                JailManager.displaySignEmptyCell(cell);
+                player.teleport(mPlayer.getLastLocation());
+                Metropolis.sendMessage(player, "messages.cell.expired");
             }
-        }, (banTime - date) * 20);
+        }, (banTime - DateUtil.getTimestamp()) * 20);
     }
 }

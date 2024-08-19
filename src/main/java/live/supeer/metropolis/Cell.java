@@ -26,11 +26,12 @@ public class Cell {
         this.location = LocationUtil.stringToLocation(data.getString("location"));
         this.prisonerUUID = data.getString("prisonerUUID") != null ? data.getString("prisonerUUID") : null;
         this.signLocation = data.getString("signLocation") != null ? LocationUtil.stringToLocation(data.getString("signLocation")) : null;
-        this.signSide = Side.valueOf(data.getString("signSide"));
+        this.signSide = data.getString("signSide") != null ? Side.valueOf(data.getString("signSide")) : null;
     }
 
     public void setSignSide(Side side) {
         try {
+            this.signSide = side;
             DB.executeUpdate("UPDATE mp_cells SET signSide = ? WHERE cellId = ?", side.toString(), this.cellId);
         } catch (Exception e) {
             throw new RuntimeException(e);

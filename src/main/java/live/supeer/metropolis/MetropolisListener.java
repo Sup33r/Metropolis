@@ -1,6 +1,7 @@
 package live.supeer.metropolis;
 
 import live.supeer.apied.ApiedAPI;
+import live.supeer.apied.ChestManager;
 import live.supeer.apied.MPlayer;
 import live.supeer.apied.MPlayerManager;
 import live.supeer.metropolis.city.City;
@@ -14,6 +15,7 @@ import live.supeer.metropolis.plot.PlotDatabase;
 import live.supeer.metropolis.utils.DateUtil;
 import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.utils.Utilities;
+import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.event.player.*;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -75,14 +77,21 @@ public class MetropolisListener implements Listener {
                 cell.setPrisonerUUID(player.getUniqueId().toString());
                 player.teleport(cell.getLocation());
                 JailManager.displaySign(cell);
-                if (JailManager.banExpiresSoon(player.getUniqueId())) {
-                    Metropolis.getInstance().scheduleUnban(MPlayerManager.getExpiringBan(player.getUniqueId()));
-                }
             } else {
                 Cell cell = JailManager.getCellForPrisoner(player.getUniqueId().toString());
                 player.teleport(cell.getLocation());
             }
             JailManager.sendJailMessage(player);
+            if (JailManager.banExpiresSoon(player.getUniqueId())) {
+                Metropolis.getInstance().scheduleUnban(MPlayerManager.getExpiringBan(player.getUniqueId()));
+            }
+        } else {
+            if (JailManager.hasCell(player.getUniqueId().toString())) {
+                Cell cell = JailManager.getCellForPrisoner(player.getUniqueId().toString());
+                cell.setPrisonerUUID(null);
+                JailManager.displaySignEmptyCell(cell);
+                player.teleport(mPlayer.getLastLocation());
+            }
         }
         if (CityDatabase.getClaim(player.getLocation()) != null) {
             City city = Objects.requireNonNull(CityDatabase.getClaim(player.getLocation().toBlockLocation())).getCity();
@@ -171,6 +180,16 @@ public class MetropolisListener implements Listener {
         }
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             if (event.getMaterial() == Material.STICK) {
+                if (ChestManager.chestInventories.containsKey(player.getUniqueId()) || ChestManager.isChestEventCounting(player.getUniqueId())) {
+                    return;
+                }
+                Block block = event.getClickedBlock();
+                assert block != null;
+                if (block.getType().equals(Material.CHEST) || block.getType().equals(Material.TRAPPED_CHEST) || block.getType().equals(Material.BARREL) || block.getType().equals(Material.SHULKER_BOX)) {
+                    ChestManager.handleChestClick(block.getLocation(), player);
+                    event.setCancelled(true);
+                    return;
+                }
                 if (CommandCity.blockEnabled.contains(player)) {
                     event.setCancelled(true);
                     if (CityDatabase.getClaim(event.getClickedBlock().getLocation()) == null) {

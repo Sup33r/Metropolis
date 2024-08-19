@@ -3,6 +3,7 @@ package live.supeer.metropolis;
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.city.CityDatabase;
 import live.supeer.metropolis.city.Member;
+import live.supeer.metropolis.city.Role;
 import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.plot.PlotDatabase;
@@ -62,5 +63,17 @@ public class MetropolisAPI {
 
     public static List<Player> playersInPlot(Plot plot) {
         return plot.playersInPlot();
+    }
+
+    public static boolean playerHasCityPermission(Location location, Player player, Role target) {
+        City city = CityDatabase.getCityByClaim(location);
+        if (city == null) {
+            return false;
+        }
+        Role role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
+        if (role == null) {
+            return false;
+        }
+        return role.getPermissionLevel() >= role.getPermissionLevel();
     }
 }

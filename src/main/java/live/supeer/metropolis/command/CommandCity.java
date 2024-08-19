@@ -127,7 +127,7 @@ public class CommandCity extends BaseCommand {
         String cityPublic = city.isPublic() ? Metropolis.getMessage("messages.words.yes_word") : Metropolis.getMessage("messages.words.no_word");
         String founderName = Bukkit.getOfflinePlayer(UUID.fromString(city.getOriginalMayorUUID())).getName();
         Metropolis.sendMessage(player, "messages.city.cityInfo.openPublic", "%open%", cityOpen, "%public%", cityPublic);
-        Metropolis.sendMessage(player, "messages.city.cityInfo.founded", "%founded%", DateUtil.formatDate(city.getCityCreationDate()), "%by%" , founderName);
+        Metropolis.sendMessage(player, "messages.city.cityInfo.founded", "%founded%", DateUtil.niceDate(city.getCityCreationDate()), "%by%" , founderName);
         Metropolis.sendMessage(player, "messages.city.cityInfo.balance", "%balance%", Utilities.formattedMoney(CityDatabase.getCityBalance(city)));
         Metropolis.sendMessage(player, "messages.city.cityInfo.tax", "%tax%", String.valueOf(city.getCityTax()), "%payedBy%", Utilities.taxPayedBy(city.getTaxLevel()));
         Metropolis.sendMessage(player, "messages.city.cityInfo.stateTax", "%tax%", String.valueOf(city.getCityClaims()*Metropolis.configuration.getStateTax()));
