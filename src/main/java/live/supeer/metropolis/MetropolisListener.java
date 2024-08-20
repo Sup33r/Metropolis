@@ -405,6 +405,40 @@ public class MetropolisListener implements Listener {
                     savedPlayers.add(player);
                 }
                 savedLocs.get(player.getUniqueId()).add(event.getClickedBlock().getLocation());
+                return;
+            }
+            Block block = event.getClickedBlock();
+            assert block != null;
+            if (block.getType().equals(Material.CHEST) || block.getType().equals(Material.TRAPPED_CHEST) || block.getType().equals(Material.BARREL) || block.getType().equals(Material.SHULKER_BOX)) {
+                live.supeer.apied.Chest chest1;
+                if (block.getState() instanceof Chest chest) {
+                    if (chest.getInventory() instanceof DoubleChestInventory doubleChestInventory) {
+                        chest1 = ChestManager.getClaimedChest(doubleChestInventory.getLeftSide().getLocation());
+                    } else {
+                        chest1 = ChestManager.getClaimedChest(block.getLocation());
+                    }
+                } else {
+                    chest1 = ChestManager.getClaimedChest(block.getLocation());
+                }
+                if (chest1 != null) {
+                    MPlayer mPlayer = ApiedAPI.getPlayer(player);
+                    if (chest1.getOwnerUUID().equals(player.getUniqueId())) {
+                        if (!mPlayer.hasFlag('m')) {
+                            Metropolis.sendMessage(player, "messages.chest.open.self");
+                        }
+                    } else {
+                        if (chest1.getSharedPlayers().contains(player.getUniqueId())) {
+                            if (!mPlayer.hasFlag('m')) {
+                                Metropolis.sendMessage(player, "messages.chest.open.shared", "%owner%", ApiedAPI.getPlayer(chest1.getOwnerUUID()).getName());
+                            }
+                        } else if (ChestManager.chestOverride.contains(player)) {
+                            Metropolis.sendMessage(player, "messages.chest.open.override", "%owner%", ApiedAPI.getPlayer(chest1.getOwnerUUID()).getName());
+                        } else {
+                            event.setCancelled(true);
+                            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                        }
+                    }
+                }
             }
         }
     }
