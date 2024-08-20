@@ -84,7 +84,9 @@ public final class Metropolis extends JavaPlugin {
 
     public static void sendMessage(@NotNull CommandSender sender, @NotNull String key, String... replacements) {
         String message = languageManager.getValue(key, getLocale(sender), replacements);
-
+        if (message == null || message.isEmpty()) {
+            sender.sendMessage("§cMessage not found: " + key);
+        }
         if (message != null && !message.isEmpty()) {
             Component component = languageManager.getMiniMessage().deserialize(message);
             sender.sendMessage(component);

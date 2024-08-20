@@ -16,8 +16,11 @@ import live.supeer.metropolis.utils.DateUtil;
 import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.utils.Utilities;
 import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
 import org.bukkit.block.Sign;
 import org.bukkit.event.player.*;
+import org.bukkit.inventory.DoubleChestInventory;
+import org.bukkit.inventory.Inventory;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
 import net.coreprotect.CoreProtect;
@@ -180,12 +183,127 @@ public class MetropolisListener implements Listener {
         }
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             if (event.getMaterial() == Material.STICK) {
-                if (ChestManager.chestInventories.containsKey(player.getUniqueId()) || ChestManager.isChestEventCounting(player.getUniqueId())) {
-                    return;
-                }
                 Block block = event.getClickedBlock();
                 assert block != null;
                 if (block.getType().equals(Material.CHEST) || block.getType().equals(Material.TRAPPED_CHEST) || block.getType().equals(Material.BARREL) || block.getType().equals(Material.SHULKER_BOX)) {
+                    if (ChestManager.chestInventories.containsKey(player.getUniqueId())) {
+                        event.setCancelled(true);
+                        if (block.getState() instanceof Chest chest1) {
+                            Inventory inventory = chest1.getInventory();
+                            if (inventory instanceof DoubleChestInventory doubleChestInventory) {
+                                live.supeer.apied.Chest chest = ChestManager.getClaimedChest(event.getClickedBlock().getLocation());
+                                if (chest == null) {
+                                    Metropolis.sendMessage(player, "messages.chest.error.notLocked");
+                                    return;
+                                }
+                                if (!chest.getOwnerUUID().equals(player.getUniqueId())) {
+                                    Metropolis.sendMessage(player, "messages.chest.error.notOwner");
+                                    return;
+                                }
+                                //TODO: ADD A CHECK FOR IF THE CITYCLAIM IS OCCUPIED
+                                if (Arrays.stream(doubleChestInventory.getContents()).allMatch(Objects::isNull)) {
+                                    int id = ChestManager.chestInventories.get(player.getUniqueId());
+                                    Inventory archiveInventory = ChestManager.getInventoryFromArchive(id);
+                                    if (archiveInventory != null) {
+                                        chest1.getInventory().setContents(archiveInventory.getContents());
+                                        ChestManager.removeArchive(id);
+                                        ChestManager.chestInventories.remove(player.getUniqueId());
+                                        Metropolis.sendMessage(player, "messages.chest.claimedArchive");
+                                        return;
+                                    } else {
+                                        Metropolis.sendMessage(player, "messages.chest.error.noItems");
+                                        return;
+                                    }
+                                } else {
+                                    Metropolis.sendMessage(player, "messages.chest.error.notEmpty");
+                                    return;
+                                }
+                            } else {
+                                Metropolis.sendMessage(player, "messages.chest.error.notDouble");
+                                return;
+                            }
+                        }
+                        return;
+                    }
+                    if (ChestManager.isChestEventCounting(player.getUniqueId())) {
+                        event.setCancelled(true);
+                        String action = ChestManager.getChestEventCount(player.getUniqueId()).getType();
+                        switch (action) {
+                            case "info" -> {
+                                ChestManager.decrementChestEventCount(player.getUniqueId());
+                                live.supeer.apied.Chest chest = ChestManager.getClaimedChest(event.getClickedBlock().getLocation());
+                                ChestManager.ChestEventCount chestEventCount = ChestManager.getChestEventCount(player.getUniqueId());
+                                int count;
+                                if (chestEventCount == null) {
+                                    count = 0;
+                                } else {
+                                    count = chestEventCount.getCount();
+                                }
+                                if (chest == null) {
+                                    Metropolis.sendMessage(player, "messages.chest.info.unlocked", "%location%", LocationUtil.formatLocation(event.getClickedBlock().getLocation()));
+                                    if (!(count <= 0)) {
+                                        Metropolis.sendMessage(player, "messages.chest.operationsleft", "%count%", String.valueOf(count));
+                                    }
+                                    return;
+                                } else {
+                                    MPlayer owner = ApiedAPI.getPlayer(chest.getOwnerUUID());
+                                    Metropolis.sendMessage(player, "messages.chest.info.locked", "%location%", LocationUtil.formatLocation(event.getClickedBlock().getLocation()), "%owner%", owner.getName(), "%id%", String.valueOf(chest.getId()));
+                                    if (!(count <= 0)) {
+                                        Metropolis.sendMessage(player, "messages.chest.operationsleft", "%count%", String.valueOf(count));
+                                    }
+                                    return;
+                                }
+                            }
+                            case "share" -> {
+                                ChestManager.decrementChestEventCount(player.getUniqueId());
+                                ChestManager.ChestEventCount chestEventCount = ChestManager.getChestEventCount(player.getUniqueId());
+                                int count;
+                                if (chestEventCount == null) {
+                                    count = 0;
+                                } else {
+                                    count = chestEventCount.getCount();
+                                }
+                                ChestManager.handleChestShare(event.getClickedBlock().getLocation(), player, ChestManager.getChestEventCount(player.getUniqueId()).getTarget());
+                                if (!(count <= 0)) {
+                                    Metropolis.sendMessage(player, "messages.chest.operationsleft", "%count%", String.valueOf(count));
+                                }
+                                return;
+                            }
+                            case "give" -> {
+                                ChestManager.decrementChestEventCount(player.getUniqueId());
+                                ChestManager.ChestEventCount chestEventCount = ChestManager.getChestEventCount(player.getUniqueId());
+                                int count;
+                                if (chestEventCount == null) {
+                                    count = 0;
+                                } else {
+                                    count = chestEventCount.getCount();
+                                }
+                                ChestManager.handleChestGive(event.getClickedBlock().getLocation(), player, ChestManager.getChestEventCount(player.getUniqueId()).getTarget());
+                                if (!(count <= 0)) {
+                                    Metropolis.sendMessage(player, "messages.chest.operationsleft", "%count%", String.valueOf(count));
+                                }
+                                return;
+                            }
+                            case "archive" -> {
+                                ChestManager.decrementChestEventCount(player.getUniqueId());
+                                ChestManager.ChestEventCount chestEventCount = ChestManager.getChestEventCount(player.getUniqueId());
+                                int count;
+                                if (chestEventCount == null) {
+                                    count = 0;
+                                } else {
+                                    count = chestEventCount.getCount();
+                                }
+                                boolean city = MetropolisAPI.playerHasCityPermission(event.getClickedBlock().getLocation(), player, Role.ASSISTANT);
+                                boolean self = player.hasPermission("mandatory.command.chest.archive");
+                                ChestManager.handleArchiveItems(player, event.getClickedBlock().getLocation(), city, self);
+                                if (!(count <= 0)) {
+                                    Metropolis.sendMessage(player, "messages.chest.operationsleft", "%count%", String.valueOf(count));
+                                }
+                                return;
+                            }
+                        }
+                        return;
+                    }
                     ChestManager.handleChestClick(block.getLocation(), player);
                     event.setCancelled(true);
                     return;
@@ -288,7 +406,7 @@ public class MetropolisListener implements Listener {
                 }
                 savedLocs.get(player.getUniqueId()).add(event.getClickedBlock().getLocation());
             }
-            }
+        }
     }
 
     @EventHandler
