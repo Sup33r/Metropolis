@@ -697,7 +697,7 @@ public class MetropolisListener implements Listener {
                                 + " -- §c"
                                 + result.getType().toString().toLowerCase().replace("_", " ")
                                 + "§2 -- "
-                                + DateUtil.niceDate(result.getTimestamp() / 1000L);
+                                + DateUtil.niceDate(DateUtil.getTimestamp());
             }
             if (result.getActionId() == 1) {
                 row =
@@ -708,7 +708,7 @@ public class MetropolisListener implements Listener {
                                 + " -- §a"
                                 + result.getType().toString().toLowerCase().replace("_", " ")
                                 + "§2 -- "
-                                + DateUtil.niceDate(result.getTimestamp() / 1000L);
+                                + DateUtil.niceDate(DateUtil.getTimestamp());
             }
             if (result.getActionId() == 2) {
                 row =
@@ -719,7 +719,7 @@ public class MetropolisListener implements Listener {
                                 + " -- §e"
                                 + result.getType().toString().toLowerCase().replace("_", " ")
                                 + "§2 -- "
-                                + DateUtil.niceDate(result.getTimestamp() / 1000L);
+                                + DateUtil.niceDate(DateUtil.getTimestamp());
             }
             if (!row.isEmpty()) {
                 player.sendMessage(row);
@@ -774,7 +774,7 @@ public class MetropolisListener implements Listener {
                                 + " -- §c"
                                 + result.getType().toString().toLowerCase().replace("_", " ")
                                 + "§2 -- "
-                                + DateUtil.niceDate(result.getTimestamp() / 1000L);
+                                + DateUtil.niceDate(DateUtil.getTimestamp());
             }
             if (result.getActionId() == 1) {
                 row =
@@ -785,7 +785,7 @@ public class MetropolisListener implements Listener {
                                 + " -- §a"
                                 + result.getType().toString().toLowerCase().replace("_", " ")
                                 + "§2 -- "
-                                + DateUtil.niceDate(result.getTimestamp() / 1000L);
+                                + DateUtil.niceDate(DateUtil.getTimestamp());
             }
             if (result.getActionId() == 2) {
                 row =
@@ -796,7 +796,7 @@ public class MetropolisListener implements Listener {
                                 + " -- §e"
                                 + result.getType().toString().toLowerCase().replace("_", " ")
                                 + "§2 -- "
-                                + DateUtil.niceDate(result.getTimestamp() / 1000L);
+                                + DateUtil.niceDate(DateUtil.getTimestamp());
             }
             if (!row.isEmpty()) {
                 player.sendMessage(row);
