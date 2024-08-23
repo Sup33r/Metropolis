@@ -1,9 +1,6 @@
 package live.supeer.metropolis;
 
-import live.supeer.apied.ApiedAPI;
-import live.supeer.apied.ChestManager;
-import live.supeer.apied.MPlayer;
-import live.supeer.apied.MPlayerManager;
+import live.supeer.apied.*;
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.city.CityDatabase;
 import live.supeer.metropolis.city.District;
@@ -142,21 +139,6 @@ public class MetropolisListener implements Listener {
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         Player player = event.getPlayer();
-        if (event.getAction() == Action.RIGHT_CLICK_BLOCK && Objects.requireNonNull(event.getClickedBlock()).getState() instanceof Sign) {
-            if (!waitingForSignClick.containsKey(player.getUniqueId())) {
-                return;
-            }
-            event.setCancelled(true);
-            if (JailManager.signAlreadyExists(event.getClickedBlock().getLocation())) {
-                Metropolis.sendMessage(player, "messages.cell.sign.alreadyExists");
-                return;
-            }
-            Cell cell = waitingForSignClick.get(player.getUniqueId());
-            JailManager.UpdateCellSign(cell, event.getClickedBlock().getLocation(), ((Sign) event.getClickedBlock().getState()).getInteractableSideFor(player));
-            Metropolis.sendMessage(player, "messages.cell.sign.set");
-            JailManager.displaySignEmptyCell(cell);
-            waitingForSignClick.remove(player.getUniqueId());
-        }
 
         if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
             if (event.getMaterial() == Material.STICK) {
@@ -182,6 +164,41 @@ public class MetropolisListener implements Listener {
             }
         }
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+            if (event.getMaterial() == Material.REDSTONE) {
+                Block block = event.getClickedBlock();
+                assert block != null;
+                if (block.getState() instanceof Sign sign) {
+                    event.setCancelled(true);
+                    if (ShopManager.validSign(sign)) {
+                        ShopManager.shopCreation.put(player.getUniqueId(), block.getLocation());
+                        Metropolis.sendMessage(player, "messages.shop.creation.started");
+                    } else {
+                        Metropolis.sendMessage(player, "messages.shop.creation.invalid");
+                    }
+                }
+                if (block.getType().equals(Material.CHEST) || block.getType().equals(Material.TRAPPED_CHEST) || block.getType().equals(Material.BARREL) || block.getType().equals(Material.SHULKER_BOX)) {
+                    if (ShopManager.shopCreation.containsKey(player.getUniqueId())) {
+                        event.setCancelled(true);
+                        ShopManager.handleChestClick(player, block.getLocation(), ShopManager.shopCreation.get(player.getUniqueId()));
+                        return;
+                    }
+                }
+            }
+            if (event.getAction() == Action.RIGHT_CLICK_BLOCK && Objects.requireNonNull(event.getClickedBlock()).getState() instanceof Sign) {
+                if (!waitingForSignClick.containsKey(player.getUniqueId())) {
+                    return;
+                }
+                event.setCancelled(true);
+                if (JailManager.signAlreadyExists(event.getClickedBlock().getLocation())) {
+                    Metropolis.sendMessage(player, "messages.cell.sign.alreadyExists");
+                    return;
+                }
+                Cell cell = waitingForSignClick.get(player.getUniqueId());
+                JailManager.UpdateCellSign(cell, event.getClickedBlock().getLocation(), ((Sign) event.getClickedBlock().getState()).getInteractableSideFor(player));
+                Metropolis.sendMessage(player, "messages.cell.sign.set");
+                JailManager.displaySignEmptyCell(cell);
+                waitingForSignClick.remove(player.getUniqueId());
+            }
             if (event.getMaterial() == Material.STICK) {
                 Block block = event.getClickedBlock();
                 assert block != null;
