@@ -169,14 +169,17 @@ public class MetropolisListener implements Listener {
                 assert block != null;
                 if (block.getState() instanceof Sign sign) {
                     event.setCancelled(true);
+                    ChestShop shop = ShopManager.getShopFromSign(sign);
                     if (ShopManager.validSign(sign)) {
                         ShopManager.shopCreation.put(player.getUniqueId(), block.getLocation());
                         Metropolis.sendMessage(player, "messages.shop.creation.started");
+                    } else if (shop != null) {
+                        ShopManager.shopCreation.put(player.getUniqueId(), block.getLocation());
+                        Metropolis.sendMessage(player, "messages.shop.creation.continue");
                     } else {
                         Metropolis.sendMessage(player, "messages.shop.creation.invalid");
                     }
-                }
-                if (block.getType().equals(Material.CHEST) || block.getType().equals(Material.TRAPPED_CHEST) || block.getType().equals(Material.BARREL) || block.getType().equals(Material.SHULKER_BOX)) {
+                } else if (block.getType().equals(Material.CHEST) || block.getType().equals(Material.TRAPPED_CHEST) || block.getType().equals(Material.BARREL) || block.getType().equals(Material.SHULKER_BOX)) {
                     if (ShopManager.shopCreation.containsKey(player.getUniqueId())) {
                         event.setCancelled(true);
                         ShopManager.handleChestClick(player, block.getLocation(), ShopManager.shopCreation.get(player.getUniqueId()));

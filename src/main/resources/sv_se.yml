@@ -372,7 +372,8 @@ messages:
   shop:
     creation:
       started: "<green>Skylt sparad! Klicka på kistan där du har ditt lager.</green>"
-      invalid: "<red>Skylten är ogiltig."
+      invalid: "<red>Skylten är ogiltig.</red>"
+      continue: "<green>Skylten är redan kopplad till en affär. Klicka på en kista för att lägga till den som lager för affären.</green>"
   chest:
     open:
       self: "<green>Du öppnade din kista.</green>"
