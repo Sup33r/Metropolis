@@ -27,9 +27,9 @@ public class OctreePointIterator<T> extends OctreeIterator<T> {
     /**
      * Resets the iterator and points it to a different point
      * 
-     * @param x
-     * @param y
-     * @param z
+     * @param x The x coordinate of the point
+     * @param y The y coordinate of the point
+     * @param z The z coordinate of the point
      */
     public void reset(int x, int y, int z) {
         super.reset();

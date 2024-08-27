@@ -447,18 +447,18 @@ public class OctreeIterator<T> implements Iterator<T> {
         this.y |= (node & 0x2) >> 1;
         this.x |= (node & 0x1);
 
-        int mask = ~((1<<this.depth)-1);
+        int mask = -(1 << this.depth);
         this.x &= mask;
         this.y &= mask;
         this.z &= mask;
         this.coord_dirty = false;
     }
 
-    private static enum IteratorState {
+    private enum IteratorState {
         READY, INITIAL, FIND_NEXT
     }
 
-    protected static enum Intersection {
+    protected enum Intersection {
         INSIDE, OUTSIDE, PARTIAL
     }
 }

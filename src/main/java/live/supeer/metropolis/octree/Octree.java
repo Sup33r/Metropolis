@@ -1,6 +1,7 @@
 package live.supeer.metropolis.octree;
 
 
+import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3i;
 
 import java.util.Arrays;
@@ -12,7 +13,7 @@ import java.util.Collections;
  * This is done by building an octree out of the x/y/z values, where each bit
  * in the value is a single layer. This layout is slower than hashtables,
  * but has the advantage of allowing faster lookups of all the values stored
- * inside a region. Values that lay outside of the region can quickly be
+ * inside a region. Values that lay outside the region can quickly be
  * eliminated, reducing the number of comparison checks required.
  * 
  * @param <T> The value type of the Octree
@@ -25,11 +26,11 @@ public class Octree<T> implements OctreeIterable<T> {
     protected final OctreePointIterator<T> remove_iter;
 
     public Octree() {
-        this.values = new IndexedCollection<T>();
+        this.values = new IndexedCollection<>();
         this.values.reserve(1);
         this.values.setAt(0, null);
         this.clear();
-        this.remove_iter = new OctreePointIterator<T>(this, 0, 0, 0);
+        this.remove_iter = new OctreePointIterator<>(this, 0, 0, 0);
     }
 
     /**
@@ -99,7 +100,7 @@ public class Octree<T> implements OctreeIterable<T> {
      */
     public void compress() {
         // Iterate all values in the tree to generate a remapping array
-        OctreeDefragmentIterator<T> iter = new OctreeDefragmentIterator<T>(this);
+        OctreeDefragmentIterator<T> iter = new OctreeDefragmentIterator<>(this);
         while (iter.hasNext()) {
             iter.next();
         }
@@ -178,8 +179,8 @@ public class Octree<T> implements OctreeIterable<T> {
     }
 
     @Override
-    public OctreeIterator<T> iterator() {
-        return new OctreeIterator<T>(this);
+    public @NotNull OctreeIterator<T> iterator() {
+        return new OctreeIterator<>(this);
     }
 
     /**
@@ -190,7 +191,7 @@ public class Octree<T> implements OctreeIterable<T> {
      * @return iterable
      */
     public OctreeIterable<T> cuboid(final Vector3i min, final Vector3i max) {
-        return () -> new OctreeCuboidIterator<T>(Octree.this, min, max);
+        return () -> new OctreeCuboidIterator<>(Octree.this, min, max);
     }
 
     protected boolean clean(int parent) {
@@ -282,7 +283,7 @@ public class Octree<T> implements OctreeIterable<T> {
     /**
      * Puts a new value at the x/y/z coordinates specified.
      * @param pos The position
-     * @param value
+     * @param value The value
      * @return previous value stored at these coordinates, or null if none was stored
      */
     public T put(Vector3i pos, T value) {
@@ -295,7 +296,7 @@ public class Octree<T> implements OctreeIterable<T> {
      * @param x The X-coordinate
      * @param y The Y-coordinate
      * @param z The Z-coordinate
-     * @param value
+     * @param value The value
      * @return previous value stored at these coordinates, or null if none was stored
      */
     public T put(int x, int y, int z, T value) {
@@ -339,9 +340,9 @@ public class Octree<T> implements OctreeIterable<T> {
      * @return value index, 0 if create is false and no entry exists
      */
     public int getValueIndex(int x, int y, int z, boolean create) {
+        int index = 0;
         if (create) {
             // Go by all 32 bits of the x/y/z values and select the right relative index (0 - 7)
-            int index = 0;
             for (int n = 0; n < 31; n++) {
                 int subaddr = ((x&(0x80000000))>>>31) | ((y&(0x80000000))>>>30) | ((z&(0x80000000))>>>29);
                 index |= subaddr;
@@ -361,7 +362,7 @@ public class Octree<T> implements OctreeIterable<T> {
             }
 
             // For the last bit we point to an entry in the data list
-            int subaddr = ((x&(0x80000000))>>>31) | ((y&(0x80000000))>>>30) | ((z&(0x80000000))>>>29);;
+            int subaddr = ((x&(0x80000000))>>>31) | ((y&(0x80000000))>>>30) | ((z&(0x80000000))>>>29);
             index |= subaddr;
             int data_index = this.table[index];
             if (data_index == 0 || ((data_index & 0x7) != subaddr)) {
@@ -375,7 +376,6 @@ public class Octree<T> implements OctreeIterable<T> {
             return data_index;
         } else {
             // Go by all 32 bits of the x/y/z values and select the right relative index (0 - 7)
-            int index = 0;
             for (int n = 0; n < 31; n++) {
                 int sub = ((x&(0x80000000))>>>31) | ((y&(0x80000000))>>>30) | ((z&(0x80000000))>>>29);
                 index |= sub;
@@ -393,7 +393,7 @@ public class Octree<T> implements OctreeIterable<T> {
             }
 
             // For the last bit we point to an entry in the data list
-            int subaddr = ((x&(0x80000000))>>>31) | ((y&(0x80000000))>>>30) | ((z&(0x80000000))>>>29);;
+            int subaddr = ((x&(0x80000000))>>>31) | ((y&(0x80000000))>>>30) | ((z&(0x80000000))>>>29);
             index |= subaddr;
             int data_index = this.table[index];
             if (data_index == 0 || ((data_index & 0x7) != subaddr)) {

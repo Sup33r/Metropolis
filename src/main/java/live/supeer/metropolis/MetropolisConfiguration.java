@@ -41,6 +41,9 @@ public class MetropolisConfiguration {
     private final int minChunkDistance;
     private final int minSpawnDistance;
 
+    private final int prisonerPayback;
+    private final int dailyPayback;
+
     private final double cityMaxTax;
 
     MetropolisConfiguration(Metropolis plugin) {
@@ -83,5 +86,8 @@ public class MetropolisConfiguration {
         taxTimeHour = plugin.getConfig().getInt("settings.taxtime.hour");
         taxTimeMinute = plugin.getConfig().getInt("settings.taxtime.minute");
         taxTimeSecond = plugin.getConfig().getInt("settings.taxtime.second");
+
+        prisonerPayback = plugin.getConfig().getInt("settings.jail.prisonerpayback");
+        dailyPayback = plugin.getConfig().getInt("settings.jail.dailypayback");
     }
 }

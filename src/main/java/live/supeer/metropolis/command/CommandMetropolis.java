@@ -37,9 +37,10 @@ public class CommandMetropolis extends BaseCommand {
                     Metropolis.sendMessage(player,"messages.syntax.admin.balance");
                     return;
                 }
+                boolean numberSubstring = argument.substring(1).replaceAll("[0-9]", "").matches("[^0-9]")
+                        || argument.length() == 1;
                 if (argument.startsWith("+")) {
-                    if (argument.substring(1).replaceAll("[0-9]", "").matches("[^0-9]")
-                            || argument.length() == 1) {
+                    if (numberSubstring) {
                         Metropolis.sendMessage(player, "messages.syntax.admin.balance");
                         return;
                     }
@@ -50,7 +51,7 @@ public class CommandMetropolis extends BaseCommand {
                             "{ \"type\": \"cityBank\", \"subtype\": \"deposit\", \"balance\": "
                                     + inputBalance
                                     + ", \"player\": "
-                                    + player.getUniqueId().toString()
+                                    + player.getUniqueId()
                                     + " }");
                     Metropolis.sendMessage(
                             player,
@@ -62,21 +63,19 @@ public class CommandMetropolis extends BaseCommand {
                     return;
                 }
                 if (argument.startsWith("-")) {
-                    if (argument.substring(1).replaceAll("[0-9]", "").matches("[^0-9]")
-                            || argument.length() == 1) {
+                    if (numberSubstring) {
                         Metropolis.sendMessage(player, "messages.syntax.admin.balance");
                         return;
                     }
                     int inputBalance = Integer.parseInt(argument.replaceAll("[^0-9]", ""));
                     String inputBalanceFormatted = Utilities.formattedMoney(inputBalance);
-                    int cityBalance = city.getCityBalance();
                     CityDatabase.removeCityBalance(city, inputBalance);
                     Database.addLogEntry(
                             city,
                             "{ \"type\": \"cityBank\", \"subtype\": \"withdraw\", \"balance\": "
                                     + inputBalance
                                     + ", \"player\": "
-                                    + player.getUniqueId().toString()
+                                    + player.getUniqueId()
                                     + "\" }");
                     Metropolis.sendMessage(
                             player,

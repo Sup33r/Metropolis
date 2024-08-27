@@ -80,10 +80,11 @@ public class CommandCity extends BaseCommand {
 
             // Create the formatted string
             StringBuilder cityList = new StringBuilder();
+            assert memberCities != null;
             int size = memberCities.size();
 
             if (size == 1) {
-                cityList.append(memberCities.get(0).getCityName());
+                cityList.append(memberCities.getFirst().getCityName());
             } else if (size == 2) {
                 cityList.append(memberCities.get(0).getCityName())
                         .append(" & ")
@@ -230,7 +231,7 @@ public class CommandCity extends BaseCommand {
                     "{ \"type\": \"cityBank\", \"subtype\": \"deposit\", \"balance\": "
                             + inputBalance
                             + ", \"player\": "
-                            + player.getUniqueId().toString()
+                            + player.getUniqueId()
                             + " }");
             Metropolis.sendMessage(
                     player,
@@ -276,7 +277,7 @@ public class CommandCity extends BaseCommand {
                     "{ \"type\": \"cityBank\", \"subtype\": \"withdraw\", \"balance\": "
                             + inputBalance
                             + ", \"player\": "
-                            + player.getUniqueId().toString()
+                            + player.getUniqueId()
                             + ", \"reason\": \""
                             + reason
                             + "\" }");
@@ -346,12 +347,12 @@ public class CommandCity extends BaseCommand {
                         + ", \"balance\": "
                         + Metropolis.configuration.getCityStartingBalance()
                         + ", \"player\": "
-                        + player.getUniqueId().toString()
+                        + player.getUniqueId()
                         + " }");
         Database.addLogEntry(
                 city,
                 "{ \"type\": \"join\", \"subtype\": \"city\", \"player\": "
-                        + player.getUniqueId().toString()
+                        + player.getUniqueId()
                         + " }");
         Database.addLogEntry(
                 city,
@@ -360,7 +361,7 @@ public class CommandCity extends BaseCommand {
                         + ", \"to\": "
                         + "mayor"
                         + ", \"player\": "
-                        + player.getUniqueId().toString()
+                        + player.getUniqueId()
                         + " }");
         CityDatabase.setCityRole(city, player.getUniqueId().toString(), Role.MAYOR);
         Claim claim = CityDatabase.createClaim(city, player.getLocation(), false, player.getName(), player.getUniqueId().toString());
@@ -377,7 +378,7 @@ public class CommandCity extends BaseCommand {
                         + LocationUtil.formatChunk(
                         claim.getClaimWorld().getName(), claim.getXPosition(), claim.getZPosition())
                         + ", \"player\": "
-                        + player.getUniqueId().toString()
+                        + player.getUniqueId()
                         + " }");
         mPlayer.removeBalance(Metropolis.configuration.getCityCreationCost(), "{ \"type\": \"city\", \"subtype\": \"new\", \"cityId\": " + city.getCityId() + "}");
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
@@ -473,7 +474,7 @@ public class CommandCity extends BaseCommand {
                                         + LocationUtil.formatChunk(
                                         claim.getClaimWorld().getName(), claim.getXPosition(), claim.getZPosition())
                                         + ", \"player\": "
-                                        + player.getUniqueId().toString()
+                                        + player.getUniqueId()
                                         + " }");
                         PlayerEnterCityEvent enterCityEvent = new PlayerEnterCityEvent(player, city);
                         Bukkit.getServer().getPluginManager().callEvent(enterCityEvent);
@@ -533,7 +534,7 @@ public class CommandCity extends BaseCommand {
                             + LocationUtil.formatChunk(
                             claim.getClaimWorld().getName(), claim.getXPosition(), claim.getZPosition())
                             + ", \"player\": "
-                            + player.getUniqueId().toString()
+                            + player.getUniqueId()
                             + " }");
             PlayerEnterCityEvent enterCityEvent = new PlayerEnterCityEvent(player, city);
             Bukkit.getServer().getPluginManager().callEvent(enterCityEvent);
@@ -865,7 +866,7 @@ public class CommandCity extends BaseCommand {
                         "{ \"type\": \"delete\", \"subtype\": \"go\", \"name\": "
                                 + args[0]
                                 + ", \"player\": "
-                                + player.getUniqueId().toString()
+                                + player.getUniqueId()
                                 + " }");
                 Metropolis.sendMessage(player, "messages.city.successful.delete.citygo", "%cityname%", city.getCityName(), "%name%", goName);
             }
@@ -1179,7 +1180,7 @@ public class CommandCity extends BaseCommand {
                         "{ \"type\": \"set\", \"subtype\": \"enterMessage\", \"message\": "
                                 + null
                                 + ", \"player\": "
-                                + player.getUniqueId().toString()
+                                + player.getUniqueId()
                                 + " }");
                 Metropolis.sendMessage(
                         player, "messages.city.successful.set.enter.removed", "%cityname%", city.getCityName());
@@ -1201,7 +1202,7 @@ public class CommandCity extends BaseCommand {
                     "{ \"type\": \"set\", \"subtype\": \"enterMessage\", \"message\": "
                             + message
                             + ", \"player\": "
-                            + player.getUniqueId().toString()
+                            + player.getUniqueId()
                             + " }");
             Metropolis.sendMessage(
                     player, "messages.city.successful.set.enter.set", "%cityname%", city.getCityName());
@@ -1224,7 +1225,7 @@ public class CommandCity extends BaseCommand {
                         "{ \"type\": \"set\", \"subtype\": \"exitMessage\", \"message\": "
                                 + null
                                 + ", \"player\": "
-                                + player.getUniqueId().toString()
+                                + player.getUniqueId()
                                 + " }");
                 Metropolis.sendMessage(
                         player, "messages.city.successful.set.exit.removed", "%cityname%", city.getCityName());
@@ -1246,7 +1247,7 @@ public class CommandCity extends BaseCommand {
                     "{ \"type\": \"set\", \"subtype\": \"exitMessage\", \"message\": "
                             + message
                             + ", \"player\": "
-                            + player.getUniqueId().toString()
+                            + player.getUniqueId()
                             + " }");
             Metropolis.sendMessage(
                     player, "messages.city.successful.set.exit.set", "%cityname%", city.getCityName());
@@ -1269,7 +1270,7 @@ public class CommandCity extends BaseCommand {
                         "{ \"type\": \"set\", \"subtype\": \"motdMessage\", \"message\": "
                                 + null
                                 + ", \"player\": "
-                                + player.getUniqueId().toString()
+                                + player.getUniqueId()
                                 + " }");
                 Metropolis.sendMessage(
                         player, "messages.city.successful.set.motd.removed", "%cityname%", city.getCityName());
@@ -1291,7 +1292,7 @@ public class CommandCity extends BaseCommand {
                     "{ \"type\": \"set\", \"subtype\": \"motdMessage\", \"message\": "
                             + message
                             + ", \"player\": "
-                            + player.getUniqueId().toString()
+                            + player.getUniqueId()
                             + " }");
             Metropolis.sendMessage(
                     player, "messages.city.successful.set.motd.set", "%cityname%", city.getCityName());
@@ -1314,7 +1315,7 @@ public class CommandCity extends BaseCommand {
                             + ", \"to\": "
                             + "([" + player.getLocation().getWorld().getName() + "]" + player.getLocation().getX() + ", " + player.getLocation().getY() + ", " + player.getLocation().getZ() + ")"
                             + ", \"player\": "
-                            + player.getUniqueId().toString()
+                            + player.getUniqueId()
                             + " }");
             city.setCitySpawn(player.getLocation());
             Metropolis.sendMessage(player, "messages.city.successful.set.spawn", "%cityname%", city.getCityName());
@@ -1363,7 +1364,7 @@ public class CommandCity extends BaseCommand {
                             + ", \"to\": "
                             + name
                             + ", \"player\": "
-                            + player.getUniqueId().toString()
+                            + player.getUniqueId()
                             + " }");
             city.setCityName(name);
             CityDatabase.setLatestNameChange(city, (int) (System.currentTimeMillis() / 1000));
@@ -1399,7 +1400,7 @@ public class CommandCity extends BaseCommand {
                             + ", \"to\": "
                             + tax
                             + ", \"player\": "
-                            + player.getUniqueId().toString()
+                            + player.getUniqueId()
                             + " }");
             city.setCityTax(tax);
             Metropolis.sendMessage(player, "messages.city.successful.set.tax", "%cityname%", city.getCityName(), "%tax%", String.valueOf(tax));
@@ -1424,7 +1425,7 @@ public class CommandCity extends BaseCommand {
                                 + ", \"to\": "
                                 + -1
                                 + ", \"player\": "
-                                + player.getUniqueId().toString()
+                                + player.getUniqueId()
                                 + " }");
                 Metropolis.sendMessage(player, "messages.city.successful.maxPlotsPerMember.removed", "%cityname%", city.getCityName());
                 return;
@@ -1444,7 +1445,7 @@ public class CommandCity extends BaseCommand {
                             + ", \"to\": "
                             + maxPlotsPerMember
                             + ", \"player\": "
-                            + player.getUniqueId().toString()
+                            + player.getUniqueId()
                             + " }");
             city.setMaxPlotsPerMember(maxPlotsPerMember);
             Metropolis.sendMessage(player, "messages.city.successful.maxPlotsPerMember.set", "%cityname%", city.getCityName(), "%amount%", String.valueOf(maxPlotsPerMember));
@@ -1470,7 +1471,7 @@ public class CommandCity extends BaseCommand {
                                 + ", \"to\": "
                                 + "none"
                                 + ", \"player\": "
-                                + player.getUniqueId().toString()
+                                + player.getUniqueId()
                                 + " }");
                 Metropolis.sendMessage(player, "messages.city.successful.taxLevel.removed", "%cityname%", city.getCityName());
                 return;
@@ -1494,7 +1495,7 @@ public class CommandCity extends BaseCommand {
                             + ", \"to\": "
                             + argument
                             + ", \"player\": "
-                            + player.getUniqueId().toString()
+                            + player.getUniqueId()
                             + " }");
             city.setTaxLevel(Role.fromString(argument));
             Metropolis.sendMessage(player, "messages.city.successful.taxLevel.set", "%cityname%", city.getCityName(), "%role%", role);
@@ -1542,7 +1543,7 @@ public class CommandCity extends BaseCommand {
                     "{ \"type\": \"buy\", \"subtype\": \"bonus\", \"count\": "
                             + count
                             + ", \"player\": "
-                            + player.getUniqueId().toString()
+                            + player.getUniqueId()
                             + ", \"balance\": "
                             + Metropolis.configuration.getCityBonusCost() * count
                             + " }");
@@ -1596,7 +1597,6 @@ public class CommandCity extends BaseCommand {
             }
 
             Polygon regionPolygon = MetropolisListener.playerPolygons.get(player.getUniqueId());
-            Location[] locations = MetropolisListener.savedLocs.get(player.getUniqueId()).toArray(new Location[0]);
             double minX = regionPolygon.getEnvelopeInternal().getMinX();
             double maxX = regionPolygon.getEnvelopeInternal().getMaxX();
             double minY = regionPolygon.getEnvelopeInternal().getMinY();
@@ -1637,7 +1637,7 @@ public class CommandCity extends BaseCommand {
                                 "{ \"type\": \"buy\", \"subtype\": \"district\", \"name\": "
                                         + name
                                         + ", \"player\": "
-                                        + player.getUniqueId().toString()
+                                        + player.getUniqueId()
                                         + ", \"balance\": "
                                         + Metropolis.configuration.getDistrictCreationCost()
                                         + ", \"districtBounds\": "
@@ -1693,7 +1693,7 @@ public class CommandCity extends BaseCommand {
                     "{ \"type\": \"buy\", \"subtype\": \"go\", \"name\": "
                             + name
                             + ", \"player\": "
-                            + player.getUniqueId().toString()
+                            + player.getUniqueId()
                             + ", \"balance\": "
                             + Metropolis.configuration.getCityGoCost()
                             + ", \"claimlocation\": "
@@ -1724,7 +1724,7 @@ public class CommandCity extends BaseCommand {
             Database.addLogEntry(
                     city,
                     "{ \"type\": \"buy\", \"subtype\": \"outpost\", \"player\": "
-                            + player.getUniqueId().toString()
+                            + player.getUniqueId()
                             + ", \"balance\": "
                             + Metropolis.configuration.getCityOutpostCost()
                             + ", \"claimlocation\": "
@@ -1745,7 +1745,7 @@ public class CommandCity extends BaseCommand {
             return;
         }
         if (getCoreProtect() == null) {
-            Bukkit.getLogger().severe("[Metropolis] CoreProtect not found.");
+            Metropolis.getInstance().logger.severe("[Metropolis] CoreProtect not found.");
             player.sendMessage("§cSomething went wrong. Please contact an administrator.");
             return;
         }
@@ -1780,7 +1780,7 @@ public class CommandCity extends BaseCommand {
                 Metropolis.sendMessage(player, "messages.error.missing.page");
                 return;
             }
-            String[] firstLine = MetropolisListener.savedBlockHistory.get(player.getUniqueId()).get(0);
+            String[] firstLine = MetropolisListener.savedBlockHistory.get(player.getUniqueId()).getFirst();
             CoreProtectAPI.ParseResult firstResult = getCoreProtect().parseResult(firstLine);
             player.sendMessage("");
             Metropolis.sendMessage(
@@ -1907,7 +1907,7 @@ public class CommandCity extends BaseCommand {
         Database.addLogEntry(
                 city,
                 "{ \"type\": \"leave\", \"player\": "
-                        + player.getUniqueId().toString()
+                        + player.getUniqueId()
                         + " }");
         Utilities.sendScoreboard(player);
         Metropolis.sendMessage(player, "messages.city.leave.success", "%cityname%", cityname);
@@ -2076,13 +2076,12 @@ public class CommandCity extends BaseCommand {
             String playerUUID = Bukkit.getOfflinePlayer(playerName).getUniqueId().toString();
             if (CityDatabase.getCityBan(city, playerUUID) == null) {
                 Metropolis.sendMessage(player, "messages.city.ban.notBanned","%cityname%", city.getCityName());
-                return;
             } else {
                 Ban ban = CityDatabase.getCityBan(city, playerUUID);
                 assert ban != null;
                 Metropolis.sendMessage(player, "messages.city.ban.banned", "%player%", playerName, "%cityname%", city.getCityName(), "%reason%", ban.getReason(), "%length%", DateUtil.formatDateDiff(ban.getLength()));
-                return;
             }
+            return;
         }
         long length = DateUtil.parseDateDiff(args, true);
         boolean isMinus = args.startsWith("-");
@@ -2096,7 +2095,7 @@ public class CommandCity extends BaseCommand {
             for (Ban ban : bannedPlayers) {
                 if (ban.getPlayerUUID().equals(Bukkit.getOfflinePlayer(playerName).getUniqueId().toString())) {
                     CityDatabase.removeCityBan(city, ban);
-                    Database.addLogEntry(city, "{ \"type\": \"unban\", \"subtype\": \"city\", \"player\": " + ban.getPlayerUUID() + ", \"placer\": " + player.getUniqueId().toString() + " }");
+                    Database.addLogEntry(city, "{ \"type\": \"unban\", \"subtype\": \"city\", \"player\": " + ban.getPlayerUUID() + ", \"placer\": " + player.getUniqueId() + " }");
                     Metropolis.sendMessage(player, "messages.city.ban.unbanned", "%player%", playerName, "%cityname%", city.getCityName());
                     return;
                 }
@@ -2147,7 +2146,7 @@ public class CommandCity extends BaseCommand {
             }
 
             // Log the ban
-            Database.addLogEntry(city, "{ \"type\": \"ban\", \"subtype\": \"city\", \"player\": " + playerUUID + ", \"placer\": " + player.getUniqueId().toString() + ", \"reason\": \"" + reason + "\", \"length\": \"" + length + "\" }");
+            Database.addLogEntry(city, "{ \"type\": \"ban\", \"subtype\": \"city\", \"player\": " + playerUUID + ", \"placer\": " + player.getUniqueId() + ", \"reason\": \"" + reason + "\", \"length\": \"" + length + "\" }");
             return;
         }
         Metropolis.sendMessage(player, "messages.error.usage", "%command%", "/city ban <player> <length> <reason>");
@@ -2207,7 +2206,7 @@ public class CommandCity extends BaseCommand {
                 if (targetPlayer.isOnline()) {
                     Metropolis.sendMessage((Player) targetPlayer, "messages.city.successful.rank.promoted", "%cityname%", city.getCityName(), "%newrole%", Metropolis.getMessage("messages.city.roles.assistant"));
                 }
-                Database.addLogEntry(city, "{ \"type\": \"rank\", \"subtype\": \"change\", \"from\": \"" + targetRole + "\", \"to\": \"" + rank.toLowerCase() + "\", \"issuer\": \"" + player.getUniqueId().toString() + "\", \"player\": \"" + targetPlayer.getUniqueId().toString() + "\" }");
+                Database.addLogEntry(city, "{ \"type\": \"rank\", \"subtype\": \"change\", \"from\": \"" + targetRole + "\", \"to\": \"" + rank.toLowerCase() + "\", \"issuer\": \"" + player.getUniqueId() + "\", \"player\": \"" + targetPlayer.getUniqueId() + "\" }");
                 break;
             case "inviter":
                 if (!isMayor && targetRole.equals(Role.VICE_MAYOR)) {
@@ -2219,7 +2218,7 @@ public class CommandCity extends BaseCommand {
                 if (targetPlayer.isOnline()) {
                     Metropolis.sendMessage((Player) targetPlayer, "messages.city.successful.rank.promoted", "%cityname%", city.getCityName(), "%newrole%", Metropolis.getMessage("messages.city.roles.inviter"));
                 }
-                Database.addLogEntry(city, "{ \"type\": \"rank\", \"subtype\": \"change\", \"from\": \"" + targetRole + "\", \"to\": \"" + rank.toLowerCase() + "\", \"issuer\": \"" + player.getUniqueId().toString() + "\", \"player\": \"" + targetPlayer.getUniqueId().toString() + "\" }");
+                Database.addLogEntry(city, "{ \"type\": \"rank\", \"subtype\": \"change\", \"from\": \"" + targetRole + "\", \"to\": \"" + rank.toLowerCase() + "\", \"issuer\": \"" + player.getUniqueId() + "\", \"player\": \"" + targetPlayer.getUniqueId() + "\" }");
                 break;
             case "vicemayor":
                 if (!isMayor && targetRole.equals(Role.VICE_MAYOR)) {
@@ -2231,7 +2230,7 @@ public class CommandCity extends BaseCommand {
                 if (targetPlayer.isOnline()) {
                     Metropolis.sendMessage((Player) targetPlayer, "messages.city.successful.rank.promoted", "%cityname%", city.getCityName(), "%newrole%", Metropolis.getMessage("messages.city.roles.vicemayor"));
                 }
-                Database.addLogEntry(city, "{ \"type\": \"rank\", \"subtype\": \"change\", \"from\": \"" + targetRole + "\", \"to\": \"" + rank.toLowerCase() + "\", \"issuer\": \"" + player.getUniqueId().toString() + "\", \"player\": \"" + targetPlayer.getUniqueId().toString() + "\" }");
+                Database.addLogEntry(city, "{ \"type\": \"rank\", \"subtype\": \"change\", \"from\": \"" + targetRole + "\", \"to\": \"" + rank.toLowerCase() + "\", \"issuer\": \"" + player.getUniqueId() + "\", \"player\": \"" + targetPlayer.getUniqueId() + "\" }");
                 break;
             case "member":
             case "-":
@@ -2244,7 +2243,7 @@ public class CommandCity extends BaseCommand {
                 if (targetPlayer.isOnline()) {
                     Metropolis.sendMessage((Player) targetPlayer, "messages.city.successful.rank.promoted", "%cityname%", city.getCityName(), "%newrole%", Metropolis.getMessage("messages.city.roles.member"));
                 }
-                Database.addLogEntry(city, "{ \"type\": \"rank\", \"subtype\": \"remove\", \"from\": \"" + targetRole + "\", \"issuer\": \"" + player.getUniqueId().toString() + "\", \"player\": \"" + targetPlayer.getUniqueId().toString() + "\" }");
+                Database.addLogEntry(city, "{ \"type\": \"rank\", \"subtype\": \"remove\", \"from\": \"" + targetRole + "\", \"issuer\": \"" + player.getUniqueId() + "\", \"player\": \"" + targetPlayer.getUniqueId() + "\" }");
                 break;
             case "swap":
                 if (!isMayor) {
@@ -2257,7 +2256,7 @@ public class CommandCity extends BaseCommand {
                 if (targetPlayer.isOnline()) {
                     Metropolis.sendMessage((Player) targetPlayer, "messages.city.successful.rank.promoted", "%cityname%", city.getCityName(), "%newrole%", Metropolis.getMessage("messages.city.roles.mayor"));
                 }
-                Database.addLogEntry(city, "{ \"type\": \"rank\", \"subtype\": \"swap\", \"from\": \"" + role + "\", \"to\": \"" + targetRole + "\", \"issuer\": \"" + player.getUniqueId().toString() + "\", \"player\": \"" + targetPlayer.getUniqueId().toString() + "\" }");
+                Database.addLogEntry(city, "{ \"type\": \"rank\", \"subtype\": \"swap\", \"from\": \"" + role + "\", \"to\": \"" + targetRole + "\", \"issuer\": \"" + player.getUniqueId() + "\", \"player\": \"" + targetPlayer.getUniqueId() + "\" }");
                 break;
             default:
                 Metropolis.sendMessage(player, "messages.error.city.rank.invalid", "%cityname%", city.getCityName());
@@ -2290,10 +2289,10 @@ public class CommandCity extends BaseCommand {
             }
             if (city.toggleOpen()) {
                 Metropolis.sendMessage(player, "messages.city.toggle.open", "%cityname%", city.getCityName());
-                Database.addLogEntry(city, "{ \"type\": \"city\", \"subtype\": \"toggleOpen\", \"state\": \"open\", \"player\": \"" + player.getUniqueId().toString() + "\" }");
+                Database.addLogEntry(city, "{ \"type\": \"city\", \"subtype\": \"toggleOpen\", \"state\": \"open\", \"player\": \"" + player.getUniqueId() + "\" }");
             } else {
                 Metropolis.sendMessage(player, "messages.city.toggle.closed", "%cityname%", city.getCityName());
-                Database.addLogEntry(city, "{ \"type\": \"city\", \"subtype\": \"toggleOpen\", \"state\": \"closed\", \"player\": \"" + player.getUniqueId().toString() + "\" }");
+                Database.addLogEntry(city, "{ \"type\": \"city\", \"subtype\": \"toggleOpen\", \"state\": \"closed\", \"player\": \"" + player.getUniqueId() + "\" }");
             }
         }
 
@@ -2309,10 +2308,10 @@ public class CommandCity extends BaseCommand {
             }
             if (city.togglePublic()) {
                 Metropolis.sendMessage(player, "messages.city.toggle.public", "%cityname%", city.getCityName());
-                Database.addLogEntry(city, "{ \"type\": \"city\", \"subtype\": \"togglePublic\", \"state\": \"public\", \"player\": \"" + player.getUniqueId().toString() + "\" }");
+                Database.addLogEntry(city, "{ \"type\": \"city\", \"subtype\": \"togglePublic\", \"state\": \"public\", \"player\": \"" + player.getUniqueId() + "\" }");
             } else {
                 Metropolis.sendMessage(player, "messages.city.toggle.private", "%cityname%", city.getCityName());
-                Database.addLogEntry(city, "{ \"type\": \"city\", \"subtype\": \"togglePublic\", \"state\": \"private\", \"player\": \"" + player.getUniqueId().toString() + "\" }");
+                Database.addLogEntry(city, "{ \"type\": \"city\", \"subtype\": \"togglePublic\", \"state\": \"private\", \"player\": \"" + player.getUniqueId() + "\" }");
             }
         }
     }
@@ -2414,7 +2413,7 @@ public class CommandCity extends BaseCommand {
                 set = Metropolis.getMessage("messages.words.here");
             }
             String cityEntry = "§2" + city.getCityName() + " (" +
-                    "§a" + distance + "m" +
+                    "§a" + set +
                     "§2" + ")";
 
             if (i == nearbyCities.size() - 2) {
@@ -2478,7 +2477,7 @@ public class CommandCity extends BaseCommand {
             if (argument.startsWith("-")) {
                 if (district.getContactplayers().contains(targetPlayer)) {
                     district.removeContactPlayer(targetPlayer);
-                    Database.addLogEntry(city, "{ \"type\": \"district\", \"subtype\": \"contactRemove\", \"district\": \"" + district.getDistrictName() + "\", \"player\": \"" + targetPlayer.getUniqueId().toString() + "\" }");
+                    Database.addLogEntry(city, "{ \"type\": \"district\", \"subtype\": \"contactRemove\", \"district\": \"" + district.getDistrictName() + "\", \"player\": \"" + targetPlayer.getUniqueId() + "\" }");
                     Metropolis.sendMessage(player, "messages.city.district.contact.removed", "%player%", playerName, "%cityname%", city.getCityName());
                     return;
                 }
@@ -2491,7 +2490,7 @@ public class CommandCity extends BaseCommand {
                     return;
                 }
                 district.addContactPlayer(targetPlayer);
-                Database.addLogEntry(city, "{ \"type\": \"district\", \"subtype\": \"contactAdd\", \"district\": \"" + district.getDistrictName() + "\", \"player\": \"" + targetPlayer.getUniqueId().toString() + "\" }");
+                Database.addLogEntry(city, "{ \"type\": \"district\", \"subtype\": \"contactAdd\", \"district\": \"" + district.getDistrictName() + "\", \"player\": \"" + targetPlayer.getUniqueId() + "\" }");
                 Metropolis.sendMessage(player, "messages.city.district.contact.added", "%player%", playerName, "%cityname%", city.getCityName());
             }
 
@@ -2520,7 +2519,7 @@ public class CommandCity extends BaseCommand {
             CityDatabase.deleteDistrict(district);
             city.removeCityDistrict(district);
             Metropolis.playerInDistrict.remove(player.getUniqueId());
-            Database.addLogEntry(city, "{ \"type\": \"district\", \"subtype\": \"delete\", \"district\": \"" + district.getDistrictName() + "\", \"player\": \"" + player.getUniqueId().toString() + "\" }");
+            Database.addLogEntry(city, "{ \"type\": \"district\", \"subtype\": \"delete\", \"district\": \"" + district.getDistrictName() + "\", \"player\": \"" + player.getUniqueId() + "\" }");
             Metropolis.sendMessage(player, "messages.city.district.deleted", "%districtname%", district.getDistrictName(), "%cityname%", city.getCityName());
             Utilities.sendScoreboard(player);
         }
@@ -2554,6 +2553,7 @@ public class CommandCity extends BaseCommand {
             }
             if (name != null) {
                 City city = CityDatabase.getCityByClaim(player.getLocation().toBlockLocation());
+                assert city != null;
                 live.supeer.metropolis.city.District district = CityDatabase.getDistrict(name, city);
                 if (district == null) {
                     Metropolis.sendMessage(player, "messages.error.city.district.notFound");
@@ -2602,7 +2602,7 @@ public class CommandCity extends BaseCommand {
                     return;
                 }
                 district.setDistrictName(name);
-                Database.addLogEntry(city, "{ \"type\": \"district\", \"subtype\": \"nameChange\", \"district\": \"" + name + "\", \"player\": \"" + player.getUniqueId().toString() + "\" }");
+                Database.addLogEntry(city, "{ \"type\": \"district\", \"subtype\": \"nameChange\", \"district\": \"" + name + "\", \"player\": \"" + player.getUniqueId() + "\" }");
                 Metropolis.sendMessage(player, "messages.city.district.nameChanged", "%districtname%", name, "%cityname%", city.getCityName());
                 Utilities.sendScoreboard(player);
             }
@@ -2676,7 +2676,7 @@ public class CommandCity extends BaseCommand {
                                 "{ \"type\": \"update\", \"subtype\": \"district\", \"name\": "
                                         + district.getDistrictName()
                                         + ", \"player\": "
-                                        + player.getUniqueId().toString()
+                                        + player.getUniqueId()
                                         + ", \"districtBounds\": "
                                         + regionPolygon.toText()
                                         + " }");
@@ -2728,7 +2728,7 @@ public class CommandCity extends BaseCommand {
                 city,
                 "{ \"type\": \"unclaim\", \"claimlocation\": \"" +
                         LocationUtil.formatChunk(claim.getClaimWorld().getName(), claim.getXPosition(), claim.getZPosition()) +
-                        "\", \"player\": \"" + player.getUniqueId().toString() + "\" }"
+                        "\", \"player\": \"" + player.getUniqueId() + "\" }"
         );
     }
 
@@ -2768,7 +2768,7 @@ public class CommandCity extends BaseCommand {
         CityDatabase.deleteCity(city);
         CityDeletionEvent deletionEvent = new CityDeletionEvent(city);
         Metropolis.getInstance().getServer().getPluginManager().callEvent(deletionEvent);
-        Database.addLogEntry(city, "{ \"type\": \"city\", \"subtype\": \"delete\", \"city\": \"" + cityName + "\", \"player\": \"" + player.getUniqueId().toString() + "\" }");
+        Database.addLogEntry(city, "{ \"type\": \"city\", \"subtype\": \"delete\", \"city\": \"" + cityName + "\", \"player\": \"" + player.getUniqueId() + "\" }");
 
         for (Player p : Bukkit.getOnlinePlayers()) {
             if (player == p) {
@@ -2806,7 +2806,7 @@ public class CommandCity extends BaseCommand {
         coordinates[3] = new Coordinate(chunkX * 16, (chunkZ + 1) * 16);
         coordinates[4] = coordinates[0]; // Close the polygon
         Polygon chunkPolygon = geometryFactory.createPolygon(coordinates);
-        List<Plot> plots = List.of(PlotDatabase.intersectingPlots(chunkPolygon, -64, 319, claim.getCity(), player.getWorld()));
+        List<Plot> plots = List.of(Objects.requireNonNull(PlotDatabase.intersectingPlots(chunkPolygon, -64, 319, claim.getCity(), player.getWorld())));
         StringBuilder plotList = new StringBuilder();
         Metropolis.sendMessage(player,"messages.city.chunk.header","%chunkx%", String.valueOf(chunkX), "%chunkz%", String.valueOf(chunkZ));
         Metropolis.sendMessage(player,"messages.city.chunk.status.claimed");
@@ -2865,7 +2865,7 @@ public class CommandCity extends BaseCommand {
                     }
                     if (city.getTwinCities().contains(twinCity)) {
                         city.removeTwinCity(twinCity);
-                        Database.addLogEntry(city, "{ \"type\": \"twin\", \"subtype\": \"remove\", \"twin\": \"" + twinCity.getCityName() + "\", \"player\": \"" + player.getUniqueId().toString() + "\" }");
+                        Database.addLogEntry(city, "{ \"type\": \"twin\", \"subtype\": \"remove\", \"twin\": \"" + twinCity.getCityName() + "\", \"player\": \"" + player.getUniqueId() + "\" }");
                         Metropolis.sendMessage(player, "messages.city.twin.removed", "%cityname%", city.getCityName(), "%twin%", twinCity.getCityName());
                         return;
                     }
@@ -2878,7 +2878,7 @@ public class CommandCity extends BaseCommand {
                         return;
                     }
                     city.addTwinCity(twinCity);
-                    Database.addLogEntry(city, "{ \"type\": \"twin\", \"subtype\": \"add\", \"twin\": \"" + twinCity.getCityName() + "\", \"player\": \"" + player.getUniqueId().toString() + "\" }");
+                    Database.addLogEntry(city, "{ \"type\": \"twin\", \"subtype\": \"add\", \"twin\": \"" + twinCity.getCityName() + "\", \"player\": \"" + player.getUniqueId() + "\" }");
                     Metropolis.sendMessage(player, "messages.city.twin.added", "%cityname%", city.getCityName(), "%twin%", twinCity.getCityName());
                 }
             } else {
@@ -2947,7 +2947,7 @@ public class CommandCity extends BaseCommand {
             }
             Metropolis.sendMessage(memberPlayer, "messages.city.kick.kickedOthers", "%cityname%", city.getCityName(), "%playername%", targetPlayer.getName());
         }
-        Database.addLogEntry(city, "{ \"type\": \"kick\", \"player\": \"" + targetPlayer.getUniqueId().toString() + "\", \"issuer\": \"" + player.getUniqueId().toString() + "\", \"reason\": \"" + reason + "\" }");
+        Database.addLogEntry(city, "{ \"type\": \"kick\", \"player\": \"" + targetPlayer.getUniqueId() + "\", \"issuer\": \"" + player.getUniqueId() + "\", \"reason\": \"" + reason + "\" }");
     }
 
     @Subcommand("broadcast")

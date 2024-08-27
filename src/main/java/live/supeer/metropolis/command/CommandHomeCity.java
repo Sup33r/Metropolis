@@ -5,6 +5,7 @@ import co.aikar.commands.annotation.*;
 import live.supeer.metropolis.Metropolis;
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.city.CityDatabase;
+import live.supeer.metropolis.city.Role;
 import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.utils.BannerUtil;
 import org.bukkit.Bukkit;
@@ -36,7 +37,7 @@ public class CommandHomeCity extends BaseCommand implements Listener {
                     Metropolis.sendMessage(player,"messages.error.missing.membership");
                     return;
                 }
-                if (Objects.equals(CityDatabase.getCityRole(city,player.getUniqueId().toString()),"mayor") || Objects.equals(CityDatabase.getCityRole(city,player.getUniqueId().toString()),"vicemayor") || Objects.equals(CityDatabase.getCityRole(city,player.getUniqueId().toString()),"assistant") || Objects.equals(CityDatabase.getCityRole(city,player.getUniqueId().toString()),"inviter") || Objects.equals(CityDatabase.getCityRole(city,player.getUniqueId().toString()),"member")) {
+                if (Objects.requireNonNull(CityDatabase.getCityRole(city, player.getUniqueId().toString())).hasPermission(Role.MEMBER)) {
                     if (CityDatabase.getPlayerCityCount(player.getUniqueId().toString()) < 1) {
                         Metropolis.sendMessage(player,"messages.error.missing.homeCity");
                         return;

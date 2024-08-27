@@ -45,3 +45,6 @@ settings:
     outpostcost: 15000
     districtcost: 10000
     startingtaxlevel: "mayor"
+  jail:
+    dailypayback: 100
+    prisonerpayback: 100

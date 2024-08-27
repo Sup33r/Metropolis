@@ -19,6 +19,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.jetbrains.annotations.NotNull;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
@@ -149,7 +150,7 @@ public class CommandPlot extends BaseCommand {
                                     + ", \"ymax\": "
                                     + MetropolisListener.playerYMax.get(player.getUniqueId())
                                     + ", \"player\": "
-                                    + player.getUniqueId().toString()
+                                    + player.getUniqueId()
                                     + " }");
                     MetropolisListener.savedLocs.remove(player.getUniqueId());
                     MetropolisListener.playerPolygons.remove(player.getUniqueId());
@@ -252,7 +253,7 @@ public class CommandPlot extends BaseCommand {
                         + ", \"name\": "
                         + plot.getPlotName()
                         + ", \"player\": "
-                        + player.getUniqueId().toString()
+                        + player.getUniqueId()
                         + " }");
         PlotDatabase.deletePlot(plot);
         plot.getCity().removeCityPlot(plot);
@@ -283,7 +284,7 @@ public class CommandPlot extends BaseCommand {
                         + ", \"name\": "
                         + plot.getPlotName()
                         + ", \"player\": "
-                        + player.getUniqueId().toString()
+                        + player.getUniqueId()
                         + " }");
         Metropolis.sendMessage(
                 player,
@@ -320,7 +321,7 @@ public class CommandPlot extends BaseCommand {
                             + ", \"name\": "
                             + plot.getPlotName()
                             + ", \"player\": "
-                            + player.getUniqueId().toString()
+                            + player.getUniqueId()
                             + " }");
             return;
         }
@@ -356,7 +357,7 @@ public class CommandPlot extends BaseCommand {
                                 + ", \"to\": "
                                 + arg
                                 + ", \"player\": "
-                                + player.getUniqueId().toString()
+                                + player.getUniqueId()
                                 + " }");
                 plot.setPlotPrice(Integer.parseInt(arg));
                 return;
@@ -380,7 +381,7 @@ public class CommandPlot extends BaseCommand {
                             + ", \"to\": "
                             + arg
                             + ", \"player\": "
-                            + player.getUniqueId().toString()
+                            + player.getUniqueId()
                             + " }");
             Metropolis.sendMessage(
                     player,
@@ -601,9 +602,9 @@ public class CommandPlot extends BaseCommand {
                             + ", \"to\": "
                             + newPerms
                             + ", \"issuer\": "
-                            + player.getUniqueId().toString()
+                            + player.getUniqueId()
                             + ", \"player\": "
-                            + offlinePlayer.getUniqueId().toString()
+                            + offlinePlayer.getUniqueId()
                             + " }");
             Metropolis.sendMessage(player,"messages.plot.share.success", "%cityname%", plot.getCity().getCityName(), "%player%", offlinePlayer.getName());
         } else {
@@ -627,9 +628,9 @@ public class CommandPlot extends BaseCommand {
                             + ", \"to\": "
                             + newPerms
                             + ", \"issuer\": "
-                            + player.getUniqueId().toString()
+                            + player.getUniqueId()
                             + ", \"player\": "
-                            + offlinePlayer.getUniqueId().toString()
+                            + offlinePlayer.getUniqueId()
                             + " }");
             Metropolis.sendMessage(player,"messages.plot.share.remove", "%cityname%", plot.getCity().getCityName(), "%player%", offlinePlayer.getName());
         }
@@ -651,39 +652,8 @@ public class CommandPlot extends BaseCommand {
         }
         Role role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
         if (subject == null) {
-            StringBuilder stringBuilderOutsiders = new StringBuilder();
-            for (char s : plot.getPermsOutsiders()) {
-                stringBuilderOutsiders.append(s);
-            }
-            String permsOutsiders = "+"
-                            + stringBuilderOutsiders.substring(
-                            0, stringBuilderOutsiders.toString().length());
-            if (stringBuilderOutsiders
-                    .substring(0, stringBuilderOutsiders.toString().length())
-                    .equals(" ")
-                    || stringBuilderOutsiders
-                    .substring(0, stringBuilderOutsiders.toString().length())
-                    .isEmpty()
-                    || stringBuilderOutsiders.substring(0, stringBuilderOutsiders.toString().length())
-                    == null) {
-                permsOutsiders = "<italic>nada";
-            }
-            StringBuilder stringBuilderMembers = new StringBuilder();
-            for (char s : plot.getPermsMembers()) {
-                stringBuilderMembers.append(s);
-            }
-            String permsMembers =
-                    "+" + stringBuilderMembers.substring(0, stringBuilderMembers.toString().length());
-            if (stringBuilderMembers
-                    .substring(0, stringBuilderMembers.toString().length())
-                    .equals(" ")
-                    || stringBuilderMembers
-                    .substring(0, stringBuilderMembers.toString().length())
-                    .isEmpty()
-                    || stringBuilderMembers.substring(0, stringBuilderMembers.toString().length())
-                    == null) {
-                permsMembers = "<italic>nada";
-            }
+            String permsOutsiders = getPermsOutsiders(plot.getPermsOutsiders());
+            String permsMembers = getPermsOutsiders(plot.getPermsMembers());
             Metropolis.sendMessage(
                     player, "messages.plot.list.perm.header", "%plot%", plot.getPlotName());
             Metropolis.sendMessage(
@@ -738,23 +708,22 @@ public class CommandPlot extends BaseCommand {
                                 + ", \"type\": "
                                 + "all"
                                 + ", \"from\": "
-                                + ""
+                                + Arrays.toString(plot.getPermsMembers())
                                 + ", \"to\": "
-                                + ""
+                                + "null"
                                 + ", \"player\": "
-                                + player.getUniqueId().toString()
+                                + player.getUniqueId()
                                 + " }");
                 Metropolis.sendMessage(
                         player,
                         "messages.city.successful.set.plot.perm.remove.all",
                         "%cityname%",
                         city.getCityName());
-                return;
             } else {
                 Metropolis.sendMessage(
                         player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
-                return;
             }
+            return;
         }
 
         if (perm == null) {
@@ -801,7 +770,7 @@ public class CommandPlot extends BaseCommand {
                                 + ", \"to\": "
                                 + Utilities.parsePermChange(plot.getPermsMembers(), perm, player, "plot")
                                 + ", \"issuer\": "
-                                + player.getUniqueId().toString()
+                                + player.getUniqueId()
                                 + " }");
                 Metropolis.sendMessage(
                         player,
@@ -839,7 +808,7 @@ public class CommandPlot extends BaseCommand {
                                 + ", \"to\": "
                                 + Utilities.parsePermChange(plot.getPermsOutsiders(), perm, player, "plot")
                                 + ", \"issuer\": "
-                                + player.getUniqueId().toString()
+                                + player.getUniqueId()
                                 + " }");
                 Metropolis.sendMessage(
                         player,
@@ -878,9 +847,9 @@ public class CommandPlot extends BaseCommand {
                                 + ", \"to\": "
                                 + perms
                                 + ", \"issuer\": "
-                                + player.getUniqueId().toString()
+                                + player.getUniqueId()
                                 + ", \"player\": "
-                                + offlinePlayer.getUniqueId().toString()
+                                + offlinePlayer.getUniqueId()
                                 + " }");
             } else {
                 String perms = Utilities.parsePermChange(plot.getPlayerPlotPerm(offlinePlayer.getUniqueId().toString()).getPerms(), perm, player, "plot");
@@ -904,9 +873,9 @@ public class CommandPlot extends BaseCommand {
                                 + ", \"to\": "
                                 + perms
                                 + ", \"issuer\": "
-                                + player.getUniqueId().toString()
+                                + player.getUniqueId()
                                 + ", \"player\": "
-                                + offlinePlayer.getUniqueId().toString()
+                                + offlinePlayer.getUniqueId()
                                 + " }");
             }
             Metropolis.sendMessage(
@@ -922,6 +891,27 @@ public class CommandPlot extends BaseCommand {
             Metropolis.sendMessage(
                     player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
         }
+    }
+
+    private static @NotNull String getPermsOutsiders(char[] plot) {
+        StringBuilder stringBuilderOutsiders = new StringBuilder();
+        for (char s : plot) {
+            stringBuilderOutsiders.append(s);
+        }
+        String permsOutsiders = "+"
+                + stringBuilderOutsiders.substring(
+                0, stringBuilderOutsiders.toString().length());
+        if (stringBuilderOutsiders
+                .substring(0, stringBuilderOutsiders.toString().length())
+                .equals(" ")
+                || stringBuilderOutsiders
+                .substring(0, stringBuilderOutsiders.toString().length())
+                .isEmpty()
+                || stringBuilderOutsiders.substring(0, stringBuilderOutsiders.toString().length())
+                == null) {
+            permsOutsiders = "<italic>nada";
+        }
+        return permsOutsiders;
     }
 
     @Subcommand("set")
@@ -1045,7 +1035,7 @@ public class CommandPlot extends BaseCommand {
                                     + ", \"to\": "
                                     + null
                                     + ", \"issuer\": "
-                                    + player.getUniqueId().toString()
+                                    + player.getUniqueId()
                                     + " }");
                     plot.setPlotType(null);
                     Utilities.sendCityScoreboard(player, plot.getCity(), plot);
@@ -1070,7 +1060,7 @@ public class CommandPlot extends BaseCommand {
                                         + ", \"to\": "
                                         + "church"
                                         + ", \"issuer\": "
-                                        + player.getUniqueId().toString()
+                                        + player.getUniqueId()
                                         + " }");
                         plot.setPlotType("church");
                         Utilities.sendCityScoreboard(player, plot.getCity(), plot);
@@ -1104,7 +1094,7 @@ public class CommandPlot extends BaseCommand {
                                     + ", \"to\": "
                                     + "church"
                                     + ", \"issuer\": "
-                                    + player.getUniqueId().toString()
+                                    + player.getUniqueId()
                                     + " }");
                     plot.setPlotType("church");
                     Utilities.sendCityScoreboard(player, plot.getCity(), plot);
@@ -1134,7 +1124,7 @@ public class CommandPlot extends BaseCommand {
                                         + ", \"to\": "
                                         + "farm"
                                         + ", \"issuer\": "
-                                        + player.getUniqueId().toString()
+                                        + player.getUniqueId()
                                         + " }");
                         plot.setPlotType("farm");
                         Utilities.sendCityScoreboard(player, plot.getCity(), plot);
@@ -1168,7 +1158,7 @@ public class CommandPlot extends BaseCommand {
                                     + ", \"to\": "
                                     + "farm"
                                     + ", \"issuer\": "
-                                    + player.getUniqueId().toString()
+                                    + player.getUniqueId()
                                     + " }");
                     plot.setPlotType("farm");
                     Utilities.sendCityScoreboard(player, plot.getCity(), plot);
@@ -1198,7 +1188,7 @@ public class CommandPlot extends BaseCommand {
                                         + ", \"to\": "
                                         + "shop"
                                         + ", \"issuer\": "
-                                        + player.getUniqueId().toString()
+                                        + player.getUniqueId()
                                         + " }");
                         plot.setPlotType("shop");
                         Utilities.sendCityScoreboard(player, plot.getCity(), plot);
@@ -1232,7 +1222,7 @@ public class CommandPlot extends BaseCommand {
                                     + ", \"to\": "
                                     + "shop"
                                     + ", \"issuer\": "
-                                    + player.getUniqueId().toString()
+                                    + player.getUniqueId()
                                     + " }");
                     plot.setPlotType("shop");
                     Utilities.sendCityScoreboard(player, plot.getCity(), plot);
@@ -1262,7 +1252,7 @@ public class CommandPlot extends BaseCommand {
                                         + ", \"to\": "
                                         + "vacation"
                                         + ", \"issuer\": "
-                                        + player.getUniqueId().toString()
+                                        + player.getUniqueId()
                                         + " }");
                         plot.setPlotType("vacation");
                         Utilities.sendCityScoreboard(player, plot.getCity(), plot);
@@ -1296,7 +1286,7 @@ public class CommandPlot extends BaseCommand {
                                     + ", \"to\": "
                                     + "vacation"
                                     + ", \"issuer\": "
-                                    + player.getUniqueId().toString()
+                                    + player.getUniqueId()
                                     + " }");
                     plot.setPlotType("vacation");
                     Utilities.sendCityScoreboard(player, plot.getCity(), plot);
@@ -1323,7 +1313,7 @@ public class CommandPlot extends BaseCommand {
                                             + ", \"to\": "
                                             + "jail"
                                             + ", \"issuer\": "
-                                            + player.getUniqueId().toString()
+                                            + player.getUniqueId()
                                             + " }");
                             plot.setPlotType("jail");
                             Utilities.sendCityScoreboard(player, plot.getCity(), plot);
@@ -1357,7 +1347,7 @@ public class CommandPlot extends BaseCommand {
                                         + ", \"to\": "
                                         + "jail"
                                         + ", \"issuer\": "
-                                        + player.getUniqueId().toString()
+                                        + player.getUniqueId()
                                         + " }");
                         plot.setPlotType("jail");
                         Utilities.sendCityScoreboard(player, plot.getCity(), plot);
@@ -1424,7 +1414,7 @@ public class CommandPlot extends BaseCommand {
                                 + "Tomt #"
                                 + plot.getPlotId()
                                 + ", \"issuer\": "
-                                + player.getUniqueId().toString()
+                                + player.getUniqueId()
                                 + " }");
                 plot.setPlotName("Tomt #" + plot.getPlotId());
                 Utilities.sendCityScoreboard(player, plot.getCity(), plot);
@@ -1451,7 +1441,7 @@ public class CommandPlot extends BaseCommand {
                             + ", \"to\": "
                             + name
                             + ", \"issuer\": "
-                            + player.getUniqueId().toString()
+                            + player.getUniqueId()
                             + " }");
             plot.setPlotName(name);
             Utilities.sendCityScoreboard(player, plot.getCity(), plot);
@@ -1495,7 +1485,7 @@ public class CommandPlot extends BaseCommand {
                                 + ", \"to\": "
                                 + 0
                                 + ", \"issuer\": "
-                                + player.getUniqueId().toString()
+                                + player.getUniqueId()
                                 + " }");
                 plot.setPlotRent(0);
                 Utilities.sendCityScoreboard(player, city, plot);
@@ -1525,7 +1515,7 @@ public class CommandPlot extends BaseCommand {
                                 + ", \"to\": "
                                 + 0
                                 + ", \"player\": "
-                                + player.getUniqueId().toString()
+                                + player.getUniqueId()
                                 + " }");
                 plot.setForSale(true);
             }
@@ -1540,7 +1530,7 @@ public class CommandPlot extends BaseCommand {
                             + ", \"to\": "
                             + rentInt
                             + ", \"issuer\": "
-                            + player.getUniqueId().toString()
+                            + player.getUniqueId()
                             + " }");
             plot.setPlotRent(rentInt);
             Utilities.sendCityScoreboard(player, city, plot);
@@ -1601,7 +1591,7 @@ public class CommandPlot extends BaseCommand {
                                 + ", \"state\": "
                                 + false
                                 + ", \"issuer\": "
-                                + player.getUniqueId().toString()
+                                + player.getUniqueId()
                                 + " }");
                 plot.setPlotFlags(
                         Objects.requireNonNull(Utilities.parseFlagChange(plot.getPlotFlags(), "-p")));
@@ -1626,7 +1616,7 @@ public class CommandPlot extends BaseCommand {
                                 + ", \"state\": "
                                 + true
                                 + ", \"issuer\": "
-                                + player.getUniqueId().toString()
+                                + player.getUniqueId()
                                 + " }");
                 plot.setPlotFlags("p");
                 Metropolis.sendMessage(
@@ -1680,7 +1670,7 @@ public class CommandPlot extends BaseCommand {
                                 + ", \"state\": "
                                 + false
                                 + ", \"issuer\": "
-                                + player.getUniqueId().toString()
+                                + player.getUniqueId()
                                 + " }");
                 plot.setPlotFlags(
                         Objects.requireNonNull(Utilities.parseFlagChange(plot.getPlotFlags(), "-a")));
@@ -1705,7 +1695,7 @@ public class CommandPlot extends BaseCommand {
                                 + ", \"state\": "
                                 + true
                                 + ", \"issuer\": "
-                                + player.getUniqueId().toString()
+                                + player.getUniqueId()
                                 + " }");
                 plot.setPlotFlags("a");
                 Metropolis.sendMessage(
@@ -1759,7 +1749,7 @@ public class CommandPlot extends BaseCommand {
                                 + ", \"state\": "
                                 + false
                                 + ", \"issuer\": "
-                                + player.getUniqueId().toString()
+                                + player.getUniqueId()
                                 + " }");
                 plot.setPlotFlags(
                         Objects.requireNonNull(Utilities.parseFlagChange(plot.getPlotFlags(), "-m")));
@@ -1784,7 +1774,7 @@ public class CommandPlot extends BaseCommand {
                                 + ", \"state\": "
                                 + true
                                 + ", \"issuer\": "
-                                + player.getUniqueId().toString()
+                                + player.getUniqueId()
                                 + " }");
                 plot.setPlotFlags("m");
                 Metropolis.sendMessage(
@@ -1838,7 +1828,7 @@ public class CommandPlot extends BaseCommand {
                                 + ", \"state\": "
                                 + false
                                 + ", \"issuer\": "
-                                + player.getUniqueId().toString()
+                                + player.getUniqueId()
                                 + " }");
                 plot.setPlotFlags(
                         Objects.requireNonNull(Utilities.parseFlagChange(plot.getPlotFlags(), "-c")));
@@ -1873,7 +1863,7 @@ public class CommandPlot extends BaseCommand {
                             + ", \"state\": "
                             + true
                             + ", \"issuer\": "
-                            + player.getUniqueId().toString()
+                            + player.getUniqueId()
                             + " }");
             plot.setPlotFlags(
                     Objects.requireNonNull(Utilities.parseFlagChange(plot.getPlotFlags(), "+c")));
@@ -1913,7 +1903,7 @@ public class CommandPlot extends BaseCommand {
                                 + ", \"state\": "
                                 + false
                                 + ", \"issuer\": "
-                                + player.getUniqueId().toString()
+                                + player.getUniqueId()
                                 + " }");
                 plot.setPlotFlags(
                         Objects.requireNonNull(Utilities.parseFlagChange(plot.getPlotFlags(), "-x")));
@@ -1948,7 +1938,7 @@ public class CommandPlot extends BaseCommand {
                             + ", \"state\": "
                             + true
                             + ", \"issuer\": "
-                            + player.getUniqueId().toString()
+                            + player.getUniqueId()
                             + " }");
             plot.setPlotFlags(
                     Objects.requireNonNull(Utilities.parseFlagChange(plot.getPlotFlags(), "+x")));
@@ -1988,7 +1978,7 @@ public class CommandPlot extends BaseCommand {
                                 + ", \"state\": "
                                 + false
                                 + ", \"issuer\": "
-                                + player.getUniqueId().toString()
+                                + player.getUniqueId()
                                 + " }");
                 plot.setPlotFlags(
                         Objects.requireNonNull(Utilities.parseFlagChange(plot.getPlotFlags(), "-i")));
@@ -2023,7 +2013,7 @@ public class CommandPlot extends BaseCommand {
                             + ", \"state\": "
                             + true
                             + ", \"issuer\": "
-                            + player.getUniqueId().toString()
+                            + player.getUniqueId()
                             + " }");
             plot.setPlotFlags(
                     Objects.requireNonNull(Utilities.parseFlagChange(plot.getPlotFlags(), "+i")));
@@ -2063,7 +2053,7 @@ public class CommandPlot extends BaseCommand {
                                 + ", \"state\": "
                                 + false
                                 + ", \"issuer\": "
-                                + player.getUniqueId().toString()
+                                + player.getUniqueId()
                                 + " }");
                 plot.setPlotFlags(
                         Objects.requireNonNull(Utilities.parseFlagChange(plot.getPlotFlags(), "-l")));
@@ -2098,7 +2088,7 @@ public class CommandPlot extends BaseCommand {
                             + ", \"state\": "
                             + true
                             + ", \"issuer\": "
-                            + player.getUniqueId().toString()
+                            + player.getUniqueId()
                             + " }");
             plot.setPlotFlags(
                     Objects.requireNonNull(Utilities.parseFlagChange(plot.getPlotFlags(), "+l")));
@@ -2134,7 +2124,7 @@ public class CommandPlot extends BaseCommand {
                                 + ", \"state\": "
                                 + false
                                 + ", \"issuer\": "
-                                + player.getUniqueId().toString()
+                                + player.getUniqueId()
                                 + " }");
                 plot.setKMarked(false);
                 Utilities.sendCityScoreboard(player, city, plot);
@@ -2157,7 +2147,7 @@ public class CommandPlot extends BaseCommand {
                                 + ", \"state\": "
                                 + true
                                 + ", \"issuer\": "
-                                + player.getUniqueId().toString()
+                                + player.getUniqueId()
                                 + " }");
                 plot.setKMarked(true);
                 Utilities.sendCityScoreboard(player, city, plot);
@@ -2258,7 +2248,7 @@ public class CommandPlot extends BaseCommand {
                                     + ", \"ymax\": "
                                     + MetropolisListener.playerYMax.get(player.getUniqueId())
                                     + ", \"player\": "
-                                    + player.getUniqueId().toString()
+                                    + player.getUniqueId()
                                     + " }");
                     plot.updatePlot(player, locations, MetropolisListener.playerYMin.get(player.getUniqueId()), MetropolisListener.playerYMax.get(player.getUniqueId()));
                     MetropolisListener.savedLocs.remove(player.getUniqueId());
@@ -2345,7 +2335,7 @@ public class CommandPlot extends BaseCommand {
                         + ", \"name\": "
                         + plot.getPlotName()
                         + ", \"player\": "
-                        + player.getUniqueId().toString()
+                        + player.getUniqueId()
                         + " }");
         plot.setPlotOwner(player.getName());
         plot.setPlotOwnerUUID(player.getUniqueId().toString());
@@ -2503,35 +2493,5 @@ public class CommandPlot extends BaseCommand {
             cell.setLocation(player.getLocation().toBlockLocation());
             Metropolis.sendMessage(player, "messages.cell.updated", "%id%", String.valueOf(cellId));
         }
-
-
-        // Just to see if it works.
-//        @Subcommand("ban")
-//        public void onBan(Player player, Player target) {
-//            if (!player.hasPermission("metropolis.admin.cell.ban")) {
-//                plugin.sendMessage(player, "messages.error.permissionDenied");
-//                return;
-//            }
-//            Plot plot = PlotDatabase.getPlotAtLocation(player.getLocation().toBlockLocation());
-//            if (plot == null) {
-//                return;
-//            }
-//            if (!plot.isJail()) {
-//                plugin.sendMessage(player, "messages.error.jail.notJail");
-//                return;
-//            }
-//
-//            if (target == null) {
-//                plugin.sendMessage(player, "messages.error.playerNotFound");
-//                return;
-//            }
-//
-//            Cell cell = JailManager.getRandomEmptyCell();
-//            target.teleport(cell.getLocation());
-//            cell.setPrisonerUUID(target.getUniqueId().toString());
-//            JailManager.displayOccupiedCell(cell);
-//            plugin.sendMessage(player, "messages.cell.banned", "%player%", target.getName());
-//
-//        }
     }
 }

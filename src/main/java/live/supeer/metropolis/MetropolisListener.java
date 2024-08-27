@@ -170,6 +170,10 @@ public class MetropolisListener implements Listener {
                 if (block.getState() instanceof Sign sign) {
                     event.setCancelled(true);
                     ChestShop shop = ShopManager.getShopFromSign(sign);
+                    if (ShopManager.isShopEventCounting(player.getUniqueId())) {
+                        ShopManager.handleSignModify(player,sign);
+                        return;
+                    }
                     if (ShopManager.validSign(sign)) {
                         ShopManager.shopCreation.put(player.getUniqueId(), block.getLocation());
                         Metropolis.sendMessage(player, "messages.shop.creation.started");
@@ -187,7 +191,12 @@ public class MetropolisListener implements Listener {
                     }
                 }
             }
-            if (event.getAction() == Action.RIGHT_CLICK_BLOCK && Objects.requireNonNull(event.getClickedBlock()).getState() instanceof Sign) {
+            if (event.getAction() == Action.RIGHT_CLICK_BLOCK && Objects.requireNonNull(event.getClickedBlock()).getState() instanceof Sign sign) {
+                if (ShopManager.getShopFromSign(sign) != null) {
+                    ShopManager.handleSignClick(player, sign, ShopManager.getSide(sign));
+                    event.setCancelled(true);
+                    return;
+                }
                 if (!waitingForSignClick.containsKey(player.getUniqueId())) {
                     return;
                 }

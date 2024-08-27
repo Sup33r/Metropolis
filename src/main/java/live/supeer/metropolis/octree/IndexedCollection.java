@@ -1,5 +1,7 @@
 package live.supeer.metropolis.octree;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.AbstractCollection;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -53,7 +55,7 @@ public class IndexedCollection<T> extends AbstractCollection<T> {
      * Values set before this offset will not show up during iteration,
      * value removal or contains checks. The first value that is added
      * will have this index (as opposed to the default 0).
-     * Values before the offset can be safely set using {@link #setAt(index, value)}.
+     * Values before the offset can be safely set using.
      * These values will also be preserved when clearing.<br>
      * <br>
      * This method can only be called while the collection is empty.
@@ -204,8 +206,8 @@ public class IndexedCollection<T> extends AbstractCollection<T> {
     }
 
     @Override
-    public Iterator<T> iterator() {
-        return new IndexedCollectionIterator<T>(this);
+    public @NotNull Iterator<T> iterator() {
+        return new IndexedCollectionIterator<>(this);
     }
 
     private static final class IndexedCollectionIterator<T> implements Iterator<T> {
@@ -272,16 +274,11 @@ public class IndexedCollection<T> extends AbstractCollection<T> {
         }
     }
 
-    private static final class FreeValue {
-        public final int next;
-
-        public FreeValue(int next) {
-            this.next = next;
-        }
+    private record FreeValue(int next) {
 
         @Override
-        public boolean equals(Object o) {
-            return false;
+            public boolean equals(Object o) {
+                return false;
+            }
         }
-    }
 }

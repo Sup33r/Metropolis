@@ -1,5 +1,7 @@
 package live.supeer.metropolis.octree;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Iterable that returns a {@link OctreeIterator}
  * 
@@ -7,5 +9,5 @@ package live.supeer.metropolis.octree;
  */
 public interface OctreeIterable<T> extends Iterable<T> {
     @Override
-    public OctreeIterator<T> iterator();
+    @NotNull OctreeIterator<T> iterator();
 }
