@@ -140,10 +140,13 @@ public class MetropolisListener implements Listener {
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
+
         Player player = event.getPlayer();
 
         if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
+
             if (event.getMaterial() == Material.STICK) {
+
                 event.setCancelled(true);
                 savedPlayers.remove(player);
                 savedLocs.remove(player.getUniqueId());
@@ -166,14 +169,16 @@ public class MetropolisListener implements Listener {
             }
         }
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+
             if (event.getMaterial() == Material.REDSTONE) {
+
                 Block block = event.getClickedBlock();
                 assert block != null;
                 if (block.getState() instanceof Sign sign) {
                     event.setCancelled(true);
                     ChestShop shop = ShopManager.getShopFromSign(sign);
                     if (ShopManager.isShopEventCounting(player.getUniqueId())) {
-                        ShopManager.handleSignModify(player,sign);
+                        ShopManager.handleSignModify(player, sign);
                         return;
                     }
                     if (ShopManager.isValidSign(sign)) {
@@ -185,7 +190,8 @@ public class MetropolisListener implements Listener {
                     } else {
                         Metropolis.sendMessage(player, "messages.shop.creation.invalid");
                     }
-                } else if (block.getType().equals(Material.CHEST) || block.getType().equals(Material.TRAPPED_CHEST) || block.getType().equals(Material.BARREL) || block.getType().equals(Material.SHULKER_BOX)) {
+                    return;
+                } else if (Utilities.isBlockContainer(block.getType())) {
                     if (ShopManager.shopCreation.containsKey(player.getUniqueId())) {
                         event.setCancelled(true);
                         ShopManager.handleChestClick(player, block.getLocation(), ShopManager.shopCreation.get(player.getUniqueId()));
@@ -195,7 +201,7 @@ public class MetropolisListener implements Listener {
             }
             if (event.getAction() == Action.RIGHT_CLICK_BLOCK && Objects.requireNonNull(event.getClickedBlock()).getState() instanceof Sign sign) {
                 if (ShopManager.getShopFromSign(sign) != null) {
-                    ShopManager.handleSignClick(player, sign, ShopManager.getSide(sign));
+                    ShopManager.handleSignClick(player, sign, sign.getInteractableSideFor(player));
                     event.setCancelled(true);
                     return;
                 }
@@ -216,7 +222,7 @@ public class MetropolisListener implements Listener {
             if (event.getMaterial() == Material.STICK) {
                 Block block = event.getClickedBlock();
                 assert block != null;
-                if (block.getType().equals(Material.CHEST) || block.getType().equals(Material.TRAPPED_CHEST) || block.getType().equals(Material.BARREL) || block.getType().equals(Material.SHULKER_BOX)) {
+                if (Utilities.isBlockContainer(block.getType())) {
                     if (ChestManager.chestInventories.containsKey(player.getUniqueId())) {
                         event.setCancelled(true);
                         if (block.getState() instanceof Chest chest1) {
@@ -440,7 +446,7 @@ public class MetropolisListener implements Listener {
             }
             Block block = event.getClickedBlock();
             assert block != null;
-            if (block.getType().equals(Material.CHEST) || block.getType().equals(Material.TRAPPED_CHEST) || block.getType().equals(Material.BARREL) || block.getType().equals(Material.SHULKER_BOX)) {
+            if (Utilities.isBlockContainer(block.getType())) {
                 live.supeer.apied.Chest chest1;
                 if (block.getState() instanceof Chest chest) {
                     if (chest.getInventory() instanceof DoubleChestInventory doubleChestInventory) {
@@ -477,6 +483,7 @@ public class MetropolisListener implements Listener {
     @EventHandler
     public void onChestCloses(InventoryCloseEvent event)
     {
+
         if(event.getInventory().getType().equals(InventoryType.CHEST) || event.getInventory().getType().equals(InventoryType.SHULKER_BOX) || event.getInventory().getType().equals(InventoryType.BARREL)) {
             //if double chest, get the left side
             if(event.getInventory() instanceof DoubleChestInventory) {
@@ -489,6 +496,7 @@ public class MetropolisListener implements Listener {
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
+
         Player player = event.getPlayer();
         if (event.getBlock().getType().equals(Material.DIRT)) {
             if (CommandCity.blockEnabled.contains(player)) {
@@ -526,8 +534,10 @@ public class MetropolisListener implements Listener {
             }
         }
     }
+
     @EventHandler
     public void onMove(PlayerMoveEvent event) {
+
         Player player = event.getPlayer();
         Location from = event.getFrom().toBlockLocation();
         Location to = event.getTo().toBlockLocation();
