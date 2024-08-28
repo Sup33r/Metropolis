@@ -15,6 +15,8 @@ import live.supeer.metropolis.utils.Utilities;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.block.Sign;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
@@ -174,7 +176,7 @@ public class MetropolisListener implements Listener {
                         ShopManager.handleSignModify(player,sign);
                         return;
                     }
-                    if (ShopManager.validSign(sign)) {
+                    if (ShopManager.isValidSign(sign)) {
                         ShopManager.shopCreation.put(player.getUniqueId(), block.getLocation());
                         Metropolis.sendMessage(player, "messages.shop.creation.started");
                     } else if (shop != null) {
@@ -468,6 +470,19 @@ public class MetropolisListener implements Listener {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onChestCloses(InventoryCloseEvent event)
+    {
+        if(event.getInventory().getType().equals(InventoryType.CHEST) || event.getInventory().getType().equals(InventoryType.SHULKER_BOX) || event.getInventory().getType().equals(InventoryType.BARREL)) {
+            //if double chest, get the left side
+            if(event.getInventory() instanceof DoubleChestInventory) {
+                ShopManager.handleChestClose(((DoubleChestInventory) event.getInventory()).getLeftSide().getLocation());
+            } else {
+            ShopManager.handleChestClose(event.getInventory().getLocation());
             }
         }
     }
