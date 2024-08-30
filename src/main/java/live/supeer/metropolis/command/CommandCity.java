@@ -663,6 +663,11 @@ public class CommandCity extends BaseCommand {
             Metropolis.sendMessage(player, "messages.error.city.invite.self", "%cityname%", city.getCityName());
             return;
         }
+        MPlayer inviteeMPlayer = ApiedAPI.getPlayer(inviteePlayer);
+        if (inviteeMPlayer.hasFlag('v')) {
+            Metropolis.sendMessage(player, "messages.error.city.invite.off");
+            return;
+        }
         if (!inviteCooldownTime.containsKey(uuidCityHashMap)) {
             invites.put(inviteePlayer, city);
             Metropolis.sendMessage(

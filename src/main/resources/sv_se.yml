@@ -162,6 +162,7 @@ messages:
         alreadyExists: "<yellow>%cityname% <gray>| <red>Det finns redan en teleporteringspunkt med detta namn i denna stad."
       messageTooLong: "<yellow>%cityname% <gray>| <red>Meddelandet får inte vara längre än %count% tecken."
       invite:
+        off: "<yellow>%cityname% <gray>| <red>Spelaren har stängt av inbjudningsförfrågningar."
         self: "<yellow>%cityname% <gray>| <red>Man kan inte bjuda in sig själv till en stad."
         alreadyInvited: "<yellow>%cityname% <gray>| <red>Spelaren är redan inbjuden till staden."
         playerBanned: "<yellow>%cityname% <gray>| <red>Spelaren är bannlyst från staden och kan därför inte bli inbjuden."
