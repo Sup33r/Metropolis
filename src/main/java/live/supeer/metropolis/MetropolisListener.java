@@ -100,7 +100,7 @@ public class MetropolisListener implements Listener {
             PlayerEnterCityEvent enterCityEvent = new PlayerEnterCityEvent(event.getPlayer(), city);
             Bukkit.getServer().getPluginManager().callEvent(enterCityEvent);
             District district = CityDatabase.getDistrict(player.getLocation());
-            Plot plot = PlotDatabase.getPlotAtLocation(player.getLocation());
+            Plot plot = PlotDatabase.getCityPlot(city, player.getLocation());
             if (district != null) {
                 PlayerEnterDistrictEvent enterDistrictEvent = new PlayerEnterDistrictEvent(event.getPlayer(), district);
                 Bukkit.getServer().getPluginManager().callEvent(enterDistrictEvent);
@@ -355,7 +355,7 @@ public class MetropolisListener implements Listener {
                     assert city != null;
                     Role role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
                     assert role != null;
-                    Plot plot = PlotDatabase.getPlotAtLocation(event.getClickedBlock().getLocation());
+                    Plot plot = PlotDatabase.getCityPlot(city, player.getLocation());
                     if (plot != null) {
                         if (plot.getPlotOwnerUUID().equals(player.getUniqueId().toString()) || role.getPermissionLevel() > Role.ASSISTANT.getPermissionLevel()) {
                             coreProtectInteractCheck(player, event);
@@ -508,7 +508,7 @@ public class MetropolisListener implements Listener {
                 City city = CityDatabase.getCityByClaim(event.getBlockPlaced().getLocation());
                 Role role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
                 assert role != null;
-                Plot plot = PlotDatabase.getPlotAtLocation(event.getBlockPlaced().getLocation());
+                Plot plot = PlotDatabase.getCityPlot(city, player.getLocation());
                 if (plot != null) {
                     if (plot.getPlotOwnerUUID().equals(player.getUniqueId().toString()) || role.getPermissionLevel() > Role.ASSISTANT.getPermissionLevel()) {
                         coreProtectPlaceCheck(player, event);
@@ -575,8 +575,8 @@ public class MetropolisListener implements Listener {
         // Existing plot enter/exit logic
         if (from.getX() != to.getX() || from.getZ() != to.getZ() || from.getY() != to.getY()) {
             if (Metropolis.playerInCity.containsKey(player.getUniqueId())) {
-                Plot plot = PlotDatabase.getPlotAtLocation(to);
-                District district = CityDatabase.getDistrict(to);
+                Plot plot = PlotDatabase.getCityPlot(Metropolis.playerInCity.get(player.getUniqueId()), to.toBlockLocation());
+                District district = CityDatabase.getDistrict(to.toBlockLocation());
                 if (district == null) {
                     if (Metropolis.playerInDistrict.containsKey(player.getUniqueId())) {
                         PlayerExitDistrictEvent exitDistrictEvent = new PlayerExitDistrictEvent(player, Metropolis.playerInDistrict.get(player.getUniqueId()));
@@ -636,7 +636,7 @@ public class MetropolisListener implements Listener {
 
         // Check for plot changes
         if (Metropolis.playerInCity.containsKey(playerId)) {
-            Plot plot = PlotDatabase.getPlotAtLocation(to);
+            Plot plot = PlotDatabase.getCityPlot(Metropolis.playerInCity.get(playerId), to);
             District district = CityDatabase.getDistrict(to);
             if (district == null) {
                 if (Metropolis.playerInDistrict.containsKey(playerId)) {
@@ -694,7 +694,7 @@ public class MetropolisListener implements Listener {
 
         // Check for plot changes
         if (Metropolis.playerInCity.containsKey(playerId)) {
-            Plot plot = PlotDatabase.getPlotAtLocation(to);
+            Plot plot = PlotDatabase.getCityPlot(Metropolis.playerInCity.get(playerId), to);
             if (plot == null) {
                 if (Metropolis.playerInPlot.containsKey(playerId)) {
                     PlayerExitPlotEvent exitEvent = new PlayerExitPlotEvent(player, Metropolis.playerInPlot.get(playerId));

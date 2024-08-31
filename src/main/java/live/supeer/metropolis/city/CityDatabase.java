@@ -797,31 +797,6 @@ public class CityDatabase {
         return result;
     }
 
-    public static Plot getPlotAtLocation(Location location) {
-        GeometryFactory geometryFactory = new GeometryFactory();
-        Point point = geometryFactory.createPoint(new Coordinate(location.getX(), location.getZ()));
-        int y = location.getBlockY();
-        String worldName = location.getWorld().getName();
-
-        try {
-            DbRow result = DB.getFirstRow(
-                    "SELECT * FROM `mp_plots` WHERE ST_Intersects(`plotBoundary`, ST_GeomFromText(?)) AND `plotYMin` <= ? AND `plotYMax` >= ? AND `plotCenter` LIKE ?;",
-                    point.toText()
-                    , y
-                    , y
-                    , worldName + "%"
-            );
-
-            if (result != null) {
-                return new Plot(result);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
     public static District getDistrict(Location location) {
         GeometryFactory geometryFactory = new GeometryFactory();
         Point point = geometryFactory.createPoint(new Coordinate(location.getX(), location.getZ()));

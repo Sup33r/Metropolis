@@ -13,6 +13,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDeathEvent;
 
 public class CityListener implements Listener {
 
@@ -150,6 +151,4 @@ public class CityListener implements Listener {
                 (claim3 != null && claim3.getCity() == city) ||
                 (claim4 != null && claim4.getCity() == city);
     }
-
-
 }

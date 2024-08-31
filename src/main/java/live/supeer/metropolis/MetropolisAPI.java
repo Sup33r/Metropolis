@@ -21,10 +21,6 @@ public class MetropolisAPI {
         return CityDatabase.getCity(cityName).orElse(null);
     }
 
-    public static Plot getPlotByLocation(Location location) {
-        return PlotDatabase.getPlotAtLocation(location);
-    }
-
     public static List<Member> getCityMembers(City city) { return city.getCityMembers(); }
 
     public static boolean isPlayerCityMember(Player player, String cityName) {

@@ -211,6 +211,24 @@ public class Database {
                                 `placeUUID` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                  PRIMARY KEY (cityId,playerUUID)
                               ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;""");
+            DB.executeUpdate(
+                    """
+                              CREATE TABLE IF NOT EXISTS `mp_leaderboards` (
+                                `plotId` int(11) NOT NULL,
+                                `creatorUUID` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+                                `createDate` bigint(30) DEFAULT NULL,
+                                `type` bigint(30) DEFAULT NULL,
+                                `conditions` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                                 PRIMARY KEY (plotId)
+                              ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;""");
+            DB.executeUpdate(
+                    """
+                              CREATE TABLE IF NOT EXISTS `mp_standings` (
+                                `plotId` int(11) NOT NULL,
+                                `playerUUID` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+                                `count` bigint(30) DEFAULT NULL,
+                                 PRIMARY KEY (plotId,playerUUID)
+                              ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;""");
         } catch (SQLException exception) {
             exception.printStackTrace();
         }

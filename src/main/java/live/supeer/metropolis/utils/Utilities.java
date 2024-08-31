@@ -388,7 +388,7 @@ public class Utilities {
             Metropolis.sendMessage(player, "messages.error.permissionDenied");
             return null;
         }
-        Plot plot = PlotDatabase.getPlotAtLocation(player.getLocation());
+        Plot plot = Metropolis.playerInPlot.get(player.getUniqueId());
         if (plot == null) {
             Metropolis.sendMessage(player, "messages.error.plot.notInPlot");
             return null;

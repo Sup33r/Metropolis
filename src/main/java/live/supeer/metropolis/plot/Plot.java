@@ -3,8 +3,8 @@ package live.supeer.metropolis.plot;
 import co.aikar.idb.DB;
 import co.aikar.idb.DbRow;
 import live.supeer.metropolis.Database;
+import live.supeer.metropolis.Metropolis;
 import live.supeer.metropolis.utils.LocationUtil;
-import live.supeer.metropolis.utils.Utilities;
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.city.CityDatabase;
 import org.bukkit.World;
@@ -17,7 +17,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import java.awt.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -321,15 +320,19 @@ public class Plot {
 
     public List<Player> playersInPlot() {
         List<Player> players = new ArrayList<>();
-        for (Player p : Bukkit.getOnlinePlayers()) {
-            Polygon polygon = getPlotPoints();
-            Point point = geometryFactory.createPoint(new Coordinate(p.getLocation().getBlockX(), p.getLocation().getBlockZ()));
-            if (polygon.contains(point)) {
-                if (!players.contains(p)) {
-                    players.add(p);
-                }
+        for (UUID uuid: Metropolis.playerInPlot.keySet()) {
+            if (Metropolis.playerInPlot.get(uuid).getPlotId() == plotId) {
+                players.add(Bukkit.getPlayer(uuid));
             }
         }
         return players;
+    }
+
+    public boolean contains(Location location) {
+        if (!location.getWorld().equals(plotWorld)) {
+            return false;
+        }
+        Point point = geometryFactory.createPoint(new Coordinate(location.getBlockX(), location.getBlockZ()));
+        return plotPoints.covers(point) && location.getBlockY() >= plotYMin && location.getBlockY() <= plotYMax;
     }
 }

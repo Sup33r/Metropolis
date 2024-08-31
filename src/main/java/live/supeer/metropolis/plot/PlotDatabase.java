@@ -4,22 +4,17 @@ import co.aikar.idb.DB;
 import co.aikar.idb.DbRow;
 import live.supeer.metropolis.Database;
 import live.supeer.metropolis.Metropolis;
-import live.supeer.metropolis.city.CityDatabase;
 import live.supeer.metropolis.city.Claim;
 import live.supeer.metropolis.utils.LocationUtil;
-import live.supeer.metropolis.utils.Utilities;
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.utils.DateUtil;
-import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
-import org.locationtech.jts.geom.Point;
 
-import java.awt.*;
 import java.util.List;
 
 public class PlotDatabase {
@@ -32,7 +27,6 @@ public class PlotDatabase {
 
 
         if (minY == 0 && maxY == 0) {
-            minY = 0;
             maxY = 256;
             Metropolis.getInstance().getLogger().warning("PlotDatabase.createPlot: minY and maxY was 0, setting to 0 and 256");
         }
@@ -158,8 +152,13 @@ public class PlotDatabase {
         return null;
     }
 
-    public static Plot getPlotAtLocation(Location location) {
-        return CityDatabase.getPlotAtLocation(location);
+    public static Plot getCityPlot(City city, Location location) {
+        for (Plot plot : city.getCityPlots()) {
+            if (plot.contains(location.toBlockLocation())) {
+                return plot;
+            }
+        }
+        return null;
     }
 
     public static boolean hasPlotInClaim(Claim claim) {

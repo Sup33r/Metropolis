@@ -403,7 +403,7 @@ public class CommandPlot extends BaseCommand {
             Metropolis.sendMessage(player, "messages.error.permissionDenied");
             return;
         }
-        Plot plot = PlotDatabase.getPlotAtLocation(player.getLocation());
+        Plot plot = Metropolis.playerInPlot.get(player.getUniqueId());
         if (plot == null) {
             Metropolis.sendMessage(player, "messages.error.plot.notInPlot");
             return;
@@ -642,8 +642,9 @@ public class CommandPlot extends BaseCommand {
         if (city == null) {
             return;
         }
-        Plot plot = PlotDatabase.getPlotAtLocation(player.getLocation());
+        Plot plot = Metropolis.playerInPlot.get(player.getUniqueId());
         if (plot == null) {
+            Metropolis.sendMessage(player, "messages.error.plot.notInPlot");
             return;
         }
         if (plot.getCity().isReserve()) {
@@ -1570,8 +1571,9 @@ public class CommandPlot extends BaseCommand {
                 Metropolis.sendMessage(player, "messages.error.permissionDenied");
                 return;
             }
-            Plot plot = PlotDatabase.getPlotAtLocation(player.getLocation());
+            Plot plot = Metropolis.playerInPlot.get(player.getUniqueId());
             if (plot == null) {
+                Metropolis.sendMessage(player, "messages.error.plot.notInPlot");
                 return;
             }
             if (plot.getCity().isReserve()) {
@@ -1602,6 +1604,7 @@ public class CommandPlot extends BaseCommand {
                         city.getCityName(),
                         "%status%",
                         "inaktiverat");
+                Utilities.sendCityScoreboard(player, city, plot);
                 return;
             }
             if (plot.getPlotFlags().length == 0) {
@@ -1626,6 +1629,7 @@ public class CommandPlot extends BaseCommand {
                         city.getCityName(),
                         "%status%",
                         "aktiverat");
+                Utilities.sendCityScoreboard(player, city, plot);
                 return;
             }
             plot.setPlotFlags(
@@ -1637,6 +1641,7 @@ public class CommandPlot extends BaseCommand {
                     city.getCityName(),
                     "%status%",
                     "aktiverat");
+            Utilities.sendCityScoreboard(player, city, plot);
         }
 
         @Subcommand("animals")
@@ -1681,6 +1686,7 @@ public class CommandPlot extends BaseCommand {
                         city.getCityName(),
                         "%status%",
                         "inaktiverat");
+                Utilities.sendCityScoreboard(player, city, plot);
                 return;
             }
             if (plot.getPlotFlags().length == 0) {
@@ -1705,6 +1711,7 @@ public class CommandPlot extends BaseCommand {
                         city.getCityName(),
                         "%status%",
                         "aktiverat");
+                Utilities.sendCityScoreboard(player, city, plot);
                 return;
             }
             plot.setPlotFlags(
@@ -1716,6 +1723,7 @@ public class CommandPlot extends BaseCommand {
                     city.getCityName(),
                     "%status%",
                     "aktiverat");
+            Utilities.sendCityScoreboard(player, city, plot);
         }
 
         @Subcommand("mobs")
@@ -1760,6 +1768,7 @@ public class CommandPlot extends BaseCommand {
                         city.getCityName(),
                         "%status%",
                         "inaktiverat");
+                Utilities.sendCityScoreboard(player, city, plot);
                 return;
             }
             if (plot.getPlotFlags().length == 0) {
@@ -1784,6 +1793,7 @@ public class CommandPlot extends BaseCommand {
                         city.getCityName(),
                         "%status%",
                         "aktiverat");
+                Utilities.sendCityScoreboard(player, city, plot);
                 return;
             }
             plot.setPlotFlags(
@@ -1795,6 +1805,7 @@ public class CommandPlot extends BaseCommand {
                     city.getCityName(),
                     "%status%",
                     "aktiverat");
+            Utilities.sendCityScoreboard(player, city, plot);
         }
 
         @Subcommand("meeting")
@@ -1839,6 +1850,7 @@ public class CommandPlot extends BaseCommand {
                         city.getCityName(),
                         "%status%",
                         "inaktiverat");
+                Utilities.sendCityScoreboard(player, city, plot);
                 return;
             }
             if (plot.getPlotFlags().length == 0) {
@@ -1850,6 +1862,7 @@ public class CommandPlot extends BaseCommand {
                         city.getCityName(),
                         "%status%",
                         "aktiverat");
+                Utilities.sendCityScoreboard(player, city, plot);
                 return;
             }
             Database.addLogEntry(
@@ -1874,6 +1887,7 @@ public class CommandPlot extends BaseCommand {
                     city.getCityName(),
                     "%status%",
                     "aktiverat");
+            Utilities.sendCityScoreboard(player, city, plot);
         }
 
         @Subcommand("keepexp")
@@ -1882,8 +1896,9 @@ public class CommandPlot extends BaseCommand {
                 Metropolis.sendMessage(player, "messages.error.permissionDenied");
                 return;
             }
-            Plot plot = PlotDatabase.getPlotAtLocation(player.getLocation());
+            Plot plot = Metropolis.playerInPlot.get(player.getUniqueId());
             if (plot == null) {
+                Metropolis.sendMessage(player, "messages.error.plot.notInPlot");
                 return;
             }
             if (plot.getCity().isReserve()) {
@@ -1914,6 +1929,7 @@ public class CommandPlot extends BaseCommand {
                         city.getCityName(),
                         "%status%",
                         "tappas");
+                Utilities.sendCityScoreboard(player, city, plot);
                 return;
             }
             if (plot.getPlotFlags().length == 0) {
@@ -1925,6 +1941,7 @@ public class CommandPlot extends BaseCommand {
                         city.getCityName(),
                         "%status%",
                         "behålls");
+                Utilities.sendCityScoreboard(player, city, plot);
                 return;
             }
             Database.addLogEntry(
@@ -1949,6 +1966,7 @@ public class CommandPlot extends BaseCommand {
                     city.getCityName(),
                     "%status%",
                     "behålls");
+            Utilities.sendCityScoreboard(player, city, plot);
         }
 
         @Subcommand("keepinv")
@@ -1957,8 +1975,9 @@ public class CommandPlot extends BaseCommand {
                 Metropolis.sendMessage(player, "messages.error.permissionDenied");
                 return;
             }
-            Plot plot = PlotDatabase.getPlotAtLocation(player.getLocation());
+            Plot plot = Metropolis.playerInPlot.get(player.getUniqueId());
             if (plot == null) {
+                Metropolis.sendMessage(player, "messages.error.plot.notInPlot");
                 return;
             }
             if (plot.getCity().isReserve()) {
@@ -1989,6 +2008,7 @@ public class CommandPlot extends BaseCommand {
                         city.getCityName(),
                         "%status%",
                         "tappas");
+                Utilities.sendCityScoreboard(player, city, plot);
                 return;
             }
             if (plot.getPlotFlags().length == 0) {
@@ -2000,6 +2020,7 @@ public class CommandPlot extends BaseCommand {
                         city.getCityName(),
                         "%status%",
                         "behålls");
+                Utilities.sendCityScoreboard(player, city, plot);
                 return;
             }
             Database.addLogEntry(
@@ -2024,6 +2045,7 @@ public class CommandPlot extends BaseCommand {
                     city.getCityName(),
                     "%status%",
                     "behålls");
+            Utilities.sendCityScoreboard(player, city, plot);
         }
 
         @Subcommand("lock")
@@ -2032,8 +2054,9 @@ public class CommandPlot extends BaseCommand {
                 Metropolis.sendMessage(player, "messages.error.permissionDenied");
                 return;
             }
-            Plot plot = PlotDatabase.getPlotAtLocation(player.getLocation());
+            Plot plot = Metropolis.playerInPlot.get(player.getUniqueId());
             if (plot == null) {
+                Metropolis.sendMessage(player, "messages.error.plot.notInPlot");
                 return;
             }
             if (plot.getCity().isReserve()) {
@@ -2277,8 +2300,9 @@ public class CommandPlot extends BaseCommand {
             Metropolis.sendMessage(player, "messages.error.permissionDenied");
             return;
         }
-        Plot plot = PlotDatabase.getPlotAtLocation(player.getLocation());
+        Plot plot = Metropolis.playerInPlot.get(player.getUniqueId());
         if (plot == null) {
+            Metropolis.sendMessage(player, "messages.error.plot.notInPlot");
             return;
         }
         if (plot.getCity().isReserve()) {
@@ -2361,8 +2385,9 @@ public class CommandPlot extends BaseCommand {
                 Metropolis.sendMessage(player, "messages.error.permissionDenied");
                 return;
             }
-            Plot plot = PlotDatabase.getPlotAtLocation(player.getLocation().toBlockLocation());
+            Plot plot = Metropolis.playerInPlot.get(player.getUniqueId());
             if (plot == null) {
+                Metropolis.sendMessage(player, "messages.error.plot.notInPlot");
                 return;
             }
             if (!plot.isJail()) {
@@ -2400,8 +2425,9 @@ public class CommandPlot extends BaseCommand {
                 Metropolis.sendMessage(player, "messages.error.permissionDenied");
                 return;
             }
-            Plot plot = PlotDatabase.getPlotAtLocation(player.getLocation().toBlockLocation());
+            Plot plot = Metropolis.playerInPlot.get(player.getUniqueId());
             if (plot == null) {
+                Metropolis.sendMessage(player, "messages.error.plot.notInPlot");
                 return;
             }
             if (!plot.isJail()) {
@@ -2446,8 +2472,9 @@ public class CommandPlot extends BaseCommand {
                 Metropolis.sendMessage(player, "messages.error.permissionDenied");
                 return;
             }
-            Plot plot = PlotDatabase.getPlotAtLocation(player.getLocation().toBlockLocation());
+            Plot plot = Metropolis.playerInPlot.get(player.getUniqueId());
             if (plot == null) {
+                Metropolis.sendMessage(player, "messages.error.plot.notInPlot");
                 return;
             }
             if (!plot.isJail()) {
@@ -2476,8 +2503,9 @@ public class CommandPlot extends BaseCommand {
                 Metropolis.sendMessage(player, "messages.error.permissionDenied");
                 return;
             }
-            Plot plot = PlotDatabase.getPlotAtLocation(player.getLocation().toBlockLocation());
+            Plot plot = Metropolis.playerInPlot.get(player.getUniqueId());
             if (plot == null) {
+                Metropolis.sendMessage(player, "messages.error.plot.notInPlot");
                 return;
             }
             if (!plot.isJail()) {

@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableList;
 import live.supeer.apied.ApiedAPI;
 import live.supeer.apied.ExpiringBan;
 import live.supeer.apied.MPlayer;
-import live.supeer.apied.MPlayerManager;
 import live.supeer.metropolis.city.*;
 import live.supeer.metropolis.command.*;
 import live.supeer.metropolis.homecity.HCDatabase;
@@ -17,16 +16,13 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.logging.Logger;
 
 public final class Metropolis extends JavaPlugin {
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(Metropolis.class);
     public static HashMap<UUID, City> playerInCity = new HashMap<>();
     public static HashMap<UUID, Plot> playerInPlot = new HashMap<>();
     public static HashMap<UUID, District> playerInDistrict = new HashMap<>();
