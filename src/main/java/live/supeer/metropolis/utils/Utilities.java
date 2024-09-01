@@ -317,12 +317,14 @@ public class Utilities {
                 board.updateLine(i + 2, " ");
                 i = i + 3;
             }
-            MPlayer mOwner = ApiedAPI.getPlayer(UUID.fromString(plot.getPlotOwnerUUID()));
-            if (mOwner != null) {
-                board.updateLine(i, Metropolis.getMessage("messages.city.scoreboard.owner"));
-                board.updateLine(i + 1, "§a" + mOwner.getName());
-                board.updateLine(i + 2, " ");
-                i = i + 3;
+            if (plot.getPlotOwnerUUID() != null) {
+                MPlayer mOwner = ApiedAPI.getPlayer(UUID.fromString(plot.getPlotOwnerUUID()));
+                if (mOwner != null) {
+                    board.updateLine(i, Metropolis.getMessage("messages.city.scoreboard.owner"));
+                    board.updateLine(i + 1, "§a" + mOwner.getName());
+                    board.updateLine(i + 2, " ");
+                    i = i + 3;
+                }
             }
 
             // Leaderboard section
@@ -428,7 +430,7 @@ public class Utilities {
         }
         Role role = CityDatabase.getCityRole(plot.getCity(), player.getUniqueId().toString());
         if (isOwner) {
-            if (plot.getPlotOwnerUUID().equals(player.getUniqueId().toString())) {
+            if (plot.getPlotOwnerUUID() != null && plot.getPlotOwnerUUID().equals(player.getUniqueId().toString())) {
                 return plot;
             }
             if (role != null && targetRole != null) {

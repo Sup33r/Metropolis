@@ -479,6 +479,7 @@ public class CityDatabase {
         Iterator<City> iterator = cities.iterator();
         while (iterator.hasNext()) {
             City city = iterator.next();
+            city.compensateForInmates();
             city.drawCityTaxes();
             city.drawStateTaxes();
             if (city.hasNegativeBalance() && !city.isReserve()) {

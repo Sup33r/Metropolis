@@ -5,6 +5,7 @@ import co.aikar.idb.DbRow;
 import live.supeer.apied.ApiedAPI;
 import live.supeer.apied.MPlayer;
 import live.supeer.apied.MPlayerManager;
+import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.utils.DateUtil;
 import live.supeer.metropolis.utils.LocationUtil;
@@ -53,6 +54,21 @@ public class JailManager {
                 cells.add(new Cell(row));
             }
             return cells;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static int getOccupiedCellsCount(Plot plot) {
+        try {
+            List<DbRow> rows = DB.getResults("SELECT * FROM mp_cells WHERE plotId = ? AND prisonerUUID IS NOT NULL", plot.getPlotId());
+            int count = 0;
+            for (DbRow row : rows) {
+                if (!banHasExpired(UUID.fromString(row.getString("prisonerUUID")))) {
+                    count++;
+                }
+            }
+            return count;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -194,6 +210,14 @@ public class JailManager {
         }
     }
 
+    public static boolean banHasExpired(UUID playerUUID) {
+        if (MPlayerManager.getBanLength(playerUUID) < DateUtil.getTimestamp() || !MPlayerManager.isBanned(playerUUID)) {
+            handleUnban(playerUUID);
+            return true;
+        }
+        return false;
+    }
+
     public static boolean banExpiresSoon(UUID playerUUID) {
         Metropolis.getInstance().logger.info("Checking if ban expires soon for " + playerUUID);
         if (!MPlayerManager.isBanned(playerUUID)) {
@@ -204,4 +228,8 @@ public class JailManager {
         return MPlayerManager.getBanLength(playerUUID) - DateUtil.getTimestamp() < 86400;
     }
 
+    public static void compensateCity(City city) {
+        city.addCityBalance(Metropolis.configuration.getPrisonerPayback());
+        Database.addLogEntry(city, "{ \"type\": \"cityBank\", \"subtype\": \"jailCompensation\", \"balance\": " + Metropolis.configuration.getPrisonerPayback() + "}");
+    }
 }

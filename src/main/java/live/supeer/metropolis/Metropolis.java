@@ -10,6 +10,7 @@ import live.supeer.metropolis.city.*;
 import live.supeer.metropolis.command.*;
 import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.plot.Plot;
+import live.supeer.metropolis.plot.PlotDatabase;
 import live.supeer.metropolis.utils.DateUtil;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
@@ -211,6 +212,55 @@ public final class Metropolis extends JavaPlugin {
 
             return CityDatabase.getCitynames(player);
         });
+        manager.getCommandCompletions().registerAsyncCompletion("playerCities", c -> {
+            Player player = c.getPlayer();
+            if (player == null) {
+                return Collections.emptyList();
+            }
+
+            return HCDatabase.getPlayerHomeCities(player.getUniqueId());
+        });
+        manager.getCommandCompletions().registerAsyncCompletion("playerNames", c -> {
+            Player player = c.getPlayer();
+            if (player == null) {
+                return Collections.emptyList();
+            }
+
+            City homeCity = HCDatabase.getHomeCityToCity(player.getUniqueId().toString());
+            if (homeCity == null) {
+                return Collections.emptyList();
+            }
+
+            List<String> memberNames = new ArrayList<>();
+            for (Member member : homeCity.getCityMembers()) {
+                MPlayer mPlayer = ApiedAPI.getPlayer(UUID.fromString(member.getPlayerUUID()));
+                if (mPlayer != null) {
+                    memberNames.add(mPlayer.getName());
+                }
+            }
+
+            return memberNames;
+        });
+    }
+
+    public void scheduleWeeklyPlotRentCollection() {
+        Calendar now = Calendar.getInstance();
+
+        Calendar nextRun = Calendar.getInstance();
+        nextRun.set(Calendar.DAY_OF_WEEK, configuration.getRentTimeDay());
+        nextRun.set(Calendar.HOUR_OF_DAY, configuration.getRentTimeHour());
+        nextRun.set(Calendar.MINUTE, configuration.getRentTimeMinute());
+        nextRun.set(Calendar.SECOND, configuration.getRentTimeSecond());
+
+        if (now.after(nextRun)) {
+            nextRun.add(Calendar.WEEK_OF_YEAR, 1);
+        }
+
+        long initialDelay = nextRun.getTimeInMillis() - now.getTimeInMillis();
+
+        getServer().getScheduler().runTaskTimer(this, () -> {
+            getServer().getScheduler().runTask(this, PlotDatabase::collectPlotRents);
+        }, initialDelay / 50, 7 * 24 * 60 * 60 * 20); // Convert to ticks (20 ticks = 1 second)
     }
 
     public void scheduleDailyTaxCollection() {

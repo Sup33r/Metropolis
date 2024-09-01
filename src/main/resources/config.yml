@@ -24,6 +24,11 @@ settings:
     minchunkdistance: 400
     minspawndistance: 2000
 
+  renttime:
+    day: 1
+    hour: 23
+    minute: 59
+    second: 0
 
   taxtime:
     hour: 0

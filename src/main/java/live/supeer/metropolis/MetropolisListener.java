@@ -82,6 +82,7 @@ public class MetropolisListener implements Listener {
                 cell.setPrisonerUUID(player.getUniqueId().toString());
                 player.teleport(cell.getLocation());
                 JailManager.displaySign(cell);
+                JailManager.compensateCity(cell.getJailPlot().getCity());
             } else {
                 Cell cell = JailManager.getCellForPrisoner(player.getUniqueId().toString());
                 player.teleport(cell.getLocation());
@@ -127,6 +128,9 @@ public class MetropolisListener implements Listener {
                         } else {
                             Metropolis.sendMessage(player, "messages.city.motd.normal", "%cityname%", city.getCityName(), "%motd%", cityMotd);
                         }
+                    }
+                    if (PlotDatabase.cantPayRent(PlotDatabase.getPlayerPlots(mPlayer.getUuid()), mPlayer)) {
+                        Metropolis.sendMessage(player, "messages.city.warning.rentDue");
                     }
                     if (!city.isReserve() && city.cityCouldGoUnder(1)) {
                         Metropolis.sendMessage(player, "messages.city.warning.lowBalance", "%cityname%", city.getCityName());

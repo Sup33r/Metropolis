@@ -5,6 +5,7 @@ import co.aikar.idb.DbRow;
 import live.supeer.apied.ApiedAPI;
 import live.supeer.apied.MPlayer;
 import live.supeer.metropolis.Database;
+import live.supeer.metropolis.JailManager;
 import live.supeer.metropolis.Metropolis;
 import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.octree.Octree;
@@ -330,6 +331,17 @@ public class City {
         }
     }
 
+    public void compensateForInmates() {
+        int compensation = 0;
+        for (Plot plot : cityPlots) {
+            if (plot.getPlotType().equalsIgnoreCase("jail")) {
+                compensation += JailManager.getOccupiedCellsCount(plot) * Metropolis.configuration.getDailyPayback();
+            }
+        }
+        cityBalance += compensation;
+        Database.addLogEntry(this, "{ \"type\": \"cityBank\", \"subtype\": \"dailyJailCompensation\", \"balance\": " + compensation + "}");
+    }
+
     public boolean canBecomeReserve() {
         if (cityMembers.size() >= 20) {
             return true;
@@ -374,6 +386,7 @@ public class City {
 
                         if (roundedTaxAmount > 0) {
                             mPlayer.removeBalance(roundedTaxAmount, "{ \"type\": \"city\", \"subtype\": \"tax\", \"cityId\": " + cityId +"}");
+                            Database.addLogEntry(this, "{ \"type\": \"cityBank\", \"subtype\": \"tax\", \"balance\": " + roundedTaxAmount + ", \"player\": " + member.getPlayerUUID() + " }");
                             cityBalance += roundedTaxAmount;
 
                             // Update city balance in database

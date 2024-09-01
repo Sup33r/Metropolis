@@ -197,11 +197,11 @@ messages:
         mayor: "<yellow>%cityname% <gray>| <red>Du kan inte lämna staden som borgermästare. Överväg att istället ta bort staden med /city delete <underlined>stadsnamn<reset><red>, eller byta roll med en annan medlem med kommandot /city rank <underlined>spelare<reset><red> swap."
       missing:
         balance:
-          districtCost: "<yellow>%cityname% <gray>| <red>Staden har inte råd med %amount% minemynt som det kostar att skapa ett område."
-          bonusCost: "<yellow>%cityname% <gray>| <red>Staden har inte råd med %amount% minemynt som %count% bonusmarkbit(ar) kostar."
-          outpostCost: "<yellow>%cityname% <gray>| <red>Staden har inte råd med 15 000 minemynt som en utpost kostar."
-          goCost: "<yellow>%cityname% <gray>| <red>Staden har inte råd med 5 000 minemynt som det kostar att köpa en teleporteringspunkt till en stad."
-          cityCost: "<red>Du har inte råd med 500 000 minemynt som en stad kostar."
+          districtCost: "<yellow>%cityname% <gray>| <red>Staden har inte råd med %amount% encoins som det kostar att skapa ett område."
+          bonusCost: "<yellow>%cityname% <gray>| <red>Staden har inte råd med %amount% encoins som %count% bonusmarkbit(ar) kostar."
+          outpostCost: "<yellow>%cityname% <gray>| <red>Staden har inte råd med 15 000 encoins som en utpost kostar."
+          goCost: "<yellow>%cityname% <gray>| <red>Staden har inte råd med 5 000 encoins som det kostar att köpa en teleporteringspunkt till en stad."
+          cityCost: "<red>Du har inte råd med 500 000 encoins som en stad kostar."
       set:
         spawn:
           outsideCity: "<yellow>%cityname% <gray>| <red>Du kan inte sätta en startpunkt utanför staden."
@@ -218,7 +218,8 @@ messages:
         noChange: "<yellow>%cityname% <gray>| <red>Tomten är redan till salu för det angivna värdet."
       set:
         rent:
-          tooHigh: "<yellow>%cityname% <gray>| <red>Tomträttsavgälden får inte vara högre än 100 000 minemynt."
+          owner: "<yellow>%cityname% <gray>| <red>Du kan inte ändra tomträttsavgäld på en tomt som redan har en ägare."
+          tooHigh: "<yellow>%cityname% <gray>| <red>Tomträttsavgälden får inte vara högre än 100 000 encoins."
         name:
           alreadyName: "<yellow>%cityname% <gray>| <red>Tomten har redan namnet <dark_red>%name%<red>."
           tooLong: "<yellow>%cityname% <gray>| <red>Tomtens namn får inte vara längre än %maxlength% tecken."
@@ -245,16 +246,16 @@ messages:
         notFound: "<red>Rättighetsflaggan hittades inte. Använd /plot perm för att se alla rättigheter."
         noChange: "<red>Det finns inga ändringar att göra."
     missing:
-      claimCost: "<yellow>%cityname% <gray>| <red>Staden har inte råd med %cost% minemynt som en stad kostar."
+      claimCost: "<yellow>%cityname% <gray>| <red>Staden har inte råd med %cost% encoins som en stad kostar."
       spawn: "<red>Det finns ingen sparad startpunkt i din stad."
-      goCost: "<yellow>%cityname% <gray>| <red>Du har inte råd med 5 000 minemynt som det kostar att köpa en stadsteleporteringspunkt."
+      goCost: "<yellow>%cityname% <gray>| <red>Du har inte råd med 5 000 encoins som det kostar att köpa en stadsteleporteringspunkt."
       blockHistory: "<red>Du har ingen sparad blockhistorik."
       go: "<yellow>%cityname% <gray>| <red>Den specifierade teleporteringspunkten hittades inte."
       goes: "<red>Det finns inga stadsteleporteringspunkter i din stad."
       page: "<red>Sidan hittades inte."
       onlinePlayer: "<red>Spelaren hittades inte. <italic>Är spelaren online?<reset>"
-      balance: "<yellow>%cityname% <gray>| <red>Staden måste ha minst 100 000 minemynt i stadskassan."
-      playerBalance: "<yellow>%cityname% <gray>| <red>Du har inte nog med minemynt i din plånbok."
+      balance: "<yellow>%cityname% <gray>| <red>Staden måste ha minst 100 000 encoins i stadskassan."
+      playerBalance: "<yellow>%cityname% <gray>| <red>Du har inte nog med encoins i din plånbok."
       homeCity: "<red>Du är inte medlem i någon stad."
       membership: "<red>Du är inte medlem i staden."
       city: "<red>Staden finns inte."
@@ -321,7 +322,7 @@ messages:
         none: "<dark_green>/plot type -"
       update: "<dark_green>/plot update"
     buy:
-      success: "<yellow>%cityname% <gray>| <green>Du har köpt tomten %plotname% för %price% minemynt."
+      success: "<yellow>%cityname% <gray>| <green>Du har köpt tomten %plotname% för %price% encoins."
     toggle:
       pvp:
         success: "<yellow>%cityname% <gray>| <green>PVP är nu %status% på tomten."
@@ -350,7 +351,7 @@ messages:
             amount: "<green>Markeringen har expanderats med %amount% block nedåt."
             max: "<green>Markeringen har expanderats till -64 på y-led."
       rent:
-        success: "<yellow>%cityname% <gray>| <green>Tomtens hyra är nu %rent% minemynt."
+        success: "<yellow>%cityname% <gray>| <green>Tomtens hyra är nu %rent% encoins."
         removed: "<yellow>%cityname% <gray>| <green>Tomtens hyra är nu borttagen."
       name:
         success: "<yellow>%cityname% <gray>| <green>Tomtens namn är nu %plotname%."
@@ -367,6 +368,7 @@ messages:
       id: "<dark_green>ID: <green>#%id%"
       city: "<dark_green>Tillhör stad: <green>%cityname%"
       owner: "<dark_green>Ägare: <green>%owner%"
+      rent: "<dark_green>Tomträttsavgäld: <green>%rent% encoins"
       pvp: "<dark_green>PVP: %status%"
       animals: "<dark_green>Djur: %status%"
       monsters: "<dark_green>Monster: %status%"
@@ -433,6 +435,7 @@ messages:
     becameReserve: "<aqua>Staden %cityname% har gått under och blivit ett naturreservat."
     wentUnder: "<aqua>Staden %cityname% har gått under."
     warning:
+      rentDue: "<dark_red><bold>VARNING: <reset><red>Du har inte råd att betala tomträttsavgälden för din/dina tomt(er) med avgäld. Om ditt saldo inte fylls på innan slutet av veckan riskerar du att förlora ägarskapet av din/dina tomt(er)."
       lowBalance: "<dark_red><bold>VARNING: <reset><red>Stadskassan för <bold>%cityname%</bold> är farligt låg, och staden riskerar att GÅ UNDER om dess stadskassa inte fylls på innan skatterna dras."
     cityMemberships: "<aqua><bold>Dina stadsmedlemskap: </bold>%cities%"
     homeCity: "<aqua><bold>Hemstad: </bold>%cityname%"
@@ -444,9 +447,9 @@ messages:
       bansTwins: "<dark_green>Bannlysningar: <green>%bans%<dark_green>     Vänorter: <green>%twins%"
       openPublic: "<dark_green>Öppen: <green>%open%<dark_green>     Offentlig: <green>%public%"
       founded: "<dark_green>Grundades: <green>%founded% av %by%"
-      balance: "<dark_green>Stadskassa: <green>%balance% minemynt"
+      balance: "<dark_green>Stadskassa: <green>%balance% encoins"
       tax: "<dark_green>Skattesats: <green>%tax%%<dark_green>, betalas av <green>%payedBy%"
-      stateTax: "<dark_green>Stadsskatt: <green>%tax% minemynt"
+      stateTax: "<dark_green>Stadsskatt: <green>%tax% encoins"
       maxPlotsPerMember: "<dark_green>Max tomter per medlem: <green>%maxplots%"
       minChunkDistance: "<dark_green>Gräns till andra markbitar: <green>%distance% block"
       minSpawnDistance: "<dark_green>Gräns till andra startpunkter: <green>%distance% block"
@@ -455,7 +458,7 @@ messages:
       viceMayors: "<dark_green>Vice borgmästare (<green>%count%<dark_green>): <green>%vicemayors%"
       assistants: "<dark_green>Assistenter (<green>%count%<dark_green>): <green>%assistants%"
       inbjudare: "<dark_green>Inbjudare (<green>%count%<dark_green>): <green>%inviters%"
-      reserve: "<yellow>Staden är ett naturreservat. Om du vill ta över den kostar det %cost% minemynt. Kontakta en administratör för mer information."
+      reserve: "<yellow>Staden är ett naturreservat. Om du vill ta över den kostar det %cost% encoins. Kontakta en administratör för mer information."
       roles:
         member: "medlemmar"
         inviter: "inbjudare"
@@ -507,7 +510,7 @@ messages:
       notNature: "<red>Markbiten du står på tillhör inte naturen."
       started: "<yellow>%cityname% <gray>| <green>Autoövertagningen av markbitar har startats. \n<green>Markbitar kvar på autoövertagning: %remaining%. Avbryt med <dark_green>/city claim -<green>."
       stopped: "<yellow>%cityname% <gray>| <green>Autoövertagningen av markbitar har avslutats."
-      claimed: "<yellow>%cityname% <gray>| <green>Markbiten har blivit övertagen för %amount% minemynt. \n<green>Markbitar kvar på autoövertagning: %remaining%. Avbryt med <dark_green>/city claim -"
+      claimed: "<yellow>%cityname% <gray>| <green>Markbiten har blivit övertagen för %amount% encoins. \n<green>Markbitar kvar på autoövertagning: %remaining%. Avbryt med <dark_green>/city claim -"
       unclaimable: "<red>Markbiten är inte tillgänglig för övertagande, och autoövertagningen avslutade därmed."
     list:
       header: "<dark_green>--- <green>Städer <dark_green>---"
@@ -562,7 +565,7 @@ messages:
       changedAccessLevel: "<yellow>%cityname% <gray>| <green>Du har ändrat tillgänglighetsnivån för teleporteringspunkten %name% till <dark_green>%accesslevel%<green>."
       changedName: "<yellow>%cityname% <gray>| <green>Namnet för stadsteleporteringspunkten %name% ändrades."
       changedDisplayname: "<yellow>%cityname% <gray>| <green>Visningsnamnet för stadsteleporteringspunkten %name% ändrades."
-      created: "<yellow>%cityname% <gray>| <green>Du har skapat teleporteringspunkten %name% för 5 000 minemynt."
+      created: "<yellow>%cityname% <gray>| <green>Du har skapat teleporteringspunkten %name% för 5 000 encoins."
     invite:
       invited: "<yellow>%cityname% <gray>| <yellow>%player% har blivit inbjuden till staden av %inviter%."
       inviteMessage: "<hover:show_text:'<green>/city join %cityname%'><click:run_command:/city join %cityname%><yellow>%cityname% <gray>| <green>Du har blivit inbjuden till staden av %inviter%.</click></hover>\n<hover:show_text:'<green>/city join %cityname%'><click:run_command:/city join %cityname%><green>Skriv /city join %cityname% för att gå med, eller <dark_green><underlined>Klicka här >>"
@@ -575,8 +578,8 @@ messages:
     motd:
       normal: "<yellow>%cityname% <gray>|<yellow> %motd%"
       reserve: "<yellow>%cityname% <light_purple>-- Naturreservat <gray>|<yellow> %motd%"
-    balance: "<yellow>%cityname% <gray>|<green> Stadskassa: %balance% minemynt."
-    price: "<dark_green>--- <green>Prislista städer <dark_green>--- \n<dark_green>Ny stad: <green>%city% minemynt\n<dark_green>Överta markbit: <green>%chunk% minemynt\n<dark_green>Bonusmarkbit: <green>%bonus% minemynt\n<dark_green>Stadsteleporteringspunkt: <green>%go% minemynt\n<dark_green>Utpost: <green>%outpost% minemynt"
+    balance: "<yellow>%cityname% <gray>|<green> Stadskassa: %balance% encoins."
+    price: "<dark_green>--- <green>Prislista städer <dark_green>--- \n<dark_green>Ny stad: <green>%city% encoins\n<dark_green>Överta markbit: <green>%chunk% encoins\n<dark_green>Bonusmarkbit: <green>%bonus% encoins\n<dark_green>Stadsteleporteringspunkt: <green>%go% encoins\n<dark_green>Utpost: <green>%outpost% encoins"
     markings:
       new: "<green>En ny markering har påbörjats på punkten ([%world%]%x%, %y%, %z%)."
       add: "<green>Punkt %number% med koodinaterna ([%world%]%x%, %y%, %z%) har lagts till."
@@ -610,8 +613,8 @@ messages:
       resetMinChunkDistance: "<yellow>%cityname% <gray>| <green>Minsta avståndet mellan städer har återställts."
       setMinChunkDistance: "<yellow>%cityname% <gray>| <green>Minsta avståndet mellan städer har ändrats till %distance%."
       unclaim: "<yellow>%cityname% <gray>| <green>Markbiten har återgått till naturen."
-      bonus: "<yellow>%cityname% <gray>| <green>Staden har köpt %count% bonusmarkbit(ar) för %amount% minemynt."
-      outpost: "<yellow>%cityname% <gray>| <green>Staden har köpt en utpost för %amount% minemynt."
+      bonus: "<yellow>%cityname% <gray>| <green>Staden har köpt %count% bonusmarkbit(ar) för %amount% encoins."
+      outpost: "<yellow>%cityname% <gray>| <green>Staden har köpt en utpost för %amount% encoins."
       rank:
         promoted: "<yellow>%cityname% <gray>| <green>Du har fått rollen <dark_green>%newrole%<green>."
         changed: "<yellow>%cityname% <gray>| <green>%playername% har fått rollen <dark_green>%newrole%<green>."
@@ -623,12 +626,12 @@ messages:
       join:
         self: "<yellow>%cityname% <gray>| Du gick med i staden."
         others: "<yellow>%cityname% <gray>| <aqua>%playername% gick med i staden."
-      withdraw: "<yellow>%cityname% <gray>|<green> Du tog ut %amount% minemynt från stadskassan."
-      deposit: "<yellow>%cityname% <gray>|<green> Du satte in %amount% minemynt i stadskassan."
+      withdraw: "<yellow>%cityname% <gray>|<green> Du tog ut %amount% encoins från stadskassan."
+      deposit: "<yellow>%cityname% <gray>|<green> Du satte in %amount% encoins i stadskassan."
       creation:
         others: "<aqua>%playername% skapade staden %cityname%."
         self: "<green>Du skapade staden %cityname%."
-      claim: "<yellow>%cityname% <gray>|<green> Markbit övertagen för %amount% minemynt."
+      claim: "<yellow>%cityname% <gray>|<green> Markbit övertagen för %amount% encoins."
       set:
         name: "<yellow>%cityname% <gray>|<green> Stadens namn är nu %cityname%."
         tax: "<yellow>%cityname% <gray>|<green> Skattesatsen är nu %tax%."
@@ -646,8 +649,8 @@ messages:
           delete: "<yellow>%cityname% <gray>|<green> Tomten %plot% togs bort."
           market:
             remove: "<yellow>%cityname% <gray>|<green> Tomten drogs tillbaka från marknaden."
-            set: "<yellow>%cityname% <gray>|<green> Tomten lades ut på marknaden för %amount% minemynt."
-            change: "<yellow>%cityname% <gray>|<green> Priset för tomten ändrades från %from% till %to% minemynt."
+            set: "<yellow>%cityname% <gray>|<green> Tomten lades ut på marknaden för %amount% encoins."
+            change: "<yellow>%cityname% <gray>|<green> Priset för tomten ändrades från %from% till %to% encoins."
           perm:
             change:
               members: "<yellow>%cityname% <gray>|<green> Rättigheter för medlemmar på tomten ändrades till %perms%."

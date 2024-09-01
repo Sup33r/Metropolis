@@ -1,9 +1,7 @@
 package live.supeer.metropolis;
 
-import live.supeer.metropolis.city.City;
-import live.supeer.metropolis.city.CityDatabase;
-import live.supeer.metropolis.city.Claim;
-import live.supeer.metropolis.city.Role;
+import live.supeer.apied.ApiedAPI;
+import live.supeer.metropolis.city.*;
 import live.supeer.metropolis.event.*;
 import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.utils.LocationUtil;
@@ -14,6 +12,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
+
+import java.util.Objects;
 
 public class CityListener implements Listener {
 
@@ -83,6 +83,20 @@ public class CityListener implements Listener {
         Metropolis.playerInDistrict.remove(event.getPlayer().getUniqueId(), event.getDistrict());
         Plot plot = Metropolis.playerInPlot.get(event.getPlayer().getUniqueId());
         Utilities.sendCityScoreboard(event.getPlayer(), event.getDistrict().getCity(), plot);
+    }
+
+    @EventHandler
+    public void onCityLeaveEvent(CityLeaveEvent event) {
+        for (Plot plot : event.getCity().getCityPlots()) {
+            if (Objects.equals(plot.getPlotOwnerUUID(), event.getMPlayer().getUuid().toString())) {
+                plot.removePlotOwner();
+            }
+        }
+        for (District district : event.getCity().getCityDistricts()) {
+            if (district.getContactplayers().contains(event.getMPlayer().getUuid())) {
+                district.removeContactPlayer(event.getMPlayer());
+            }
+        }
     }
 
     @EventHandler

@@ -40,6 +40,11 @@ public class MetropolisConfiguration {
     private final int taxTimeMinute;
     private final int taxTimeSecond;
 
+    private final int rentTimeDay;
+    private final int rentTimeHour;
+    private final int rentTimeMinute;
+    private final int rentTimeSecond;
+
     private final int minChunkDistance;
     private final int minSpawnDistance;
 
@@ -93,6 +98,11 @@ public class MetropolisConfiguration {
         taxTimeHour = plugin.getConfig().getInt("settings.taxtime.hour");
         taxTimeMinute = plugin.getConfig().getInt("settings.taxtime.minute");
         taxTimeSecond = plugin.getConfig().getInt("settings.taxtime.second");
+
+        rentTimeDay = plugin.getConfig().getInt("settings.renttime.day");
+        rentTimeHour = plugin.getConfig().getInt("settings.renttime.hour");
+        rentTimeMinute = plugin.getConfig().getInt("settings.renttime.minute");
+        rentTimeSecond = plugin.getConfig().getInt("settings.renttime.second");
 
         prisonerPayback = plugin.getConfig().getInt("settings.jail.prisonerpayback");
         dailyPayback = plugin.getConfig().getInt("settings.jail.dailypayback");

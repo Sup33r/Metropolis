@@ -22,7 +22,6 @@ import net.coreprotect.CoreProtect;
 import net.coreprotect.CoreProtectAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -36,7 +35,12 @@ import java.util.regex.Pattern;
 
 @CommandAlias("city|c")
 public class CommandCity extends BaseCommand {
+
     private static final GeometryFactory geometryFactory = new GeometryFactory();
+
+    private static final HashMap<Player, City> invites = new HashMap<>();
+    private static final HashMap<HashMap<UUID, City>, Integer> inviteCooldownTime = new HashMap<>();
+    private static final HashMap<HashMap<UUID, City>, BukkitRunnable> inviteCooldownTask = new HashMap<>();
 
 
     private CoreProtectAPI getCoreProtect() {
@@ -62,6 +66,7 @@ public class CommandCity extends BaseCommand {
     }
 
     @Subcommand("info")
+    @CommandCompletion("@cityNames")
     @Default
     public static void onInfo(Player player, @Optional String cityName) {
         City city;
@@ -572,6 +577,7 @@ public class CommandCity extends BaseCommand {
     }
 
     @Subcommand("join")
+    @CommandCompletion("@cityNames")
     public static void onJoin(Player player, String cityname) {
         if (!player.hasPermission("metropolis.city.join")) {
             Metropolis.sendMessage(player, "messages.error.permissionDenied");
@@ -628,11 +634,6 @@ public class CommandCity extends BaseCommand {
             }
         }
     }
-
-    private static final HashMap<Player, City> invites = new HashMap<>();
-    private static final HashMap<HashMap<UUID, City>, Integer> inviteCooldownTime = new HashMap<>();
-    private static final HashMap<HashMap<UUID, City>, BukkitRunnable> inviteCooldownTask =
-            new HashMap<>();
 
     @Subcommand("invite")
     @CommandCompletion("@players")
@@ -1894,21 +1895,22 @@ public class CommandCity extends BaseCommand {
     }
 
     @Subcommand("leave")
+    @CommandCompletion("@playerCities")
     public static void onLeave(Player player, String cityname) {
         City city = Utilities.hasCityPermissions(player, "metropolis.city.leave", Role.MEMBER);
         if (city == null) {
             return;
         }
-//        if (!CityDatabase.memberExists(player.getUniqueId().toString(), CityDatabase.getCity(cityname).get())) {
-//            plugin.sendMessage(player, "messages.error.city.notInCity");
-//            return;
-//        }
+        MPlayer mPlayer = ApiedAPI.getPlayer(player);
+        if (mPlayer == null) {
+            return;
+        }
         if (Objects.equals(CityDatabase.getCityRole(city, player.getUniqueId().toString()), Role.MAYOR) && !city.isReserve()) {
             Metropolis.sendMessage(player, "messages.error.city.leave.mayor", "%cityname%", cityname);
             return;
         }
         city.removeCityMember(city.getCityMember(player.getUniqueId().toString()));
-        CityLeaveEvent leaveEvent = new CityLeaveEvent(player, city);
+        CityLeaveEvent leaveEvent = new CityLeaveEvent(mPlayer, city);
         Metropolis.getInstance().getServer().getPluginManager().callEvent(leaveEvent);
         Database.addLogEntry(
                 city,
@@ -1933,6 +1935,7 @@ public class CommandCity extends BaseCommand {
     }
 
     @Subcommand("members")
+    @CommandCompletion("@cityNames")
     public static void onMember(Player player, String cityname) {
         if (!player.hasPermission("metropolis.city.members")) {
             Metropolis.sendMessage(player, "messages.error.permissionDenied");
@@ -1948,6 +1951,7 @@ public class CommandCity extends BaseCommand {
     }
 
     @Subcommand("online")
+    @CommandCompletion("@cityNames")
     public static void onOnline(Player player, String cityname) {
         if (!player.hasPermission("metropolis.city.online")) {
             Metropolis.sendMessage(player, "messages.error.permissionDenied");
@@ -2010,6 +2014,7 @@ public class CommandCity extends BaseCommand {
     }
 
     @Subcommand("spawn")
+    @CommandCompletion("@cityNames")
     public static void onSpawn(Player player,@Optional String cityName) {
         if (!player.hasPermission("metropolis.city.spawn")) {
             Metropolis.sendMessage(player, "messages.error.permissionDenied");
@@ -2052,6 +2057,7 @@ public class CommandCity extends BaseCommand {
     }
 
     @Subcommand("ban")
+    @CommandCompletion("@playerNames")
     public static void onBan(Player player, @Optional String playerName, @Optional String args) {
         City city = Utilities.hasCityPermissions(player, "metropolis.city.ban", Role.ASSISTANT);
         if (city == null) {
@@ -2075,7 +2081,7 @@ public class CommandCity extends BaseCommand {
             player.sendMessage(bannedPlayersList.delete(bannedPlayersList.length()-4,bannedPlayersList.length())+"");
             return;
         }
-        MPlayer mPlayer = ApiedAPI.getPlayer(player);
+        MPlayer mPlayer = ApiedAPI.getPlayer(playerName);
         if (mPlayer == null) {
             Metropolis.sendMessage(player, "messages.error.player.notFound");
             return;
@@ -2133,7 +2139,7 @@ public class CommandCity extends BaseCommand {
             CityDatabase.addCityBan(city, mPlayer.getUuid().toString(), reason, player, placeDate, length);
             if (CityDatabase.memberExists(mPlayer.getUuid().toString(), city)) {
                 city.removeCityMember(city.getCityMember(mPlayer.getUuid().toString()));
-                CityLeaveEvent leaveEvent = new CityLeaveEvent(player, city);
+                CityLeaveEvent leaveEvent = new CityLeaveEvent(mPlayer, city);
                 Metropolis.getInstance().getServer().getPluginManager().callEvent(leaveEvent);
             }
             if (Bukkit.getPlayer(mPlayer.getUuid()) != null) {
@@ -2155,11 +2161,11 @@ public class CommandCity extends BaseCommand {
             Database.addLogEntry(city, "{ \"type\": \"ban\", \"subtype\": \"city\", \"player\": " + mPlayer.getUuid() + ", \"placer\": " + player.getUniqueId() + ", \"reason\": \"" + reason + "\", \"length\": \"" + length + "\" }");
             return;
         }
-        Metropolis.sendMessage(player, "messages.error.usage", "%command%", "/city ban <player> <length> <reason>");
+        Metropolis.sendMessage(player, "messages.syntax.city.ban");
     }
 
     @Subcommand("rank")
-    @CommandCompletion("@players @cityRoles")
+    @CommandCompletion("@playerNames @cityRoles")
     public static void onRank(Player player , String playerName, String rank) {
         City city = Utilities.hasCityPermissions(player, "metropolis.city.rank", Role.VICE_MAYOR);
         if (city == null) {
@@ -2480,10 +2486,6 @@ public class CommandCity extends BaseCommand {
             live.supeer.metropolis.city.District district = CityDatabase.getDistrict(player.getLocation().toBlockLocation());
             if (district == null) {
                 Metropolis.sendMessage(player, "messages.error.city.district.notInDistrict");
-                return;
-            }
-            if (mPlayer == null) {
-                Metropolis.sendMessage(player, "messages.error.player.notFound", "%player%", mPlayer.getName());
                 return;
             }
             if (!CityDatabase.memberExists(mPlayer.getUuid().toString(), city)) {
@@ -2904,6 +2906,7 @@ public class CommandCity extends BaseCommand {
     }
 
     @Subcommand("kick")
+    @CommandCompletion("@playerNames")
     public static void onKick(Player player, String playerName, String reason) {
         City city = Utilities.hasCityPermissions(player, "metropolis.city.kick", Role.ASSISTANT);
         if (city == null) {
@@ -2950,8 +2953,9 @@ public class CommandCity extends BaseCommand {
             Metropolis.sendMessage(Objects.requireNonNull(Metropolis.getInstance().getServer().getPlayer(mPlayer.getUuid())), "messages.city.kick.kicked", "%cityname%", city.getCityName(), "%reason%", reason);
         }
         city.removeCityMember(mPlayer.getUuid().toString());
-        CityLeaveEvent leaveEvent = new CityLeaveEvent(player, city);
+        CityLeaveEvent leaveEvent = new CityLeaveEvent(mPlayer, city);
         Metropolis.getInstance().getServer().getPluginManager().callEvent(leaveEvent);
+
         for (Member member : city.getCityMembers()) {
             Player memberPlayer = Bukkit.getPlayer(UUID.fromString(member.getPlayerUUID()));
             if (memberPlayer == null) {

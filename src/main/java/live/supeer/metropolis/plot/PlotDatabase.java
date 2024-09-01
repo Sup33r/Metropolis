@@ -2,6 +2,8 @@ package live.supeer.metropolis.plot;
 
 import co.aikar.idb.DB;
 import co.aikar.idb.DbRow;
+import live.supeer.apied.ApiedAPI;
+import live.supeer.apied.MPlayer;
 import live.supeer.metropolis.Database;
 import live.supeer.metropolis.Leaderboard;
 import live.supeer.metropolis.Metropolis;
@@ -12,6 +14,7 @@ import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.utils.DateUtil;
 import live.supeer.metropolis.utils.Utilities;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -19,6 +22,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -274,6 +278,55 @@ public class PlotDatabase {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+        }
+    }
+
+    public static List<Plot> getPlayerPlots(UUID playerUUID) {
+        try {
+            List<Plot> plots = new ArrayList<>();
+            List<DbRow> results = DB.getResults("SELECT * FROM `mp_plots` WHERE `plotOwnerUUID` = ?", playerUUID.toString());
+            for (DbRow row : results) {
+                plots.add(new Plot(row));
+            }
+            return plots;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static boolean cantPayRent(List<Plot> plots, MPlayer mPlayer) {
+        int totalRent = 0;
+        for (Plot plot : plots) {
+            totalRent += plot.getPlotRent();
+        }
+        return mPlayer.getBalance() < totalRent;
+    }
+
+    public static void collectPlotRents() {
+        try {
+            List<DbRow> results = DB.getResults("SELECT * FROM `mp_plots` WHERE `plotOwnerUUID` IS NOT NULL AND `plotRent` IS NOT '0'");
+            for (DbRow row : results) {
+                Plot plot = new Plot(row);
+                if (plot.getPlotOwnerUUID() == null || plot.getPlotRent() == 0) {
+                    continue;
+                }
+                MPlayer mPlayer = ApiedAPI.getPlayer(UUID.fromString(plot.getPlotOwnerUUID()));
+                if (mPlayer == null) {
+                    continue;
+                }
+                Bukkit.broadcastMessage("Plot rent: " + plot.getPlotRent());
+                Bukkit.broadcastMessage("Player balance: " + mPlayer.getBalance());
+                if (mPlayer.getBalance() < plot.getPlotRent()) {
+                    Bukkit.broadcastMessage("Player can't pay rent");
+                    plot.removePlotOwner();
+                    continue;
+                }
+                mPlayer.removeBalance(plot.getPlotRent(), "{ \"type\": \"plot\", \"subtype\": \"payRent\", \"plotId\": " + plot.getPlotId() + "}");
+                plot.getCity().addCityBalance(plot.getPlotRent());
+                Database.addLogEntry(plot.getCity(), "{ \"type\": \"cityBank\", \"subtype\": \"rent\", \"balance\": " + plot.getPlotRent() + ", \"player\": " + mPlayer.getUuid().toString() + " }");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

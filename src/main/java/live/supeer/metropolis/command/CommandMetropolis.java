@@ -5,6 +5,7 @@ import co.aikar.commands.annotation.*;
 import live.supeer.metropolis.Database;
 import live.supeer.metropolis.Metropolis;
 import live.supeer.metropolis.city.CityDatabase;
+import live.supeer.metropolis.plot.PlotDatabase;
 import live.supeer.metropolis.utils.Utilities;
 import org.bukkit.entity.Player;
 
@@ -14,6 +15,15 @@ public class CommandMetropolis extends BaseCommand {
     public void onTaxCollect(Player player) {
         if (player.hasPermission("metropolis.admin.taxcollect")) {
             CityDatabase.collectTaxes();
+        } else {
+            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+        }
+    }
+
+    @Subcommand("rentcollect")
+    public void onRentCollect(Player player) {
+        if (player.hasPermission("metropolis.admin.rentcollect")) {
+            PlotDatabase.collectPlotRents();
         } else {
             Metropolis.sendMessage(player, "messages.error.permissionDenied");
         }
