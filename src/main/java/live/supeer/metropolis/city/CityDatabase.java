@@ -2,6 +2,7 @@ package live.supeer.metropolis.city;
 
 import co.aikar.idb.DB;
 import co.aikar.idb.DbRow;
+import live.supeer.apied.ApiedAPI;
 import live.supeer.metropolis.Database;
 import live.supeer.metropolis.Leaderboard;
 import live.supeer.metropolis.Metropolis;
@@ -119,10 +120,9 @@ public class CityDatabase {
 
     public static City newCity(String cityName, Player player) {
         try {
-            DB.executeUpdate("INSERT INTO `mp_cities` (`cityName`, `originalMayorUUID`, `originalMayorName`, `cityBalance`, `citySpawn`, `createDate`, `taxLevel`) VALUES (?,?,?,?,?,?,?)",
+            DB.executeUpdate("INSERT INTO `mp_cities` (`cityName`, `originalMayorUUID`, `cityBalance`, `citySpawn`, `createDate`, `taxLevel`) VALUES (?,?,?,?,?,?)",
                     cityName,
                     player.getUniqueId().toString(),
-                    player.getName(),
                     Metropolis.configuration.getCityStartingBalance(),
                     LocationUtil.locationToString(player.getLocation()),
                     DateUtil.getTimestamp(),
@@ -141,8 +141,7 @@ public class CityDatabase {
     public static void newMember(City city, Player player) {
         try {
             String cityName = city.getCityName();
-            DB.executeUpdate("INSERT INTO `mp_members` (`playerName`, `playerUUID`, `cityId`, `cityName`, `cityRole`, `joinDate`) VALUES (?,?,?,?,?,?)",
-                    player.getName(),
+            DB.executeUpdate("INSERT INTO `mp_members` (`playerUUID`, `cityId`, `cityName`, `cityRole`, `joinDate`) VALUES (?,?,?,?,?)",
                     player.getUniqueId().toString(),
                     city.getCityId(),
                     cityName,
@@ -156,10 +155,9 @@ public class CityDatabase {
         }
     }
 
-    public static Claim createClaim(City city, Location location, boolean outpost, String playername, String playerUUID) {
+    public static Claim createClaim(City city, Location location, boolean outpost, String playerUUID) {
         try {
-            DB.executeInsert("INSERT INTO `mp_claims` (`claimerName`, `claimerUUID`, `world`, `xPosition`, `zPosition`, `claimDate`, `cityId`, `outpost`) VALUES (?,?,?,?,?,?,?,?)",
-                    playername,
+            DB.executeInsert("INSERT INTO `mp_claims` (`claimerUUID`, `world`, `xPosition`, `zPosition`, `claimDate`, `cityId`, `outpost`) VALUES (?,?,?,?,?,?,?)",
                     playerUUID,
                     location.getChunk().getWorld().getName(),
                     location.getChunk().getX(),
@@ -688,7 +686,7 @@ public class CityDatabase {
             if (results.isEmpty()) return null;
             StringBuilder sb = new StringBuilder();
             for (var row : results) {
-                sb.append("§2").append(row.getString("playerName")).append("§a, ");
+                sb.append("§2").append(ApiedAPI.getPlayer(UUID.fromString(row.getString("playerUUID"))).getName()).append("§a, ");
             }
             sb.delete(sb.length() - 2, sb.length());
             return sb.toString();

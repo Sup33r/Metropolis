@@ -6,7 +6,6 @@ import lombok.Getter;
 
 @Getter
 public class Member {
-    private final String playerName;
     private final String playerUUID;
     private final int cityId;
     private final String cityName;
@@ -15,7 +14,6 @@ public class Member {
     private final City city;
 
     public Member(DbRow data) {
-        this.playerName = data.getString("playerName");
         this.playerUUID = data.getString("playerUUID");
         this.cityId = data.getInt("cityId");
         this.cityName = data.getString("cityName");

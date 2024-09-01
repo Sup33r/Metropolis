@@ -92,7 +92,7 @@ public class CityListener implements Listener {
         Location location = event.getLocation();
 
         if (isChunkClaimable(city, player, location)) {
-            Claim claim = CityDatabase.createClaim(city, location, false, player.getName(), player.getUniqueId().toString());
+            Claim claim = CityDatabase.createClaim(city, location, false, player.getUniqueId().toString());
             if (claim != null) {
                 Database.addLogEntry(
                         city,

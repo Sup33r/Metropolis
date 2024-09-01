@@ -2,29 +2,24 @@ package live.supeer.metropolis.homecity;
 
 import co.aikar.idb.DB;
 import live.supeer.metropolis.Database;
-import live.supeer.metropolis.Metropolis;
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.city.CityDatabase;
-import org.bukkit.Bukkit;
 
 import java.sql.SQLException;
-import java.util.UUID;
 
 public class HCDatabase {
     public static void setHomeCity(String uuid, City city) {
         try {
             if (hasHomeCity(uuid)) {
                 DB.executeInsert(
-                        "INSERT INTO mp_homecities (playerUUID, playerName, cityId) VALUES ("
+                        "INSERT INTO mp_homecities (playerUUID, cityId) VALUES ("
                                 + Database.sqlString(uuid)
-                                + ", "
-                                + Database.sqlString(Bukkit.getOfflinePlayer(UUID.fromString(uuid)).getName())
                                 + ", "
                                 + city.getCityId()
                                 + ");");
                 return;
             }
-            DB.executeUpdate("UPDATE mp_homecities SET cityId = " + city.getCityId() + ", playerName = " + Database.sqlString(Metropolis.getInstance().getServer().getOfflinePlayer(UUID.fromString(uuid)).getName()) + " WHERE playerUUID = " + Database.sqlString(uuid));
+            DB.executeUpdate("UPDATE mp_homecities SET cityId = " + city.getCityId() + " WHERE playerUUID = " + Database.sqlString(uuid));
         } catch (SQLException e) {
             e.printStackTrace();
         }

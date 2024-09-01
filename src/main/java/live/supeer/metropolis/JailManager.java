@@ -143,7 +143,7 @@ public class JailManager {
         Sign sign = (Sign) cell.getSignLocation().getBlock().getState();
         Side side = cell.getSignSide();
         sign.getSide(side).line(0, Objects.requireNonNull(Metropolis.getMessageComponent("messages.cell.sign.occupied.row0")));
-        sign.getSide(side).line(1, Objects.requireNonNull(Metropolis.getMessageComponent("messages.cell.sign.occupied.row1", "%playername%", Metropolis.getInstance().getServer().getOfflinePlayer(UUID.fromString(cell.getPrisonerUUID())).getName())));
+        sign.getSide(side).line(1, Objects.requireNonNull(Metropolis.getMessageComponent("messages.cell.sign.occupied.row1", "%playername%", ApiedAPI.getPlayer(UUID.fromString(cell.getPrisonerUUID())).getName())));
         sign.getSide(side).line(2, Objects.requireNonNull(Metropolis.getMessageComponent("messages.cell.sign.occupied.row2")));
         sign.getSide(side).line(3, Objects.requireNonNull(Metropolis.getMessageComponent("messages.cell.sign.occupied.row3")));
         sign.setWaxed(true);

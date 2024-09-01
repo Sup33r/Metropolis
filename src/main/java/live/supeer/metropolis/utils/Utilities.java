@@ -317,10 +317,10 @@ public class Utilities {
                 board.updateLine(i + 2, " ");
                 i = i + 3;
             }
-
-            if (plot.getPlotOwner() != null) {
+            MPlayer mOwner = ApiedAPI.getPlayer(UUID.fromString(plot.getPlotOwnerUUID()));
+            if (mOwner != null) {
                 board.updateLine(i, Metropolis.getMessage("messages.city.scoreboard.owner"));
-                board.updateLine(i + 1, "§a" + plot.getPlotOwner());
+                board.updateLine(i + 1, "§a" + mOwner.getName());
                 board.updateLine(i + 2, " ");
                 i = i + 3;
             }
@@ -428,7 +428,7 @@ public class Utilities {
         }
         Role role = CityDatabase.getCityRole(plot.getCity(), player.getUniqueId().toString());
         if (isOwner) {
-            if (plot.getPlotOwner().equals(player.getUniqueId().toString())) {
+            if (plot.getPlotOwnerUUID().equals(player.getUniqueId().toString())) {
                 return plot;
             }
             if (role != null && targetRole != null) {
@@ -719,5 +719,26 @@ public class Utilities {
 
         String message = messageBuilder.toString();
         return message.substring(0, message.length() - 8);
+    }
+
+    public static List<UUID> stringToUUIDList(String playerString) {
+        List<UUID> players = new ArrayList<>();
+        if (playerString == null || playerString.isEmpty()) {
+            return players;
+        }
+        String[] playerArray = playerString.split(",");
+        for (String playerUUID : playerArray) {
+            players.add(UUID.fromString(playerUUID));
+        }
+        return players;
+    }
+
+
+    public static String uuidListToString(List<UUID> players) {
+        StringBuilder playerString = new StringBuilder();
+        for (UUID player : players) {
+            playerString.append(player.toString()).append(",");
+        }
+        return playerString.toString();
     }
 }

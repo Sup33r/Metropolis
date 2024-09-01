@@ -10,7 +10,6 @@ import live.supeer.metropolis.city.*;
 import live.supeer.metropolis.command.*;
 import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.plot.Plot;
-import live.supeer.metropolis.plot.PlotDatabase;
 import live.supeer.metropolis.utils.DateUtil;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
@@ -60,6 +59,7 @@ public final class Metropolis extends JavaPlugin {
         manager.registerCommand(new CommandCity());
         manager.registerCommand(new CommandPlot());
         manager.registerCommand(new CommandHere());
+        manager.registerCommand(new CommandShutdown());
         manager.registerCommand(new CommandMetropolis());
         this.getServer().getPluginManager().registerEvents(new CommandHomeCity(), this);
         this.getServer().getPluginManager().registerEvents(new MetropolisListener(), this);
@@ -81,9 +81,6 @@ public final class Metropolis extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        for (List<Standing> standings : plotStandings.values()) {
-            PlotDatabase.storeStandings(standings);
-        }
         DB.close();
     }
 

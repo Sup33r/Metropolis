@@ -40,14 +40,12 @@ public class PlotDatabase {
         Location plotCenter = new Location(world, centerX, player.getWorld().getHighestBlockYAt(centerX, centerZ) + 1, centerZ);
         try {
             DB.executeUpdate(
-                    "INSERT INTO `mp_plots` (`cityId`, `cityName`, `plotName`, `plotOwner`, `plotOwnerUUID`, `plotPoints`, `plotYMin`, `plotYMax`, `plotPermsMembers`, `plotPermsOutsiders`, `plotCenter`, `plotCreationDate`, `plotBoundary`) VALUES ("
+                    "INSERT INTO `mp_plots` (`cityId`, `cityName`, `plotName`, `plotOwnerUUID`, `plotPoints`, `plotYMin`, `plotYMax`, `plotPermsMembers`, `plotPermsOutsiders`, `plotCenter`, `plotCreationDate`, `plotBoundary`) VALUES ("
                             + city.getCityId()
                             + ", "
                             + Database.sqlString(city.getCityName())
                             + ", "
                             + Database.sqlString(plotName)
-                            + ", "
-                            + Database.sqlString(player.getName())
                             + ", "
                             + Database.sqlString(player.getUniqueId().toString())
                             + ", "
@@ -257,25 +255,12 @@ public class PlotDatabase {
         }
     }
 
-    public static int getTotalStanding(int plotId) {
-        try {
-            List<DbRow> results = DB.getResults("SELECT * FROM `mp_standings` WHERE `plotId` = ?", plotId);
-            int total = 0;
-            for (DbRow row : results) {
-                total += row.getInt("count");
-            }
-            return total;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public static int getTotalStanding(Plot plot) {
+        return Metropolis.plotStandings.get(plot).stream().mapToInt(Standing::getCount).sum();
     }
 
-    public static int getStandingEntries(int plotId) {
-        try {
-            return DB.getResults("SELECT * FROM `mp_standings` WHERE `plotId` = ?", plotId).size();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public static int getStandingEntries(Plot plot) {
+        return Metropolis.plotStandings.get(plot).size();
     }
 
     public static void storeStandings(List<Standing> standings) {

@@ -39,6 +39,9 @@ messages:
   days:
     yesterday: "i går"
     today: "i dag"
+  shutdownMessage: "\n<aqua>Servern kommer precis att startas om för underhåll. Vi ses snart igen!\n"
+  shutdownMessageCountdown: "\n<aqua>Servern kommer att startas om för underhåll om %time%.\n"
+  shutdownMessageSoon: "\n<aqua>Servern kommer att startas om för underhåll snart.\n"
   block:
     enabled: "<green>Blockdataläget är nu aktiverat. Högerklicka med en pinne eller ett jordblock för att få fram blockdatan."
     disabled: "<red>Blockdataläget är nu inaktiverat."
@@ -257,10 +260,10 @@ messages:
     scoreboard:
       noStandings: "<green>Inga resultat att visa."
       leaderboardType:
-        blocks: "<dark_green>block"
-        kills: "<dark_green>mördade"
+        blocks: "block"
+        mobs: "mobs"
       leaderboard: "<dark_green><bold>Tomttopplista:</bold></dark_green>"
-      leaderboardLine: "<dark_green>%position%.</dark_green> <green>%player%</green> <dark_green>-</dark_green> <green>%score%</green> %type%"
+      leaderboardLine: "<dark_green>%position%.</dark_green> <green>%player%</green> <dark_green>-</dark_green> <green>%score% %type%"
     leaderboard:
       condition:
         removedMob: "<dark_green><lang:entity.minecraft.%mob%></dark_green> <green>har tagits bort som villkor på topplistan."
@@ -271,7 +274,7 @@ messages:
       stopped: "<green>Topplistan har avslutats."
       info: "<dark_green>--- <green>Topplista: <dark_green>---\n<dark_green>Typ:<green> %type%\n<dark_green>Startades:<green> %creation% <dark_green>av %player%\n<dark_green>Antal deltagare:<green> %entries%\n<dark_green>Antal händelser:<green> %count%"
       list:
-        entry: "<dark_green>%position%.</dark_green> <green>%player%</green> <dark_green>-</dark_green> <green>%score%</green> %type%"
+        entry: "<dark_green>%position%.</dark_green> <green>%player%</green> <dark_green>-</dark_green> <green>%count% %type%"
         header: "<dark_green>--- <green>Tomttopplista (sida <click:run_command:/plot leaderboard list %previous%><bold>%start%</bold></click> av <click:run_command:/plot leaderboard list %next%><bold>%end%</bold></click>)</green> <dark_green>---"
       hidden: "<green>Topplistan är nu dold från sidolistan."
       shown: "<green>Topplistan är nu synlig på sidolistan."

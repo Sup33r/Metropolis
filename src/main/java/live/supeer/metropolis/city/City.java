@@ -21,7 +21,6 @@ import java.util.*;
 public class City {
     private final int cityId;
     private String cityName;
-    private final String originalMayorName;
     private final String originalMayorUUID;
     private final List<Member> cityMembers = new ArrayList<>();
 
@@ -52,7 +51,6 @@ public class City {
     public City(DbRow data) {
         this.cityId = data.getInt("cityId");
         this.cityName = data.getString("cityName");
-        this.originalMayorName = data.getString("originalMayorName");
         this.originalMayorUUID = data.getString("originalMayorUUID");
         this.cityBalance = data.getInt("cityBalance");
         this.citySpawn = LocationUtil.stringToLocation(data.getString("citySpawn"));

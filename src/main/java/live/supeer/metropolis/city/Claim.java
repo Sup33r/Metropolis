@@ -12,7 +12,6 @@ import org.locationtech.jts.geom.Point;
 public class Claim {
     private final int claimId;
     private final String claimerUUID;
-    private final String claimerName;
     private final World claimWorld;
     private final int xPosition;
     private final int zPosition;
@@ -23,7 +22,6 @@ public class Claim {
     public Claim(DbRow data) {
         this.claimId = data.getInt("claimId");
         this.claimerUUID = data.getString("claimerUUID");
-        this.claimerName = data.getString("claimerName");
         this.claimWorld = Metropolis.getInstance().getServer().getWorld(data.getString("world"));
         this.xPosition = data.getInt("xPosition");
         this.zPosition = data.getInt("zPosition");

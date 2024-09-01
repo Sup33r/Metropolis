@@ -30,7 +30,6 @@ public class Plot {
     private final int plotId;
     private final int cityId;
     private String plotName;
-    private String plotOwner;
     private String plotOwnerUUID;
     private int plotYMin;
     private int plotYMax;
@@ -55,7 +54,6 @@ public class Plot {
         this.plotId = data.getInt("plotId");
         this.cityId = data.getInt("cityId");
         this.plotName = data.getString("plotName");
-        this.plotOwner = data.getString("plotOwner");
         this.plotOwnerUUID = data.getString("plotOwnerUUID");
         this.plotYMin = data.getInt("plotYMin");
         this.plotYMax = data.getInt("plotYMax");
@@ -129,16 +127,6 @@ public class Plot {
                         + ";");
     }
 
-    public void setPlotOwner(String plotOwner) {
-        this.plotOwner = plotOwner;
-        DB.executeUpdateAsync(
-                "UPDATE `mp_plots` SET `plotOwner` = "
-                        + Database.sqlString(plotOwner)
-                        + " WHERE `plotId` = "
-                        + plotId
-                        + ";");
-    }
-
     public void setPlotOwnerUUID(String plotOwnerUUID) {
         this.plotOwnerUUID = plotOwnerUUID;
         DB.executeUpdateAsync(
@@ -172,10 +160,9 @@ public class Plot {
     }
 
     public void removePlotOwner() {
-        this.plotOwner = null;
         this.plotOwnerUUID = null;
         DB.executeUpdateAsync(
-                "UPDATE `mp_plots` SET `plotOwner` = NULL, `plotOwnerUUID` = NULL WHERE `plotId` = "
+                "UPDATE `mp_plots` SET `plotOwnerUUID` = NULL WHERE `plotId` = "
                         + plotId
                         + ";");
     }
@@ -249,7 +236,7 @@ public class Plot {
                 return;
             }
             DB.executeUpdate(
-                    "INSERT INTO `mp_plotperms` (`plotId`, `cityId`, `plotPerms`, `playerUUID`, `playerName`) VALUES ("
+                    "INSERT INTO `mp_plotperms` (`plotId`, `cityId`, `plotPerms`, `playerUUID`) VALUES ("
                             + plotId
                             + ", "
                             + cityId
@@ -257,8 +244,6 @@ public class Plot {
                             + Database.sqlString(perms)
                             + ", "
                             + Database.sqlString(playerUUID)
-                            + ", "
-                            + Database.sqlString(Bukkit.getOfflinePlayer(UUID.fromString(playerUUID)).getName())
                             + ") ON DUPLICATE KEY UPDATE plotPerms = '"
                             + perms
                             + "';");

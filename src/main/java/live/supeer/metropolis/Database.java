@@ -50,7 +50,6 @@ public class Database {
                                 `cityId` int(11) NOT NULL AUTO_INCREMENT,
                                 `cityName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `originalMayorUUID` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-                                `originalMayorName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `cityBalance` int(25) NOT NULL,
                                 `cityTax` double DEFAULT 2,
                                 `bonusClaims` int(11) DEFAULT 0,
@@ -75,7 +74,6 @@ public class Database {
             DB.executeUpdate(
                     """
                               CREATE TABLE IF NOT EXISTS `mp_members` (
-                                `playerName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `playerUUID` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `cityId` int(11) NOT NULL,
                                 `cityName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -98,7 +96,6 @@ public class Database {
                     """
                               CREATE TABLE IF NOT EXISTS `mp_homecities` (
                                 `playerUUID` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-                                `playerName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `cityId` int(11) DEFAULT NULL,
                                 PRIMARY KEY (`playerUUID`)
                               ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;""");
@@ -107,7 +104,6 @@ public class Database {
                     """
                               CREATE TABLE IF NOT EXISTS `mp_claims` (
                                 `claimId` int(11) NOT NULL AUTO_INCREMENT,
-                                `claimerName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `claimerUUID` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `world` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `xPosition` mediumint(9) NOT NULL,
@@ -135,7 +131,6 @@ public class Database {
                                 `cityId` int(11) NOT NULL,
                                 `cityName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `plotName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-                                `plotOwner` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                 `plotOwnerUUID` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                 `plotPoints` text COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `plotBoundary` GEOMETRY NOT NULL,
@@ -177,7 +172,6 @@ public class Database {
                                 `cityId` int(11) NOT NULL,
                                 `plotPerms` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `playerUUID` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-                                `playerName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 PRIMARY KEY (plotId,playerUUID)
                               ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;""");
             DB.executeUpdate(
@@ -186,7 +180,6 @@ public class Database {
                                 `cityId` int(11) NOT NULL,
                                 `cityPerms` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `playerUUID` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-                                `playerName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 PRIMARY KEY (cityId,playerUUID)
                               ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;""");
 

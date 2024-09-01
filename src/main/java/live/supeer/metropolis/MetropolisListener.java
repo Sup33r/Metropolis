@@ -989,4 +989,12 @@ public class MetropolisListener implements Listener {
             }
         }
     }
+
+    @EventHandler
+    public void onPlayerExit(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+        Metropolis.playerInCity.remove(player.getUniqueId());
+        Metropolis.playerInPlot.remove(player.getUniqueId());
+        Metropolis.playerInDistrict.remove(player.getUniqueId());
+    }
 }

@@ -126,7 +126,7 @@ public class CommandCity extends BaseCommand {
         Metropolis.sendMessage(player, "messages.city.cityInfo.bansTwins", "%bans%", bans, "%twins%", String.valueOf(city.getTwinCities().size()));
         String cityOpen = city.isOpen() ? Metropolis.getMessage("messages.words.yes_word") : Metropolis.getMessage("messages.words.no_word");
         String cityPublic = city.isPublic() ? Metropolis.getMessage("messages.words.yes_word") : Metropolis.getMessage("messages.words.no_word");
-        String founderName = Bukkit.getOfflinePlayer(UUID.fromString(city.getOriginalMayorUUID())).getName();
+        String founderName = ApiedAPI.getPlayer(UUID.fromString(city.getOriginalMayorUUID())).getName();
         Metropolis.sendMessage(player, "messages.city.cityInfo.openPublic", "%open%", cityOpen, "%public%", cityPublic);
         Metropolis.sendMessage(player, "messages.city.cityInfo.founded", "%founded%", DateUtil.niceDate(city.getCityCreationDate()), "%by%" , founderName);
         Metropolis.sendMessage(player, "messages.city.cityInfo.balance", "%balance%", Utilities.formattedMoney(CityDatabase.getCityBalance(city)));
@@ -144,27 +144,31 @@ public class CommandCity extends BaseCommand {
         List<String> inviters = new ArrayList<>();
         for (Member member : city.getCityMembers()) {
             Role memberRole = CityDatabase.getCityRole(city, member.getPlayerUUID());
+            MPlayer mPlayer = ApiedAPI.getPlayer(UUID.fromString(member.getPlayerUUID()));
+            if (mPlayer == null) {
+                continue;
+            }
             if (memberRole == Role.MAYOR) {
-                mayors.add(Bukkit.getOfflinePlayer(UUID.fromString(member.getPlayerUUID())).getName());
+                mayors.add(mPlayer.getName());
             } else if (memberRole == Role.VICE_MAYOR) {
-                viceMayors.add(Bukkit.getOfflinePlayer(UUID.fromString(member.getPlayerUUID())).getName());
+                viceMayors.add(mPlayer.getName());
             } else if (memberRole == Role.ASSISTANT) {
-                assistants.add(Bukkit.getOfflinePlayer(UUID.fromString(member.getPlayerUUID())).getName());
+                assistants.add(mPlayer.getName());
             } else if (memberRole == Role.INVITER) {
-                inviters.add(Bukkit.getOfflinePlayer(UUID.fromString(member.getPlayerUUID())).getName());
+                inviters.add(mPlayer.getName());
             }
         }
         if (!mayors.isEmpty()) {
-            Metropolis.sendMessage(player, "messages.city.cityInfo.mayors","%count%",String.valueOf(mayors.size()), "%mayors%", Utilities.formatStringList(mayors));
+            Metropolis.sendMessage(player, "messages.city.cityInfo.mayors", "%count%", String.valueOf(mayors.size()), "%mayors%", Utilities.formatStringList(mayors));
         }
         if (!viceMayors.isEmpty()) {
-            Metropolis.sendMessage(player, "messages.city.cityInfo.viceMayors","%count%",String.valueOf(viceMayors.size()), "%vicemayors%", Utilities.formatStringList(viceMayors));
+            Metropolis.sendMessage(player, "messages.city.cityInfo.viceMayors", "%count%", String.valueOf(viceMayors.size()), "%vicemayors%", Utilities.formatStringList(viceMayors));
         }
         if (!assistants.isEmpty()) {
-            Metropolis.sendMessage(player, "messages.city.cityInfo.assistants","%count%",String.valueOf(assistants.size()), "%assistants%", Utilities.formatStringList(assistants));
+            Metropolis.sendMessage(player, "messages.city.cityInfo.assistants", "%count%", String.valueOf(assistants.size()), "%assistants%", Utilities.formatStringList(assistants));
         }
         if (!inviters.isEmpty()) {
-            Metropolis.sendMessage(player, "messages.city.cityInfo.inviters","%count%",String.valueOf(inviters.size()), "%inviters%", Utilities.formatStringList(inviters));
+            Metropolis.sendMessage(player, "messages.city.cityInfo.inviters", "%count%", String.valueOf(inviters.size()), "%inviters%", Utilities.formatStringList(inviters));
         }
         player.sendMessage("");
         if (city.isReserve()) {
@@ -364,7 +368,7 @@ public class CommandCity extends BaseCommand {
                         + player.getUniqueId()
                         + " }");
         CityDatabase.setCityRole(city, player.getUniqueId().toString(), Role.MAYOR);
-        Claim claim = CityDatabase.createClaim(city, player.getLocation(), false, player.getName(), player.getUniqueId().toString());
+        Claim claim = CityDatabase.createClaim(city, player.getLocation(), false, player.getUniqueId().toString());
         PlayerEnterCityEvent enterCityEvent = new PlayerEnterCityEvent(player, city);
         Bukkit.getServer().getPluginManager().callEvent(enterCityEvent);
         CityJoinEvent joinEvent = new CityJoinEvent(player, city);
@@ -464,7 +468,7 @@ public class CommandCity extends BaseCommand {
                             (claim2 != null && claim2.getCity() == city) ||
                             (claim3 != null && claim3.getCity() == city) ||
                             (claim4 != null && claim4.getCity() == city)) {
-                        Claim claim = CityDatabase.createClaim(city, player.getLocation(), false, player.getName(), player.getUniqueId().toString());
+                        Claim claim = CityDatabase.createClaim(city, player.getLocation(), false, player.getUniqueId().toString());
                         assert claim != null;
                         Database.addLogEntry(
                                 city,
@@ -524,7 +528,7 @@ public class CommandCity extends BaseCommand {
                 (claim2 != null && claim2.getCity() == city) ||
                 (claim3 != null && claim3.getCity() == city) ||
                 (claim4 != null && claim4.getCity() == city)) {
-            Claim claim = CityDatabase.createClaim(city, player.getLocation(), false, player.getName(), player.getUniqueId().toString());
+            Claim claim = CityDatabase.createClaim(city, player.getLocation(), false, player.getUniqueId().toString());
             assert claim != null;
             Database.addLogEntry(
                     city,
@@ -1723,7 +1727,7 @@ public class CommandCity extends BaseCommand {
                         player, "messages.error.city.missing.balance.outpostCost", "%cityname%", city.getCityName());
                 return;
             }
-            Claim claim = CityDatabase.createClaim(city, player.getLocation(), true, player.getName(), player.getUniqueId().toString());
+            Claim claim = CityDatabase.createClaim(city, player.getLocation(), true, player.getUniqueId().toString());
             assert claim != null;
             city.removeCityBalance(Metropolis.configuration.getCityOutpostCost());
             Database.addLogEntry(
@@ -2071,20 +2075,24 @@ public class CommandCity extends BaseCommand {
             }
             StringBuilder bannedPlayersList = new StringBuilder().append("§4");
             for (Ban ban : bannedPlayers) {
-                bannedPlayersList.append(Metropolis.getInstance().getServer().getOfflinePlayer(UUID.fromString(ban.getPlayerUUID())).getName()).append("§c, §4");
+                bannedPlayersList.append(ApiedAPI.getPlayer(UUID.fromString(ban.getPlayerUUID())).getName()).append("§c, §4");
             }
             Metropolis.sendMessage(player, "messages.city.ban.header", "%cityname%", city.getCityName());
             player.sendMessage(bannedPlayersList.delete(bannedPlayersList.length()-4,bannedPlayersList.length())+"");
             return;
         }
+        MPlayer mPlayer = ApiedAPI.getPlayer(player);
+        if (mPlayer == null) {
+            Metropolis.sendMessage(player, "messages.error.player.notFound");
+            return;
+        }
         if (playerName != null && args == null) {
-            String playerUUID = Bukkit.getOfflinePlayer(playerName).getUniqueId().toString();
-            if (CityDatabase.getCityBan(city, playerUUID) == null) {
+            if (CityDatabase.getCityBan(city, mPlayer.getUuid().toString()) == null) {
                 Metropolis.sendMessage(player, "messages.city.ban.notBanned","%cityname%", city.getCityName());
             } else {
-                Ban ban = CityDatabase.getCityBan(city, playerUUID);
+                Ban ban = CityDatabase.getCityBan(city, mPlayer.getUuid().toString());
                 assert ban != null;
-                Metropolis.sendMessage(player, "messages.city.ban.banned", "%player%", playerName, "%cityname%", city.getCityName(), "%reason%", ban.getReason(), "%length%", DateUtil.formatDateDiff(ban.getLength()));
+                Metropolis.sendMessage(player, "messages.city.ban.banned", "%player%", mPlayer.getName(), "%cityname%", city.getCityName(), "%reason%", ban.getReason(), "%length%", DateUtil.formatDateDiff(ban.getLength()));
             }
             return;
         }
@@ -2098,10 +2106,10 @@ public class CommandCity extends BaseCommand {
                 return;
             }
             for (Ban ban : bannedPlayers) {
-                if (ban.getPlayerUUID().equals(Bukkit.getOfflinePlayer(playerName).getUniqueId().toString())) {
+                if (ban.getPlayerUUID().equals(mPlayer.getUuid().toString())) {
                     CityDatabase.removeCityBan(city, ban);
                     Database.addLogEntry(city, "{ \"type\": \"unban\", \"subtype\": \"city\", \"player\": " + ban.getPlayerUUID() + ", \"placer\": " + player.getUniqueId() + " }");
-                    Metropolis.sendMessage(player, "messages.city.ban.unbanned", "%player%", playerName, "%cityname%", city.getCityName());
+                    Metropolis.sendMessage(player, "messages.city.ban.unbanned", "%player%", mPlayer.getName(), "%cityname%", city.getCityName());
                     return;
                 }
             }
@@ -2120,23 +2128,22 @@ public class CommandCity extends BaseCommand {
             }
             if (bannedPlayers != null) {
                 for (Ban ban : bannedPlayers) {
-                    if (ban.getPlayerUUID().equals(Bukkit.getOfflinePlayer(playerName).getUniqueId().toString())) {
-                        Metropolis.sendMessage(player, "messages.city.ban.alreadyBanned", "%player%", playerName, "%cityname%", city.getCityName());
+                    if (ban.getPlayerUUID().equals(mPlayer.getUuid().toString())) {
+                        Metropolis.sendMessage(player, "messages.city.ban.alreadyBanned", "%player%", mPlayer.getName(), "%cityname%", city.getCityName());
                         return;
                     }
                 }
             }
             long placeDate = System.currentTimeMillis();
-            String playerUUID = Bukkit.getOfflinePlayer(playerName).getUniqueId().toString();
             String expiryDate = DateUtil.formatDateDiff(length);
-            CityDatabase.addCityBan(city, playerUUID, reason, player, placeDate, length);
-            if (CityDatabase.memberExists(playerUUID, city)) {
-                city.removeCityMember(city.getCityMember(playerUUID));
+            CityDatabase.addCityBan(city, mPlayer.getUuid().toString(), reason, player, placeDate, length);
+            if (CityDatabase.memberExists(mPlayer.getUuid().toString(), city)) {
+                city.removeCityMember(city.getCityMember(mPlayer.getUuid().toString()));
                 CityLeaveEvent leaveEvent = new CityLeaveEvent(player, city);
                 Metropolis.getInstance().getServer().getPluginManager().callEvent(leaveEvent);
             }
-            if (Bukkit.getOfflinePlayer(playerName).isOnline()) {
-                Metropolis.sendMessage((Player) Bukkit.getOfflinePlayer(playerName), "messages.city.ban.playerBanned", "%player%", playerName, "%cityname%", city.getCityName(), "%reason%", reason, "%length%", expiryDate);
+            if (Bukkit.getPlayer(mPlayer.getUuid()) != null) {
+                Metropolis.sendMessage(Objects.requireNonNull(Bukkit.getPlayer(mPlayer.getUuid())), "messages.city.ban.playerBanned", "%player%", mPlayer.getName(), "%cityname%", city.getCityName(), "%reason%", reason, "%length%", expiryDate);
             }
             for (Member member : city.getCityMembers()) {
                 Player memberPlayer = Bukkit.getPlayer(UUID.fromString(member.getPlayerUUID()));
@@ -2144,14 +2151,14 @@ public class CommandCity extends BaseCommand {
                     continue;
                 }
                 if(member.getCityRole().hasPermission(Role.ASSISTANT)) {
-                    Metropolis.sendMessage(memberPlayer, "messages.city.ban.success", "%player%", playerName, "%cityname%", city.getCityName(), "%reason%", reason, "%length%", expiryDate);
+                    Metropolis.sendMessage(memberPlayer, "messages.city.ban.success", "%player%", mPlayer.getName(), "%cityname%", city.getCityName(), "%reason%", reason, "%length%", expiryDate);
                     continue;
                 }
-                Metropolis.sendMessage(memberPlayer, "messages.city.ban.others", "%player%", playerName, "%cityname%", city.getCityName());
+                Metropolis.sendMessage(memberPlayer, "messages.city.ban.others", "%player%", mPlayer.getName(), "%cityname%", city.getCityName());
             }
 
             // Log the ban
-            Database.addLogEntry(city, "{ \"type\": \"ban\", \"subtype\": \"city\", \"player\": " + playerUUID + ", \"placer\": " + player.getUniqueId() + ", \"reason\": \"" + reason + "\", \"length\": \"" + length + "\" }");
+            Database.addLogEntry(city, "{ \"type\": \"ban\", \"subtype\": \"city\", \"player\": " + mPlayer.getUuid() + ", \"placer\": " + player.getUniqueId() + ", \"reason\": \"" + reason + "\", \"length\": \"" + length + "\" }");
             return;
         }
         Metropolis.sendMessage(player, "messages.error.usage", "%command%", "/city ban <player> <length> <reason>");
@@ -2173,20 +2180,24 @@ public class CommandCity extends BaseCommand {
         boolean isViceMayor = role.equals(Role.MAYOR) || role.equals(Role.VICE_MAYOR);
         boolean isMayor = role.equals(Role.MAYOR);
 
-        OfflinePlayer targetPlayer = Bukkit.getOfflinePlayer(playerName);
-        if (!CityDatabase.memberExists(targetPlayer.getUniqueId().toString(), city)) {
-            Metropolis.sendMessage(player, "messages.error.city.rank.notInCity", "%cityname%", city.getCityName(), "%playername%", playerName);
+        MPlayer mPlayer = ApiedAPI.getPlayer(playerName);
+        if (mPlayer == null) {
+            Metropolis.sendMessage(player, "messages.error.player.notFound");
+            return;
+        }
+        if (!CityDatabase.memberExists(mPlayer.getUuid().toString(), city)) {
+            Metropolis.sendMessage(player, "messages.error.city.rank.notInCity", "%cityname%", city.getCityName(), "%playername%", mPlayer.getName());
             return;
         }
 
-        if (targetPlayer.getUniqueId() == player.getUniqueId()) {
+        if (mPlayer.getUuid() == player.getUniqueId()) {
             Metropolis.sendMessage(player, "messages.error.city.rank.cannotChangeOwnRole", "%cityname%", city.getCityName());
             return;
         }
 
-        Role targetRole = CityDatabase.getCityRole(city, Bukkit.getOfflinePlayer(playerName).getUniqueId().toString());
+        Role targetRole = CityDatabase.getCityRole(city, mPlayer.getUuid().toString());
         if (targetRole == null) {
-            Metropolis.sendMessage(player, "messages.error.city.rank.notInCity", "%cityname%", city.getCityName(), "%playername%", playerName);
+            Metropolis.sendMessage(player, "messages.error.city.rank.notInCity", "%cityname%", city.getCityName(), "%playername%", mPlayer.getName());
             return;
         }
 
@@ -2200,55 +2211,57 @@ public class CommandCity extends BaseCommand {
             return;
         }
 
+        Player targetPlayer = Bukkit.getPlayer(mPlayer.getUuid());
+
         switch (rank.toLowerCase()) {
             case "assistant":
                 if (!isMayor && targetRole.equals(Role.VICE_MAYOR)) {
-                    Metropolis.sendMessage(player, "messages.error.city.rank.cannotChangeHigherRole", "%playername%", playerName);
+                    Metropolis.sendMessage(player, "messages.error.city.rank.cannotChangeHigherRole", "%playername%", mPlayer.getName());
                     return;
                 }
-                CityDatabase.setCityRole(city, targetPlayer.getUniqueId().toString(), Role.ASSISTANT);
-                Metropolis.sendMessage(player, "messages.city.successful.rank.changed","%cityname%", city.getCityName(), "%playername%", playerName, "%newrole%", Metropolis.getMessage("messages.city.roles.assistant"));
-                if (targetPlayer.isOnline()) {
-                    Metropolis.sendMessage((Player) targetPlayer, "messages.city.successful.rank.promoted", "%cityname%", city.getCityName(), "%newrole%", Metropolis.getMessage("messages.city.roles.assistant"));
+                CityDatabase.setCityRole(city, mPlayer.getUuid().toString(), Role.ASSISTANT);
+                Metropolis.sendMessage(player, "messages.city.successful.rank.changed","%cityname%", city.getCityName(), "%playername%", mPlayer.getName(), "%newrole%", Metropolis.getMessage("messages.city.roles.assistant"));
+                if (targetPlayer != null) {
+                    Metropolis.sendMessage(targetPlayer, "messages.city.successful.rank.promoted", "%cityname%", city.getCityName(), "%newrole%", Metropolis.getMessage("messages.city.roles.assistant"));
                 }
-                Database.addLogEntry(city, "{ \"type\": \"rank\", \"subtype\": \"change\", \"from\": \"" + targetRole + "\", \"to\": \"" + rank.toLowerCase() + "\", \"issuer\": \"" + player.getUniqueId() + "\", \"player\": \"" + targetPlayer.getUniqueId() + "\" }");
+                Database.addLogEntry(city, "{ \"type\": \"rank\", \"subtype\": \"change\", \"from\": \"" + targetRole + "\", \"to\": \"" + rank.toLowerCase() + "\", \"issuer\": \"" + player.getUniqueId() + "\", \"player\": \"" + mPlayer.getUuid() + "\" }");
                 break;
             case "inviter":
                 if (!isMayor && targetRole.equals(Role.VICE_MAYOR)) {
-                    Metropolis.sendMessage(player, "messages.error.city.rank.cannotChangeHigherRole", "%playername%", playerName);
+                    Metropolis.sendMessage(player, "messages.error.city.rank.cannotChangeHigherRole", "%playername%", mPlayer.getName());
                     return;
                 }
-                CityDatabase.setCityRole(city, targetPlayer.getUniqueId().toString(), Role.INVITER);
-                Metropolis.sendMessage(player, "messages.city.successful.rank.changed","%cityname%", city.getCityName(), "%playername%", playerName, "%newrole%", Metropolis.getMessage("messages.city.roles.inviter"));
-                if (targetPlayer.isOnline()) {
-                    Metropolis.sendMessage((Player) targetPlayer, "messages.city.successful.rank.promoted", "%cityname%", city.getCityName(), "%newrole%", Metropolis.getMessage("messages.city.roles.inviter"));
+                CityDatabase.setCityRole(city, mPlayer.getUuid().toString(), Role.INVITER);
+                Metropolis.sendMessage(player, "messages.city.successful.rank.changed","%cityname%", city.getCityName(), "%playername%", mPlayer.getName(), "%newrole%", Metropolis.getMessage("messages.city.roles.inviter"));
+                if (targetPlayer != null) {
+                    Metropolis.sendMessage(targetPlayer, "messages.city.successful.rank.promoted", "%cityname%", city.getCityName(), "%newrole%", Metropolis.getMessage("messages.city.roles.inviter"));
                 }
-                Database.addLogEntry(city, "{ \"type\": \"rank\", \"subtype\": \"change\", \"from\": \"" + targetRole + "\", \"to\": \"" + rank.toLowerCase() + "\", \"issuer\": \"" + player.getUniqueId() + "\", \"player\": \"" + targetPlayer.getUniqueId() + "\" }");
+                Database.addLogEntry(city, "{ \"type\": \"rank\", \"subtype\": \"change\", \"from\": \"" + targetRole + "\", \"to\": \"" + rank.toLowerCase() + "\", \"issuer\": \"" + player.getUniqueId() + "\", \"player\": \"" + mPlayer.getUuid() + "\" }");
                 break;
             case "vicemayor":
                 if (!isMayor && targetRole.equals(Role.VICE_MAYOR)) {
-                    Metropolis.sendMessage(player, "messages.error.city.rank.cannotChangeHigherRole", "%playername%", playerName);
+                    Metropolis.sendMessage(player, "messages.error.city.rank.cannotChangeHigherRole", "%playername%", mPlayer.getName());
                     return;
                 }
-                CityDatabase.setCityRole(city, targetPlayer.getUniqueId().toString(), Role.VICE_MAYOR);
-                Metropolis.sendMessage(player, "messages.city.successful.rank.changed","%cityname%", city.getCityName(), "%playername%", playerName, "%newrole%", Metropolis.getMessage("messages.city.roles.vicemayor"));
-                if (targetPlayer.isOnline()) {
-                    Metropolis.sendMessage((Player) targetPlayer, "messages.city.successful.rank.promoted", "%cityname%", city.getCityName(), "%newrole%", Metropolis.getMessage("messages.city.roles.vicemayor"));
+                CityDatabase.setCityRole(city, mPlayer.getUuid().toString(), Role.VICE_MAYOR);
+                Metropolis.sendMessage(player, "messages.city.successful.rank.changed","%cityname%", city.getCityName(), "%playername%", mPlayer.getName(), "%newrole%", Metropolis.getMessage("messages.city.roles.vicemayor"));
+                if (targetPlayer != null) {
+                    Metropolis.sendMessage(targetPlayer, "messages.city.successful.rank.promoted", "%cityname%", city.getCityName(), "%newrole%", Metropolis.getMessage("messages.city.roles.vicemayor"));
                 }
-                Database.addLogEntry(city, "{ \"type\": \"rank\", \"subtype\": \"change\", \"from\": \"" + targetRole + "\", \"to\": \"" + rank.toLowerCase() + "\", \"issuer\": \"" + player.getUniqueId() + "\", \"player\": \"" + targetPlayer.getUniqueId() + "\" }");
+                Database.addLogEntry(city, "{ \"type\": \"rank\", \"subtype\": \"change\", \"from\": \"" + targetRole + "\", \"to\": \"" + rank.toLowerCase() + "\", \"issuer\": \"" + player.getUniqueId() + "\", \"player\": \"" + mPlayer.getUuid() + "\" }");
                 break;
             case "member":
             case "-":
                 if (!isMayor && targetRole.equals(Role.VICE_MAYOR)) {
-                    Metropolis.sendMessage(player, "messages.error.city.rank.cannotChangeHigherRole", "%playername%", playerName);
+                    Metropolis.sendMessage(player, "messages.error.city.rank.cannotChangeHigherRole", "%playername%", mPlayer.getName());
                     return;
                 }
-                CityDatabase.setCityRole(city, targetPlayer.getUniqueId().toString(), Role.MEMBER);
-                Metropolis.sendMessage(player, "messages.city.successful.rank.changed","%cityname%", city.getCityName(), "%playername%", playerName, "%newrole%", Metropolis.getMessage("messages.city.roles.member"));
-                if (targetPlayer.isOnline()) {
-                    Metropolis.sendMessage((Player) targetPlayer, "messages.city.successful.rank.promoted", "%cityname%", city.getCityName(), "%newrole%", Metropolis.getMessage("messages.city.roles.member"));
+                CityDatabase.setCityRole(city, mPlayer.getUuid().toString(), Role.MEMBER);
+                Metropolis.sendMessage(player, "messages.city.successful.rank.changed","%cityname%", city.getCityName(), "%playername%", mPlayer.getName(), "%newrole%", Metropolis.getMessage("messages.city.roles.member"));
+                if (targetPlayer != null) {
+                    Metropolis.sendMessage(targetPlayer, "messages.city.successful.rank.promoted", "%cityname%", city.getCityName(), "%newrole%", Metropolis.getMessage("messages.city.roles.member"));
                 }
-                Database.addLogEntry(city, "{ \"type\": \"rank\", \"subtype\": \"remove\", \"from\": \"" + targetRole + "\", \"issuer\": \"" + player.getUniqueId() + "\", \"player\": \"" + targetPlayer.getUniqueId() + "\" }");
+                Database.addLogEntry(city, "{ \"type\": \"rank\", \"subtype\": \"remove\", \"from\": \"" + targetRole + "\", \"issuer\": \"" + player.getUniqueId() + "\", \"player\": \"" + mPlayer.getUuid() + "\" }");
                 break;
             case "swap":
                 if (!isMayor) {
@@ -2256,12 +2269,12 @@ public class CommandCity extends BaseCommand {
                     return;
                 }
                 CityDatabase.setCityRole(city, player.getUniqueId().toString(), targetRole);
-                CityDatabase.setCityRole(city, targetPlayer.getUniqueId().toString(), Role.MAYOR);
-                Metropolis.sendMessage(player, "messages.city.successful.rank.swapped","%cityname%", city.getCityName(), "%playername%", playerName, "%newrole%", Metropolis.getMessage("messages.city.roles." + targetRole));
-                if (targetPlayer.isOnline()) {
-                    Metropolis.sendMessage((Player) targetPlayer, "messages.city.successful.rank.promoted", "%cityname%", city.getCityName(), "%newrole%", Metropolis.getMessage("messages.city.roles.mayor"));
+                CityDatabase.setCityRole(city, mPlayer.getUuid().toString(), Role.MAYOR);
+                Metropolis.sendMessage(player, "messages.city.successful.rank.swapped","%cityname%", city.getCityName(), "%playername%", mPlayer.getName(), "%newrole%", Metropolis.getMessage("messages.city.roles." + targetRole));
+                if (targetPlayer != null) {
+                    Metropolis.sendMessage(targetPlayer, "messages.city.successful.rank.promoted", "%cityname%", city.getCityName(), "%newrole%", Metropolis.getMessage("messages.city.roles.mayor"));
                 }
-                Database.addLogEntry(city, "{ \"type\": \"rank\", \"subtype\": \"swap\", \"from\": \"" + role + "\", \"to\": \"" + targetRole + "\", \"issuer\": \"" + player.getUniqueId() + "\", \"player\": \"" + targetPlayer.getUniqueId() + "\" }");
+                Database.addLogEntry(city, "{ \"type\": \"rank\", \"subtype\": \"swap\", \"from\": \"" + role + "\", \"to\": \"" + targetRole + "\", \"issuer\": \"" + player.getUniqueId() + "\", \"player\": \"" + mPlayer.getUuid() + "\" }");
                 break;
             default:
                 Metropolis.sendMessage(player, "messages.error.city.rank.invalid", "%cityname%", city.getCityName());
@@ -2461,7 +2474,11 @@ public class CommandCity extends BaseCommand {
         }
         if (argument.startsWith("-") || argument.startsWith("+")) {
             String playerName = argument.substring(1);
-            OfflinePlayer targetPlayer = Bukkit.getOfflinePlayer(playerName);
+            MPlayer mPlayer = ApiedAPI.getPlayer(playerName);
+            if (mPlayer == null) {
+                Metropolis.sendMessage(player, "messages.error.player.notFound");
+                return;
+            }
             City city = Utilities.hasCityPermissions(player, "metropolis.city.district", Role.VICE_MAYOR);
             if (city == null) {
                 return;
@@ -2471,32 +2488,32 @@ public class CommandCity extends BaseCommand {
                 Metropolis.sendMessage(player, "messages.error.city.district.notInDistrict");
                 return;
             }
-            if (!targetPlayer.hasPlayedBefore()) {
-                Metropolis.sendMessage(player, "messages.error.player.notFound", "%player%", playerName);
+            if (mPlayer == null) {
+                Metropolis.sendMessage(player, "messages.error.player.notFound", "%player%", mPlayer.getName());
                 return;
             }
-            if (!CityDatabase.memberExists(targetPlayer.getUniqueId().toString(), city)) {
-                Metropolis.sendMessage(player, "messages.error.city.district.contactNotInCity", "%player%", playerName, "%cityname%", city.getCityName());
+            if (!CityDatabase.memberExists(mPlayer.getUuid().toString(), city)) {
+                Metropolis.sendMessage(player, "messages.error.city.district.contactNotInCity", "%player%", mPlayer.getName(), "%cityname%", city.getCityName());
                 return;
             }
             if (argument.startsWith("-")) {
-                if (district.getContactplayers().contains(targetPlayer)) {
-                    district.removeContactPlayer(targetPlayer);
-                    Database.addLogEntry(city, "{ \"type\": \"district\", \"subtype\": \"contactRemove\", \"district\": \"" + district.getDistrictName() + "\", \"player\": \"" + targetPlayer.getUniqueId() + "\" }");
-                    Metropolis.sendMessage(player, "messages.city.district.contact.removed", "%player%", playerName, "%cityname%", city.getCityName());
+                if (district.getContactplayers().contains(mPlayer.getUuid())) {
+                    district.removeContactPlayer(mPlayer);
+                    Database.addLogEntry(city, "{ \"type\": \"district\", \"subtype\": \"contactRemove\", \"district\": \"" + district.getDistrictName() + "\", \"player\": \"" + mPlayer.getUuid() + "\" }");
+                    Metropolis.sendMessage(player, "messages.city.district.contact.removed", "%player%", mPlayer.getName(), "%cityname%", city.getCityName());
                     return;
                 }
-                Metropolis.sendMessage(player, "messages.error.city.district.contactNotInDistrict", "%player%", playerName, "%cityname%", city.getCityName());
+                Metropolis.sendMessage(player, "messages.error.city.district.contactNotInDistrict", "%player%", mPlayer.getName(), "%cityname%", city.getCityName());
                 return;
             }
             if (argument.startsWith("+")) {
-                if (district.getContactplayers().contains(targetPlayer)) {
-                    Metropolis.sendMessage(player, "messages.error.city.district.contactAlreadyInDistrict", "%player%", playerName, "%cityname%", city.getCityName());
+                if (district.getContactplayers().contains(mPlayer.getUuid())) {
+                    Metropolis.sendMessage(player, "messages.error.city.district.contactAlreadyInDistrict", "%player%", mPlayer.getName(), "%cityname%", city.getCityName());
                     return;
                 }
-                district.addContactPlayer(targetPlayer);
-                Database.addLogEntry(city, "{ \"type\": \"district\", \"subtype\": \"contactAdd\", \"district\": \"" + district.getDistrictName() + "\", \"player\": \"" + targetPlayer.getUniqueId() + "\" }");
-                Metropolis.sendMessage(player, "messages.city.district.contact.added", "%player%", playerName, "%cityname%", city.getCityName());
+                district.addContactPlayer(mPlayer);
+                Database.addLogEntry(city, "{ \"type\": \"district\", \"subtype\": \"contactAdd\", \"district\": \"" + district.getDistrictName() + "\", \"player\": \"" + mPlayer.getUuid() + "\" }");
+                Metropolis.sendMessage(player, "messages.city.district.contact.added", "%player%", mPlayer.getName(), "%cityname%", city.getCityName());
             }
 
         } else {
@@ -2547,8 +2564,8 @@ public class CommandCity extends BaseCommand {
                 if (contactCount > 0) {
                     StringBuilder contacts = new StringBuilder();
                     contacts.append("<green>");
-                    for (OfflinePlayer contact : district.getContactplayers()) {
-                        contacts.append(contact.getName()).append("<dark_green>, <green>");
+                    for (UUID contact : district.getContactplayers()) {
+                        contacts.append(ApiedAPI.getPlayer(contact).getName()).append("<dark_green>, <green>");
                     }
                     contacts.delete(contacts.length() - 9, contacts.length());
                     if (!contacts.isEmpty()) {
@@ -2570,8 +2587,8 @@ public class CommandCity extends BaseCommand {
                 if (contactCount > 0) {
                     StringBuilder contacts = new StringBuilder();
                     contacts.append("<green>");
-                    for (OfflinePlayer contact : district.getContactplayers()) {
-                        contacts.append(contact.getName()).append("<dark_green>, <green>");
+                    for (UUID contact : district.getContactplayers()) {
+                        contacts.append(ApiedAPI.getPlayer(contact).getName()).append("<dark_green>, <green>");
                         contacts.delete(contacts.length() - 9, contacts.length());
                         if (!contacts.isEmpty()) {
                             Metropolis.sendMessage(player, "messages.city.district.contacts", "%contacts%", contacts.toString(), "%count%", String.valueOf(contactCount));
@@ -2904,8 +2921,8 @@ public class CommandCity extends BaseCommand {
         }
         Role role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
         assert role != null;
-        OfflinePlayer targetPlayer = Bukkit.getOfflinePlayer(playerName);
-        if (!targetPlayer.hasPlayedBefore()) {
+        MPlayer mPlayer = ApiedAPI.getPlayer(playerName);
+        if (mPlayer == null) {
             Metropolis.sendMessage(player, "messages.error.player.notFound", "%player%", playerName);
             return;
         }
@@ -2913,16 +2930,16 @@ public class CommandCity extends BaseCommand {
             Metropolis.sendMessage(player, "messages.error.city.kick.tooShort");
             return;
         }
-        if (!CityDatabase.memberExists(targetPlayer.getUniqueId().toString(), city)) {
+        if (!CityDatabase.memberExists(mPlayer.getUuid().toString(), city)) {
             Metropolis.sendMessage(player, "messages.error.city.kick.notInCity", "%cityname%", city.getCityName());
             return;
         }
-        if (targetPlayer.getUniqueId() == player.getUniqueId()) {
+        if (mPlayer.getUuid() == player.getUniqueId()) {
             Metropolis.sendMessage(player, "messages.error.city.kick.cannotKickSelf", "%cityname%", city.getCityName());
             return;
         }
         //if targetPlayer has higher role
-        Role targetRole = CityDatabase.getCityRole(city, targetPlayer.getUniqueId().toString());
+        Role targetRole = CityDatabase.getCityRole(city, mPlayer.getUuid().toString());
         if (targetRole == null) {
             Metropolis.sendMessage(player, "messages.error.city.kick.notInCity", "%cityname%", city.getCityName());
             return;
@@ -2935,10 +2952,10 @@ public class CommandCity extends BaseCommand {
             Metropolis.sendMessage(player, "messages.error.city.kick.cannotKickMayor", "%cityname%", city.getCityName());
             return;
         }
-        if (targetPlayer.isOnline()) {
-            Metropolis.sendMessage((Player) targetPlayer, "messages.city.kick.kicked", "%cityname%", city.getCityName(), "%reason%", reason);
+        if (Metropolis.getInstance().getServer().getPlayer(mPlayer.getUuid()) != null) {
+            Metropolis.sendMessage(Objects.requireNonNull(Metropolis.getInstance().getServer().getPlayer(mPlayer.getUuid())), "messages.city.kick.kicked", "%cityname%", city.getCityName(), "%reason%", reason);
         }
-        city.removeCityMember(targetPlayer.getUniqueId().toString());
+        city.removeCityMember(mPlayer.getUuid().toString());
         CityLeaveEvent leaveEvent = new CityLeaveEvent(player, city);
         Metropolis.getInstance().getServer().getPluginManager().callEvent(leaveEvent);
         for (Member member : city.getCityMembers()) {
@@ -2947,12 +2964,12 @@ public class CommandCity extends BaseCommand {
                 continue;
             }
             if(member.getCityRole().hasPermission(Role.ASSISTANT)) {
-                Metropolis.sendMessage(memberPlayer, "messages.city.kick.success", "%cityname%", city.getCityName(), "%playername%", targetPlayer.getName());
+                Metropolis.sendMessage(memberPlayer, "messages.city.kick.success", "%cityname%", city.getCityName(), "%playername%", mPlayer.getName());
                 continue;
             }
-            Metropolis.sendMessage(memberPlayer, "messages.city.kick.kickedOthers", "%cityname%", city.getCityName(), "%playername%", targetPlayer.getName());
+            Metropolis.sendMessage(memberPlayer, "messages.city.kick.kickedOthers", "%cityname%", city.getCityName(), "%playername%", mPlayer.getName());
         }
-        Database.addLogEntry(city, "{ \"type\": \"kick\", \"player\": \"" + targetPlayer.getUniqueId() + "\", \"issuer\": \"" + player.getUniqueId() + "\", \"reason\": \"" + reason + "\" }");
+        Database.addLogEntry(city, "{ \"type\": \"kick\", \"player\": \"" + mPlayer.getUuid() + "\", \"issuer\": \"" + player.getUniqueId() + "\", \"reason\": \"" + reason + "\" }");
     }
 
     @Subcommand("broadcast")
