@@ -150,6 +150,8 @@ public class Database {
                                 `plotPermsOutsiders` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `plotCenter` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `plotFlags` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                                `leaderboard` tinyint(1) DEFAULT '0',
+                                `leaderboardShown` tinyint(1) DEFAULT '0',
                                 `plotCreationDate` bigint(30) DEFAULT NULL,
                                 PRIMARY KEY (`plotId`),
                                 SPATIAL INDEX `idx_plotBoundary` (`plotBoundary`)
@@ -217,8 +219,8 @@ public class Database {
                                 `plotId` int(11) NOT NULL,
                                 `creatorUUID` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `createDate` bigint(30) DEFAULT NULL,
-                                `type` bigint(30) DEFAULT NULL,
-                                `conditions` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                                `type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+                                `conditions` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                  PRIMARY KEY (plotId)
                               ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;""");
             DB.executeUpdate(

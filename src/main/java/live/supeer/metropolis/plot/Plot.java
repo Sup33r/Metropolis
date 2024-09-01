@@ -47,6 +47,8 @@ public class Plot {
     private final World plotWorld;
     private Polygon plotPoints;
     private boolean isJail;
+    private boolean hasLeaderboard;
+    private boolean leaderboardShown;
     private final City city;
 
     public Plot(DbRow data) {
@@ -84,6 +86,26 @@ public class Plot {
         this.plotPoints = LocationUtil.stringToPolygon(data.getString("plotPoints"));
         this.plotWorld = plotCenter.getWorld();
         this.isJail = plotType != null && plotType.equalsIgnoreCase("jail");
+        this.hasLeaderboard = data.get("leaderboard");
+        this.leaderboardShown = data.get("leaderboardShown");
+    }
+
+    public void setLeaderboard(boolean hasLeaderboard) {
+        this.hasLeaderboard = hasLeaderboard;
+        try {
+        DB.executeUpdate("UPDATE `mp_plots` SET `leaderboard` = " + hasLeaderboard + " WHERE `plotId` = " + plotId + ";");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setLeaderboardShown(boolean leaderboardShown) {
+        this.leaderboardShown = leaderboardShown;
+        try {
+            DB.executeUpdate("UPDATE `mp_plots` SET `leaderboardShown` = " + leaderboardShown + " WHERE `plotId` = " + plotId + ";");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public void setPlotName(String plotName) {

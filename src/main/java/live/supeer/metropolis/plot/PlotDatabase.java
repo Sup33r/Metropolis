@@ -3,11 +3,15 @@ package live.supeer.metropolis.plot;
 import co.aikar.idb.DB;
 import co.aikar.idb.DbRow;
 import live.supeer.metropolis.Database;
+import live.supeer.metropolis.Leaderboard;
 import live.supeer.metropolis.Metropolis;
+import live.supeer.metropolis.Standing;
+import live.supeer.metropolis.city.CityDatabase;
 import live.supeer.metropolis.city.Claim;
 import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.utils.DateUtil;
+import live.supeer.metropolis.utils.Utilities;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -16,6 +20,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
 
 import java.util.List;
+import java.util.UUID;
 
 public class PlotDatabase {
     public static Plot createPlot(Player player, Polygon plotPolygon, String plotName, City city, int minY, int maxY, World world) {
@@ -195,4 +200,95 @@ public class PlotDatabase {
         return false;
     }
 
+    public static Leaderboard startLeaderboard(Plot plot, String type, Player player) {
+        try {
+            DB.executeUpdate("INSERT INTO `mp_leaderboards` (`plotId`, `creatorUUID`, `createDate`, `type`) VALUES (?, ?, ?, ?)", plot.getPlotId(), player.getUniqueId().toString(), DateUtil.getTimestamp(), type);
+            DbRow row = DB.getFirstRow("SELECT * FROM `mp_leaderboards` WHERE `plotId` = ? AND `creatorUUID` = ?", plot.getPlotId(), player.getUniqueId().toString());
+            return new Leaderboard(UUID.fromString(row.getString("creatorUUID")), row.getLong("createDate"), row.getString("type"), null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void updateLeaderboard(Leaderboard leaderboard, int plotId) {
+        try {
+            DB.executeUpdate("UPDATE `mp_leaderboards` SET `conditions` = ? WHERE `plotId` = ?",
+                    Utilities.stringArrayToString(leaderboard.getConditions()), plotId);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static boolean leaderboardExists(int plotId) {
+        try {
+            return DB.getFirstRow("SELECT * FROM `mp_leaderboards` WHERE `plotId` = ?", plotId) != null;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void removeLeaderboard(int plotId) {
+        try {
+            DB.executeUpdate("DELETE FROM `mp_leaderboards` WHERE `plotId` = ?", plotId);
+            DB.executeUpdate("DELETE FROM `mp_standings` WHERE `plotId` = ?", plotId);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void updatePlayerStanding(int plotId, UUID playerUUID, int count) {
+        try {
+            if (DB.getFirstRow("SELECT * FROM `mp_standings` WHERE `plotId` = ? AND `playerUUID` = ?", plotId, playerUUID.toString()) != null) {
+                DB.executeUpdate("UPDATE `mp_standings` SET `count` = ? WHERE `plotId` = ? AND `playerUUID` = ?", count, plotId, playerUUID.toString());
+            } else {
+                DB.executeUpdate("INSERT INTO `mp_standings` (`plotId`, `playerUUID`, `count`) VALUES (?, ?, ?)", plotId, playerUUID.toString(), count);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void eraseLeaderboard(Plot plot) {
+        try {
+            Metropolis.plotStandings.remove(plot);
+            DB.executeUpdate("DELETE * FROM `mp_standings` WHERE `plotId` = ?", plot.getPlotId());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static int getTotalStanding(int plotId) {
+        try {
+            List<DbRow> results = DB.getResults("SELECT * FROM `mp_standings` WHERE `plotId` = ?", plotId);
+            int total = 0;
+            for (DbRow row : results) {
+                total += row.getInt("count");
+            }
+            return total;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static int getStandingEntries(int plotId) {
+        try {
+            return DB.getResults("SELECT * FROM `mp_standings` WHERE `plotId` = ?", plotId).size();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void storeStandings(List<Standing> standings) {
+        for (Standing standing : standings) {
+            try {
+                if (DB.getFirstRow("SELECT * FROM `mp_standings` WHERE `plotId` = ? AND `playerUUID` = ?", standing.getPlotId(), standing.getPlayerUUID().toString()) != null) {
+                    DB.executeUpdate("UPDATE `mp_standings` SET `count` = ? WHERE `plotId` = ? AND `playerUUID` = ?", standing.getCount(), standing.getPlotId(), standing.getPlayerUUID().toString());
+                } else {
+                    DB.executeUpdate("INSERT INTO `mp_standings` (`plotId`, `playerUUID`, `count`) VALUES (?, ?, ?)", standing.getPlotId(), standing.getPlayerUUID().toString(), standing.getCount());
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
 }

@@ -2,11 +2,13 @@ package live.supeer.metropolis.command;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
+import co.aikar.commands.annotation.Optional;
 import live.supeer.apied.ApiedAPI;
 import live.supeer.apied.MPlayer;
 import live.supeer.metropolis.*;
 import live.supeer.metropolis.city.Role;
 import live.supeer.metropolis.event.PlayerEnterPlotEvent;
+import live.supeer.metropolis.utils.DateUtil;
 import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.utils.Utilities;
 import live.supeer.metropolis.city.City;
@@ -19,6 +21,8 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Material;
+import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -28,9 +32,7 @@ import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @CommandAlias("plot")
 public class CommandPlot extends BaseCommand {
@@ -2520,6 +2522,312 @@ public class CommandPlot extends BaseCommand {
             Cell cell = JailManager.getCell(cellId);
             cell.setLocation(player.getLocation().toBlockLocation());
             Metropolis.sendMessage(player, "messages.cell.updated", "%id%", String.valueOf(cellId));
+        }
+    }
+
+
+    @Subcommand("leaderboard|lb")
+    public static void onLeaderboard(Player player) {
+        Metropolis.sendMessage(player, "messages.syntax.plot.leaderboard");
+    }
+
+    @Subcommand("leaderboard|lb")
+    public class LeaderboardCommands extends BaseCommand {
+
+        @Subcommand("start")
+        @CommandCompletion("@leaderboardTypes")
+        public void onStart(Player player, String type) {
+            Plot plot = Utilities.hasPlotPermissions(player, "metropolis.plot.leaderboard.start", Role.ASSISTANT, true);
+            if (plot == null) {
+                return;
+            }
+            if (plot.getCity().isReserve()) {
+                Metropolis.sendMessage(player, "messages.error.city.reserve");
+                return;
+            }
+            if (PlotDatabase.leaderboardExists(plot.getPlotId())) {
+                Metropolis.sendMessage(player, "messages.error.plot.leaderboard.alreadyExists");
+                return;
+            }
+            if (!type.equalsIgnoreCase("place") && !type.equalsIgnoreCase("break") && !type.equalsIgnoreCase("mobs")) {
+                Metropolis.sendMessage(player, "messages.error.plot.leaderboard.invalidType");
+                return;
+            }
+            Metropolis.plotLeaderboards.put(plot, PlotDatabase.startLeaderboard(plot, type.toUpperCase(), player));
+            Metropolis.plotStandings.put(plot, new ArrayList<>());
+            plot.setLeaderboard(true);
+            plot.setLeaderboardShown(true);
+            Metropolis.sendMessage(player, "messages.plot.leaderboard.started", "%type%", type.toUpperCase());
+        }
+
+        @Subcommand("erase")
+        public void onErase(Player player) {
+            Plot plot = Utilities.hasPlotPermissions(player, "metropolis.plot.leaderboard.erase", Role.ASSISTANT, true);
+            if (plot == null) {
+                return;
+            }
+            if (plot.getCity().isReserve()) {
+                Metropolis.sendMessage(player, "messages.error.city.reserve");
+                return;
+            }
+            if (!plot.isHasLeaderboard()) {
+                Metropolis.sendMessage(player, "messages.error.plot.leaderboard.notStarted");
+                return;
+            }
+            PlotDatabase.eraseLeaderboard(plot);
+            Metropolis.sendMessage(player, "messages.plot.leaderboard.erased");
+        }
+
+        @Subcommand("toggle")
+        public void onToggle(Player player) {
+            Plot plot = Utilities.hasPlotPermissions(player, "metropolis.plot.leaderboard.toggle", Role.ASSISTANT, true);
+            if (plot == null) {
+                return;
+            }
+            if (plot.getCity().isReserve()) {
+                Metropolis.sendMessage(player, "messages.error.city.reserve");
+                return;
+            }
+            if (!plot.isHasLeaderboard()) {
+                Metropolis.sendMessage(player, "messages.error.plot.leaderboard.notStarted");
+                return;
+            }
+            if (plot.isLeaderboardShown()) {
+                plot.setLeaderboardShown(false);
+                Metropolis.sendMessage(player, "messages.plot.leaderboard.hidden");
+            } else {
+                plot.setLeaderboardShown(true);
+                Metropolis.sendMessage(player, "messages.plot.leaderboard.shown");
+            }
+        }
+
+        @Subcommand("list")
+        public void onList(Player player, @Default("1") int page) {
+            Plot plot = Metropolis.playerInPlot.get(player.getUniqueId());
+            if (plot == null) {
+                Metropolis.sendMessage(player, "messages.error.plot.notInPlot");
+                return;
+            }
+            List<Standing> standings = Metropolis.plotStandings.get(plot);
+            if (standings == null || standings.isEmpty()) {
+                Metropolis.sendMessage(player, "messages.error.plot.leaderboard.notStarted");
+                return;
+            }
+            standings.sort((s1, s2) -> Integer.compare(s2.getCount(), s1.getCount()));
+
+            int itemsPerPage = 8;
+            int start = (page - 1) * itemsPerPage;
+            int end = Math.min(page * itemsPerPage, standings.size());
+
+            if (start >= standings.size()) {
+                Metropolis.sendMessage(player, "messages.error.plot.leaderboard.notEnoughPages");
+                return;
+            }
+            Leaderboard leaderboard = Metropolis.plotLeaderboards.get(plot);
+            String type;
+            if (leaderboard.getType().equals("place") || leaderboard.getType().equals("break")) {
+                type = Metropolis.getMessage("messages.plot.scoreboard.leaderboardType.block");
+            } else {
+                type = Metropolis.getMessage("messages.plot.scoreboard.leaderboardType.mobs");
+            }
+
+            Metropolis.sendMessage(player, "messages.plot.leaderboard.list.header", "%start%", String.valueOf(start + 1), "%end%", String.valueOf(((int) Math.ceil(((double) standings.size()) / ((double) itemsPerPage)))), "%next%", String.valueOf(page + 1), "%previous%", String.valueOf(page - 1));
+            for (int i = start; i < end; i++) {
+                Standing standing = standings.get(i);
+                MPlayer mPlayer = ApiedAPI.getPlayer(standing.getPlayerUUID());
+                if (mPlayer == null) {
+                    continue;
+                }
+                Metropolis.sendMessage(player, "messages.plot.leaderboard.list.entry", "%position%", String.valueOf(i+1), "%player%", mPlayer.getName(), "%count%", Utilities.formattedMoney(standing.getCount()), "%type%", type);
+            }
+        }
+
+        @Subcommand("info")
+        public void onInfo(Player player) {
+            if (!player.hasPermission("metropolis.plot.leaderboard.info")) {
+                Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                return;
+            }
+            Plot plot = Metropolis.playerInPlot.get(player.getUniqueId());
+            if (plot == null) {
+                Metropolis.sendMessage(player, "messages.error.plot.notInPlot");
+                return;
+            }
+            if (!plot.isHasLeaderboard()) {
+                Metropolis.sendMessage(player, "messages.error.plot.leaderboard.notStarted");
+                return;
+            }
+            Leaderboard leaderboard = Metropolis.plotLeaderboards.get(plot);
+            MPlayer mPlayer = ApiedAPI.getPlayer(leaderboard.getCreatorUUID());
+            if (mPlayer == null) {
+                return;
+            }
+            Metropolis.sendMessage(player, "messages.plot.leaderboard.info", "%type%", leaderboard.getType(),"%creation%", DateUtil.niceDate(leaderboard.getCreateDate()), "%player%", mPlayer.getName(), "%count%", Utilities.formattedMoney(PlotDatabase.getTotalStanding(plot.getPlotId())), "%entries%", String.valueOf(PlotDatabase.getStandingEntries(plot.getPlotId())));
+        }
+
+        @Subcommand("stop")
+        public void onStop(Player player) {
+            Plot plot = Utilities.hasPlotPermissions(player, "metropolis.plot.leaderboard.stop", Role.ASSISTANT, true);
+            if (plot == null) {
+                return;
+            }
+            if (plot.getCity().isReserve()) {
+                Metropolis.sendMessage(player, "messages.error.city.reserve");
+                return;
+            }
+            if (!plot.isHasLeaderboard()) {
+                Metropolis.sendMessage(player, "messages.error.plot.leaderboard.notStarted");
+                return;
+            }
+            PlotDatabase.removeLeaderboard(plot.getPlotId());
+            plot.setLeaderboard(false);
+            plot.setLeaderboardShown(false);
+            Metropolis.plotStandings.remove(plot);
+            Metropolis.plotLeaderboards.remove(plot);
+            Utilities.sendCityScoreboard(player, plot.getCity(), plot);
+            Metropolis.sendMessage(player, "messages.plot.leaderboard.stopped");
+        }
+
+        @Subcommand("condition list")
+        public void onCondition(Player player) {
+            if (!player.hasPermission("metropolis.plot.leaderboard.condition.list")) {
+                Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                return;
+            }
+            Plot plot = Metropolis.playerInPlot.get(player.getUniqueId());
+            if (plot == null) {
+                Metropolis.sendMessage(player, "messages.error.plot.notInPlot");
+                return;
+            }
+            if (plot.getCity().isReserve()) {
+                Metropolis.sendMessage(player, "messages.error.city.reserve");
+                return;
+            }
+            if (!plot.isHasLeaderboard()) {
+                Metropolis.sendMessage(player, "messages.error.plot.leaderboard.notStarted");
+                return;
+            }
+            Leaderboard leaderboard = Metropolis.plotLeaderboards.get(plot);
+            if (leaderboard.getConditions() == null) {
+                Metropolis.sendMessage(player, "messages.error.plot.leaderboard.noConditions");
+                return;
+            }
+            boolean isBlock = leaderboard.getType().equalsIgnoreCase("place") || leaderboard.getType().equalsIgnoreCase("break");
+            List<String> conditions = Arrays.asList(leaderboard.getConditions());
+            List<String> convertedConditions = new ArrayList<>();
+
+            if (isBlock) {
+                for (String condition : conditions) {
+                    try {
+                        convertedConditions.add(Material.valueOf(condition).getKey().getKey());
+                    } catch (IllegalArgumentException ignored) {
+
+                    }
+                }
+            } else if (leaderboard.getType().equalsIgnoreCase("mobs")) {
+                for (String condition : conditions) {
+                    try {
+                        convertedConditions.add(EntityType.valueOf(condition).getKey().getKey());
+                    } catch (IllegalArgumentException ignored) {
+
+                    }
+                }
+            }
+
+            Metropolis.sendMessage(player, "messages.plot.leaderboard.condition.list", "%conditions%", Utilities.listConditions(convertedConditions, isBlock));
+        }
+
+        @Subcommand("condition add")
+        @CommandCompletion("@leaderboardAConditions")
+        public void onConditionAdd(Player player, String condition) {
+            Plot plot = Utilities.hasPlotPermissions(player, "metropolis.plot.leaderboard.condition.add", Role.ASSISTANT, true);
+            if (plot == null) {
+                return;
+            }
+            if (plot.getCity().isReserve()) {
+                Metropolis.sendMessage(player, "messages.error.city.reserve");
+                return;
+            }
+            if (!plot.isHasLeaderboard()) {
+                Metropolis.sendMessage(player, "messages.error.plot.leaderboard.notStarted");
+                return;
+            }
+
+            Leaderboard leaderboard = Metropolis.plotLeaderboards.get(plot);
+            List<String> conditions = new ArrayList<>(Arrays.asList(leaderboard.getConditions()));
+            boolean isBlock = leaderboard.getType().equalsIgnoreCase("place") || leaderboard.getType().equalsIgnoreCase("break");
+            if (conditions.contains(condition)) {
+                Metropolis.sendMessage(player, "messages.error.plot.leaderboard.condition.alreadyExists");
+                return;
+            }
+
+            List<String> blockFilter = Metropolis.configuration.getLeaderboardBlockFilter();
+            List<String> mobFilter = Metropolis.configuration.getLeaderboardMobFilter();
+
+            if (blockFilter.contains(condition) &&  isBlock) {
+                Metropolis.sendMessage(player, "messages.error.plot.leaderboard.condition.blacklisted");
+                return;
+            } else if (mobFilter.contains(condition) && !isBlock) {
+                Metropolis.sendMessage(player, "messages.error.plot.leaderboard.condition.blacklisted");
+                return;
+
+            }
+
+            boolean isValidBlock = Arrays.stream(Material.values()).map(Material::name).anyMatch(condition::equalsIgnoreCase);
+            boolean isValidMob = Arrays.stream(EntityType.values()).filter(EntityType::isAlive).map(EntityType::name).anyMatch(condition::equalsIgnoreCase);
+
+            if (!isValidBlock && isBlock) {
+                Metropolis.sendMessage(player, "messages.error.plot.leaderboard.condition.invalid");
+                return;
+            } else if (!isValidMob && !isBlock) {
+                Metropolis.sendMessage(player, "messages.error.plot.leaderboard.condition.invalid");
+                return;
+            }
+
+            leaderboard.addCondition(condition);
+            PlotDatabase.updateLeaderboard(leaderboard, plot.getPlotId());
+            if (isBlock) {
+                Material material = Material.valueOf(condition);
+                Metropolis.sendMessage(player, "messages.plot.leaderboard.condition.addedBlock", "%block%", material.getKey().getKey());
+            } else {
+                EntityType entityType = EntityType.valueOf(condition);
+                Metropolis.sendMessage(player, "messages.plot.leaderboard.condition.addedMob", "%mob%", entityType.getKey().getKey());
+            }
+        }
+
+        @Subcommand("condition remove")
+        @CommandCompletion("@leaderboardCConditions")
+        public void onConditionRemove(Player player, String condition) {
+            Plot plot = Utilities.hasPlotPermissions(player, "metropolis.plot.leaderboard.condition.remove", Role.ASSISTANT, true);
+            if (plot == null) {
+                return;
+            }
+            if (plot.getCity().isReserve()) {
+                Metropolis.sendMessage(player, "messages.error.city.reserve");
+                return;
+            }
+            if (!plot.isHasLeaderboard()) {
+                Metropolis.sendMessage(player, "messages.error.plot.leaderboard.notStarted");
+                return;
+            }
+
+            Leaderboard leaderboard = Metropolis.plotLeaderboards.get(plot);
+            List<String> conditions = new ArrayList<>(Arrays.asList(leaderboard.getConditions()));
+
+            if (!conditions.contains(condition)) {
+                Metropolis.sendMessage(player, "messages.error.plot.leaderboard.condition.notExists");
+                return;
+            }
+
+            leaderboard.removeCondition(condition);
+            PlotDatabase.updateLeaderboard(leaderboard, plot.getPlotId());
+            if (leaderboard.getType().equalsIgnoreCase("place") || leaderboard.getType().equalsIgnoreCase("break")) {
+                Material material = Material.valueOf(condition);
+                Metropolis.sendMessage(player, "messages.plot.leaderboard.condition.removedBlock", "%block%", material.getKey().getKey());
+            } else {
+                EntityType entityType = EntityType.valueOf(condition);
+                Metropolis.sendMessage(player, "messages.plot.leaderboard.condition.removedMob", "%mob%", entityType.getKey().getKey());
+            }
         }
     }
 }

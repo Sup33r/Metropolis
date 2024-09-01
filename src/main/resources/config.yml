@@ -48,3 +48,7 @@ settings:
   jail:
     dailypayback: 100
     prisonerpayback: 100
+
+  leaderboard:
+    blockfilter:
+    mobfilter:

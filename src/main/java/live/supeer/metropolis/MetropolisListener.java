@@ -15,6 +15,9 @@ import live.supeer.metropolis.utils.Utilities;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.block.Sign;
+import org.bukkit.entity.EntityType;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.*;
@@ -495,47 +498,6 @@ public class MetropolisListener implements Listener {
     }
 
     @EventHandler
-    public void onBlockPlace(BlockPlaceEvent event) {
-
-        Player player = event.getPlayer();
-        if (event.getBlock().getType().equals(Material.DIRT)) {
-            if (CommandCity.blockEnabled.contains(player)) {
-                event.setCancelled(true);
-                if (CityDatabase.getClaim(event.getBlockPlaced().getLocation()) == null) {
-                    Metropolis.sendMessage(player, "messages.error.permissionDenied");
-                    return;
-                }
-                City city = CityDatabase.getCityByClaim(event.getBlockPlaced().getLocation());
-                Role role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
-                assert role != null;
-                Plot plot = PlotDatabase.getCityPlot(city, player.getLocation());
-                if (plot != null) {
-                    if (plot.getPlotOwnerUUID().equals(player.getUniqueId().toString()) || role.getPermissionLevel() > Role.ASSISTANT.getPermissionLevel()) {
-                        coreProtectPlaceCheck(player, event);
-                        return;
-                    } else {
-                        Metropolis.sendMessage(
-                                player,
-                                "messages.error.city.permissionDenied",
-                                "%cityname%",
-                                city.getCityName());
-                        return;
-                    }
-                }
-                boolean isAssistant = Objects.equals(role, Role.ASSISTANT)
-                        || Objects.equals(role, Role.VICE_MAYOR)
-                        || Objects.equals(role, Role.MAYOR);
-                if (!isAssistant) {
-                    Metropolis.sendMessage(
-                            player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
-                    return;
-                }
-                coreProtectPlaceCheck(player, event);
-            }
-        }
-    }
-
-    @EventHandler
     public void onMove(PlayerMoveEvent event) {
 
         Player player = event.getPlayer();
@@ -859,5 +821,172 @@ public class MetropolisListener implements Listener {
         savedBlockHistory.remove(player.getUniqueId());
         savedBlockHistory.put(
                 player.getUniqueId(), getCoreProtect().blockLookup(event.getBlockPlaced(), 0));
+    }
+
+    @EventHandler
+    public void onBlockBreak(BlockBreakEvent event) {
+        Player player = event.getPlayer();
+        City city = CityDatabase.getCityByClaim(event.getBlock().getLocation());
+        if (city == null) {
+            return;
+        }
+        Plot plot = PlotDatabase.getCityPlot(city, event.getBlock().getLocation());
+        if (plot == null || !plot.isHasLeaderboard()) {
+            return;
+        }
+
+        Leaderboard leaderboard = Metropolis.plotLeaderboards.get(plot);
+        if (leaderboard == null || !leaderboard.getType().equalsIgnoreCase("break")) {
+            return;
+        }
+        List<String> conditions;
+        if (leaderboard.getConditions() != null) {
+            conditions = Arrays.asList(leaderboard.getConditions());
+        } else {
+            conditions = new ArrayList<>();
+        }
+        Material blockType = event.getBlock().getType();
+        if (conditions.isEmpty() || conditions.contains(blockType.name())) {
+            List<Standing> standings = Metropolis.plotStandings.get(plot);
+            Optional<Standing> standingOpt = standings.stream().filter(s -> s.getPlayerUUID().equals(player.getUniqueId())).findFirst();
+
+            Standing standing;
+            if (standingOpt.isPresent()) {
+                standing = standingOpt.get();
+                standing.incrementCount();
+                standings.removeIf(s -> s.getPlayerUUID().equals(player.getUniqueId()));
+            } else {
+                standing = new Standing(plot.getPlotId(), player.getUniqueId(), 1);
+            }
+            standings.add(standing);
+            for (Player player2 : plot.playersInPlot()) {
+                Utilities.sendCityScoreboard(player2, city, plot);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onBlockPlace(BlockPlaceEvent event) {
+
+        Player player = event.getPlayer();
+        if (event.getBlock().getType().equals(Material.DIRT)) {
+            if (CommandCity.blockEnabled.contains(player)) {
+                event.setCancelled(true);
+                if (CityDatabase.getClaim(event.getBlockPlaced().getLocation()) == null) {
+                    Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                    return;
+                }
+                City city = CityDatabase.getCityByClaim(event.getBlockPlaced().getLocation());
+                Role role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
+                assert role != null;
+                Plot plot = PlotDatabase.getCityPlot(city, player.getLocation());
+                if (plot != null) {
+                    if (plot.getPlotOwnerUUID().equals(player.getUniqueId().toString()) || role.getPermissionLevel() > Role.ASSISTANT.getPermissionLevel()) {
+                        coreProtectPlaceCheck(player, event);
+                        return;
+                    } else {
+                        Metropolis.sendMessage(
+                                player,
+                                "messages.error.city.permissionDenied",
+                                "%cityname%",
+                                city.getCityName());
+                        return;
+                    }
+                }
+                boolean isAssistant = Objects.equals(role, Role.ASSISTANT)
+                        || Objects.equals(role, Role.VICE_MAYOR)
+                        || Objects.equals(role, Role.MAYOR);
+                if (!isAssistant) {
+                    Metropolis.sendMessage(
+                            player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
+                    return;
+                }
+                coreProtectPlaceCheck(player, event);
+                return;
+            }
+        }
+
+        City city = CityDatabase.getCityByClaim(event.getBlock().getLocation());
+        if (city == null) {
+            return;
+        }
+        Plot plot = PlotDatabase.getCityPlot(city, event.getBlock().getLocation());
+        if (plot == null || !plot.isHasLeaderboard()) {
+            return;
+        }
+
+        Leaderboard leaderboard = Metropolis.plotLeaderboards.get(plot);
+        if (leaderboard == null || !leaderboard.getType().equalsIgnoreCase("place")) {
+            return;
+        }
+        List<String> conditions;
+        if (leaderboard.getConditions() != null) {
+            conditions = Arrays.asList(leaderboard.getConditions());
+        } else {
+            conditions = new ArrayList<>();
+        }
+        Material blockType = event.getBlock().getType();
+        if (conditions.isEmpty() || conditions.contains(blockType.name())) {
+            List<Standing> standings = Metropolis.plotStandings.get(plot);
+            Optional<Standing> standingOpt = standings.stream().filter(s -> s.getPlayerUUID().equals(player.getUniqueId())).findFirst();
+
+            Standing standing;
+            if (standingOpt.isPresent()) {
+                standing = standingOpt.get();
+                standing.incrementCount();
+                standings.removeIf(s -> s.getPlayerUUID().equals(player.getUniqueId()));
+            } else {
+                standing = new Standing(plot.getPlotId(), player.getUniqueId(), 1);
+            }
+            standings.add(standing);
+            for (Player player2 : plot.playersInPlot()) {
+                Utilities.sendCityScoreboard(player2, city, plot);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onEntityKill(EntityDeathEvent event) {
+        if (event.getEntity().getKiller() == null) {
+            return;
+        }
+        Player player = event.getEntity().getKiller();
+        City city = CityDatabase.getCityByClaim(player.getLocation().toBlockLocation());
+        if (city == null) {
+            return;
+        }
+        Plot plot = PlotDatabase.getCityPlot(city, player.getLocation().toBlockLocation());
+        if (plot == null || !plot.isHasLeaderboard()) {
+            return;
+        }
+
+        Leaderboard leaderboard = Metropolis.plotLeaderboards.get(plot);
+        if (leaderboard == null || !leaderboard.getType().equalsIgnoreCase("mobs")) {
+            return;
+        }
+        List<String> conditions;
+        if (leaderboard.getConditions() != null) {
+            conditions = Arrays.asList(leaderboard.getConditions());
+        } else {
+            conditions = new ArrayList<>();
+        }
+        EntityType entityType = event.getEntityType();
+        if (conditions.isEmpty() || conditions.contains(entityType.name())) {
+            List<Standing> standings = Metropolis.plotStandings.get(plot);
+            Optional<Standing> standingOpt = standings.stream().filter(s -> s.getPlayerUUID().equals(player.getUniqueId())).findFirst();
+
+            Standing standing;
+            if (standingOpt.isPresent()) {
+                standing = standingOpt.get();
+                standing.incrementCount();
+                standings.removeIf(s -> s.getPlayerUUID().equals(player.getUniqueId()));
+            } else {
+                standing = new Standing(plot.getPlotId(), player.getUniqueId(), 1);
+            }
+            standings.add(standing);
+            for (Player player2 : plot.playersInPlot()) {
+                Utilities.sendCityScoreboard(player2, city, plot);
+            }
+        }
     }
 }

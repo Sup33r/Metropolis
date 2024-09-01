@@ -10,22 +10,28 @@ import live.supeer.metropolis.city.*;
 import live.supeer.metropolis.command.*;
 import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.plot.Plot;
+import live.supeer.metropolis.plot.PlotDatabase;
 import live.supeer.metropolis.utils.DateUtil;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public final class Metropolis extends JavaPlugin {
     public static HashMap<UUID, City> playerInCity = new HashMap<>();
     public static HashMap<UUID, Plot> playerInPlot = new HashMap<>();
     public static HashMap<UUID, District> playerInDistrict = new HashMap<>();
+    public static HashMap<Plot,Leaderboard> plotLeaderboards = new HashMap<>();
+    public static HashMap<Plot, List<Standing>> plotStandings = new HashMap<>();
     public static List<UUID> scheduledForUnban = new ArrayList<>();
     public Logger logger = null;
     public static MetropolisConfiguration configuration;
@@ -75,6 +81,9 @@ public final class Metropolis extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        for (List<Standing> standings : plotStandings.values()) {
+            PlotDatabase.storeStandings(standings);
+        }
         DB.close();
     }
 
@@ -128,6 +137,54 @@ public final class Metropolis extends JavaPlugin {
         manager.getCommandCompletions().registerAsyncCompletion("cityGo1", c -> ImmutableList.of("delete", "set"));
         manager.getCommandCompletions().registerAsyncCompletion("cityGo2", c -> ImmutableList.of("displayname", "accesslevel","name"));
         manager.getCommandCompletions().registerAsyncCompletion("taxLevel", c -> ImmutableList.of("member", "inviter", "assistant", "vicemayor", "mayor", "all", "-"));
+        manager.getCommandCompletions().registerAsyncCompletion("leaderboardTypes", c -> ImmutableList.of("place", "break", "mobs"));
+        manager.getCommandCompletions().registerAsyncCompletion("leaderboardCConditions", c -> {
+            Player player = c.getPlayer();
+            if (player == null) {
+                return Collections.emptyList();
+            }
+            Plot plot = playerInPlot.get(player.getUniqueId());
+            if (plot == null) {
+                return Collections.emptyList();
+            }
+            Leaderboard leaderboard = plotLeaderboards.get(plot);
+            if (leaderboard == null) {
+                return Collections.emptyList();
+            }
+            return Arrays.asList(leaderboard.getConditions());
+        });
+        manager.getCommandCompletions().registerAsyncCompletion("leaderboardAConditions", c -> {
+            Player player = c.getPlayer();
+            if (player == null) {
+                return Collections.emptyList();
+            }
+            Plot plot = playerInPlot.get(player.getUniqueId());
+            if (plot == null) {
+                return Collections.emptyList();
+            }
+            Leaderboard leaderboard = plotLeaderboards.get(plot);
+            if (leaderboard == null) {
+                return Collections.emptyList();
+            }
+            if (leaderboard.getType().equals("place") || leaderboard.getType().equals("break")) {
+                List<String> allBlocks = Arrays.stream(Material.values())
+                        .filter(Material::isBlock)
+                        .map(Material::name)
+                        .collect(Collectors.toList());
+                List<String> blockFilter = Metropolis.configuration.getLeaderboardBlockFilter();
+                allBlocks.removeAll(blockFilter);
+                return allBlocks;
+            } else if (leaderboard.getType().equals("kill")) {
+                List<String> allMobs = Arrays.stream(EntityType.values())
+                        .filter(EntityType::isAlive)
+                        .map(EntityType::name)
+                        .collect(Collectors.toList());
+                List<String> mobFilter = Metropolis.configuration.getLeaderboardMobFilter();
+                allMobs.removeAll(mobFilter);
+                return allMobs;
+            }
+            return Collections.emptyList();
+        });
         manager.getCommandCompletions().registerAsyncCompletion("cityGoes", c -> {
             Player player = c.getPlayer();
             if (player == null) {

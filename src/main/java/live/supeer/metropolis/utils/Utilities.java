@@ -1,11 +1,17 @@
 package live.supeer.metropolis.utils;
 
 import fr.mrmicky.fastboard.FastBoard;
+import live.supeer.apied.ApiedAPI;
+import live.supeer.apied.MPlayer;
+import live.supeer.metropolis.Leaderboard;
 import live.supeer.metropolis.Metropolis;
+import live.supeer.metropolis.Standing;
 import live.supeer.metropolis.city.*;
 import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.plot.PlotDatabase;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -13,6 +19,7 @@ import org.locationtech.jts.geom.Polygon;
 
 import java.text.NumberFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 public class Utilities {
@@ -272,6 +279,7 @@ public class Utilities {
         board.updateTitle(getFormattedTitle(city.getCityName()));
         board.updateLine(i, " ");
         i = i + 1;
+
         if (district != null) {
             board.updateLine(i, Metropolis.getMessage("messages.city.scoreboard.district"));
             board.updateLine(i + 1, "§a" + district.getDistrictName());
@@ -279,6 +287,7 @@ public class Utilities {
             board.updateLine(i, " ");
             i = i + 1;
         }
+
         if (plot != null) {
             if (plot.hasFlag('c')) {
                 board.updateLine(i, Metropolis.getMessage("messages.city.scoreboard.meeting"));
@@ -293,33 +302,57 @@ public class Utilities {
             i = i + 2;
             board.updateLine(i, " ");
             i = i + 1;
+
             if (plot.getPlotType() != null) {
                 board.updateLine(i, Metropolis.getMessage("messages.city.scoreboard.type"));
                 String type = plot.getPlotType();
-                if (type.equals("church")) {
-                    type = Metropolis.getMessage("messages.plot.type.church");
-                }
-                if (type.equals("farm")) {
-                    type = Metropolis.getMessage("messages.plot.type.farm");
-                }
-                if (type.equals("shop")) {
-                    type = Metropolis.getMessage("messages.plot.type.shop");
-                }
-                if (type.equals("vacation")) {
-                    type = Metropolis.getMessage("messages.plot.type.vacation");
-                }
-                if (type.equals("jail")) {
-                    type = Metropolis.getMessage("messages.plot.type.jail");
+                switch (type) {
+                    case "church" -> type = Metropolis.getMessage("messages.plot.type.church");
+                    case "farm" -> type = Metropolis.getMessage("messages.plot.type.farm");
+                    case "shop" -> type = Metropolis.getMessage("messages.plot.type.shop");
+                    case "vacation" -> type = Metropolis.getMessage("messages.plot.type.vacation");
+                    case "jail" -> type = Metropolis.getMessage("messages.plot.type.jail");
                 }
                 board.updateLine(i + 1, "§a" + type);
                 board.updateLine(i + 2, " ");
                 i = i + 3;
             }
+
             if (plot.getPlotOwner() != null) {
                 board.updateLine(i, Metropolis.getMessage("messages.city.scoreboard.owner"));
                 board.updateLine(i + 1, "§a" + plot.getPlotOwner());
                 board.updateLine(i + 2, " ");
                 i = i + 3;
+            }
+
+            // Leaderboard section
+            if (plot.isLeaderboardShown()) {
+                Leaderboard leaderboard = Metropolis.plotLeaderboards.get(plot);
+                List<Standing> topThree = Utilities.getTopThree(plot);
+                board.updateLine(i, Metropolis.getMessage("messages.plot.scoreboard.leaderboard"));
+                i++;
+                String type = "";
+                if (leaderboard.getType().equalsIgnoreCase("place") || leaderboard.getType().equalsIgnoreCase("break")) {
+                    type = Metropolis.getMessage("messages.plot.scoreboard.leaderboardType.blocks");
+                } else if (leaderboard.getType().equalsIgnoreCase("mobs")) {
+                    type = Metropolis.getMessage("messages.plot.scoreboard.leaderboardType.mobs");
+                }
+                if (!topThree.isEmpty()) {
+                    int rank = 1;
+                    for (Standing standing : topThree) {
+                        MPlayer mPlayer = ApiedAPI.getPlayer(standing.getPlayerUUID());
+                        if (mPlayer == null) {
+                            continue;
+                        }
+                        board.updateLine(i, Metropolis.getMessage("messages.plot.scoreboard.leaderboardLine", "%position%", String.valueOf(rank), "%player%", mPlayer.getName(), "%score%", formattedMoney(standing.getCount()), "%type%", type));
+                        i++;
+                        rank++;
+                    }
+                    i++; // Space after leaderboard
+                } else {
+                    board.updateLine(i, Metropolis.getMessage("messages.plot.scoreboard.noStandings"));
+                    i++;
+                }
             }
             if (plot.isForSale()) {
                 board.updateLine(i, Metropolis.getMessage("messages.city.scoreboard.price"));
@@ -328,6 +361,7 @@ public class Utilities {
                     board.updateLine(i + 2, "§aTR: " + Utilities.formattedMoney(plot.getPlotRent()) + " minemynt");
                 }
             }
+
             if (board.getLine(board.size() - 1).equals(" ")) {
                 board.removeLine(board.size() - 1);
             }
@@ -357,7 +391,6 @@ public class Utilities {
         }
         City city = Metropolis.playerInCity.get(player.getUniqueId());
         Plot plot = Metropolis.playerInPlot.get(player.getUniqueId());
-        District district = Metropolis.playerInDistrict.get(player.getUniqueId());
         sendCityScoreboard(player, city, plot);
     }
     public static City hasCityPermissions(Player player, String permission, Role targetRole) {
@@ -651,5 +684,40 @@ public class Utilities {
                 || material == Material.RED_SHULKER_BOX
                 || material == Material.WHITE_SHULKER_BOX
                 || material == Material.YELLOW_SHULKER_BOX;
+    }
+
+    public static String[] stringToStringArray(String string) {
+        if (string == null || string.isEmpty()) {
+            return new String[0];
+        }
+        return string.split(",");
+    }
+
+    public static String stringArrayToString(String[] strings) {
+        StringBuilder string = new StringBuilder();
+        for (String s : strings) {
+            string.append(s).append(",");
+        }
+        return string.toString();
+    }
+
+    public static List<Standing> getTopThree(Plot plot) {
+        List<Standing> standings = new ArrayList<>(Metropolis.plotStandings.get(plot));
+        standings.sort((s1, s2) -> Integer.compare(s2.getCount(), s1.getCount()));
+        return standings.stream().limit(3).collect(Collectors.toList());
+    }
+
+    public static String listConditions(List<String> conditions, boolean block) {
+        StringBuilder messageBuilder = new StringBuilder();
+        for (String condition : conditions) {
+            if (block){
+                messageBuilder.append("<dark_green><lang:block.minecraft.").append(condition).append("><green>, ");
+            } else {
+                messageBuilder.append("<dark_green><lang:entity.minecraft.").append(condition).append("><green>, ");
+            }
+        }
+
+        String message = messageBuilder.toString();
+        return message.substring(0, message.length() - 8);
     }
 }

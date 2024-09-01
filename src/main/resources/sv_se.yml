@@ -74,6 +74,7 @@ messages:
         withdraw: "<gray>Syntax: /city bank -<underlined>belopp<reset><gray> <underlined>anledning"
         bank: "<gray>Syntax: /city bank"
     plot:
+      leaderboard: "<gray>Syntax: /plot leaderboard start <underlined>typ</underlined>\n<gray>Syntax: /plot leaderboard erase \n<gray>Syntax: /plot leaderboard toggle\n<gray>Syntax: /plot leaderboard list\n<gray>Syntax: /plot leaderboard info\n<gray>Syntax: /plot leaderboard stop\n<gray>Syntax: /plot leaderboard condition list\n<gray>Syntax: /plot leaderboard condition add <underlined>villkor</underlined>\n<gray>Syntax: /plot leaderboard condition remove <underlined>villkor</underlined>"
       toggle: "<gray>Syntax: /plot toggle animals\n<gray>Syntax: /plot toggle meeting\n<gray>Syntax: /plot toggle mobs\n<gray>Syntax: /plot toggle k"
       set:
         rent: "<gray>Syntax: /plot set rent <underlined>tomträttsavgäld\n<gray>Syntax: /plot set rent -"
@@ -197,6 +198,11 @@ messages:
           outsideCity: "<yellow>%cityname% <gray>| <red>Du kan inte sätta en startpunkt utanför staden."
     permissionDenied: "<red>Åtkomst nekad."
     plot:
+      leaderboard:
+        noConditions: "<red>Det finns inga villkor på topplistan."
+        notStarted: "<red>Det finns ingen topplista på tomten."
+        alreadyExists: "<red>Det finns redan en topplista på tomten."
+        invalidType: "<red>Topplistetypen är ogiltig."
       expand:
         invalidHeight: "<red>Du måste ändra höjden med ett positivt heltal, exklusive 0."
       market:
@@ -248,6 +254,29 @@ messages:
   save:
     membership: "<green>Din hemstad är nu %cityname%."
   plot:
+    scoreboard:
+      noStandings: "<green>Inga resultat att visa."
+      leaderboardType:
+        blocks: "<dark_green>block"
+        kills: "<dark_green>mördade"
+      leaderboard: "<dark_green><bold>Tomttopplista:</bold></dark_green>"
+      leaderboardLine: "<dark_green>%position%.</dark_green> <green>%player%</green> <dark_green>-</dark_green> <green>%score%</green> %type%"
+    leaderboard:
+      condition:
+        removedMob: "<dark_green><lang:entity.minecraft.%mob%></dark_green> <green>har tagits bort som villkor på topplistan."
+        removedBlock: "<dark_green><lang:block.minecraft.%block%></dark_green> <green>har tagits bort som villkor på topplistan."
+        addedMob: "<dark_green><lang:entity.minecraft.%mob%></dark_green> <green>har lagts till som villkor på topplistan."
+        addedBlock: "<dark_green><lang:block.minecraft.%block%></dark_green> <green>har lagts till som villkor på topplistan."
+        list: "<dark_green>--- <green>Villkor: <dark_green>---\n<dark_green>%conditions%"
+      stopped: "<green>Topplistan har avslutats."
+      info: "<dark_green>--- <green>Topplista: <dark_green>---\n<dark_green>Typ:<green> %type%\n<dark_green>Startades:<green> %creation% <dark_green>av %player%\n<dark_green>Antal deltagare:<green> %entries%\n<dark_green>Antal händelser:<green> %count%"
+      list:
+        entry: "<dark_green>%position%.</dark_green> <green>%player%</green> <dark_green>-</dark_green> <green>%score%</green> %type%"
+        header: "<dark_green>--- <green>Tomttopplista (sida <click:run_command:/plot leaderboard list %previous%><bold>%start%</bold></click> av <click:run_command:/plot leaderboard list %next%><bold>%end%</bold></click>)</green> <dark_green>---"
+      hidden: "<green>Topplistan är nu dold från sidolistan."
+      shown: "<green>Topplistan är nu synlig på sidolistan."
+      erased: "<green>Alla resultat på topplistan har raderats."
+      started: "<green>En topplista har startats på tomten, av typen %type%."
     share:
         success: "<yellow>%cityname% <gray>| <green>Tomten delades med %player%."
         remove: "<yellow>%cityname% <gray>| <green>Tomten delas inte längre med %player%."

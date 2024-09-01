@@ -2,6 +2,8 @@ package live.supeer.metropolis;
 
 import lombok.Getter;
 
+import java.util.List;
+
 @Getter
 public class MetropolisConfiguration {
 
@@ -46,6 +48,9 @@ public class MetropolisConfiguration {
 
     private final double cityMaxTax;
 
+    private final List<String> leaderboardMobFilter;
+    private final List<String> leaderboardBlockFilter;
+
     MetropolisConfiguration(Metropolis plugin) {
         plugin.saveDefaultConfig();
         plugin.reloadConfig();
@@ -89,5 +94,8 @@ public class MetropolisConfiguration {
 
         prisonerPayback = plugin.getConfig().getInt("settings.jail.prisonerpayback");
         dailyPayback = plugin.getConfig().getInt("settings.jail.dailypayback");
+
+        leaderboardMobFilter = plugin.getConfig().getStringList("leaderboard.mobfilter");
+        leaderboardBlockFilter = plugin.getConfig().getStringList("leaderboard.blockfilter");
     }
 }

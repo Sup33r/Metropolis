@@ -3,12 +3,15 @@ package live.supeer.metropolis.city;
 import co.aikar.idb.DB;
 import co.aikar.idb.DbRow;
 import live.supeer.metropolis.Database;
+import live.supeer.metropolis.Leaderboard;
 import live.supeer.metropolis.Metropolis;
+import live.supeer.metropolis.Standing;
 import live.supeer.metropolis.event.CityDeletionEvent;
 import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.utils.DateUtil;
+import live.supeer.metropolis.utils.Utilities;
 import org.bukkit.*;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -19,7 +22,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class CityDatabase {
-    private static final List<City> cities = new ArrayList<>();
+    public static final List<City> cities = new ArrayList<>();
 
     public static void initDBSync() throws SQLException {
         loadCities();
@@ -69,6 +72,7 @@ public class CityDatabase {
         var plots = DB.getResults("SELECT * FROM `mp_plots` WHERE `cityId` = '" + cityId + "';");
         for (DbRow plot : plots) {
             Plot plot1 = new Plot(plot);
+            loadPlotLeaderboard(plot1);
             rCity.addCityPlot(plot1);
         }
     }
@@ -82,6 +86,36 @@ public class CityDatabase {
         }
     }
 
+    private static void loadPlotLeaderboard(Plot plot) {
+        Bukkit.getLogger().warning("Loading plot leaderboard for plot " + plot.getPlotId());
+        try {
+            DbRow result = DB.getFirstRow("SELECT * FROM `mp_leaderboards` WHERE `plotId` = ?", plot.getPlotId());
+            if (result != null) {
+                Metropolis.plotLeaderboards.put(plot, new Leaderboard(UUID.fromString(result.getString("creatorUUID")), result.getLong("createDate"), result.getString("type"), Utilities.stringToStringArray(result.getString("conditions"))));
+                loadPlotStandings(plot);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void loadPlotStandings(Plot plot) {
+        Bukkit.getLogger().warning("Loading plot standings for plot " + plot.getPlotId());
+        List<Standing> plotStandings = new ArrayList<>();
+        try {
+            var standings = DB.getResults("SELECT * FROM `mp_standings` WHERE `plotId` = " + plot.getPlotId() + ";");
+            for (DbRow standing : standings) {
+                plotStandings.add(new Standing(plot.getPlotId(), UUID.fromString(standing.getString("playerUUID")), standing.getInt("count")));
+            }
+            if (!plotStandings.isEmpty()) {
+                Metropolis.plotStandings.put(plot, plotStandings);
+            } else {
+                Metropolis.plotStandings.put(plot, new ArrayList<>());
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static City newCity(String cityName, Player player) {
         try {
