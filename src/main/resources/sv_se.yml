@@ -41,11 +41,17 @@ messages:
     today: "i dag"
   shutdownMessage: "\n<aqua>Servern kommer precis att startas om för underhåll. Vi ses snart igen!\n"
   shutdownMessageCountdown: "\n<aqua>Servern kommer att startas om för underhåll om %time%.\n"
-  shutdownMessageSoon: "\n<aqua>Servern kommer att startas om för underhåll snart.\n"
+  shutdownMessageSoon: "\n<aqua>EnServer ska genomgå en snabb omstart. Vänligen <bold>STÅ STILL</bold>, så teleporteras du snart till väntsalen. Tack!\n"
+
   block:
     enabled: "<green>Blockdataläget är nu aktiverat. Högerklicka med en pinne eller ett jordblock för att få fram blockdatan."
     disabled: "<red>Blockdataläget är nu inaktiverat."
-  teleport: "<green>Teleporterar dig till <dark_green>%to%<green>..."
+  teleport:
+    backOther: "<green>Du har teleporterat %player% tillbaka till deras tidigare position.</green>"
+    failed: "<red>Den pågående teleporteringen avbröts.</red>"
+    hasTeleport: "<red>Du har redan en pågående teleportering.</red>"
+    started: "<red>Stå still!</red> <aqua>Du kommer att teleporteras om %cooldown% sekunder, men endast om du inte rör dig och inte tar skada.</aqua>"
+    success: "<green>Teleporterar dig till</green> <dark_green>%name%</dark_green><green>...</green>"
   list:
     goes: "<dark_green>--- <green>Stadsteleporteringspunkter (sida <bold>%startPage% <reset><green>av <bold>%totalPages%<reset><green>) <dark_green>---"
   syntax:

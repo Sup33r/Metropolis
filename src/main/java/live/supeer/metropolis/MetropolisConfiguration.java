@@ -51,6 +51,8 @@ public class MetropolisConfiguration {
     private final List<String> leaderboardMobFilter;
     private final List<String> leaderboardBlockFilter;
 
+    private final int teleportCooldown;
+
     MetropolisConfiguration(Metropolis plugin) {
         plugin.saveDefaultConfig();
         plugin.reloadConfig();
@@ -97,5 +99,7 @@ public class MetropolisConfiguration {
 
         leaderboardMobFilter = plugin.getConfig().getStringList("leaderboard.mobfilter");
         leaderboardBlockFilter = plugin.getConfig().getStringList("leaderboard.blockfilter");
+
+        teleportCooldown = plugin.getConfig().getInt("settings.teleportcooldown");
     }
 }

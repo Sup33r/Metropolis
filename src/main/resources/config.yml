@@ -49,6 +49,8 @@ settings:
     dailypayback: 100
     prisonerpayback: 100
 
+  teleportcooldown: 3
+
   leaderboard:
     blockfilter:
     mobfilter:

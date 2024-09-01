@@ -31,6 +31,10 @@ public class MetropolisAPI {
         return city.isMember(player.getUniqueId());
     }
 
+    public static boolean isInCity(Location location) {
+        return CityDatabase.getCityByClaim(location) != null;
+    }
+
     public static City getHomeCity(Player player) {
         return HCDatabase.getHomeCityToCity(player.getUniqueId().toString());
     }

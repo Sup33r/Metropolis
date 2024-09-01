@@ -412,9 +412,13 @@ public class CityDatabase {
 
     public static String getCityGoDisplayname(String name, City city) {
         try {
-            var results = DB.getResults("SELECT * FROM `mp_citygoes` WHERE `cityId` = " + city.getCityId() + " AND `goName` = " + Database.sqlString(name) + ";");
-            if (results.size() == 1) {
-                return results.get(0).getString("goNickname");
+            DbRow row  = DB.getFirstRow("SELECT * FROM `mp_citygoes` WHERE `cityId` = " + city.getCityId() + " AND `goName` = " + Database.sqlString(name) + ";");
+            if (row != null) {
+                if (row.getString("goNickname") != null && !row.getString("goNickname").isEmpty()) {
+                    return row.getString("goNickname");
+                } else {
+                    return row.getString("goName");
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();

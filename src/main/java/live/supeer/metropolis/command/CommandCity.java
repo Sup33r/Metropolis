@@ -13,6 +13,7 @@ import live.supeer.metropolis.event.*;
 import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.plot.PlotDatabase;
 import live.supeer.metropolis.utils.LocationUtil;
+import live.supeer.metropolis.utils.TeleportUtil;
 import live.supeer.metropolis.utils.Utilities;
 import live.supeer.metropolis.city.*;
 import live.supeer.metropolis.homecity.HCDatabase;
@@ -1109,9 +1110,7 @@ public class CommandCity extends BaseCommand {
             if (goAccessLevel == null) {
                 Location location = CityDatabase.getCityGoLocation(args[0], city);
                 assert location != null;
-                player.teleport(location);
-                // Istället för player.teleport här så ska vi ha en call till Mandatory, som sköter VIP
-                // teleportering.
+                TeleportUtil.teleport(player, location, CityDatabase.getCityGoDisplayname(args[0], city), false);
                 return;
             }
             boolean hasAccess = false;
@@ -1146,9 +1145,7 @@ public class CommandCity extends BaseCommand {
             assert location != null;
             player.teleport(location);
             String name = CityDatabase.getCityGoDisplayname(args[0], city);
-            Metropolis.sendMessage(player, "messages.city.go.teleported", "%cityname%", city.getCityName(), "%name%", name);
-            // Istället för player.teleport här så ska vi ha en call till Mandatory, som sköter VIP
-            // teleportering.
+            TeleportUtil.teleport(player, location, name, false);
         } else {
             Metropolis.sendMessage(player, "messages.syntax.city.go");
         }
@@ -2027,8 +2024,7 @@ public class CommandCity extends BaseCommand {
                 Metropolis.sendMessage(player, "messages.error.missing.spawn");
                 return;
             }
-            player.teleport(city.getCitySpawn());
-            Metropolis.sendMessage(player, "messages.teleport", "%to%", "startpunkten i " + city.getCityName());
+            TeleportUtil.teleport(player, city.getCitySpawn(), "startpunkten i " + city.getCityName(), false);
         } else {
             if (CityDatabase.getCity(cityName).isEmpty()) {
                 Metropolis.sendMessage(player, "messages.error.missing.city");
@@ -2040,8 +2036,7 @@ public class CommandCity extends BaseCommand {
                 return;
             }
             if (player.hasPermission("metropolis.city.spawn.bypass")) {
-                player.teleport(city.getCitySpawn());
-                Metropolis.sendMessage(player, "messages.teleport", "%to%", "startpunkten i " + city.getCityName());
+                TeleportUtil.teleport(player, city.getCitySpawn(), "startpunkten i " + city.getCityName(), false);
                 return;
             }
             if (CityDatabase.getCityBan(city, player.getUniqueId().toString()) != null) {
@@ -2052,8 +2047,7 @@ public class CommandCity extends BaseCommand {
                 Metropolis.sendMessage(player, "messages.city.spawn.closed", "%cityname%", city.getCityName());
                 return;
             }
-            player.teleport(city.getCitySpawn());
-            Metropolis.sendMessage(player, "messages.teleport", "%to%", "startpunkten i " + city.getCityName());
+            TeleportUtil.teleport(player, city.getCitySpawn(), "startpunkten i " + city.getCityName(), false);
         }
     }
 

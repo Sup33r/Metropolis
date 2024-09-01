@@ -14,6 +14,7 @@ import live.supeer.metropolis.utils.DateUtil;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
@@ -31,6 +32,8 @@ public final class Metropolis extends JavaPlugin {
     public static HashMap<UUID, District> playerInDistrict = new HashMap<>();
     public static HashMap<Plot,Leaderboard> plotLeaderboards = new HashMap<>();
     public static HashMap<Plot, List<Standing>> plotStandings = new HashMap<>();
+    public static HashMap<UUID, List<Component>> afkPlayers = new HashMap<>();
+    public static HashMap<Player, Location> backLocations = new HashMap<>();
     public static List<UUID> scheduledForUnban = new ArrayList<>();
     public Logger logger = null;
     public static MetropolisConfiguration configuration;
