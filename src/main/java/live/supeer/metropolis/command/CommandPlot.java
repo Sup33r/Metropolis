@@ -407,37 +407,37 @@ public class CommandPlot extends BaseCommand {
         if (plot.getPlotRent() > 0) {
             Metropolis.sendMessage(player, "messages.plot.list.rent", "%rent%", Utilities.formattedMoney(plot.getPlotRent()));
         }
-        if (Arrays.toString(plot.getPlotFlags()).contains("p")) {
+        if (plot.hasFlag('p')) {
             Metropolis.sendMessage(player, "messages.plot.list.pvp", "%status%", "<red>" + Metropolis.getRawMessage("messages.words.on_state"));
         } else {
             Metropolis.sendMessage(player, "messages.plot.list.pvp", "%status%", "<green>" + Metropolis.getRawMessage("messages.words.off_state"));
         }
-        if (Arrays.toString(plot.getPlotFlags()).contains("a")) {
+        if (plot.hasFlag('a')) {
             Metropolis.sendMessage(player, "messages.plot.list.animals", "%status%", "<green>" + Metropolis.getRawMessage("messages.words.on_state"));
         } else {
             Metropolis.sendMessage(player, "messages.plot.list.animals", "%status%", "<green>" + Metropolis.getRawMessage("messages.words.off_state"));
         }
-        if (Arrays.toString(plot.getPlotFlags()).contains("m")) {
+        if (plot.hasFlag('m')) {
             Metropolis.sendMessage(player, "messages.plot.list.monsters", "%status%", "<red>" + Metropolis.getRawMessage("messages.words.on_state"));
         } else {
             Metropolis.sendMessage(player, "messages.plot.list.monsters", "%status%", "<green>" + Metropolis.getRawMessage("messages.words.off_state"));
         }
-        if (Arrays.toString(plot.getPlotFlags()).contains("l")) {
-            Metropolis.sendMessage(player, "messages.plot.list.monsters", "%status%", "<green>" + Metropolis.getRawMessage("messages.words.yes_word"));
+        if (plot.hasFlag('l')) {
+            Metropolis.sendMessage(player, "messages.plot.list.locked", "%status%", "<green>" + Metropolis.getRawMessage("messages.words.yes_word"));
         } else {
-            Metropolis.sendMessage(player, "messages.plot.list.monsters", "%status%", "<green>" + Metropolis.getRawMessage("messages.words.no_word"));
+            Metropolis.sendMessage(player, "messages.plot.list.locked", "%status%", "<green>" + Metropolis.getRawMessage("messages.words.no_word"));
         }
         if (plot.isKMarked()) {
             Metropolis.sendMessage(player, "messages.plot.list.k-marked", "%status%","<green>" + Metropolis.getRawMessage("messages.words.yes_word"));
         } else {
             Metropolis.sendMessage(player, "messages.plot.list.k-marked", "%status%","<green>" + Metropolis.getRawMessage("messages.words.no_word"));
         }
-        if (Arrays.toString(plot.getPlotFlags()).contains("i")) {
+        if (!plot.hasFlag('i')) {
             Metropolis.sendMessage(player, "messages.plot.list.lose.items", "%status%","<red>" + Metropolis.getRawMessage("messages.words.yes_word"));
         } else {
             Metropolis.sendMessage(player, "messages.plot.list.lose.items", "%status%","<green>" + Metropolis.getRawMessage("messages.words.no_word"));
         }
-        if (Arrays.toString(plot.getPlotFlags()).contains("x")) {
+        if (!plot.hasFlag('x')) {
             Metropolis.sendMessage(player, "messages.plot.list.lose.xp", "%status%","<red>" + Metropolis.getRawMessage("messages.words.yes_word"));
         } else {
             Metropolis.sendMessage(player, "messages.plot.list.lose.xp", "%status%", "<green>" + Metropolis.getRawMessage("messages.words.no_word"));

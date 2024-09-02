@@ -77,10 +77,7 @@ public class Plot {
                         ? new char[0]
                         : data.getString("plotPermsOutsiders").toCharArray();
         this.plotCenter = LocationUtil.stringToLocation(data.getString("plotCenter"));
-        this.plotFlags =
-                data.getString("plotFlags") == null
-                        ? new char[0]
-                        : data.getString("plotFlags").toCharArray();
+        this.plotFlags = data.getString("plotFlags") == null ? new char[0] : data.getString("plotFlags").toCharArray();
         this.plotCreationDate = data.getLong("plotCreationDate");
         this.plotPoints = LocationUtil.stringToPolygon(data.getString("plotPoints"));
         this.plotWorld = plotCenter.getWorld();

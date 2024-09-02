@@ -31,28 +31,6 @@ public class Utilities {
         return formatter.format(money).replace(",", " ");
     }
 
-    public static boolean isCloseToOtherCity(Player player, Location location, String type) {
-        int centerZ = location.getChunk().getZ();
-        int centerX = location.getChunk().getX();
-
-        for (int x = centerX - 13 / 2; x <= centerX + 12 / 2; x++) {
-            for (int z = centerZ - 12 / 2; z <= centerZ + 12 / 2; z++) {
-                Location chunkLocation = new Location(location.getWorld(), x * 16, 0, z * 16);
-                if (CityDatabase.hasClaim(x, z, location.getWorld())) {
-                    if (type.equals("newcity")) {
-                        return true;
-                    }
-                    if (!Objects.equals(
-                            Objects.requireNonNull(CityDatabase.getClaim(chunkLocation)).getCity(),
-                            HCDatabase.getHomeCityToCity(player.getUniqueId().toString()))) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
     public static String parseFlagChange(char[] flagsOriginal, String change) {
         if (flagsOriginal == null) {
             flagsOriginal = new char[0];
@@ -80,10 +58,6 @@ public class Utilities {
             } else if (currentChar == '-') {
                 isAdding = false;
                 continue;
-            }
-
-            if (isValidFlag(currentChar)) {
-                return null;
             }
 
             flagsRaw =
@@ -121,19 +95,6 @@ public class Utilities {
 
         return flagsNew.toString();
     }
-
-    private static boolean isValidFlag(char currentChar) {
-        // a = animals, c = conference (meetings), i = items, l = locked, m = monsters, p = pvp, x =
-        // experience
-        return currentChar != 'a'
-                && currentChar != 'c'
-                && currentChar != 'i'
-                && currentChar != 'l'
-                && currentChar != 'm'
-                && currentChar != 'p'
-                && currentChar != 'x';
-    }
-
     public static String parsePermChange(
             char[] flagsOriginal, String change, Player player, String flagType) {
         if (flagsOriginal == null) {
@@ -141,7 +102,7 @@ public class Utilities {
         }
         String flagsRaw = new String(flagsOriginal);
 
-        change = change.replace("*", "abcefghjrstv");
+        change = change.replace("*", "abcefghjkrstv");
         boolean isAdding = true;
 
         for (int i = 0; i < change.length(); i++) {
@@ -215,7 +176,7 @@ public class Utilities {
             flags = "";
         }
 
-        flags = flags.replace("*", "abcefghjrstv");
+        flags = flags.replace("*", "abcefghjkrstv");
 
         StringBuilder flagsNew = new StringBuilder();
 
@@ -261,6 +222,7 @@ public class Utilities {
                 && currentChar != 'g'
                 && currentChar != 'h'
                 && currentChar != 'j'
+                && currentChar != 'k'
                 && currentChar != 'r'
                 && currentChar != 's'
                 && currentChar != 't'
@@ -771,9 +733,12 @@ public class Utilities {
             if (city == null) {
                 city = plot.getCity();
             }
-            Role role = CityDatabase.getCityRole(city, uuid.toString());
-            if (role != null) {
-                if (role.hasPermission(Role.ASSISTANT) && !plot.isKMarked()) {
+            //TODO: Fixa en bättre lösning för det här, för den här quickfixen är riktigt dålig...
+            if (plot.hasFlag('l')) {
+                return false;
+            }
+            if (city.getCityMember(uuid.toString()) != null) {
+                if (city.getCityMember(uuid.toString()).getCityRole().hasPermission(Role.ASSISTANT) && !plot.isKMarked()) {
                     return true;
                 }
             }
@@ -794,25 +759,24 @@ public class Utilities {
             return false;
         }
         if (city != null) {
-            Role role = CityDatabase.getCityRole(city, uuid.toString());
-            if (role != null) {
-                if (role.hasPermission(Role.ASSISTANT)) {
+            if (city.getCityMember(uuid.toString()) != null) {
+                if (city.getCityMember(uuid.toString()).getCityRole().hasPermission(Role.ASSISTANT)) {
                     return true;
                 }
-                CityPerms perms = city.getPlayerCityPerm(uuid);
-                if (perms != null) {
-                    if (new String(perms.getPerms()).contains(String.valueOf(flag))) {
-                        return true;
-                    }
+            }
+            CityPerms perms = city.getPlayerCityPerm(uuid);
+            if (perms != null) {
+                if (new String(perms.getPerms()).contains(String.valueOf(flag))) {
+                    return true;
                 }
-                if (city.getCityMember(uuid.toString()) != null && city.getMemberPerms() != null) {
-                    if (new String(city.getMemberPerms()).contains(String.valueOf(flag))) {
-                        return true;
-                    }
+            }
+            if (city.getCityMember(uuid.toString()) != null && city.getMemberPerms() != null) {
+                if (new String(city.getMemberPerms()).contains(String.valueOf(flag))) {
+                    return true;
                 }
-                if (city.getOutsiderPerms() != null) {
-                    return new String(city.getOutsiderPerms()).contains(String.valueOf(flag));
-                }
+            }
+            if (city.getOutsiderPerms() != null) {
+                return new String(city.getOutsiderPerms()).contains(String.valueOf(flag));
             }
         }
         return false;

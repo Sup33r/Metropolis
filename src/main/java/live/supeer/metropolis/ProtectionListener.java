@@ -1,15 +1,19 @@
 package live.supeer.metropolis;
 
+import com.destroystokyo.paper.event.entity.PreCreatureSpawnEvent;
 import io.papermc.paper.event.player.PlayerTradeEvent;
 import live.supeer.apied.ApiedAPI;
 import live.supeer.apied.MPlayer;
+import live.supeer.metropolis.city.City;
+import live.supeer.metropolis.city.CityDatabase;
+import live.supeer.metropolis.plot.Plot;
+import live.supeer.metropolis.plot.PlotDatabase;
 import live.supeer.metropolis.utils.Utilities;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Sign;
-import org.bukkit.entity.Animals;
-import org.bukkit.entity.ItemFrame;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -19,6 +23,7 @@ import org.bukkit.event.block.BlockFertilizeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityPortalEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
@@ -109,8 +114,6 @@ public class ProtectionListener implements Listener {
         }
         if (event.getAction() == Action.RIGHT_CLICK_AIR) {
             ItemStack item = event.getItem();
-
-            Location location = Objects.requireNonNull(event.getClickedBlock()).getLocation();
             if (item != null) {
                 Material itemType = item.getType();
                 if (itemType == Material.OAK_BOAT || itemType == Material.SPRUCE_BOAT ||
@@ -119,17 +122,17 @@ public class ProtectionListener implements Listener {
                         itemType == Material.OAK_CHEST_BOAT || itemType == Material.SPRUCE_CHEST_BOAT ||
                         itemType == Material.BIRCH_CHEST_BOAT || itemType == Material.JUNGLE_CHEST_BOAT || itemType == Material.ACACIA_CHEST_BOAT ||
                         itemType == Material.DARK_OAK_CHEST_BOAT || itemType == Material.CHERRY_CHEST_BOAT || itemType == Material.MANGROVE_CHEST_BOAT) {
-                    if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'b') && !Metropolis.overrides.contains(player)) {
+                    if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), player.getLocation().toBlockLocation(), 'b') && !Metropolis.overrides.contains(player)) {
                         event.setCancelled(true);
                         Metropolis.sendMessage(player, "messages.error.permissionDenied");
                     }
                 } else if (itemType == Material.MAP) {
-                    if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'b') && !Metropolis.overrides.contains(player)) {
+                    if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), player.getLocation().toBlockLocation(), 'b') && !Metropolis.overrides.contains(player)) {
                         event.setCancelled(true);
                         Metropolis.sendMessage(player, "messages.error.permissionDenied");
                     }
                 } else if (itemType == Material.ENDER_PEARL || itemType == Material.TRIDENT) {
-                    if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'e') && !Metropolis.overrides.contains(player)) {
+                    if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), player.getLocation().toBlockLocation(), 'e') && !Metropolis.overrides.contains(player)) {
                         event.setCancelled(true);
                         Metropolis.sendMessage(player, "messages.error.permissionDenied");
                     }
@@ -245,6 +248,11 @@ public class ProtectionListener implements Listener {
                     event.setCancelled(true);
                     Metropolis.sendMessage(player, "messages.error.permissionDenied");
                 }
+            } else if (blockType == Material.ACACIA_DOOR || blockType == Material.BIRCH_DOOR || blockType == Material.CRIMSON_DOOR || blockType == Material.DARK_OAK_DOOR || blockType == Material.JUNGLE_DOOR || blockType == Material.OAK_DOOR || blockType == Material.SPRUCE_DOOR || blockType == Material.WARPED_DOOR || blockType == Material.BAMBOO_DOOR || blockType == Material.MANGROVE_DOOR || blockType == Material.CHERRY_DOOR || blockType == Material.COPPER_DOOR || blockType == Material.EXPOSED_COPPER_DOOR || blockType == Material.OXIDIZED_COPPER_DOOR || blockType == Material.WAXED_COPPER_DOOR || blockType == Material.WAXED_EXPOSED_COPPER_DOOR || blockType == Material.WAXED_OXIDIZED_COPPER_DOOR || blockType == Material.WAXED_WEATHERED_COPPER_DOOR || blockType == Material.WEATHERED_COPPER_DOOR) {
+                if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'd') && !Metropolis.overrides.contains(player)) {
+                    event.setCancelled(true);
+                    Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                }
             }
         }
         if (event.getAction() == Action.PHYSICAL) {
@@ -357,4 +365,78 @@ public class ProtectionListener implements Listener {
         }
     }
 
+    //EVENTS FOR PLOT TYPES AND FLAGS
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPreCreatureSpawn(PreCreatureSpawnEvent event) {
+        if (event.getType().getEntityClass() == null) {
+            return;
+        }
+        if (Animals.class.isAssignableFrom(event.getType().getEntityClass())) {
+            City city = CityDatabase.getCityByClaim(event.getSpawnLocation().toBlockLocation());
+            if (city != null) {
+                Plot plot = PlotDatabase.getCityPlot(city, event.getSpawnLocation().toBlockLocation());
+                if (plot != null) {
+                    if (!plot.hasFlag('a')) {
+                        event.setCancelled(true);
+                        event.setShouldAbortSpawn(true);
+                        return;
+                    }
+                }
+                if (!city.hasFlag('a')) {
+                    event.setCancelled(true);
+                    event.setShouldAbortSpawn(true);
+                }
+            }
+        }
+        if (Monster.class.isAssignableFrom(event.getType().getEntityClass())) {
+            City city = CityDatabase.getCityByClaim(event.getSpawnLocation().toBlockLocation());
+            if (city != null) {
+                Plot plot = PlotDatabase.getCityPlot(city, event.getSpawnLocation().toBlockLocation());
+                if (plot != null) {
+                    if (!plot.hasFlag('m')) {
+                        event.setCancelled(true);
+                        event.setShouldAbortSpawn(true);
+                        return;
+                    }
+                }
+                if (city.hasFlag('m')) {
+                    event.setCancelled(true);
+                    event.setShouldAbortSpawn(true);
+                }
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        Player player = event.getPlayer();
+        City city = CityDatabase.getCityByClaim(player.getLocation().toBlockLocation());
+        if (city != null) {
+            Plot plot = PlotDatabase.getCityPlot(city, player.getLocation().toBlockLocation());
+            if (plot != null) {
+                if (plot.hasFlag('i')) {
+                    event.setKeepInventory(true);
+                }
+                if (plot.hasFlag('x')) {
+                    event.setKeepLevel(true);
+                }
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
+        if (!(event.getEntity() instanceof Player player)) return;
+        if (!(event.getDamager() instanceof Player)) return;
+        City city = CityDatabase.getCityByClaim(player.getLocation().toBlockLocation());
+        if (city != null) {
+            Plot plot = PlotDatabase.getCityPlot(city, player.getLocation().toBlockLocation());
+            if (plot != null) {
+                if (!plot.hasFlag('p')) {
+                    event.setCancelled(true);
+                }
+            }
+        }
+    }
 }

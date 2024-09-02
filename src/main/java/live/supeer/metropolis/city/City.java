@@ -9,7 +9,6 @@ import live.supeer.metropolis.JailManager;
 import live.supeer.metropolis.Metropolis;
 import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.octree.Octree;
-import live.supeer.metropolis.plot.PlotPerms;
 import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.utils.Utilities;
@@ -47,6 +46,7 @@ public class City {
     private String taxLevel;
     private char[] memberPerms;
     private char[] outsiderPerms;
+    private char[] cityFlags;
     private boolean isOpen;
     private boolean isPublic;
     private boolean isTaxExempt;
@@ -73,6 +73,7 @@ public class City {
         this.minSpawnDistance = data.getInt("minSpawnDistance");
         this.cityTax = data.getDbl("cityTax");
         this.twinCities = new ArrayList<>(Utilities.stringToCityList(data.getString("twinCities")));
+        this.cityFlags = data.getString("cityFlags") == null ? new char[0] : data.getString("cityFlags").toCharArray();
         this.maxPlotsPerMember = data.getInt("maxPlotsPerMember");
         this.taxLevel = data.getString("taxLevel");
         this.memberPerms = data.getString("memberPerms") == null ? new char[0] : data.getString("memberPerms").toCharArray();
@@ -174,12 +175,22 @@ public class City {
                         + ";");
     }
 
-    public void setOutsiderPerms(char[] perms) {
-        this.outsiderPerms = perms;
-        DB.executeUpdateAsync("UPDATE `mp_cities` SET `outsiderPerms` = ? WHERE `cityId` = ?", new String(perms), cityId);
-        // Update local cityPerms list
-        cityPerms.removeIf(p -> p.getPlayerUUID().equals("outsiders"));
-        cityPerms.add(new CityPerms(cityId, new String(perms), "outsiders"));
+    public boolean hasFlag(char needle) {
+        if (this.cityFlags == null) {
+            return false;
+        }
+
+        for (char option : this.cityFlags) {
+            if (option == needle) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void setCityFlags(String flags) {
+        this.cityFlags = flags.toCharArray();
+        DB.executeUpdateAsync("UPDATE `mp_cities` SET `cityFlags` = ? WHERE `cityId` = ?", flags, cityId);
     }
 
     public CityPerms getPlayerCityPerm(UUID uuid) {

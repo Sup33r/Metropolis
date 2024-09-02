@@ -65,6 +65,7 @@ public class Database {
                                 `memberPerms` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `outsiderPerms` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `twinCities` text COLLATE utf8mb4_unicode_ci,
+                                `cityFlags` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                 `maxPlotsPerMember` int(11) DEFAULT -1,
                                 `isTaxExempt` tinyint(1) DEFAULT 0,
                                 `isOpen` tinyint(1) DEFAULT 0,

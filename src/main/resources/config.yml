@@ -51,6 +51,8 @@ settings:
     districtcost: 10000
     startingtaxlevel: "mayor"
     default:
+      plotFlags: ""
+      cityFlags: "am"
       memberPerms: "gt"
       outsiderPerms: "gt"
   jail:

@@ -65,10 +65,26 @@ public class CommandCity extends BaseCommand {
         return CoreProtect;
     }
 
+    @Default
+    public static void onCity(Player player, @Optional String cityName) {
+        if (!player.hasPermission("metropolis.city")) {
+            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            return;
+        }
+        info(player, cityName);
+    }
+
     @Subcommand("info")
     @CommandCompletion("@cityNames")
-    @Default
     public static void onInfo(Player player, @Optional String cityName) {
+        if (!player.hasPermission("metropolis.city.info")) {
+            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            return;
+        }
+        info(player, cityName);
+    }
+
+    private static void info(Player player , String cityName) {
         City city;
         if (cityName == null) {
             if (HCDatabase.hasHomeCity(player.getUniqueId().toString())) {
@@ -134,11 +150,15 @@ public class CommandCity extends BaseCommand {
         String cityPublic = city.isPublic() ? Metropolis.getMessage("messages.words.yes_word") : Metropolis.getMessage("messages.words.no_word");
         String founderName = ApiedAPI.getPlayer(UUID.fromString(city.getOriginalMayorUUID())).getName();
         Metropolis.sendMessage(player, "messages.city.cityInfo.openPublic", "%open%", cityOpen, "%public%", cityPublic);
+        String mobs = city.hasFlag('m') ? Metropolis.getMessage("messages.words.off_word") : Metropolis.getMessage("messages.words.red_on");
+        String animals = city.hasFlag('a') ? Metropolis.getMessage("messages.words.off_word") : Metropolis.getMessage("messages.words.on_word");
+        Metropolis.sendMessage(player, "messages.city.cityInfo.MobsAnimals", "%mobs%", mobs, "%animals%", animals);
         Metropolis.sendMessage(player, "messages.city.cityInfo.founded", "%founded%", DateUtil.niceDate(city.getCityCreationDate()), "%by%" , founderName);
         Metropolis.sendMessage(player, "messages.city.cityInfo.balance", "%balance%", Utilities.formattedMoney(CityDatabase.getCityBalance(city)));
         Metropolis.sendMessage(player, "messages.city.cityInfo.tax", "%tax%", String.valueOf(city.getCityTax()), "%payedBy%", Utilities.taxPayedBy(city.getTaxLevel()));
         Metropolis.sendMessage(player, "messages.city.cityInfo.stateTax", "%tax%", String.valueOf(city.getCityClaims()*Metropolis.configuration.getStateTax()));
-        Metropolis.sendMessage(player, "messages.city.cityInfo.maxPlotsPerMember", "%maxplots%", String.valueOf(city.getMaxPlotsPerMember()));
+        String maxPlots = city.getMaxPlotsPerMember() == -1 ? Metropolis.getMessage("messages.words.unlimited") : String.valueOf(city.getMaxPlotsPerMember());
+        Metropolis.sendMessage(player, "messages.city.cityInfo.maxPlotsPerMember", "%maxplots%", maxPlots);
         Metropolis.sendMessage(player, "messages.city.cityInfo.minChunkDistance", "%distance%", String.valueOf(city.getMinChunkDistance()));
         Metropolis.sendMessage(player, "messages.city.cityInfo.minSpawnDistance", "%distance%", String.valueOf(city.getMinSpawnDistance()));
         if (city.isPublic() || city.getCityMember(player.getUniqueId().toString()) != null) {
@@ -2290,6 +2310,7 @@ public class CommandCity extends BaseCommand {
         }
         Metropolis.sendMessage(player, "messages.syntax.city.toggle.open");
         Metropolis.sendMessage(player, "messages.syntax.city.toggle.public");
+        Metropolis.sendMessage(player, "messages.syntax.city.toggle.animals");
     }
 
     @Subcommand("toggle")
@@ -2330,6 +2351,48 @@ public class CommandCity extends BaseCommand {
             } else {
                 Metropolis.sendMessage(player, "messages.city.toggle.private", "%cityname%", city.getCityName());
                 Database.addLogEntry(city, "{ \"type\": \"city\", \"subtype\": \"togglePublic\", \"state\": \"private\", \"player\": \"" + player.getUniqueId() + "\" }");
+            }
+        }
+
+        @Subcommand("animals")
+        public static void onAnimals(Player player) {
+            City city = Utilities.hasCityPermissions(player, "metropolis.city.toggle.animals", Role.VICE_MAYOR);
+            if (city == null) {
+                return;
+            }
+            if (city.isReserve()) {
+                Metropolis.sendMessage(player, "messages.error.city.reserve");
+                return;
+            }
+            if (city.hasFlag('a')) {
+                Metropolis.sendMessage(player, "messages.city.toggle.noAnimals", "%cityname%", city.getCityName());
+                Database.addLogEntry(city, "{ \"type\": \"city\", \"subtype\": \"toggleAnimals\", \"state\": \"disabled\", \"player\": \"" + player.getUniqueId() + "\" }");
+                city.setCityFlags(Objects.requireNonNull(Utilities.parseFlagChange(city.getCityFlags(), "-a")));
+            } else {
+                Metropolis.sendMessage(player, "messages.city.toggle.animals", "%cityname%", city.getCityName());
+                Database.addLogEntry(city, "{ \"type\": \"city\", \"subtype\": \"toggleAnimals\", \"state\": \"enabled\", \"player\": \"" + player.getUniqueId() + "\" }");
+                city.setCityFlags(Objects.requireNonNull(Utilities.parseFlagChange(city.getCityFlags(), "+a")));
+            }
+        }
+
+        @Subcommand("mobs")
+        public static void onMobs(Player player) {
+            City city = Utilities.hasCityPermissions(player, "metropolis.city.toggle.mobs", Role.VICE_MAYOR);
+            if (city == null) {
+                return;
+            }
+            if (city.isReserve()) {
+                Metropolis.sendMessage(player, "messages.error.city.reserve");
+                return;
+            }
+            if (city.hasFlag('m')) {
+                Metropolis.sendMessage(player, "messages.city.toggle.noMobs", "%cityname%", city.getCityName());
+                Database.addLogEntry(city, "{ \"type\": \"city\", \"subtype\": \"toggleMobs\", \"state\": \"disabled\", \"player\": \"" + player.getUniqueId() + "\" }");
+                city.setCityFlags(Objects.requireNonNull(Utilities.parseFlagChange(city.getCityFlags(), "-m")));
+            } else {
+                Metropolis.sendMessage(player, "messages.city.toggle.mobs", "%cityname%", city.getCityName());
+                Database.addLogEntry(city, "{ \"type\": \"city\", \"subtype\": \"toggleMobs\", \"state\": \"enabled\", \"player\": \"" + player.getUniqueId() + "\" }");
+                city.setCityFlags(Objects.requireNonNull(Utilities.parseFlagChange(city.getCityFlags(), "+m")));
             }
         }
     }
@@ -2991,8 +3054,13 @@ public class CommandCity extends BaseCommand {
 
     @Subcommand("perm")
     public static void onPerm(Player player, @Optional String subject, @Optional String perm) {
-        City city = Utilities.hasCityPermissions(player, "metropolis.city.perm", null);
+        if (!player.hasPermission("metropolis.city.perm")) {
+            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            return;
+        }
+        City city = Metropolis.playerInCity.get(player.getUniqueId());
         if (city == null) {
+            Metropolis.sendMessage(player, "messages.error.city.outsideCity");
             return;
         }
         if (city.isReserve()) {

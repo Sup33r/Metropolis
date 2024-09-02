@@ -60,6 +60,8 @@ public class MetropolisConfiguration {
 
     private final String defaultMemberPerms;
     private final String defaultOutsiderPerms;
+    private final String defaultCityFlags;
+    private final String defaultPlotFlags;
 
     MetropolisConfiguration(Metropolis plugin) {
         plugin.saveDefaultConfig();
@@ -117,5 +119,7 @@ public class MetropolisConfiguration {
 
         defaultMemberPerms = plugin.getConfig().getString("settings.city.default.outsiderPerms");
         defaultOutsiderPerms = plugin.getConfig().getString("settings.city.default.memberPerms");
+        defaultCityFlags = plugin.getConfig().getString("settings.city.default.cityFlags");
+        defaultPlotFlags = plugin.getConfig().getString("settings.city.default.plotFlags");
     }
 }

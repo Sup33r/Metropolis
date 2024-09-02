@@ -33,8 +33,6 @@ public class PlotDatabase {
             plotName = "Tomt #" + plotAmount;
         }
 
-
-
         if (minY == 0 && maxY == 0) {
             maxY = 256;
             Metropolis.getInstance().getLogger().warning("PlotDatabase.createPlot: minY and maxY was 0, setting to 0 and 256");
@@ -44,39 +42,26 @@ public class PlotDatabase {
         Location plotCenter = new Location(world, centerX, player.getWorld().getHighestBlockYAt(centerX, centerZ) + 1, centerZ);
         try {
             DB.executeUpdate(
-                    "INSERT INTO `mp_plots` (`cityId`, `cityName`, `plotName`, `plotOwnerUUID`, `plotPoints`, `plotYMin`, `plotYMax`, `plotPermsMembers`, `plotPermsOutsiders`, `plotCenter`, `plotCreationDate`, `plotBoundary`) VALUES ("
-                            + city.getCityId()
-                            + ", "
-                            + Database.sqlString(city.getCityName())
-                            + ", "
-                            + Database.sqlString(plotName)
-                            + ", "
-                            + Database.sqlString(player.getUniqueId().toString())
-                            + ", "
-                            + Database.sqlString(LocationUtil.polygonToString(plotPolygon))
-                            + ", "
-                            + minY
-                            + ", "
-                            + maxY
-                            + ", "
-                            + "'gt'"
-                            + ", "
-                            + "'gt'"
-                            + ", "
-                            + Database.sqlString(LocationUtil.locationToString(plotCenter))
-                            + ", "
-                            + DateUtil.getTimestamp()
-                            + ", "
-                            + "ST_GeomFromText('"
-                            + plotPolygon.toText()
-                            + "')"
-                            + ");");
+                    "INSERT INTO `mp_plots` (`cityId`, `cityName`, `plotName`, `plotOwnerUUID`, `plotPoints`, `plotYMin`, `plotYMax`, `plotPermsMembers`, `plotPermsOutsiders`, `plotCenter`, `plotCreationDate`, `plotFlags`, `plotBoundary`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ST_GeomFromText(?))",
+                    city.getCityId(),
+                    city.getCityName(),
+                    plotName,
+                    player.getUniqueId().toString(),
+                    LocationUtil.polygonToString(plotPolygon),
+                    minY,
+                    maxY,
+                    "gt",
+                    "gt",
+                    LocationUtil.locationToString(plotCenter),
+                    DateUtil.getTimestamp(),
+                    Metropolis.configuration.getDefaultPlotFlags(),
+                    plotPolygon.toText()
+            );
             Plot plot = new Plot(DB.getFirstRow(
-                                    "SELECT * FROM `mp_plots` WHERE `plotName` = "
-                                            + Database.sqlString(plotName)
-                                            + " AND `cityName` = "
-                                            + Database.sqlString(city.getCityName())
-                                            + ";"));
+                    "SELECT * FROM `mp_plots` WHERE `plotName` = ? AND `cityName` = ?",
+                    plotName,
+                    city.getCityName()
+            ));
             city.addCityPlot(plot);
             return plot;
         } catch (Exception e) {
