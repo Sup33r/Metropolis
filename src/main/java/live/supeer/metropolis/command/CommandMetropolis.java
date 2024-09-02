@@ -29,6 +29,21 @@ public class CommandMetropolis extends BaseCommand {
         }
     }
 
+    @Subcommand("override|or")
+    public void onOverride(Player player) {
+        if (!player.hasPermission("metropolis.admin.override")) {
+            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            return;
+        }
+        if (Metropolis.overrides.contains(player)) {
+            Metropolis.overrides.remove(player);
+            Metropolis.sendMessage(player, "messages.override.disabled");
+        } else {
+            Metropolis.overrides.add(player);
+            Metropolis.sendMessage(player, "messages.override.enabled");
+        }
+    }
+
 
     @Subcommand("city")
     public class City extends BaseCommand {

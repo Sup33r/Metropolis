@@ -40,6 +40,7 @@ public class Plot {
     private int plotRent;
     private char[] permsMembers;
     private char[] permsOutsiders;
+    private List<PlotPerms> plotPerms;
     private Location plotCenter;
     private char[] plotFlags;
     private final long plotCreationDate;
@@ -86,6 +87,7 @@ public class Plot {
         this.isJail = plotType != null && plotType.equalsIgnoreCase("jail");
         this.hasLeaderboard = data.get("leaderboard");
         this.leaderboardShown = data.get("leaderboardShown");
+        this.plotPerms = loadPlayerPlotPerms();
     }
 
     public void setLeaderboard(boolean hasLeaderboard) {
@@ -235,6 +237,7 @@ public class Plot {
                 this.permsOutsiders = perms.toCharArray();
                 return;
             }
+
             DB.executeUpdate(
                     "INSERT INTO `mp_plotperms` (`plotId`, `cityId`, `plotPerms`, `playerUUID`) VALUES ("
                             + plotId
@@ -247,6 +250,11 @@ public class Plot {
                             + ") ON DUPLICATE KEY UPDATE plotPerms = '"
                             + perms
                             + "';");
+
+            // Update local plotPerms list
+            PlotPerms plotPerm = new PlotPerms(plotId, cityId, perms, playerUUID);
+            plotPerms.removeIf(p -> p.getPlayerUUID().equals(playerUUID));
+            plotPerms.add(plotPerm);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -261,9 +269,35 @@ public class Plot {
             DB.executeUpdate("DELETE FROM `mp_plotperms` WHERE `plotId` = " + plotId + ";");
             this.permsMembers = new char[] {' '};
             this.permsOutsiders = new char[] {' '};
+            this.plotPerms.clear();
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public List<PlotPerms> loadPlayerPlotPerms() {
+        List<PlotPerms> plotPermsList = new ArrayList<>();
+        try {
+            List<DbRow> rows =
+                    DB.getResults("SELECT * FROM `mp_plotperms` WHERE `plotId` = " + plotId + ";");
+            for (DbRow row : rows) {
+                plotPermsList.add(new PlotPerms(row));
+            }
+            this.plotPerms = plotPermsList;
+            return plotPermsList;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public PlotPerms getPlayerPlotPerm(String playerUUID) {
+        for (PlotPerms perm : plotPerms) {
+            if (perm.getPlayerUUID().equals(playerUUID)) {
+                return perm;
+            }
+        }
+        return null;
     }
 
     public boolean hasFlag(char needle) {
@@ -293,36 +327,6 @@ public class Plot {
         this.kMarked = kMarked;
         DB.executeUpdateAsync(
                 "UPDATE `mp_plots` SET `plotKMarked` = " + kMarked + " WHERE `plotId` = " + plotId + ";");
-    }
-
-    public List<PlotPerms> getPlayerPlotPerms() {
-        List<PlotPerms> plotPermsList = new ArrayList<>();
-        try {
-            List<DbRow> rows =
-                    DB.getResults("SELECT * FROM `mp_plotperms` WHERE `plotId` = " + plotId + ";");
-            for (DbRow row : rows) {
-                plotPermsList.add(new PlotPerms(row));
-            }
-            return plotPermsList;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public PlotPerms getPlayerPlotPerm(String playerUUID) {
-        DbRow row = null;
-        try {
-            row = DB.getFirstRow(
-                    "SELECT * FROM `mp_plotperms` WHERE `plotId` = " + plotId + " AND `playerUUID` = " + Database.sqlString(playerUUID) + ";"
-            );
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        if (row == null) {
-            return null; // Return null if no data is found
-        }
-        return new PlotPerms(row);
     }
 
     public List<Player> playersInPlot() {

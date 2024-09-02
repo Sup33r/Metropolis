@@ -35,6 +35,7 @@ public final class Metropolis extends JavaPlugin {
     public static HashMap<Plot, List<Standing>> plotStandings = new HashMap<>();
     public static HashMap<UUID, List<Component>> afkPlayers = new HashMap<>();
     public static HashMap<Player, Location> backLocations = new HashMap<>();
+    public static List<Player> overrides = new ArrayList<>();
     public static List<UUID> scheduledForUnban = new ArrayList<>();
     public Logger logger = null;
     public static MetropolisConfiguration configuration;
@@ -68,10 +69,12 @@ public final class Metropolis extends JavaPlugin {
         this.getServer().getPluginManager().registerEvents(new CommandHomeCity(), this);
         this.getServer().getPluginManager().registerEvents(new MetropolisListener(), this);
         this.getServer().getPluginManager().registerEvents(new CityListener(), this);
+        this.getServer().getPluginManager().registerEvents(new ProtectionListener(), this);
         Database.initialize();
         Database.synchronize();
         registerCompletions(manager);
         scheduleDailyTaxCollection();
+        scheduleWeeklyPlotRentCollection();
 
         MetropolisAPI.setPlugin(this);
 

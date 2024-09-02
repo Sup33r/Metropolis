@@ -62,6 +62,8 @@ public class Database {
                                 `exitMessage` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                 `motdMessage` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                 `taxLevel` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                                `memberPerms` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+                                `outsiderPerms` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `twinCities` text COLLATE utf8mb4_unicode_ci,
                                 `maxPlotsPerMember` int(11) DEFAULT -1,
                                 `isTaxExempt` tinyint(1) DEFAULT 0,
@@ -164,7 +166,6 @@ public class Database {
                                 PRIMARY KEY (`districtName`, `cityId`),
                                 SPATIAL INDEX `idx_districtBoundary` (`districtBoundary`)
                               ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;""");
-
             DB.executeUpdate(
                     """
                               CREATE TABLE IF NOT EXISTS `mp_plotperms` (
@@ -173,6 +174,14 @@ public class Database {
                                 `plotPerms` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `playerUUID` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 PRIMARY KEY (plotId,playerUUID)
+                              ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;""");
+            DB.executeUpdate(
+                    """
+                              CREATE TABLE IF NOT EXISTS `mp_cityperms` (
+                                `cityId` int(11) NOT NULL,
+                                `plotPerms` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+                                `playerUUID` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+                                PRIMARY KEY (cityId,playerUUID)
                               ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;""");
             DB.executeUpdate(
                     """

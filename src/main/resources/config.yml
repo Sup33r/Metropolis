@@ -50,6 +50,9 @@ settings:
     outpostcost: 15000
     districtcost: 10000
     startingtaxlevel: "mayor"
+    default:
+      memberPerms: "gt"
+      outsiderPerms: "gt"
   jail:
     dailypayback: 100
     prisonerpayback: 100

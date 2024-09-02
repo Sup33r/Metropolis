@@ -29,7 +29,6 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -105,8 +104,6 @@ public class CommandPlot extends BaseCommand {
         int endX = (int) Math.floor(maxX / chunkSize) * chunkSize + chunkSize;
         int startY = (int) Math.floor(minY / chunkSize) * chunkSize;
         int endY = (int) Math.floor(maxY / chunkSize) * chunkSize + chunkSize;
-        player.sendMessage("startX: " + startX + " | endX: " + endX + " | startY: " + startY + " | endY: " + endY);
-
         for (int x = startX; x < endX; x += chunkSize) {
             for (int z = startY; z < endY; z += chunkSize) {
                 Polygon chunkPolygon = geometryFactory.createPolygon(new Coordinate[]{
@@ -139,6 +136,10 @@ public class CommandPlot extends BaseCommand {
                                     MetropolisListener.playerYMax.get(player.getUniqueId()),
                                     player.getWorld());
                     assert plot != null;
+                    if (regionPolygon.contains(geometryFactory.createPoint(new Coordinate(player.getLocation().getX(), player.getLocation().getZ())))) {
+                        Metropolis.playerInPlot.put(player.getUniqueId(), plot);
+                    }
+                    Utilities.sendScoreboard(player);
                     Database.addLogEntry(
                             city,
                             "{ \"type\": \"create\", \"subtype\": \"plot\", \"id\": "
@@ -259,6 +260,9 @@ public class CommandPlot extends BaseCommand {
                         + " }");
         PlotDatabase.deletePlot(plot);
         plot.getCity().removeCityPlot(plot);
+        for (Player plotPlayer : plot.playersInPlot()) {
+            Utilities.sendCityScoreboard(plotPlayer, plot.getCity(), plot);
+        }
         Metropolis.sendMessage(
                 player,
                 "messages.city.successful.set.delete.plot",
@@ -279,6 +283,9 @@ public class CommandPlot extends BaseCommand {
             return;
         }
         plot.removePlotOwner();
+        plot.setPlotRent(0);
+        plot.setForSale(false);
+        plot.setPlotPrice(0);
         Database.addLogEntry(
                 plot.getCity(),
                 "{ \"type\": \"leave\", \"subtype\": \"plot\", \"id\": "
@@ -295,6 +302,9 @@ public class CommandPlot extends BaseCommand {
                 plot.getCity().getCityName(),
                 "%plotname%",
                 plot.getPlotName());
+        for (Player plotPlayer : plot.playersInPlot()) {
+            Utilities.sendCityScoreboard(plotPlayer, plot.getCity(), plot);
+        }
     }
 
     @Subcommand("market")
@@ -309,15 +319,11 @@ public class CommandPlot extends BaseCommand {
         }
         if (arg.equals("-")) {
             plot.setForSale(false);
-            Metropolis.sendMessage(
-                    player,
-                    "messages.city.successful.set.plot.market.remove",
-                    "%cityname%",
-                    plot.getCity().getCityName(),
-                    "%plotname%",
-                    plot.getPlotName());
-            Database.addLogEntry(
-                    plot.getCity(),
+            for (Player plotPlayer : plot.playersInPlot()) {
+                Utilities.sendCityScoreboard(plotPlayer, plot.getCity(), plot);
+            }
+            Metropolis.sendMessage(player, "messages.city.successful.set.plot.market.remove", "%cityname%", plot.getCity().getCityName(), "%plotname%", plot.getPlotName());
+            Database.addLogEntry(plot.getCity(),
                     "{ \"type\": \"plotMarket\", \"subtype\": \"remove\", \"id\": "
                             + plot.getPlotId()
                             + ", \"name\": "
@@ -330,24 +336,10 @@ public class CommandPlot extends BaseCommand {
         if (arg.matches("[0-9]+")) {
             if (plot.isForSale()) {
                 if (plot.getPlotPrice() == Integer.parseInt(arg)) {
-                    Metropolis.sendMessage(
-                            player,
-                            "messages.error.plot.market.noChange",
-                            "%cityname%",
-                            plot.getCity().getCityName());
+                    Metropolis.sendMessage(player, "messages.error.plot.market.noChange", "%cityname%", plot.getCity().getCityName());
                     return;
                 }
-                Metropolis.sendMessage(
-                        player,
-                        "messages.city.successful.set.plot.market.change",
-                        "%cityname%",
-                        plot.getCity().getCityName(),
-                        "%plotname%",
-                        plot.getPlotName(),
-                        "%from%",
-                        Utilities.formattedMoney(plot.getPlotPrice()),
-                        "%to%",
-                        Utilities.formattedMoney(Integer.valueOf(arg)));
+                Metropolis.sendMessage(player, "messages.city.successful.set.plot.market.change", "%cityname%", plot.getCity().getCityName(), "%plotname%", plot.getPlotName(), "%from%", Utilities.formattedMoney(plot.getPlotPrice()), "%to%", Utilities.formattedMoney(Integer.valueOf(arg)));
                 Database.addLogEntry(
                         plot.getCity(),
                         "{ \"type\": \"plotMarket\", \"subtype\": \"change\", \"id\": "
@@ -362,18 +354,20 @@ public class CommandPlot extends BaseCommand {
                                 + player.getUniqueId()
                                 + " }");
                 plot.setPlotPrice(Integer.parseInt(arg));
+                for (Player plotPlayer : plot.playersInPlot()) {
+                    Utilities.sendCityScoreboard(plotPlayer, plot.getCity(), plot);
+                }
                 return;
             }
             plot.setForSale(true);
             if (plot.getPlotPrice() == Integer.parseInt(arg)) {
-                Metropolis.sendMessage(
-                        player,
-                        "messages.error.plot.market.noChange",
-                        "%cityname%",
-                        plot.getCity().getCityName());
+                Metropolis.sendMessage(player, "messages.error.plot.market.noChange", "%cityname%", plot.getCity().getCityName());
                 return;
             }
             plot.setPlotPrice(Integer.parseInt(arg));
+            for (Player plotPlayer : plot.playersInPlot()) {
+                Utilities.sendCityScoreboard(plotPlayer, plot.getCity(), plot);
+            }
             Database.addLogEntry(
                     plot.getCity(),
                     "{ \"type\": \"plotMarket\", \"subtype\": \"add\", \"id\": "
@@ -385,15 +379,7 @@ public class CommandPlot extends BaseCommand {
                             + ", \"player\": "
                             + player.getUniqueId()
                             + " }");
-            Metropolis.sendMessage(
-                    player,
-                    "messages.city.successful.set.plot.market.set",
-                    "%cityname%",
-                    plot.getCity().getCityName(),
-                    "%plotname%",
-                    plot.getPlotName(),
-                    "%amount%",
-                    Utilities.formattedMoney(Integer.valueOf(arg)));
+            Metropolis.sendMessage(player, "messages.city.successful.set.plot.market.set", "%cityname%", plot.getCity().getCityName(), "%plotname%", plot.getPlotName(), "%amount%", Utilities.formattedMoney(Integer.valueOf(arg)));
             return;
         }
         Metropolis.sendMessage(player, "messages.syntax.plot.market");
@@ -415,7 +401,9 @@ public class CommandPlot extends BaseCommand {
         Metropolis.sendMessage(
                 player, "messages.plot.list.id", "%id%", String.valueOf(plot.getPlotId()));
         Metropolis.sendMessage(player, "messages.plot.list.city", "%cityname%", plot.getCity().getCityName());
-        Metropolis.sendMessage(player, "messages.plot.list.owner", "%owner%", ApiedAPI.getPlayer(UUID.fromString(plot.getPlotOwnerUUID())).getName());
+        if (plot.getPlotOwnerUUID() != null) {
+            Metropolis.sendMessage(player, "messages.plot.list.owner", "%owner%", ApiedAPI.getPlayer(UUID.fromString(plot.getPlotOwnerUUID())).getName());
+        }
         if (plot.getPlotRent() > 0) {
             Metropolis.sendMessage(player, "messages.plot.list.rent", "%rent%", Utilities.formattedMoney(plot.getPlotRent()));
         }
@@ -592,9 +580,6 @@ public class CommandPlot extends BaseCommand {
             if (newPerms == null) {
                 return;
             }
-            plot.setPlotPerms("players",
-                    newPerms,
-                    mPlayer.getUuid().toString());
             Database.addLogEntry(
                     plot.getCity(),
                     "{ \"type\": \"plot\", \"subtype\": \"perm\", \"id\": "
@@ -612,15 +597,13 @@ public class CommandPlot extends BaseCommand {
                             + ", \"player\": "
                             + mPlayer.getUuid()
                             + " }");
+            plot.setPlotPerms("players", newPerms, mPlayer.getUuid().toString());
             Metropolis.sendMessage(player,"messages.plot.share.success", "%cityname%", plot.getCity().getCityName(), "%player%", mPlayer.getName());
         } else {
             String newPerms = Utilities.parsePermChange(perms.getPerms(), "-*", player, "plot");
             if (newPerms == null) {
                 return;
             }
-            plot.setPlotPerms("players",
-                    newPerms,
-                    mPlayer.getUuid().toString());
             Database.addLogEntry(
                     plot.getCity(),
                     "{ \"type\": \"plot\", \"subtype\": \"perm\", \"id\": "
@@ -638,6 +621,7 @@ public class CommandPlot extends BaseCommand {
                             + ", \"player\": "
                             + mPlayer.getUuid()
                             + " }");
+            plot.setPlotPerms("players", newPerms, mPlayer.getUuid().toString());
             Metropolis.sendMessage(player,"messages.plot.share.remove", "%cityname%", plot.getCity().getCityName(), "%player%", mPlayer.getName());
         }
     }
@@ -653,21 +637,21 @@ public class CommandPlot extends BaseCommand {
             Metropolis.sendMessage(player, "messages.error.plot.notInPlot");
             return;
         }
-        if (plot.getCity().isReserve()) {
+        if (city.isReserve()) {
             Metropolis.sendMessage(player, "messages.error.city.reserve");
             return;
         }
         Role role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
         if (subject == null) {
-            String permsOutsiders = getPermsOutsiders(plot.getPermsOutsiders());
-            String permsMembers = getPermsOutsiders(plot.getPermsMembers());
+            String permsOutsiders = Utilities.formatPerms(plot.getPermsOutsiders());
+            String permsMembers = Utilities.formatPerms(plot.getPermsMembers());
             Metropolis.sendMessage(
                     player, "messages.plot.list.perm.header", "%plot%", plot.getPlotName());
             Metropolis.sendMessage(
                     player, "messages.plot.list.perm.outsiders", "%perms%", permsOutsiders);
             Metropolis.sendMessage(player, "messages.plot.list.perm.members", "%perms%", permsMembers);
 
-            for (PlotPerms plotPerms : plot.getPlayerPlotPerms()) {
+            for (PlotPerms plotPerms : plot.getPlotPerms()) {
                 StringBuilder stringBuilder = new StringBuilder();
                 for (char s : plotPerms.getPerms()) {
                     stringBuilder.append(s);
@@ -680,7 +664,7 @@ public class CommandPlot extends BaseCommand {
                         player,
                         "messages.plot.list.perm.players",
                         "%player%",
-                        plotPerms.getPlayerName(),
+                        ApiedAPI.getPlayer(UUID.fromString(plotPerms.getPlayerUUID())).getName(),
                         "%perms%",
                         perms);
             }
@@ -705,7 +689,6 @@ public class CommandPlot extends BaseCommand {
                             city.getCityName());
                     return;
                 }
-                plot.removePlotPerms();
                 Database.addLogEntry(
                         city,
                         "{ \"type\": \"plot\", \"subtype\": \"perm\", \"id\": "
@@ -721,6 +704,7 @@ public class CommandPlot extends BaseCommand {
                                 + ", \"player\": "
                                 + player.getUniqueId()
                                 + " }");
+                plot.removePlotPerms();
                 Metropolis.sendMessage(
                         player,
                         "messages.city.successful.set.plot.perm.remove.all",
@@ -760,10 +744,6 @@ public class CommandPlot extends BaseCommand {
                 if (perms == null) {
                     return;
                 }
-                plot.setPlotPerms(
-                        "members",
-                        perms,
-                        null);
                 Database.addLogEntry(
                         city,
                         "{ \"type\": \"plot\", \"subtype\": \"perm\", \"id\": "
@@ -779,6 +759,7 @@ public class CommandPlot extends BaseCommand {
                                 + ", \"issuer\": "
                                 + player.getUniqueId()
                                 + " }");
+                plot.setPlotPerms("members", perms, null);
                 Metropolis.sendMessage(
                         player,
                         "messages.city.successful.set.plot.perm.change.members",
@@ -798,10 +779,6 @@ public class CommandPlot extends BaseCommand {
                 if (perms == null) {
                     return;
                 }
-                plot.setPlotPerms(
-                        "outsiders",
-                        perms,
-                        null);
                 Database.addLogEntry(
                         city,
                         "{ \"type\": \"plot\", \"subtype\": \"perm\", \"id\": "
@@ -817,6 +794,7 @@ public class CommandPlot extends BaseCommand {
                                 + ", \"issuer\": "
                                 + player.getUniqueId()
                                 + " }");
+                plot.setPlotPerms("outsiders", perms, null);
                 Metropolis.sendMessage(
                         player,
                         "messages.city.successful.set.plot.perm.change.outsiders",
@@ -837,10 +815,6 @@ public class CommandPlot extends BaseCommand {
                 if (perms == null) {
                     return;
                 }
-                plot.setPlotPerms(
-                        "players",
-                        perms,
-                        mPlayer.getUuid().toString());
                 Database.addLogEntry(
                         city,
                         "{ \"type\": \"plot\", \"subtype\": \"perm\", \"id\": "
@@ -858,15 +832,13 @@ public class CommandPlot extends BaseCommand {
                                 + ", \"player\": "
                                 + mPlayer.getUuid()
                                 + " }");
+                plot.setPlotPerms("players", perms, mPlayer.getUuid().toString());
             } else {
                 String perms = Utilities.parsePermChange(plot.getPlayerPlotPerm(mPlayer.getUuid().toString()).getPerms(), perm, player, "plot");
                 String from = Arrays.toString(plot.getPlayerPlotPerm(mPlayer.getUuid().toString()).getPerms());
                 if (perms == null) {
                     return;
                 }
-                plot.setPlotPerms("players",
-                        perms,
-                        mPlayer.getUuid().toString());
                 Database.addLogEntry(
                         city,
                         "{ \"type\": \"plot\", \"subtype\": \"perm\", \"id\": "
@@ -884,6 +856,7 @@ public class CommandPlot extends BaseCommand {
                                 + ", \"player\": "
                                 + mPlayer.getUuid()
                                 + " }");
+                plot.setPlotPerms("players", perms, mPlayer.getUuid().toString());
             }
             Metropolis.sendMessage(
                     player,
@@ -898,27 +871,6 @@ public class CommandPlot extends BaseCommand {
             Metropolis.sendMessage(
                     player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
         }
-    }
-
-    private static @NotNull String getPermsOutsiders(char[] plot) {
-        StringBuilder stringBuilderOutsiders = new StringBuilder();
-        for (char s : plot) {
-            stringBuilderOutsiders.append(s);
-        }
-        String permsOutsiders = "+"
-                + stringBuilderOutsiders.substring(
-                0, stringBuilderOutsiders.toString().length());
-        if (stringBuilderOutsiders
-                .substring(0, stringBuilderOutsiders.toString().length())
-                .equals(" ")
-                || stringBuilderOutsiders
-                .substring(0, stringBuilderOutsiders.toString().length())
-                .isEmpty()
-                || stringBuilderOutsiders.substring(0, stringBuilderOutsiders.toString().length())
-                == null) {
-            permsOutsiders = "<italic>nada";
-        }
-        return permsOutsiders;
     }
 
     @Subcommand("set")
@@ -978,6 +930,10 @@ public class CommandPlot extends BaseCommand {
                             plot.getCity().getCityName());
                     return;
                 }
+            }
+            if (plot.getPlotRent() > 0) {
+                Metropolis.sendMessage(player, "messages.error.plot.set.owner.rented");
+                return;
             }
             if (plot.getPlotOwnerUUID() != null) {
                 if (plot.getPlotOwnerUUID().equals(mPlayer.getUuid().toString())) {
@@ -2460,6 +2416,9 @@ public class CommandPlot extends BaseCommand {
                 String.valueOf(plot.getPlotPrice()));
         plot.setForSale(false);
         plot.setPlotPrice(0);
+        for (Player plotPlayer : plot.playersInPlot()) {
+            Utilities.sendCityScoreboard(plotPlayer, plot.getCity(), plot);
+        }
     }
 
     @Subcommand("cell")

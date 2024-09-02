@@ -9,6 +9,7 @@ import live.supeer.metropolis.JailManager;
 import live.supeer.metropolis.Metropolis;
 import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.octree.Octree;
+import live.supeer.metropolis.plot.PlotPerms;
 import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.utils.Utilities;
@@ -16,6 +17,7 @@ import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.World;
 
+import java.sql.SQLException;
 import java.util.*;
 
 @Getter
@@ -24,6 +26,7 @@ public class City {
     private String cityName;
     private final String originalMayorUUID;
     private final List<Member> cityMembers = new ArrayList<>();
+    private List<CityPerms> cityPerms = new ArrayList<>();
 
     private int cityClaims;
     private final Map<World, Octree<Claim>> claimOctree = new HashMap<>();
@@ -42,6 +45,8 @@ public class City {
     private String exitMessage;
     private String motdMessage;
     private String taxLevel;
+    private char[] memberPerms;
+    private char[] outsiderPerms;
     private boolean isOpen;
     private boolean isPublic;
     private boolean isTaxExempt;
@@ -70,6 +75,9 @@ public class City {
         this.twinCities = new ArrayList<>(Utilities.stringToCityList(data.getString("twinCities")));
         this.maxPlotsPerMember = data.getInt("maxPlotsPerMember");
         this.taxLevel = data.getString("taxLevel");
+        this.memberPerms = data.getString("memberPerms") == null ? new char[0] : data.getString("memberPerms").toCharArray();
+        this.outsiderPerms = data.getString("outsiderPerms") == null ? new char[0] : data.getString("outsiderPerms").toCharArray();
+        this.cityPerms = loadPlayerCityPerms();
     }
 
     public void setTaxLevel(Role role) {
@@ -164,6 +172,81 @@ public class City {
                         + " WHERE `cityId` = "
                         + cityId
                         + ";");
+    }
+
+    public void setOutsiderPerms(char[] perms) {
+        this.outsiderPerms = perms;
+        DB.executeUpdateAsync("UPDATE `mp_cities` SET `outsiderPerms` = ? WHERE `cityId` = ?", new String(perms), cityId);
+        // Update local cityPerms list
+        cityPerms.removeIf(p -> p.getPlayerUUID().equals("outsiders"));
+        cityPerms.add(new CityPerms(cityId, new String(perms), "outsiders"));
+    }
+
+    public CityPerms getPlayerCityPerm(UUID uuid) {
+        for (CityPerms perm : cityPerms) {
+            if (perm.getPlayerUUID().equals(uuid.toString())) {
+                return perm;
+            }
+        }
+        DbRow row = null;
+        try {
+            row = DB.getFirstRow(
+                    "SELECT * FROM `mp_cityperms` WHERE `cityId` = ? AND `playerUUID` = ?", cityId, uuid.toString()
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (row == null) {
+            return null; // Return null if no data is found
+        }
+        return new CityPerms(row);
+    }
+
+    public List<CityPerms> loadPlayerCityPerms() {
+        List<CityPerms> cityPermsList = new ArrayList<>();
+        try {
+            List<DbRow> rows =
+                    DB.getResults("SELECT * FROM `mp_cityperms` WHERE `cityId` = ?", cityId);
+            for (DbRow row : rows) {
+                cityPermsList.add(new CityPerms(row));
+            }
+            return cityPermsList;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public void setCityPerms(String type, String perms, UUID uuid) {
+        try {
+            if (type.equalsIgnoreCase("members")) {
+                DB.executeUpdate("UPDATE `mp_cities` SET `memberPerms` = ? WHERE `cityId` = ?", perms, cityId);
+                this.memberPerms = perms.toCharArray();
+                return;
+            } else if (type.equalsIgnoreCase("outsiders")) {
+                DB.executeUpdate("UPDATE `mp_cities` SET `outsiderPerms` = ? WHERE `cityId` = ?", perms, cityId);
+                this.outsiderPerms = perms.toCharArray();
+                return;
+            }
+            DB.executeUpdate("INSERT INTO `mp_cityperms` (`cityId`, `cityPerms`, `playerUUID`) VALUES (?,?,?) ON DUPLICATE KEY UPDATE cityPerms = ?", cityId, perms, uuid.toString(), perms);
+            CityPerms cityPerm = new CityPerms(cityId, perms, uuid.toString());
+            cityPerms.removeIf(p -> p.getPlayerUUID().equals(uuid.toString()));
+            cityPerms.add(cityPerm);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void removeCityPerms() {
+        try {
+            DB.executeUpdate("UPDATE `mp_cities` SET `memberPerms` = ?, `outsiderPerms` = ? WHERE `plotId` = ?","","", cityId);
+            DB.executeUpdate("DELETE FROM `mp_cityperms` WHERE `plotId` = ?", cityId);
+            this.memberPerms = new char[] {' '};
+            this.outsiderPerms = new char[] {' '};
+            this.cityPerms.clear();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void removeCityMember(Member member) {
@@ -334,7 +417,7 @@ public class City {
     public void compensateForInmates() {
         int compensation = 0;
         for (Plot plot : cityPlots) {
-            if (plot.getPlotType().equalsIgnoreCase("jail")) {
+            if (plot.getPlotType() != null && plot.getPlotType().equalsIgnoreCase("jail")) {
                 compensation += JailManager.getOccupiedCellsCount(plot) * Metropolis.configuration.getDailyPayback();
             }
         }
@@ -346,10 +429,7 @@ public class City {
         if (cityMembers.size() >= 20) {
             return true;
         }
-        if (cityClaims >= 25) {
-            return true;
-        }
-        return false;
+        return cityClaims >= 25;
     }
 
     public void drawCityTaxes() {

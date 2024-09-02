@@ -302,11 +302,10 @@ public class PlotDatabase {
         return mPlayer.getBalance() < totalRent;
     }
 
+
     public static void collectPlotRents() {
-        try {
-            List<DbRow> results = DB.getResults("SELECT * FROM `mp_plots` WHERE `plotOwnerUUID` IS NOT NULL AND `plotRent` IS NOT '0'");
-            for (DbRow row : results) {
-                Plot plot = new Plot(row);
+        for (City city : CityDatabase.cities) {
+            for (Plot plot : city.getCityPlots()) {
                 if (plot.getPlotOwnerUUID() == null || plot.getPlotRent() == 0) {
                     continue;
                 }
@@ -314,19 +313,26 @@ public class PlotDatabase {
                 if (mPlayer == null) {
                     continue;
                 }
-                Bukkit.broadcastMessage("Plot rent: " + plot.getPlotRent());
-                Bukkit.broadcastMessage("Player balance: " + mPlayer.getBalance());
                 if (mPlayer.getBalance() < plot.getPlotRent()) {
-                    Bukkit.broadcastMessage("Player can't pay rent");
                     plot.removePlotOwner();
+                    plot.setPlotRent(0);
+                    plot.setPlotPrice(0);
+                    plot.setForSale(false);
+                    Metropolis.getInstance().logger.info("Plot " + plot.getPlotName() + " in city " + city.getCityName() + " was removed from " + mPlayer.getName() + " due to insufficient funds.");
+                    int playerBalance = mPlayer.getBalance();
+                    mPlayer.removeBalance(playerBalance, "{ \"type\": \"plot\", \"subtype\": \"payRent\", \"plotId\": " + plot.getPlotId() + "}");
+                    plot.getCity().addCityBalance(playerBalance);
+                    Database.addLogEntry(city, "{ \"type\": \"cityBank\", \"subtype\": \"rent\", \"balance\": " + playerBalance + ", \"player\": " + mPlayer.getUuid().toString() + " }");
+                    Database.addLogEntry(plot.getCity(), "{ \"type\": \"leave\", \"subtype\": \"plot\", \"id\": " + plot.getPlotId() + ", \"player\": " + mPlayer.getUuid().toString() + " }");
+                    for (Player plotPlayer : plot.playersInPlot()) {
+                        Utilities.sendCityScoreboard(plotPlayer, plot.getCity(), plot);
+                    }
                     continue;
                 }
                 mPlayer.removeBalance(plot.getPlotRent(), "{ \"type\": \"plot\", \"subtype\": \"payRent\", \"plotId\": " + plot.getPlotId() + "}");
                 plot.getCity().addCityBalance(plot.getPlotRent());
                 Database.addLogEntry(plot.getCity(), "{ \"type\": \"cityBank\", \"subtype\": \"rent\", \"balance\": " + plot.getPlotRent() + ", \"player\": " + mPlayer.getUuid().toString() + " }");
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 }

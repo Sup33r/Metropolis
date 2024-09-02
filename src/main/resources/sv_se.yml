@@ -42,7 +42,9 @@ messages:
   shutdownMessage: "\n<aqua>Servern kommer precis att startas om för underhåll. Vi ses snart igen!\n"
   shutdownMessageCountdown: "\n<aqua>Servern kommer att startas om för underhåll om %time%.\n"
   shutdownMessageSoon: "\n<aqua>EnServer ska genomgå en snabb omstart. Vänligen <bold>STÅ STILL</bold>, så teleporteras du snart till väntsalen. Tack!\n"
-
+  override:
+    enabled: "<green>Du har nu aktiverat överskridningsläget."
+    disabled: "<red>Du har nu inaktiverat överskridningsläget."
   block:
     enabled: "<green>Blockdataläget är nu aktiverat. Högerklicka med en pinne eller ett jordblock för att få fram blockdatan."
     disabled: "<red>Blockdataläget är nu inaktiverat."
@@ -58,6 +60,7 @@ messages:
     admin:
       balance: "<gray>Syntax: /metropolis balance +/-<underlined>belopp</underlined> <underlined>stad"
     city:
+      perm: "<gray>Syntax: /city perm <underlined>spelare<reset><gray> +/-<underlined>ändring</underlined>\n<gray>Syntax: /city perm members +/-<underlined>ändring</underlined>\n<gray>Syntax: /city perm outsiders +/-<underlined>ändring</underlined>"
       twin: "<gray>/city twin\n<gray>/city twin +<underlined>stadsnamn"
       district: "<gray>/city district\n/city district +<underlined>player<reset>\n<gray>/city district -<underlined>player<reset>\n<gray>/city district delete\n/city district info <underlined>namn<reset>\n<gray>/city district set name <underlined>nytt namn<reset\n<gray>/city district update"
       toggle:
@@ -228,6 +231,7 @@ messages:
           alreadyNoType: "<yellow>%cityname% <gray>| <red>Tomten har redan ingen typ."
           invalidType: "<yellow>%cityname% <gray>| <red>Tomttypen hittades inte. Använd /plot set type för att se alla typer."
         owner:
+          rented: "<yellow>%cityname% <gray>| <red> Du kan inte modifiera ägaren på en tomt med tomträttsavgäld."
           tooManyPlots: "<yellow>%cityname% <gray>| <red>Du äger redan för många tomter i staden."
           notForSale: "<yellow>%cityname% <gray>| <red>Tomten är inte till salu."
           notOwner: "<yellow>%cityname% <gray>| <red>Du är inte ägare till tomten."
@@ -359,6 +363,7 @@ messages:
         success: "<yellow>%cityname% <gray>| <green>Tomtens typ är nu %type%."
         removed: "<yellow>%cityname% <gray>| <green>Tomtens typ är nu borttagen."
       owner:
+
         success: "<yellow>%cityname% <gray>| <green>Tomtens ägare är nu %player%."
         removed: "<yellow>%cityname% <gray>| <green>Tomtens ägare är nu borttagen."
     player:
@@ -513,6 +518,15 @@ messages:
       claimed: "<yellow>%cityname% <gray>| <green>Markbiten har blivit övertagen för %amount% encoins. \n<green>Markbitar kvar på autoövertagning: %remaining%. Avbryt med <dark_green>/city claim -"
       unclaimable: "<red>Markbiten är inte tillgänglig för övertagande, och autoövertagningen avslutade därmed."
     list:
+      perm:
+        header: "<dark_green>--- <green>Stadsrättigheter: %city% <dark_green>---"
+        outsiders: "<dark_green>Utomstående: <green>%perms%"
+        members: "<dark_green>Stadsmedlemmar: <green>%perms%"
+        players: "<dark_green>%player%: <green>%perms%"
+        permsrow:
+          1: "<gray>a = animal, b = block, c = container, e = enderpearl"
+          2: "<gray>f = frame, g = go, h = home, j = jukebox"
+          3: "<gray>r = repair (anvil), s = switch, t = teleport, v = villager"
       header: "<dark_green>--- <green>Städer <dark_green>---"
       none: "<red>Inga städer hittades."
       tooShort: "<red>Sökordet är för kort."
@@ -633,6 +647,16 @@ messages:
         self: "<green>Du skapade staden %cityname%."
       claim: "<yellow>%cityname% <gray>|<green> Markbit övertagen för %amount% encoins."
       set:
+        perm:
+          change:
+            members: "<yellow>%cityname% <gray>|<green> Rättigheter för medlemmar i staden ändrades till %perms%."
+            outsiders: "<yellow>%cityname% <gray>|<green> Rättigheter för icke-medlemmar i staden ändrades till %perms%."
+            player: "<yellow>%cityname% <gray>|<green> Rättigheter för %player% i staden ändrades till %perms%."
+          remove:
+            all: "<yellow>%cityname% <gray>|<green> Alla rättigheter i staden återställdes."
+            members: "<yellow>%cityname% <gray>|<green> Rättigheterna för medlemmar i staden drogs tillbaka."
+            outsiders: "<yellow>%cityname% <gray>|<green> Rättigheterna för icke-medlemmar i staden drogs tillbaka."
+            player: "<yellow>%cityname% <gray>|<green> Rättigheterna för %player% i staden drogs tillbaka."
         name: "<yellow>%cityname% <gray>|<green> Stadens namn är nu %cityname%."
         tax: "<yellow>%cityname% <gray>|<green> Skattesatsen är nu %tax%."
         spawn: "<yellow>%cityname% <gray>|<green> Stadens startpunkt ändrades."

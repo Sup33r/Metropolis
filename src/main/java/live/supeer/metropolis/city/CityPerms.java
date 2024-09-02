@@ -1,25 +1,19 @@
-package live.supeer.metropolis.plot;
+package live.supeer.metropolis.city;
 
 import co.aikar.idb.DbRow;
-import live.supeer.metropolis.city.City;
-import live.supeer.metropolis.city.CityDatabase;
 import lombok.Getter;
 
 @Getter
-public class PlotPerms {
-    private final int plotId;
+public class CityPerms {
     private final int cityId;
+    private final City city;
     private final char[] perms;
     private final String playerUUID;
-    private final City city;
 
-    public PlotPerms(DbRow data) {
-        this.plotId = data.getInt("plotId");
+
+    public CityPerms(DbRow data) {
         this.cityId = data.getInt("cityId");
-        this.perms =
-                data.getString("plotPerms") == null
-                        ? new char[0]
-                        : data.getString("plotPerms").toCharArray();
+        this.perms = data.getString("cityPerms") == null ? new char[0] : data.getString("cityPerms").toCharArray();
         this.playerUUID = data.getString("playerUUID");
         if (CityDatabase.getCity(cityId).isPresent()) {
             this.city = CityDatabase.getCity(cityId).get();
@@ -28,8 +22,7 @@ public class PlotPerms {
         }
     }
 
-    public PlotPerms(int plotId, int cityId, String perms, String playerUUID) {
-        this.plotId = plotId;
+    public CityPerms(int cityId, String perms, String playerUUID) {
         this.cityId = cityId;
         this.perms = perms == null ? new char[0] : perms.toCharArray();
         this.playerUUID = playerUUID;

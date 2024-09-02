@@ -58,6 +58,9 @@ public class MetropolisConfiguration {
 
     private final int teleportCooldown;
 
+    private final String defaultMemberPerms;
+    private final String defaultOutsiderPerms;
+
     MetropolisConfiguration(Metropolis plugin) {
         plugin.saveDefaultConfig();
         plugin.reloadConfig();
@@ -111,5 +114,8 @@ public class MetropolisConfiguration {
         leaderboardBlockFilter = plugin.getConfig().getStringList("leaderboard.blockfilter");
 
         teleportCooldown = plugin.getConfig().getInt("settings.teleportcooldown");
+
+        defaultMemberPerms = plugin.getConfig().getString("settings.city.default.outsiderPerms");
+        defaultOutsiderPerms = plugin.getConfig().getString("settings.city.default.memberPerms");
     }
 }

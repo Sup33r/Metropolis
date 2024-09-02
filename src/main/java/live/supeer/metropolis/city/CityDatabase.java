@@ -51,13 +51,6 @@ public class CityDatabase {
         }
     }
 
-//    private static void loadCityBans(City rCity) throws SQLException {
-//        var bans = DB.getResults("SELECT * FROM `mp_citybans` WHERE `cityId` = '" + rCity.getCityId() + "';");
-//        for (DbRow ban : bans) {
-//            rCity.addCityBan(new Ban(ban));
-//        }
-//    }
-
     private static void loadClaims(City rCity) throws SQLException {
         int cityId = rCity.getCityId();
         var claims = DB.getResults("SELECT * FROM `mp_claims` WHERE `cityId` = '" + cityId + "';");
@@ -120,13 +113,15 @@ public class CityDatabase {
 
     public static City newCity(String cityName, Player player) {
         try {
-            DB.executeUpdate("INSERT INTO `mp_cities` (`cityName`, `originalMayorUUID`, `cityBalance`, `citySpawn`, `createDate`, `taxLevel`) VALUES (?,?,?,?,?,?)",
+            DB.executeUpdate("INSERT INTO `mp_cities` (`cityName`, `originalMayorUUID`, `cityBalance`, `citySpawn`, `createDate`, `taxLevel`, `memberPerms`, `outsiderPerms`) VALUES (?,?,?,?,?,?,?,?)",
                     cityName,
                     player.getUniqueId().toString(),
                     Metropolis.configuration.getCityStartingBalance(),
                     LocationUtil.locationToString(player.getLocation()),
                     DateUtil.getTimestamp(),
-                    Metropolis.configuration.getStartingTaxLevel());
+                    Metropolis.configuration.getStartingTaxLevel(),
+                    Metropolis.configuration.getDefaultMemberPerms(),
+                    Metropolis.configuration.getDefaultOutsiderPerms());
             City city = new City(DB.getFirstRow("SELECT * FROM `mp_cities` WHERE `cityName` = " + Database.sqlString(cityName) + ";"));
             cities.add(city);
             newMember(city, player);
@@ -281,22 +276,6 @@ public class CityDatabase {
         }
 
         return results;
-    }
-
-    public static List<City> getCities(Player player) {
-        List<City> cityList = new ArrayList<>();
-        try {
-            var results = DB.getResults("SELECT * FROM `mp_cities`;");
-            for (var row : results) {
-                City city = new City(row);
-                if (city.getCityMember(player.getUniqueId().toString()) != null || city.isPublic()) {
-                    cityList.add(city);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return cityList;
     }
 
     public static List<String> getCitynames(Player player) {

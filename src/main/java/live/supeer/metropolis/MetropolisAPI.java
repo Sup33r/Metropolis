@@ -7,11 +7,13 @@ import live.supeer.metropolis.city.Role;
 import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.plot.PlotDatabase;
+import live.supeer.metropolis.utils.Utilities;
 import lombok.Setter;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import java.util.List;
+import java.util.UUID;
 
 public class MetropolisAPI {
     @Setter
@@ -75,5 +77,9 @@ public class MetropolisAPI {
             return false;
         }
         return role.getPermissionLevel() >= role.getPermissionLevel();
+    }
+
+    public static boolean playerHasLocationPermissionFlags(UUID uuid, Location location, char flag) {
+        return Utilities.hasLocationPermissionFlags(uuid, location, flag);
     }
 }

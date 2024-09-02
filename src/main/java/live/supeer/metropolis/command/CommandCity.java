@@ -2988,4 +2988,182 @@ public class CommandCity extends BaseCommand {
             Metropolis.sendMessage(targetPlayer, "messages.city.broadcast", "%cityname%", city.getCityName(), "%message%", message);
         }
     }
+
+    @Subcommand("perm")
+    public static void onPerm(Player player, @Optional String subject, @Optional String perm) {
+        City city = Utilities.hasCityPermissions(player, "metropolis.city.perm", null);
+        if (city == null) {
+            return;
+        }
+        if (city.isReserve()) {
+            Metropolis.sendMessage(player, "messages.error.city.reserve");
+            return;
+        }
+        Role role = CityDatabase.getCityRole(city, player.getUniqueId().toString());
+        if (subject == null) {
+            String permsOutsiders = Utilities.formatPerms(city.getOutsiderPerms());
+            String permsMembers = Utilities.formatPerms(city.getMemberPerms());
+            Metropolis.sendMessage(
+                    player, "messages.city.list.perm.header", "%city%", city.getCityName());
+            Metropolis.sendMessage(player, "messages.city.list.perm.outsiders", "%perms%", permsOutsiders);
+            Metropolis.sendMessage(player, "messages.city.list.perm.members", "%perms%", permsMembers);
+
+            for (CityPerms cityPerms : city.getCityPerms()) {
+                StringBuilder stringBuilder = new StringBuilder();
+                for (char s : cityPerms.getPerms()) {
+                    stringBuilder.append(s);
+                }
+                String perms = "+" + stringBuilder.substring(0, stringBuilder.toString().length());
+                if (cityPerms.getPerms() == null || cityPerms.getPerms().length == 0) {
+                    return;
+                }
+                Metropolis.sendMessage(player, "messages.city.list.perm.players", "%player%", ApiedAPI.getPlayer(UUID.fromString(cityPerms.getPlayerUUID())).getName(), "%perms%", perms);
+            }
+            Metropolis.sendMessage(player, "messages.city.list.perm.permsrow.1");
+            Metropolis.sendMessage(player, "messages.city.list.perm.permsrow.2");
+            Metropolis.sendMessage(player, "messages.city.list.perm.permsrow.3");
+            return;
+        }
+
+        if (perm != null && perm.contains(" ")) {
+            Metropolis.sendMessage(player, "messages.syntax.city.perm");
+            return;
+        }
+
+        if (subject.equals("-") && perm == null) {
+            assert role != null;
+            if (role.hasPermission(Role.ASSISTANT)) {
+                Database.addLogEntry(
+                        city,
+                        "{ \"type\": \"city\", \"subtype\": \"perm\", "
+                                + "\"type\": \"all\", "
+                                + "\"from\": \"" + Arrays.toString(city.getMemberPerms()) + "\", "
+                                + "\"to\": \"null\", "
+                                + "\"player\": \"" + player.getUniqueId() + "\" }"
+                );
+                city.removeCityPerms();
+                Metropolis.sendMessage(
+                        player,
+                        "messages.city.successful.set.perm.remove.all",
+                        "%cityname%",
+                        city.getCityName());
+            } else {
+                Metropolis.sendMessage(
+                        player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
+            }
+            return;
+        }
+
+        if (perm == null) {
+            Metropolis.sendMessage(player, "messages.syntax.city.perm");
+            return;
+        }
+
+        if (!perm.startsWith("+") && !perm.startsWith("-")) {
+            Metropolis.sendMessage(player, "messages.syntax.city.perm");
+            return;
+        }
+
+        assert role != null;
+        if (role.hasPermission(Role.ASSISTANT)) {
+            if (subject.equalsIgnoreCase("members")) {
+                if (Utilities.parsePermChange(city.getMemberPerms(), perm, player, "city") == null) {
+                    return;
+                }
+                String perms = Utilities.parsePermChange(city.getMemberPerms(), perm, player, "city");
+                if (perms == null) {
+                    return;
+                }
+                Database.addLogEntry(
+                        city,
+                        "{ \"type\": \"city\", \"subtype\": \"perm\", "
+                                + "\"type\": \"members\", "
+                                + "\"from\": \"" + Arrays.toString(city.getMemberPerms()) + "\", "
+                                + "\"to\": \"" + Utilities.parsePermChange(city.getMemberPerms(), perm, player, "city") + "\", "
+                                + "\"issuer\": \"" + player.getUniqueId() + "\" }"
+                );
+                city.setCityPerms("members", perms, null);
+                Metropolis.sendMessage(player, "messages.city.successful.set.perm.change.members", "%perms%", new String(city.getMemberPerms()), "%cityname%", city.getCityName());
+                return;
+            }
+
+            if (subject.equalsIgnoreCase("outsiders")) {
+                if (Utilities.parsePermChange(city.getOutsiderPerms(), perm, player, "city") == null) {
+                    return;
+                }
+
+                String perms = Utilities.parsePermChange(city.getOutsiderPerms(), perm, player, "city");
+                if (perms == null) {
+                    return;
+                }
+                Database.addLogEntry(
+                        city,
+                        "{ \"type\": \"city\", \"subtype\": \"perm\", "
+                                + "\"type\": \"outsiders\", "
+                                + "\"from\": \"" + Arrays.toString(city.getOutsiderPerms()) + "\", "
+                                + "\"to\": \"" + Utilities.parsePermChange(city.getOutsiderPerms(), perm, player, "city") + "\", "
+                                + "\"issuer\": \"" + player.getUniqueId() + "\" }"
+                );
+                city.setCityPerms("outsiders", perms, null);
+                Metropolis.sendMessage(
+                        player,
+                        "messages.city.successful.set.perm.change.outsiders",
+                        "%perms%",
+                        perms,
+                        "%cityname%",
+                        city.getCityName());
+                return;
+            }
+
+            MPlayer mPlayer = ApiedAPI.getPlayer(subject);
+            if (mPlayer == null) {
+                Metropolis.sendMessage(player, "messages.error.player.notFound");
+                return;
+            }
+            if (city.getPlayerCityPerm(mPlayer.getUuid()) == null) {
+                String perms = Utilities.parsePermChange(null, perm, player,"city");
+                if (perms == null) {
+                    return;
+                }
+                Database.addLogEntry(
+                        city,
+                        "{ \"type\": \"city\", \"subtype\": \"perm\", "
+                                + "\"type\": \"player\", "
+                                + "\"from\": \"null\", "
+                                + "\"to\": \"" + perms + "\", "
+                                + "\"issuer\": \"" + player.getUniqueId() + "\", "
+                                + "\"player\": \"" + mPlayer.getUuid() + "\" }"
+                );
+                city.setCityPerms("players", perms, mPlayer.getUuid());
+            } else {
+                String perms = Utilities.parsePermChange(city.getPlayerCityPerm(mPlayer.getUuid()).getPerms(), perm, player, "city");
+                String from = Arrays.toString(city.getPlayerCityPerm(mPlayer.getUuid()).getPerms());
+                if (perms == null) {
+                    return;
+                }
+                Database.addLogEntry(
+                        city,
+                        "{ \"type\": \"city\", \"subtype\": \"perm\", "
+                                + "\"type\": \"player\", "
+                                + "\"from\": \"" + from + "\", "
+                                + "\"to\": \"" + perms + "\", "
+                                + "\"issuer\": \"" + player.getUniqueId() + "\", "
+                                + "\"player\": \"" + mPlayer.getUuid() + "\" }"
+                );
+                city.setCityPerms("players", perms, mPlayer.getUuid());
+            }
+            Metropolis.sendMessage(
+                    player,
+                    "messages.city.successful.set.perm.change.player",
+                    "%player%",
+                    mPlayer.getName(),
+                    "%perms%",
+                    new String(city.getPlayerCityPerm(mPlayer.getUuid()).getPerms()),
+                    "%cityname%",
+                    city.getCityName());
+        } else {
+            Metropolis.sendMessage(
+                    player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
+        }
+    }
 }

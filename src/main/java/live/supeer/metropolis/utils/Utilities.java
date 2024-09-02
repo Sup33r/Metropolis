@@ -10,10 +10,12 @@ import live.supeer.metropolis.city.*;
 import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.plot.PlotDatabase;
+import live.supeer.metropolis.plot.PlotPerms;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
 
@@ -735,6 +737,26 @@ public class Utilities {
         return players;
     }
 
+    public static @NotNull String formatPerms(char[] perms) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (char s : perms) {
+            stringBuilder.append(s);
+        }
+        String stringPerms = "+"
+                + stringBuilder.substring(
+                0, stringBuilder.toString().length());
+        if (stringBuilder
+                .substring(0, stringBuilder.toString().length())
+                .equals(" ")
+                || stringBuilder
+                .substring(0, stringBuilder.toString().length())
+                .isEmpty()
+                || stringBuilder.substring(0, stringBuilder.toString().length())
+                == null) {
+            stringPerms = "<italic>nada";
+        }
+        return stringPerms;
+    }
 
     public static String uuidListToString(List<UUID> players) {
         StringBuilder playerString = new StringBuilder();
@@ -742,5 +764,70 @@ public class Utilities {
             playerString.append(player.toString()).append(",");
         }
         return playerString.toString();
+    }
+
+    public static boolean hasPermissionFlags(UUID uuid, City city, Plot plot, char flag) {
+        if (plot != null) {
+            if (city == null) {
+                city = plot.getCity();
+            }
+            Role role = CityDatabase.getCityRole(city, uuid.toString());
+            if (role != null) {
+                if (role.hasPermission(Role.ASSISTANT) && !plot.isKMarked()) {
+                    return true;
+                }
+            }
+            PlotPerms perms = plot.getPlayerPlotPerm(uuid.toString());
+            if (perms != null) {
+                if (new String(perms.getPerms()).contains(String.valueOf(flag))) {
+                    return true;
+                }
+            }
+            if (city.getCityMember(uuid.toString()) != null && plot.getPermsMembers() != null) {
+                if (new String(plot.getPermsMembers()).contains(String.valueOf(flag))) {
+                    return true;
+                }
+            }
+            if (plot.getPermsOutsiders() != null) {
+                return new String(plot.getPermsOutsiders()).contains(String.valueOf(flag));
+            }
+            return false;
+        }
+        if (city != null) {
+            Role role = CityDatabase.getCityRole(city, uuid.toString());
+            if (role != null) {
+                if (role.hasPermission(Role.ASSISTANT)) {
+                    return true;
+                }
+                CityPerms perms = city.getPlayerCityPerm(uuid);
+                if (perms != null) {
+                    if (new String(perms.getPerms()).contains(String.valueOf(flag))) {
+                        return true;
+                    }
+                }
+                if (city.getCityMember(uuid.toString()) != null && city.getMemberPerms() != null) {
+                    if (new String(city.getMemberPerms()).contains(String.valueOf(flag))) {
+                        return true;
+                    }
+                }
+                if (city.getOutsiderPerms() != null) {
+                    return new String(city.getOutsiderPerms()).contains(String.valueOf(flag));
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean hasLocationPermissionFlags(UUID uuid, Location location, char flag) {
+        City city = CityDatabase.getCityByClaim(location);
+        if (city == null) {
+            return true;
+        }
+        Plot plot = PlotDatabase.getCityPlot(city, location.toBlockLocation());
+        if (plot == null) {
+            return hasPermissionFlags(uuid, city, null, flag);
+        } else {
+            return hasPermissionFlags(uuid, city, plot, flag);
+        }
     }
 }
