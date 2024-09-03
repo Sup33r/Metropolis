@@ -193,6 +193,15 @@ public class City {
         DB.executeUpdateAsync("UPDATE `mp_cities` SET `cityFlags` = ? WHERE `cityId` = ?", flags, cityId);
     }
 
+    public boolean hasMember(String uuid) {
+        for (Member member : cityMembers) {
+            if (member.getPlayerUUID().equals(uuid)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public CityPerms getPlayerCityPerm(UUID uuid) {
         for (CityPerms perm : cityPerms) {
             if (perm.getPlayerUUID().equals(uuid.toString())) {
@@ -226,6 +235,14 @@ public class City {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public List<Claim> getCityClaimList() {
+        List<Claim> claims = new ArrayList<>();
+        for (Octree<Claim> octree : claimOctree.values()) {
+            octree.forEach(claims::add);
+        }
+        return claims;
     }
 
     public void setCityPerms(String type, String perms, UUID uuid) {
@@ -394,6 +411,16 @@ public class City {
                         + cityId
                         + ";");
         return isPublic = !isPublic;
+    }
+
+    public void setTaxExempt(boolean isTaxExempt) {
+        DB.executeUpdateAsync(
+                "UPDATE `mp_cities` SET `isTaxExempt` = "
+                        + (isTaxExempt ? 1 : 0)
+                        + " WHERE `cityId` = "
+                        + cityId
+                        + ";");
+        this.isTaxExempt = isTaxExempt;
     }
 
     public boolean cityCouldGoUnder(int days) {

@@ -1,5 +1,6 @@
 package live.supeer.metropolis.city;
 
+import co.aikar.idb.DB;
 import co.aikar.idb.DbRow;
 import live.supeer.metropolis.Metropolis;
 import lombok.Getter;
@@ -9,7 +10,7 @@ public class Member {
     private final String playerUUID;
     private final int cityId;
     private final String cityName;
-    private final Role cityRole;
+    private Role cityRole;
     private final long joinDate;
     private final City city;
 
@@ -23,6 +24,16 @@ public class Member {
             this.city = CityDatabase.getCity(cityId).get();
         } else {
             this.city = null;
+        }
+    }
+
+    public void setRole(Role role) {
+        this.cityRole = role;
+        try {
+            DB.executeUpdate("UPDATE cityMembers SET cityRole = ? WHERE playerUUID = ? AND cityId = ?", role.toString(), playerUUID, cityId);
+        } catch (Exception e) {
+            e.printStackTrace();
+
         }
     }
 }

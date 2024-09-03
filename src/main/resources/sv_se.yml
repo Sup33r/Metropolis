@@ -41,6 +41,7 @@ messages:
   days:
     yesterday: "i går"
     today: "i dag"
+  invalidNumber: "<red>Det angivna värdet är inte ett giltigt nummer."
   shutdownMessage: "\n<aqua>Servern kommer precis att startas om för underhåll. Vi ses snart igen!\n"
   shutdownMessageCountdown: "\n<aqua>Servern kommer att startas om för underhåll om %time%.\n"
   shutdownMessageSoon: "\n<aqua>EnServer ska genomgå en snabb omstart. Vänligen <bold>STÅ STILL</bold>, så teleporteras du snart till väntsalen. Tack!\n"
@@ -60,6 +61,7 @@ messages:
     goes: "<dark_green>--- <green>Stadsteleporteringspunkter (sida <bold>%startPage% <reset><green>av <bold>%totalPages%<reset><green>) <dark_green>---"
   syntax:
     admin:
+      all: "<gray>Syntax: /metropolis taxcollect\nSyntax: /metropolis rentcollect\nSyntax: /metropolis override\nSyntax: /metropolis override <underlined>spelare</underlined\n<gray>Syntax: /metropolis city balance +/-<underlined>belopp</underlined> <underlined>stad</underlined>\nSyntax: /metropolis city toggle taxexempt\nSyntax: /metropolis city new <underlined>spelare</underlined> <underlined>stadsnamn</underlined>\nSyntax: /metropolis city delete <underlined>stadsnamn</underlined>\nSyntax: /metropolis city join <underlined>spelare</underlined> <underlined>stadsnamn</underlined>\nSyntax: /metropolis city kick <underlined>spelare</underlined> <underlined>stadsnamn</underlined>\nSyntax: /metropolis city rank <underlined>spelare</underlined> <underlined>rank</underlined> <underlined>stadsnamn</underlined>\nSyntax: /metropolis city mergeinto <underlined>stadsnamn</underlined>\nSyntax: /metropolis city restore <underlined>spelare</underlined> <underlined>pris</underlined> <underlined>stadsnamn</underlined>\nSyntax: /metropolis city restore <underlined>spelare</underlined> - <underlined>stadsnamn</underlined>\nSyntax: /metropolis city set minchunkdistance <underlined>avstånd</underlined>\nSyntax: /metropolis city set minchunkdistance - <underlined>stadsnamn</underlined>\nSyntax: /metropolis city set minspawndistance <underlined>avstånd</underlined> <underlined>stadsnamn</underlined>\nSyntax: /metropolis city set minspawndistance - <underlined>stadsnamn</underlined>"
       balance: "<gray>Syntax: /metropolis balance +/-<underlined>belopp</underlined> <underlined>stad"
     city:
       perm: "<gray>Syntax: /city perm <underlined>spelare<reset><gray> +/-<underlined>ändring</underlined>\n<gray>Syntax: /city perm members +/-<underlined>ändring</underlined>\n<gray>Syntax: /city perm outsiders +/-<underlined>ändring</underlined>"
@@ -110,6 +112,7 @@ messages:
       notJail: "<red>Tomten är inte av typen fängelse."
     invalidNumber: "<red>Det angivna värdet är inte ett giltigt nummer."
     player:
+      insufficientFunds: "<red>Spelaren har inte tillräckligt med encoins."
       notFound: "<red>Spelaren hittades inte."
       notInCity: "<red>Spelaren är inte medlem i någon stad."
     city:
@@ -191,9 +194,12 @@ messages:
       invalidName: "<red>Stadens namn får inte vara längre än 16 tecken eller innehålla några specialtecken."
       maxCityCount: "<red>Man kan inte vara medlem i fler än 3 städer."
       claimExists: "<red>Denna markbit är redan upptagen."
+      alreadyMember: "<red>Spelaren är redan medlem i staden."
+      sameCity: "<red>Städerna måste vara två olika städer."
       tooCloseToOtherCity: "<red>Denna markbit är för nära en annan stad."
       alreadyInACity: "<red>Du är redan medlem i en stad."
       alreadyInCity: "<red>Du är redan medlem i staden."
+      notMember: "<red>Spelaren är inte medlem i staden."
       notInCity: "<red>Du är inte medlem i staden."
       banned: "<red>Du är bannlyst från staden."
       notFound: "<red>Staden hittades inte."
@@ -440,6 +446,17 @@ messages:
       notEmpty: "<red>Kistan är inte tom.</red>"
       notDouble: "<red>Kistan är inte en dubbelkista.</red>"
   city:
+    admin:
+      rank:
+        success: "<aqua>%player%s roll i staden %cityname% har ändrats till %role%."
+      join: "<green>Du har nu forcerat %player% att bli medlem i staden %cityname%."
+      delete:
+        confirmation: "<yellow>%cityname% <gray>| <red>Är du säker på att du vill ta bort staden? Alla markbitar, områden, stadsteleporteringspunkter och mer kommer att tas bort. Skriv <dark_red>/metropolis city delete! stadsnamn<red> för att bekräfta."
+        success: "<yellow>%cityname% <gray>| <green>Staden har blivit borttagen."
+        others: "<aqua>Staden %cityname% har blivit borttagen."
+    merge:
+      confirm: "<aqua><bold>VARNING:</bold> Staden %merged% kommer att slås ihop med %merging%. Detta gör att %merged% kommer att raderas. Vill du fortsätta? Skriv isåfall kommandot igen."
+      successful: "<aqua>Staden %merged% har slagits ihop med %merging%."
     becameReserve: "<aqua>Staden %cityname% har gått under och blivit ett naturreservat."
     wentUnder: "<aqua>Staden %cityname% har gått under."
     warning:
@@ -623,6 +640,9 @@ messages:
       owner: "<dark_green><bold>Ägare:"
       price: "<dark_green><bold>Till salu:"
     successful:
+      onTaxExempt: "<yellow>%cityname% <gray>| <green>Skattebefrielse har lagts till."
+      offTaxExempt: "<yellow>%cityname% <gray>| <green>Skattebefrielse har tagits bort."
+      restore: "<green>Staden %cityname% har återställts åt %player% för %price% encoins."
       taxCollected: "<aqua>Dags att betala skatt! :)"
       taxLevel:
         removed: "<yellow>%cityname% <gray>| <green>Ingen betalar skatt längre. (yippie!)"

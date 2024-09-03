@@ -137,7 +137,8 @@ public final class Metropolis extends JavaPlugin {
 
     public static void registerCompletions(PaperCommandManager manager) {
         manager.getCommandCompletions().registerAsyncCompletion("plotType", c -> ImmutableList.of("church", "farm", "shop", "vacation"));
-        manager.getCommandCompletions().registerAsyncCompletion("cityRoles", c -> ImmutableList.of("vicemayor", "assistant", "inviter", "member", "swap", "-", "member"));
+        manager.getCommandCompletions().registerAsyncCompletion("cityRoles", c -> ImmutableList.of("vicemayor", "assistant", "inviter", "swap", "-", "member"));
+        manager.getCommandCompletions().registerAsyncCompletion("allCityRoles", c -> ImmutableList.of("vicemayor", "assistant", "inviter", "mayor", "member"));
         manager.getCommandCompletions().registerAsyncCompletion("cityGo1", c -> ImmutableList.of("delete", "set"));
         manager.getCommandCompletions().registerAsyncCompletion("cityGo2", c -> ImmutableList.of("displayname", "accesslevel","name"));
         manager.getCommandCompletions().registerAsyncCompletion("taxLevel", c -> ImmutableList.of("member", "inviter", "assistant", "vicemayor", "mayor", "all", "-"));

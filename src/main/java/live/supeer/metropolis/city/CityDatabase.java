@@ -664,6 +664,58 @@ public class CityDatabase {
         if (messageType.equals("motdMessage")) city.setMotdMessage(message);
     }
 
+    public static void mergeCities(City merging, City merged) {
+        try {
+            // Transfer members
+            for (Member member : merged.getCityMembers()) {
+                if (!merging.hasMember(member.getPlayerUUID())) {
+                    member.setRole(Role.MEMBER);
+                    merging.addCityMember(member);
+                    DB.executeUpdate("UPDATE `mp_members` SET `cityId` = ? WHERE `playerUUID` = ?", merging.getCityId(), member.getPlayerUUID());
+                }
+            }
+
+            // Transfer claims
+            for (Claim claim : merged.getCityClaimList()) {
+                merging.addCityClaim(claim);
+                DB.executeUpdate("UPDATE `mp_claims` SET `cityId` = ? WHERE `claimId` = ?", merging.getCityId(), claim.getClaimId());
+            }
+
+            // Transfer plots
+            for (Plot plot : merged.getCityPlots()) {
+                merging.addCityPlot(plot);
+                DB.executeUpdate("UPDATE `mp_plots` SET `cityId` = ? WHERE `plotId` = ?", merging.getCityId(), plot.getPlotId());
+            }
+
+            // Transfer districts
+            for (District district : merged.getCityDistricts()) {
+                merging.addCityDistrict(district);
+                DB.executeUpdate("UPDATE `mp_districts` SET `cityId` = ? WHERE `districtName` = ?", merging.getCityId(), district.getDistrictName());
+            }
+
+            // Transfer home cities
+            DB.executeUpdate("UPDATE `mp_homecities` SET `cityId` = ? WHERE `cityId` = ?", merging.getCityId(), merged.getCityId());
+
+            // Transfer plot permissions
+            DB.executeUpdate("UPDATE `mp_plotperms` SET `cityId` = ? WHERE `cityId` = ?", merging.getCityId(), merged.getCityId());
+
+            // Transfer bans
+            DB.executeUpdate("UPDATE `mp_citybans` SET `cityId` = ? WHERE `cityId` = ?", merging.getCityId(), merged.getCityId());
+
+            // Transfer city goes
+            DB.executeUpdate("UPDATE `mp_citygoes` SET `cityId` = ? WHERE `cityId` = ?", merging.getCityId(), merged.getCityId());
+
+            // Delete the merged city
+            DB.executeUpdate("DELETE FROM `mp_cities` WHERE `cityId` = ?", merged.getCityId());
+
+            // Remove the merged city from the list of cities
+            cities.remove(merged);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static String getCityMembers(City city) {
         try {
             var results = DB.getResults("SELECT * FROM `mp_members` WHERE `cityId` = " + city.getCityId() + ";");
