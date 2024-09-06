@@ -41,47 +41,26 @@ public class District {
             contactplayers = new ArrayList<>();
         }
         contactplayers.add(mPlayer.getUuid());
-        DB.executeUpdateAsync(
-                "UPDATE `mp_districts` SET `contactPlayers` = "
-                        + Database.sqlString(Utilities.uuidListToString(contactplayers))
-                        + " WHERE `districtName` = "
-                        + Database.sqlString(districtName) + " AND `cityId` = " + city.getCityId());
+        DB.executeUpdateAsync("UPDATE `mp_districts` SET `contactPlayers` = ? WHERE `districtName` = ? AND `cityId` = ?", Utilities.uuidListToString(contactplayers), districtName, city.getCityId());
     }
 
     public void removeContactPlayer(MPlayer mPlayer) {
         contactplayers.remove(mPlayer.getUuid());
-        DB.executeUpdateAsync(
-                "UPDATE `mp_districts` SET `contactPlayers` = "
-                        + Database.sqlString(Utilities.uuidListToString(contactplayers))
-                        + " WHERE `districtName` = "
-                        + Database.sqlString(districtName) + " AND `cityId` = " + city.getCityId());
+        DB.executeUpdateAsync("UPDATE `mp_districts` SET `contactPlayers` = ? WHERE `districtName` = ? AND `cityId` = ?", Utilities.uuidListToString(contactplayers), districtName, city.getCityId());
     }
 
     public void setDistrictName(String districtName) {
-        DB.executeUpdateAsync(
-                "UPDATE `mp_districts` SET `districtName` = "
-                        + Database.sqlString(districtName)
-                        + " WHERE `districtName` = "
-                        + Database.sqlString(this.districtName) + " AND `cityId` = " + city.getCityId());
+        DB.executeUpdateAsync("UPDATE `mp_districts` SET `districtName` = ? WHERE `districtName` = ? AND `cityId` = ?", districtName, this.districtName, city.getCityId());
     }
 
     public void update(Player player, Polygon districtPolygon) {
-
         try {
-            DB.executeUpdate(
-                    "UPDATE `mp_districts` SET `districtPoints` = "
-                            + Database.sqlString(LocationUtil.polygonToString(districtPolygon))
-                            + ", `districtBoundary` = ST_GeomFromText('"
-                            + districtPolygon.toText()
-                            + "')"
-                            + ", `world` = "
-                            + Database.sqlString(player.getWorld().getName())
-                            + " WHERE `districtName` = "
-                            + Database.sqlString(districtName)
-                            + " AND `cityId` = "
-                            + city.getCityId()
-                            + ";");
-
+            DB.executeUpdate("UPDATE `mp_districts` SET `districtPoints` = ?, `districtBoundary` = ST_GeomFromText(?), `world` = ? WHERE `districtName` = ? AND `cityId` = ?",
+                    LocationUtil.polygonToString(districtPolygon),
+                    districtPolygon.toText(),
+                    player.getWorld().getName(),
+                    districtName,
+                    city.getCityId());
             this.districtPoints = districtPolygon;
             this.world = player.getWorld();
 

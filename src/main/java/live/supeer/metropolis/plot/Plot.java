@@ -90,7 +90,7 @@ public class Plot {
     public void setLeaderboard(boolean hasLeaderboard) {
         this.hasLeaderboard = hasLeaderboard;
         try {
-        DB.executeUpdate("UPDATE `mp_plots` SET `leaderboard` = " + hasLeaderboard + " WHERE `plotId` = " + plotId + ";");
+            DB.executeUpdate("UPDATE `mp_plots` SET `leaderboard` = ? WHERE `plotId` = ?", hasLeaderboard, plotId);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -99,7 +99,7 @@ public class Plot {
     public void setLeaderboardShown(boolean leaderboardShown) {
         this.leaderboardShown = leaderboardShown;
         try {
-            DB.executeUpdate("UPDATE `mp_plots` SET `leaderboardShown` = " + leaderboardShown + " WHERE `plotId` = " + plotId + ";");
+            DB.executeUpdate("UPDATE `mp_plots` SET `leaderboardShown` = ? WHERE `plotId` = ?", leaderboardShown, plotId);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -107,63 +107,38 @@ public class Plot {
 
     public void setPlotName(String plotName) {
         this.plotName = plotName;
-        DB.executeUpdateAsync(
-                "UPDATE `mp_plots` SET `plotName` = "
-                        + Database.sqlString(plotName)
-                        + " WHERE `plotId` = "
-                        + plotId
-                        + ";");
+        DB.executeUpdateAsync("UPDATE `mp_plots` SET `plotName` = ? WHERE `plotId` = ?", plotName, plotId);
     }
 
     public void setPlotType(String plotType) {
         this.plotType = plotType;
         this.isJail = plotType != null && plotType.equalsIgnoreCase("jail");
-        DB.executeUpdateAsync(
-                "UPDATE `mp_plots` SET `plotType` = "
-                        + Database.sqlString(plotType)
-                        + " WHERE `plotId` = "
-                        + plotId
-                        + ";");
+        DB.executeUpdateAsync("UPDATE `mp_plots` SET `plotType` = ? WHERE `plotId` = ?", plotType, plotId);
     }
 
     public void setPlotOwnerUUID(String plotOwnerUUID) {
         this.plotOwnerUUID = plotOwnerUUID;
-        DB.executeUpdateAsync(
-                "UPDATE `mp_plots` SET `plotOwnerUUID` = "
-                        + Database.sqlString(plotOwnerUUID)
-                        + " WHERE `plotId` = "
-                        + plotId
-                        + ";");
+        DB.executeUpdateAsync("UPDATE `mp_plots` SET `plotOwnerUUID` = ? WHERE `plotId` = ?", plotOwnerUUID, plotId);
     }
 
     public void setForSale(boolean isForSale) {
         this.isForSale = isForSale;
-        DB.executeUpdateAsync(
-                "UPDATE `mp_plots` SET `plotIsForSale` = "
-                        + isForSale
-                        + " WHERE `plotId` = "
-                        + plotId
-                        + ";");
+        DB.executeUpdateAsync("UPDATE `mp_plots` SET `plotIsForSale` = ? WHERE `plotId` = ?", isForSale, plotId);
     }
 
     public void setPlotPrice(int plotPrice) {
         this.plotPrice = plotPrice;
-        DB.executeUpdateAsync(
-                "UPDATE `mp_plots` SET `plotPrice` = " + plotPrice + " WHERE `plotId` = " + plotId + ";");
+        DB.executeUpdateAsync("UPDATE `mp_plots` SET `plotPrice` = ? WHERE `plotId` = ?", plotPrice, plotId);
     }
 
     public void setPlotRent(int plotRent) {
         this.plotRent = plotRent;
-        DB.executeUpdateAsync(
-                "UPDATE `mp_plots` SET `plotRent` = " + plotRent + " WHERE `plotId` = " + plotId + ";");
+        DB.executeUpdateAsync("UPDATE `mp_plots` SET `plotRent` = ? WHERE `plotId` = ?", plotRent, plotId);
     }
 
     public void removePlotOwner() {
         this.plotOwnerUUID = null;
-        DB.executeUpdateAsync(
-                "UPDATE `mp_plots` SET `plotOwnerUUID` = NULL WHERE `plotId` = "
-                        + plotId
-                        + ";");
+        DB.executeUpdateAsync("UPDATE `mp_plots` SET `plotOwnerUUID` = NULL WHERE `plotId` = ?", plotId);
     }
 
     public void updatePlot(Player player, Location[] plotPoints, int minY, int maxY) {
@@ -187,23 +162,13 @@ public class Plot {
                         player.getWorld().getHighestBlockYAt(centerX, centerZ) + 1,
                         centerZ);
         try {
-            DB.executeUpdate(
-                    "UPDATE `mp_plots` SET `plotPoints` = "
-                            + Database.sqlString(LocationUtil.polygonToString(plotPolygon))
-                            + ", `plotYMin` = "
-                            + minY
-                            + ", `plotYMax` = "
-                            + maxY
-                            + ", `plotCenter` = "
-                            + Database.sqlString(LocationUtil.locationToString(plotCenter))
-                            + ", `plotBoundary` = ST_GeomFromText('"
-                            + plotPolygon.toText()
-                            + "')"
-                            + " WHERE `plotId` = "
-                            + plotId
-                            + ";");
-
-            // Update local instance variables
+            DB.executeUpdate("UPDATE `mp_plots` SET `plotPoints` = ?, `plotYMin` = ?, `plotYMax` = ?, `plotCenter` = ?, `plotBoundary` = ST_GeomFromText(?) WHERE `plotId` = ?",
+                    LocationUtil.polygonToString(plotPolygon),
+                    minY,
+                    maxY,
+                    LocationUtil.locationToString(plotCenter),
+                    plotPolygon.toText(),
+                    plotId);
             this.plotPoints = plotPolygon;
             this.plotYMin = minY;
             this.plotYMax = maxY;
@@ -216,39 +181,15 @@ public class Plot {
     public void setPlotPerms(String type, String perms, String playerUUID) {
         try {
             if (type.equalsIgnoreCase("members")) {
-                DB.executeUpdate(
-                        "UPDATE `mp_plots` SET `plotPermsMembers` = "
-                                + Database.sqlString(perms)
-                                + " WHERE `plotId` = "
-                                + plotId
-                                + ";");
+                DB.executeUpdate("UPDATE `mp_plots` SET `plotPermsMembers` = ? WHERE `plotId` = ?", perms, plotId);
                 this.permsMembers = perms.toCharArray();
                 return;
             } else if (type.equalsIgnoreCase("outsiders")) {
-                DB.executeUpdate(
-                        "UPDATE `mp_plots` SET `plotPermsOutsiders` = "
-                                + Database.sqlString(perms)
-                                + " WHERE `plotId` = "
-                                + plotId
-                                + ";");
+                DB.executeUpdate("UPDATE `mp_plots` SET `plotPermsOutsiders` = ? WHERE `plotId` = ?", perms, plotId);
                 this.permsOutsiders = perms.toCharArray();
                 return;
             }
-
-            DB.executeUpdate(
-                    "INSERT INTO `mp_plotperms` (`plotId`, `cityId`, `plotPerms`, `playerUUID`) VALUES ("
-                            + plotId
-                            + ", "
-                            + cityId
-                            + ", "
-                            + Database.sqlString(perms)
-                            + ", "
-                            + Database.sqlString(playerUUID)
-                            + ") ON DUPLICATE KEY UPDATE plotPerms = '"
-                            + perms
-                            + "';");
-
-            // Update local plotPerms list
+            DB.executeInsert("INSERT INTO `mp_plotperms` (plotId, cityId, plotPerms, playerUUID) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE plotPerms = ?", plotId, cityId, perms, playerUUID, perms);
             PlotPerms plotPerm = new PlotPerms(plotId, cityId, perms, playerUUID);
             plotPerms.removeIf(p -> p.getPlayerUUID().equals(playerUUID));
             plotPerms.add(plotPerm);
@@ -259,11 +200,8 @@ public class Plot {
 
     public void removePlotPerms() {
         try {
-            DB.executeUpdate(
-                    "UPDATE `mp_plots` SET `plotPermsMembers` = '', `plotPermsOutsiders` = '' WHERE `plotId` = "
-                            + plotId
-                            + ";");
-            DB.executeUpdate("DELETE FROM `mp_plotperms` WHERE `plotId` = " + plotId + ";");
+            DB.executeUpdate("UPDATE `mp_plots` SET `plotPermsMembers` = '', `plotPermsOutsiders` = '' WHERE `plotId` = ?", plotId);
+            DB.executeUpdate("DELETE FROM `mp_plotperms` WHERE `plotId` = ?", plotId);
             this.permsMembers = new char[] {' '};
             this.permsOutsiders = new char[] {' '};
             this.plotPerms.clear();
@@ -276,7 +214,7 @@ public class Plot {
         List<PlotPerms> plotPermsList = new ArrayList<>();
         try {
             List<DbRow> rows =
-                    DB.getResults("SELECT * FROM `mp_plotperms` WHERE `plotId` = " + plotId + ";");
+                    DB.getResults("SELECT * FROM `mp_plotperms` WHERE `plotId` = ?", plotId);
             for (DbRow row : rows) {
                 plotPermsList.add(new PlotPerms(row));
             }
@@ -312,18 +250,12 @@ public class Plot {
 
     public void setPlotFlags(String flags) {
         this.plotFlags = flags.toCharArray();
-        DB.executeUpdateAsync(
-                "UPDATE `mp_plots` SET `plotFlags` = "
-                        + Database.sqlString(flags)
-                        + " WHERE `plotId` = "
-                        + plotId
-                        + ";");
+        DB.executeUpdateAsync("UPDATE `mp_plots` SET `plotFlags` = ? WHERE `plotId` = ?", flags, plotId);
     }
 
     public void setKMarked(boolean kMarked) {
         this.kMarked = kMarked;
-        DB.executeUpdateAsync(
-                "UPDATE `mp_plots` SET `plotKMarked` = " + kMarked + " WHERE `plotId` = " + plotId + ";");
+        DB.executeUpdateAsync("UPDATE `mp_plots` SET `plotKMarked` = ? WHERE `plotId` = ?", kMarked, plotId);
     }
 
     public List<Player> playersInPlot() {

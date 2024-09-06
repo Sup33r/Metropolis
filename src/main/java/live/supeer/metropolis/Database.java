@@ -37,10 +37,6 @@ public class Database {
         }
     }
 
-    public static String sqlString(String string) {
-        return string == null ? "NULL" : "'" + string.replace("\\", "\\\\").replace("'", "\\'") + "'";
-    }
-
     public static void createTables() {
         try {
 
@@ -242,14 +238,7 @@ public class Database {
     public static void addLogEntry(City city, String logEntry) {
         try {
             int cityId = city.getCityId();
-            DB.executeInsert(
-                    "INSERT INTO `mp_citylogs` (`cityId`, `dateTime`, `jsonLog`) VALUES ("
-                            + cityId
-                            + ", "
-                            + DateUtil.getTimestamp()
-                            + ", "
-                            + Database.sqlString(logEntry)
-                            + ");");
+            DB.executeInsert("INSERT INTO `mp_citylogs` (`cityId`, `dateTime`, `jsonLog`) VALUES (?, ?, ?)", cityId, DateUtil.getTimestamp(), logEntry);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -109,8 +109,13 @@ public class PlotDatabase {
         String worldName = world.getName();
         try {
             String polygonWKT = polygon.toText();
-            List<DbRow> results = DB.getResults(
-                    "SELECT * FROM `mp_plots` WHERE ST_Intersects(`plotBoundary`, ST_GeomFromText(" + Database.sqlString(polygonWKT) + ")) AND `cityId` = " + city.getCityId() + " AND `plotYMin` <= " + yMax + " AND `plotYMax` >= " + yMin + " AND `plotCenter` LIKE " + Database.sqlString(worldName + "%") + ";");
+            List<DbRow> results = DB.getResults("SELECT * FROM `mp_plots` WHERE ST_Intersects(`plotBoundary`, ST_GeomFromText(?) AND `cityId` = ? AND `plotYMin` <= ? AND `plotYMax` >= ? AND `plotCenter` LIKE ?",
+                    polygonWKT,
+                    city.getCityId(),
+                    yMax,
+                    yMin,
+                    worldName + "%"
+            );
             return !results.isEmpty();
         } catch (Exception e) {
             e.printStackTrace();
@@ -120,7 +125,7 @@ public class PlotDatabase {
 
     public static int getPlayerPlotCount(Player player) {
         try {
-            return DB.getResults("SELECT * FROM `mp_plots` WHERE `plotOwnerUUID` = " + Database.sqlString(player.getUniqueId().toString()) + ";").size();
+            return DB.getResults("SELECT * FROM `mp_plots` WHERE `plotOwnerUUID` = ?", player.getUniqueId().toString()).size();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -131,8 +136,13 @@ public class PlotDatabase {
         String worldName = world.getName();
         try {
             String polygonWKT = polygon.toText();
-            List<DbRow> results = DB.getResults(
-                    "SELECT * FROM `mp_plots` WHERE ST_Intersects(`plotBoundary`, ST_GeomFromText(" + Database.sqlString(polygonWKT) + ")) AND `cityId` = " + city.getCityId() + " AND `plotYMin` <= " + yMax + " AND `plotYMax` >= " + yMin + " AND `plotCenter` LIKE " + Database.sqlString(worldName + "%") + ";");
+            List<DbRow> results = DB.getResults("SELECT * FROM `mp_plots` WHERE ST_Intersects(`plotBoundary`, ST_GeomFromText(?) AND `cityId` = ? AND `plotYMin` <= ? AND `plotYMax` >= ? AND `plotCenter` LIKE ?",
+                    polygonWKT,
+                    city.getCityId(),
+                    yMax,
+                    yMin,
+                    worldName + "%"
+            );
             Plot[] plots = new Plot[results.size()];
             for (int i = 0; i < results.size(); i++) {
                 plots[i] = new Plot(results.get(i));
@@ -177,7 +187,7 @@ public class PlotDatabase {
             );
 
             if (!results.isEmpty()) {
-                int count = results.get(0).getInt("count");
+                int count = results.getFirst().getInt("count");
                 return count > 0;
             }
         } catch (Exception e) {

@@ -87,92 +87,47 @@ public class City {
         } else {
             this.taxLevel = role.toString();
         }
-        DB.executeUpdateAsync(
-                "UPDATE `mp_cities` SET `taxLevel` = "
-                        + Database.sqlString(taxLevel)
-                        + " WHERE `cityId` = "
-                        + cityId
-                        + ";");
+        DB.executeUpdateAsync("UPDATE `mp_cities` SET `taxLevel` = ? WHERE `cityId` = ?", taxLevel, cityId);
     }
 
     public void addTwinCity(City city) {
         twinCities.add(city);
-        DB.executeUpdateAsync(
-                "UPDATE `mp_cities` SET `twinCities` = "
-                        + Database.sqlString(Utilities.cityListToString(twinCities))
-                        + " WHERE `cityId` = "
-                        + cityId
-                        + ";");
+        DB.executeUpdateAsync("UPDATE `mp_cities` SET `twinCities` = ? WHERE `cityId` = ?", Utilities.cityListToString(twinCities), cityId);
     }
 
     public void removeTwinCity(City city) {
         twinCities.remove(city);
-        DB.executeUpdateAsync(
-                "UPDATE `mp_cities` SET `twinCities` = "
-                        + Database.sqlString(Utilities.cityListToString(twinCities))
-                        + " WHERE `cityId` = "
-                        + cityId
-                        + ";");
+        DB.executeUpdateAsync("UPDATE `mp_cities` SET `twinCities` = ? WHERE `cityId` = ?", Utilities.cityListToString(twinCities), cityId);
     }
 
     public void setCityName(String cityName) {
         this.cityName = cityName;
-        DB.executeUpdateAsync(
-                "UPDATE `mp_cities` SET `cityName` = "
-                        + Database.sqlString(cityName)
-                        + " WHERE `cityId` = "
-                        + cityId
-                        + ";");
+        DB.executeUpdateAsync("UPDATE `mp_cities` SET `cityName` = ? WHERE `cityId` = ?", cityName, cityId);
     }
 
     public void setMaxPlotsPerMember(int maxPlotsPerMember) {
         this.maxPlotsPerMember = maxPlotsPerMember;
-        DB.executeUpdateAsync(
-                "UPDATE `mp_cities` SET `maxPlotsPerMember` = "
-                        + maxPlotsPerMember
-                        + " WHERE `cityId` = "
-                        + cityId
-                        + ";");
+        DB.executeUpdateAsync("UPDATE `mp_cities` SET `maxPlotsPerMember` = ? WHERE `cityId` = ?", maxPlotsPerMember, cityId);
     }
 
     public void addCityBalance(int cityBalance) {
         this.cityBalance += cityBalance;
-        DB.executeUpdateAsync(
-                "UPDATE `mp_cities` SET `cityBalance` = "
-                        + this.cityBalance
-                        + " WHERE `cityId` = "
-                        + cityId
-                        + ";");
+        DB.executeUpdateAsync("UPDATE `mp_cities` SET `cityBalance` = ? WHERE `cityId` = ?", this.cityBalance, cityId);
     }
 
     public void removeCityBalance(int cityBalance) {
         this.cityBalance -= cityBalance;
-        DB.executeUpdateAsync(
-                "UPDATE `mp_cities` SET `cityBalance` = "
-                        + this.cityBalance
-                        + " WHERE `cityId` = "
-                        + cityId
-                        + ";");
+        DB.executeUpdateAsync("UPDATE `mp_cities` SET `cityBalance` = ? WHERE `cityId` = ?", this.cityBalance, cityId);
     }
 
     public void setMinChunkDistance(int minChunkDistance) {
         this.minChunkDistance = minChunkDistance;
-        DB.executeUpdateAsync(
-                "UPDATE `mp_cities` SET `minChunkDistance` = "
-                        + minChunkDistance
-                        + " WHERE `cityId` = "
-                        + cityId
-                        + ";");
+        DB.executeUpdateAsync("UPDATE `mp_cities` SET `minChunkDistance` = ? WHERE `cityId` = ?", minChunkDistance, cityId);
     }
 
     public void setMinSpawnDistance(int minSpawnDistance) {
         this.minSpawnDistance = minSpawnDistance;
-        DB.executeUpdateAsync(
-                "UPDATE `mp_cities` SET `minSpawnDistance` = "
-                        + minSpawnDistance
-                        + " WHERE `cityId` = "
-                        + cityId
-                        + ";");
+        DB.executeUpdateAsync("UPDATE `mp_cities` SET `minSpawnDistance` = ? WHERE `cityId` = ?", minSpawnDistance, cityId);
     }
 
     public boolean hasFlag(char needle) {
@@ -280,7 +235,7 @@ public class City {
     public void removeCityMember(Member member) {
         this.cityMembers.remove(member);
         HCDatabase.removeHomeCity(member.getPlayerUUID(), this);
-        DB.executeUpdateAsync("DELETE FROM `mp_members` WHERE `cityId` = " + cityId + " AND `playerUUID` = " + Database.sqlString(member.getPlayerUUID()) + ";");
+        DB.executeUpdateAsync("DELETE FROM `mp_members` WHERE `cityId` = ? AND `playerUUID` = ?", cityId, member.getPlayerUUID());
     }
 
     public void removeCityMember(String playerUUID) {
@@ -288,68 +243,38 @@ public class City {
         if (member != null) {
             this.cityMembers.remove(member);
             HCDatabase.removeHomeCity(playerUUID, this);
-            DB.executeUpdateAsync("DELETE FROM `mp_members` WHERE `cityId` = " + cityId + " AND `playerUUID` = " + Database.sqlString(playerUUID) + ";");
+            DB.executeUpdateAsync("DELETE FROM `mp_members` WHERE `cityId` = ? AND `playerUUID` = ?", cityId, playerUUID);
         }
     }
 
     public void setAsReserve() {
         this.isReserve = true;
-        DB.executeUpdateAsync(
-                "UPDATE `mp_cities` SET `isReserve` = "
-                        + 1
-                        + " WHERE `cityId` = "
-                        + cityId
-                        + ";");
+        DB.executeUpdateAsync("UPDATE `mp_cities` SET `isReserve` = ? WHERE `cityId` = ?", 1, cityId);
     }
 
     public void setAsNotReserve() {
         this.isReserve = false;
-        DB.executeUpdateAsync(
-                "UPDATE `mp_cities` SET `isReserve` = "
-                        + 0
-                        + " WHERE `cityId` = "
-                        + cityId
-                        + ";");
+        DB.executeUpdateAsync("UPDATE `mp_cities` SET `isReserve` = ? WHERE `cityId` = ?", 0, cityId);
     }
 
     public void setCitySpawn(Location citySpawn) {
         this.citySpawn = citySpawn;
-        DB.executeUpdateAsync(
-                "UPDATE `mp_cities` SET `citySpawn` = "
-                        + Database.sqlString(LocationUtil.locationToString(citySpawn))
-                        + " WHERE `cityId` = "
-                        + cityId
-                        + ";");
+        DB.executeUpdateAsync("UPDATE `mp_cities` SET `citySpawn` = ? WHERE `cityId` = ?", LocationUtil.locationToString(citySpawn), cityId);
     }
 
     public void setCityTax(double cityTax) {
-        DB.executeUpdateAsync(
-                "UPDATE `mp_cities` SET `cityTax` = "
-                        + cityTax
-                        + " WHERE `cityId` = "
-                        + cityId
-                        + ";");
+        DB.executeUpdateAsync("UPDATE `mp_cities` SET `cityTax` = ? WHERE `cityId` = ?", cityTax, cityId);
         this.cityTax = cityTax;
     }
 
     public void addBonusClaims(int bonusClaims) {
         this.bonusClaims += bonusClaims;
-        DB.executeUpdateAsync(
-                "UPDATE `mp_cities` SET `bonusClaims` = "
-                        + this.bonusClaims
-                        + " WHERE `cityId` = "
-                        + cityId
-                        + ";");
+        DB.executeUpdateAsync("UPDATE `mp_cities` SET `bonusClaims` = ? WHERE `cityId` = ?", this.bonusClaims, cityId);
     }
 
     public void setEnterMessage(String enterMessage) {
         this.enterMessage = enterMessage;
-        DB.executeUpdateAsync(
-                "UPDATE `mp_cities` SET `enterMessage` = "
-                        + Database.sqlString(enterMessage)
-                        + " WHERE `cityId` = "
-                        + cityId
-                        + ";");
+        DB.executeUpdateAsync("UPDATE `mp_cities` SET `enterMessage` = ? WHERE `cityId` = ?", enterMessage, cityId);
     }
 
     public int calculateCost() {
@@ -362,22 +287,12 @@ public class City {
 
     public void setExitMessage(String exitMessage) {
         this.exitMessage = exitMessage;
-        DB.executeUpdateAsync(
-                "UPDATE `mp_cities` SET `exitMessage` = "
-                        + Database.sqlString(exitMessage)
-                        + " WHERE `cityId` = "
-                        + cityId
-                        + ";");
+        DB.executeUpdateAsync("UPDATE `mp_cities` SET `exitMessage` = ? WHERE `cityId` = ?", exitMessage, cityId);
     }
 
     public void setMotdMessage(String motdMessage) {
         this.motdMessage = motdMessage;
-        DB.executeUpdateAsync(
-                "UPDATE `mp_cities` SET `motdMessage` = "
-                        + Database.sqlString(motdMessage)
-                        + " WHERE `cityId` = "
-                        + cityId
-                        + ";");
+        DB.executeUpdateAsync("UPDATE `mp_cities` SET `motdMessage` = ? WHERE `cityId` = ?", motdMessage, cityId);
     }
 
     public void addCityMember(Member member) {
@@ -394,32 +309,17 @@ public class City {
     }
 
     public boolean toggleOpen() {
-        DB.executeUpdateAsync(
-                "UPDATE `mp_cities` SET `isOpen` = "
-                        + (isOpen ? 0 : 1)
-                        + " WHERE `cityId` = "
-                        + cityId
-                        + ";");
+        DB.executeUpdateAsync("UPDATE `mp_cities` SET `isOpen` = ? WHERE `cityId` = ?", isOpen ? 0 : 1, cityId);
         return isOpen = !isOpen;
     }
 
     public boolean togglePublic() {
-        DB.executeUpdateAsync(
-                "UPDATE `mp_cities` SET `isPublic` = "
-                        + (isPublic ? 0 : 1)
-                        + " WHERE `cityId` = "
-                        + cityId
-                        + ";");
+        DB.executeUpdateAsync("UPDATE `mp_cities` SET `isPublic` = ? WHERE `cityId` = ?", isPublic ? 0 : 1, cityId);
         return isPublic = !isPublic;
     }
 
     public void setTaxExempt(boolean isTaxExempt) {
-        DB.executeUpdateAsync(
-                "UPDATE `mp_cities` SET `isTaxExempt` = "
-                        + (isTaxExempt ? 1 : 0)
-                        + " WHERE `cityId` = "
-                        + cityId
-                        + ";");
+        DB.executeUpdateAsync("UPDATE `mp_cities` SET `isTaxExempt` = ? WHERE `cityId` = ?", isTaxExempt ? 1 : 0, cityId);
         this.isTaxExempt = isTaxExempt;
     }
 
@@ -441,12 +341,7 @@ public class City {
             }
             int tax = cityClaims * Metropolis.configuration.getStateTax();
             cityBalance -= tax;
-            DB.executeUpdate(
-                    "UPDATE `mp_cities` SET `cityBalance` = "
-                            + cityBalance
-                            + " WHERE `cityId` = "
-                            + cityId
-                            + ";");
+            DB.executeUpdate("UPDATE `mp_cities` SET `cityBalance` = ? WHERE `cityId` = ?", cityBalance, cityId);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -507,14 +402,7 @@ public class City {
                             Database.addLogEntry(this, "{ \"type\": \"cityBank\", \"subtype\": \"tax\", \"balance\": " + roundedTaxAmount + ", \"player\": " + member.getPlayerUUID() + " }");
                             cityBalance += roundedTaxAmount;
 
-                            // Update city balance in database
-                            DB.executeUpdateAsync(
-                                    "UPDATE `mp_cities` SET `cityBalance` = "
-                                            + cityBalance
-                                            + " WHERE `cityId` = "
-                                            + cityId
-                                            + ";"
-                            );
+                            DB.executeUpdateAsync("UPDATE `mp_cities` SET `cityBalance` = ? WHERE `cityId` = ?", cityBalance, cityId);
                         }
                     }
                 }
