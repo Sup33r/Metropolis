@@ -52,6 +52,7 @@ public class HCDatabase {
     }
 
     public static City getHomeCityToCity(String uuid) {
+        if (hasHomeCity(uuid)) return null;
         try {
             int cityId = getHomeCityToCityId(uuid);
             if (cityId == -1) return null;
