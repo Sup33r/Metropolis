@@ -162,12 +162,11 @@ public class Plot {
                         player.getWorld().getHighestBlockYAt(centerX, centerZ) + 1,
                         centerZ);
         try {
-            DB.executeUpdate("UPDATE `mp_plots` SET `plotPoints` = ?, `plotYMin` = ?, `plotYMax` = ?, `plotCenter` = ?, `plotBoundary` = ST_GeomFromText(?) WHERE `plotId` = ?",
+            DB.executeUpdate("UPDATE `mp_plots` SET `plotPoints` = ?, `plotYMin` = ?, `plotYMax` = ?, `plotCenter` = ? WHERE `plotId` = ?",
                     LocationUtil.polygonToString(plotPolygon),
                     minY,
                     maxY,
                     LocationUtil.locationToString(plotCenter),
-                    plotPolygon.toText(),
                     plotId);
             this.plotPoints = plotPolygon;
             this.plotYMin = minY;

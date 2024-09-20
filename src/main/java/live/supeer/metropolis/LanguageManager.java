@@ -98,28 +98,28 @@ public class LanguageManager {
             localeConfigDefaults = locales.get(defaultLocale);
 
             // Check for missing keys
-            List<String> newKeys = new ArrayList<>();
-            for (String key : localeConfigDefaults.getKeys(true)) {
-                if (localeConfigDefaults.isConfigurationSection(key)) {
-                    continue;
-                }
-
-                if (localeConfig.isSet(key)) {
-                    continue;
-                }
-
-                newKeys.add(key);
-            }
-
-            if (!newKeys.isEmpty()) {
-                plugin
-                        .getLogger()
-                        .info(
-                                "[Metropolis] Missing translations from "
-                                        + locale
-                                        + ".yml: "
-                                        + String.join(", ", newKeys));
-            }
+//            List<String> newKeys = new ArrayList<>();
+//            for (String key : localeConfigDefaults.getKeys(true)) {
+//                if (localeConfigDefaults.isConfigurationSection(key)) {
+//                    continue;
+//                }
+//
+//                if (localeConfig.isSet(key)) {
+//                    continue;
+//                }
+//
+//                newKeys.add(key);
+//            }
+//
+//            if (!newKeys.isEmpty()) {
+//                plugin
+//                        .getLogger()
+//                        .info(
+//                                "[Metropolis] Missing translations from "
+//                                        + locale
+//                                        + ".yml: "
+//                                        + String.join(", ", newKeys));
+//            }
 
             // Fall through to default locale
             localeConfig.setDefaults(localeConfigDefaults);

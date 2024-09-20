@@ -150,9 +150,9 @@ public class CommandCity extends BaseCommand {
         String cityPublic = city.isPublic() ? Metropolis.getMessage("messages.words.yes_word") : Metropolis.getMessage("messages.words.no_word");
         String founderName = ApiedAPI.getPlayer(UUID.fromString(city.getOriginalMayorUUID())).getName();
         Metropolis.sendMessage(player, "messages.city.cityInfo.openPublic", "%open%", cityOpen, "%public%", cityPublic);
-        String mobs = city.hasFlag('m') ? Metropolis.getMessage("messages.words.off_word") : Metropolis.getMessage("messages.words.red_on");
-        String animals = city.hasFlag('a') ? Metropolis.getMessage("messages.words.off_word") : Metropolis.getMessage("messages.words.on_word");
-        Metropolis.sendMessage(player, "messages.city.cityInfo.MobsAnimals", "%mobs%", mobs, "%animals%", animals);
+        String mobs = city.hasFlag('m') ? Metropolis.getMessage("messages.words.off_state") : Metropolis.getRawMessage("messages.words.red_on");
+        String animals = city.hasFlag('a') ? Metropolis.getMessage("messages.words.off_state") : Metropolis.getMessage("messages.words.on_state");
+        Metropolis.sendMessage(player, "messages.city.cityInfo.mobsAnimals", "%mobs%", mobs, "%animals%", animals);
         Metropolis.sendMessage(player, "messages.city.cityInfo.founded", "%founded%", DateUtil.niceDate(city.getCityCreationDate()), "%by%" , founderName);
         Metropolis.sendMessage(player, "messages.city.cityInfo.balance", "%balance%", Utilities.formattedMoney(CityDatabase.getCityBalance(city)));
         Metropolis.sendMessage(player, "messages.city.cityInfo.tax", "%tax%", String.valueOf(city.getCityTax()), "%payedBy%", Utilities.taxPayedBy(city.getTaxLevel()));
@@ -527,6 +527,11 @@ public class CommandCity extends BaseCommand {
 
         if (CityDatabase.getClaim(player.getLocation()) != null) {
             Metropolis.sendMessage(player, "messages.error.city.claimExists");
+            return;
+        }
+
+        if (!Utilities.cityCanClaim(city)) {
+            Metropolis.sendMessage(player, "messages.error.city.maxClaims", "%cityname%", city.getCityName());
             return;
         }
 
@@ -2386,12 +2391,12 @@ public class CommandCity extends BaseCommand {
                 return;
             }
             if (city.hasFlag('m')) {
-                Metropolis.sendMessage(player, "messages.city.toggle.noMobs", "%cityname%", city.getCityName());
-                Database.addLogEntry(city, "{ \"type\": \"city\", \"subtype\": \"toggleMobs\", \"state\": \"disabled\", \"player\": \"" + player.getUniqueId() + "\" }");
-                city.setCityFlags(Objects.requireNonNull(Utilities.parseFlagChange(city.getCityFlags(), "-m")));
-            } else {
                 Metropolis.sendMessage(player, "messages.city.toggle.mobs", "%cityname%", city.getCityName());
                 Database.addLogEntry(city, "{ \"type\": \"city\", \"subtype\": \"toggleMobs\", \"state\": \"enabled\", \"player\": \"" + player.getUniqueId() + "\" }");
+                city.setCityFlags(Objects.requireNonNull(Utilities.parseFlagChange(city.getCityFlags(), "-m")));
+            } else {
+                Metropolis.sendMessage(player, "messages.city.toggle.noMobs", "%cityname%", city.getCityName());
+                Database.addLogEntry(city, "{ \"type\": \"city\", \"subtype\": \"toggleMobs\", \"state\": \"disabled\", \"player\": \"" + player.getUniqueId() + "\" }");
                 city.setCityFlags(Objects.requireNonNull(Utilities.parseFlagChange(city.getCityFlags(), "+m")));
             }
         }
@@ -2546,7 +2551,7 @@ public class CommandCity extends BaseCommand {
             if (city == null) {
                 return;
             }
-            live.supeer.metropolis.city.District district = CityDatabase.getDistrict(player.getLocation().toBlockLocation());
+            live.supeer.metropolis.city.District district = CityDatabase.getDistrict(city, player.getLocation().toBlockLocation());
             if (district == null) {
                 Metropolis.sendMessage(player, "messages.error.city.district.notInDistrict");
                 return;
@@ -2592,7 +2597,7 @@ public class CommandCity extends BaseCommand {
                 Metropolis.sendMessage(player, "messages.error.city.reserve");
                 return;
             }
-            live.supeer.metropolis.city.District district = CityDatabase.getDistrict(player.getLocation().toBlockLocation());
+            live.supeer.metropolis.city.District district = CityDatabase.getDistrict(city, player.getLocation().toBlockLocation());
             if (district == null) {
                 Metropolis.sendMessage(player, "messages.error.city.district.notInDistrict");
                 return;
@@ -2611,8 +2616,13 @@ public class CommandCity extends BaseCommand {
                 Metropolis.sendMessage(player, "messages.error.permissionDenied");
                 return;
             }
+            City city = Metropolis.playerInCity.get(player.getUniqueId());
+            if (city == null) {
+                Metropolis.sendMessage(player, "messages.error.city.notInCity");
+                return;
+            }
             if (name == null) {
-                live.supeer.metropolis.city.District district = CityDatabase.getDistrict(player.getLocation().toBlockLocation());
+                live.supeer.metropolis.city.District district = CityDatabase.getDistrict(city, player.getLocation().toBlockLocation());
                 if (district == null) {
                     Metropolis.sendMessage(player, "messages.error.city.district.notInDistrict");
                     return;
@@ -2633,8 +2643,6 @@ public class CommandCity extends BaseCommand {
                 }
             }
             if (name != null) {
-                City city = CityDatabase.getCityByClaim(player.getLocation().toBlockLocation());
-                assert city != null;
                 live.supeer.metropolis.city.District district = CityDatabase.getDistrict(name, city);
                 if (district == null) {
                     Metropolis.sendMessage(player, "messages.error.city.district.notFound");
@@ -2669,7 +2677,7 @@ public class CommandCity extends BaseCommand {
                 return;
             }
             if (subcommand.equalsIgnoreCase("name")) {
-                live.supeer.metropolis.city.District district = CityDatabase.getDistrict(player.getLocation().toBlockLocation());
+                live.supeer.metropolis.city.District district = CityDatabase.getDistrict(city, player.getLocation().toBlockLocation());
                 if (district == null) {
                     Metropolis.sendMessage(player, "messages.error.city.district.notInDistrict");
                     return;
@@ -2699,7 +2707,7 @@ public class CommandCity extends BaseCommand {
                 Metropolis.sendMessage(player, "messages.error.city.reserve");
                 return;
             }
-            live.supeer.metropolis.city.District district = CityDatabase.getDistrict(player.getLocation().toBlockLocation());
+            live.supeer.metropolis.city.District district = CityDatabase.getDistrict(city, player.getLocation().toBlockLocation());
 
             if (district == null) {
                 Metropolis.sendMessage(player, "messages.error.city.district.notInDistrict");

@@ -21,6 +21,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockFertilizeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityPortalEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -167,7 +168,8 @@ public class ProtectionListener implements Listener {
                         Metropolis.sendMessage(player, "messages.error.permissionDenied");
                     }
                 }
-            } else if (blockType == Material.ARMOR_STAND) {
+            }
+            if (blockType == Material.ARMOR_STAND) {
                 if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'b') && !Metropolis.overrides.contains(player)) {
                     event.setCancelled(true);
                     Metropolis.sendMessage(player, "messages.error.permissionDenied");
@@ -249,6 +251,16 @@ public class ProtectionListener implements Listener {
                     Metropolis.sendMessage(player, "messages.error.permissionDenied");
                 }
             } else if (blockType == Material.ACACIA_DOOR || blockType == Material.BIRCH_DOOR || blockType == Material.CRIMSON_DOOR || blockType == Material.DARK_OAK_DOOR || blockType == Material.JUNGLE_DOOR || blockType == Material.OAK_DOOR || blockType == Material.SPRUCE_DOOR || blockType == Material.WARPED_DOOR || blockType == Material.BAMBOO_DOOR || blockType == Material.MANGROVE_DOOR || blockType == Material.CHERRY_DOOR || blockType == Material.COPPER_DOOR || blockType == Material.EXPOSED_COPPER_DOOR || blockType == Material.OXIDIZED_COPPER_DOOR || blockType == Material.WAXED_COPPER_DOOR || blockType == Material.WAXED_EXPOSED_COPPER_DOOR || blockType == Material.WAXED_OXIDIZED_COPPER_DOOR || blockType == Material.WAXED_WEATHERED_COPPER_DOOR || blockType == Material.WEATHERED_COPPER_DOOR) {
+                if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'd') && !Metropolis.overrides.contains(player)) {
+                    event.setCancelled(true);
+                    Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                }
+            } else if (blockType == Material.ACACIA_FENCE_GATE || blockType == Material.BIRCH_FENCE_GATE || blockType == Material.CRIMSON_FENCE_GATE || blockType == Material.DARK_OAK_FENCE_GATE || blockType == Material.JUNGLE_FENCE_GATE || blockType == Material.OAK_FENCE_GATE || blockType == Material.SPRUCE_FENCE_GATE || blockType == Material.WARPED_FENCE_GATE || blockType == Material.BAMBOO_FENCE_GATE || blockType == Material.MANGROVE_FENCE_GATE || blockType == Material.CHERRY_FENCE_GATE) {
+                if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'b') && !Metropolis.overrides.contains(player)) {
+                    event.setCancelled(true);
+                    Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                }
+            } else if (blockType == Material.ACACIA_TRAPDOOR || blockType == Material.BIRCH_TRAPDOOR || blockType == Material.CRIMSON_TRAPDOOR || blockType == Material.DARK_OAK_TRAPDOOR || blockType == Material.JUNGLE_TRAPDOOR || blockType == Material.OAK_TRAPDOOR || blockType == Material.SPRUCE_TRAPDOOR || blockType == Material.WARPED_TRAPDOOR || blockType == Material.BAMBOO_TRAPDOOR || blockType == Material.MANGROVE_TRAPDOOR || blockType == Material.CHERRY_TRAPDOOR || blockType == Material.COPPER_TRAPDOOR || blockType == Material.EXPOSED_COPPER_TRAPDOOR || blockType == Material.OXIDIZED_COPPER_TRAPDOOR || blockType == Material.WAXED_COPPER_TRAPDOOR || blockType == Material.WAXED_EXPOSED_COPPER_TRAPDOOR || blockType == Material.WAXED_OXIDIZED_COPPER_TRAPDOOR || blockType == Material.WAXED_WEATHERED_COPPER_TRAPDOOR || blockType == Material.WEATHERED_COPPER_TRAPDOOR) {
                 if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'd') && !Metropolis.overrides.contains(player)) {
                     event.setCancelled(true);
                     Metropolis.sendMessage(player, "messages.error.permissionDenied");
@@ -436,7 +448,38 @@ public class ProtectionListener implements Listener {
                 if (!plot.hasFlag('p')) {
                     event.setCancelled(true);
                 }
+            } else {
+                event.setCancelled(true);
             }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onEntityChangeBlock(EntityChangeBlockEvent event) {
+        if (event.getEntity() instanceof Player) {
+            return;
+        }
+        City city = CityDatabase.getCityByClaim(event.getBlock().getLocation());
+        if (city != null) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerDropItem(PlayerDropItemEvent event) {
+        MPlayer mPlayer = ApiedAPI.getPlayer(event.getPlayer());
+        if (mPlayer.isBanned()) {
+            event.setCancelled(true);
+            Metropolis.sendMessage(event.getPlayer(), "messages.error.permissionDenied");
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerPickupItem(PlayerAttemptPickupItemEvent event) {
+        MPlayer mPlayer = ApiedAPI.getPlayer(event.getPlayer());
+        if (mPlayer.isBanned()) {
+            event.setCancelled(true);
+            Metropolis.sendMessage(event.getPlayer(), "messages.error.permissionDenied");
         }
     }
 }

@@ -446,6 +446,7 @@ messages:
       notEmpty: "<red>Kistan är inte tom.</red>"
       notDouble: "<red>Kistan är inte en dubbelkista.</red>"
   city:
+    help: "<green>Det finns väldigt många kommandon för städer, så istället för att lista alla här, använd webbsidan för att se alla kommandon. https://enserver.se/information/stadskommandon"
     admin:
       rank:
         success: "<aqua>%player%s roll i staden %cityname% har ändrats till %role%."

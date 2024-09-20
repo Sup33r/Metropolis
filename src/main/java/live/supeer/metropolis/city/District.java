@@ -55,9 +55,8 @@ public class District {
 
     public void update(Player player, Polygon districtPolygon) {
         try {
-            DB.executeUpdate("UPDATE `mp_districts` SET `districtPoints` = ?, `districtBoundary` = ST_GeomFromText(?), `world` = ? WHERE `districtName` = ? AND `cityId` = ?",
+            DB.executeUpdate("UPDATE `mp_districts` SET `districtPoints` = ?, `world` = ? WHERE `districtName` = ? AND `cityId` = ?",
                     LocationUtil.polygonToString(districtPolygon),
-                    districtPolygon.toText(),
                     player.getWorld().getName(),
                     districtName,
                     city.getCityId());

@@ -132,7 +132,6 @@ public class Database {
                                 `plotName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `plotOwnerUUID` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                 `plotPoints` text COLLATE utf8mb4_unicode_ci NOT NULL,
-                                `plotBoundary` GEOMETRY NOT NULL,
                                 `plotYMin` int(11) NOT NULL,
                                 `plotYMax` int(11) NOT NULL,
                                 `plotType` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -147,8 +146,7 @@ public class Database {
                                 `leaderboard` tinyint(1) DEFAULT '0',
                                 `leaderboardShown` tinyint(1) DEFAULT '0',
                                 `plotCreationDate` bigint(30) DEFAULT NULL,
-                                PRIMARY KEY (`plotId`),
-                                SPATIAL INDEX `idx_plotBoundary` (`plotBoundary`)
+                                PRIMARY KEY (`plotId`)
                               ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;""");
 
             DB.executeUpdate(
@@ -158,10 +156,8 @@ public class Database {
                                 `cityId` int(11) NOT NULL,
                                 `world` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL,
                                 `districtPoints` text COLLATE utf8mb4_unicode_ci NOT NULL,
-                                `districtBoundary` GEOMETRY NOT NULL,
                                 `contactPlayers` text COLLATE utf8mb4_unicode_ci,
-                                PRIMARY KEY (`districtName`, `cityId`),
-                                SPATIAL INDEX `idx_districtBoundary` (`districtBoundary`)
+                                PRIMARY KEY (`districtName`, `cityId`)
                               ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;""");
             DB.executeUpdate(
                     """

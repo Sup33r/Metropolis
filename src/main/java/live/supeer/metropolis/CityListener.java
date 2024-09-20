@@ -29,8 +29,6 @@ public class CityListener implements Listener {
         }
         Metropolis.playerInCity.put(event.getPlayer().getUniqueId(), city);
         Utilities.sendCityScoreboard(event.getPlayer(), city, null);
-
-        event.getPlayer().sendMessage("You have entered " + event.getCity().getCityName());
     }
 
     @EventHandler
@@ -51,27 +49,22 @@ public class CityListener implements Listener {
         if(event.isToNature()) {
             Utilities.sendNatureScoreboard(event.getPlayer());
         }
-
-        event.getPlayer().sendMessage("You have exited " + event.getCity().getCityName());
     }
 
     @EventHandler
     public void onPlayerEnterPlot(PlayerEnterPlotEvent event) {
-        event.getPlayer().sendMessage("You have entered the plot " + event.getPlot().getPlotName());
         Metropolis.playerInPlot.put(event.getPlayer().getUniqueId(), event.getPlot());
         Utilities.sendCityScoreboard(event.getPlayer(), event.getPlot().getCity(), event.getPlot());
     }
 
     @EventHandler
     public void onPlayerExitPlot(PlayerExitPlotEvent event) {
-        event.getPlayer().sendMessage("You have exited the plot " + event.getPlot().getPlotName());
         Metropolis.playerInPlot.remove(event.getPlayer().getUniqueId(), event.getPlot());
         Utilities.sendCityScoreboard(event.getPlayer(), event.getPlot().getCity(), null);
     }
 
     @EventHandler
     public void onPlayerEnterDistrict(PlayerEnterDistrictEvent event) {
-        event.getPlayer().sendMessage("You have entered the district " + event.getDistrict().getDistrictName());
         Metropolis.playerInDistrict.put(event.getPlayer().getUniqueId(), event.getDistrict());
         Plot plot = Metropolis.playerInPlot.get(event.getPlayer().getUniqueId());
         Utilities.sendCityScoreboard(event.getPlayer(), event.getDistrict().getCity(), plot);
@@ -79,7 +72,6 @@ public class CityListener implements Listener {
 
     @EventHandler
     public void onPlayerExitDistrict(PlayerExitDistrictEvent event) {
-        event.getPlayer().sendMessage("You have exited the district " + event.getDistrict().getDistrictName());
         Metropolis.playerInDistrict.remove(event.getPlayer().getUniqueId(), event.getDistrict());
         Plot plot = Metropolis.playerInPlot.get(event.getPlayer().getUniqueId());
         Utilities.sendCityScoreboard(event.getPlayer(), event.getDistrict().getCity(), plot);
@@ -134,26 +126,22 @@ public class CityListener implements Listener {
 
     private boolean isChunkClaimable(City city, Player player, Location location) {
         if (CityDatabase.getCityBalance(city) < Metropolis.configuration.getCityClaimCost()) {
-            player.sendMessage("Not enough money");
             return false;
         }
         if (CityDatabase.getClaim(location) != null) {
-            player.sendMessage("Chunk is already claimed");
             return false;
         }
         if (Utilities.cannotClaimOrCreateCity(player.getLocation().toBlockLocation(), city)) {
             return false;
         }
         if (CityDatabase.getCityRole(city, player.getUniqueId().toString()) == null) {
-            player.sendMessage("You are not a member of this city");
             return false;
         }
         if (!Utilities.cityCanClaim(city)) {
             Metropolis.sendMessage(player, "messages.error.city.maxClaims", "%cityname%", city.getCityName());
             return false;
         }
-        if (!CityDatabase.getCityRole(city, player.getUniqueId().toString()).hasPermission(Role.ASSISTANT)) {
-            player.sendMessage("You do not have permission to claim chunks");
+        if (!Objects.requireNonNull(CityDatabase.getCityRole(city, player.getUniqueId().toString())).hasPermission(Role.ASSISTANT)) {
             return false;
         }
         Claim claim1 = CityDatabase.getClaim(location.toBlockLocation().add(16, 0, 0));

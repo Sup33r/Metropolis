@@ -14,7 +14,6 @@ import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.utils.DateUtil;
 import live.supeer.metropolis.utils.Utilities;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -35,14 +34,13 @@ public class PlotDatabase {
 
         if (minY == 0 && maxY == 0) {
             maxY = 256;
-            Metropolis.getInstance().getLogger().warning("PlotDatabase.createPlot: minY and maxY was 0, setting to 0 and 256");
         }
         int centerX = (int) (plotPolygon.getEnvelopeInternal().getMinX() + plotPolygon.getEnvelopeInternal().getWidth() / 2);
         int centerZ = (int) (plotPolygon.getEnvelopeInternal().getMinY() + plotPolygon.getEnvelopeInternal().getHeight() / 2);
         Location plotCenter = new Location(world, centerX, player.getWorld().getHighestBlockYAt(centerX, centerZ) + 1, centerZ);
         try {
             DB.executeUpdate(
-                    "INSERT INTO `mp_plots` (`cityId`, `cityName`, `plotName`, `plotOwnerUUID`, `plotPoints`, `plotYMin`, `plotYMax`, `plotPermsMembers`, `plotPermsOutsiders`, `plotCenter`, `plotCreationDate`, `plotFlags`, `plotBoundary`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ST_GeomFromText(?))",
+                    "INSERT INTO `mp_plots` (`cityId`, `cityName`, `plotName`, `plotOwnerUUID`, `plotPoints`, `plotYMin`, `plotYMax`, `plotPermsMembers`, `plotPermsOutsiders`, `plotCenter`, `plotCreationDate`, `plotFlags`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     city.getCityId(),
                     city.getCityName(),
                     plotName,
@@ -54,8 +52,7 @@ public class PlotDatabase {
                     "gt",
                     LocationUtil.locationToString(plotCenter),
                     DateUtil.getTimestamp(),
-                    Metropolis.configuration.getDefaultPlotFlags(),
-                    plotPolygon.toText()
+                    Metropolis.configuration.getDefaultPlotFlags()
             );
             Plot plot = new Plot(DB.getFirstRow(
                     "SELECT * FROM `mp_plots` WHERE `plotName` = ? AND `cityName` = ?",
@@ -106,19 +103,14 @@ public class PlotDatabase {
     }
 
     public static boolean intersectsExistingPlot(Polygon polygon, int yMin, int yMax, City city, World world) {
-        String worldName = world.getName();
-        try {
-            String polygonWKT = polygon.toText();
-            List<DbRow> results = DB.getResults("SELECT * FROM `mp_plots` WHERE ST_Intersects(`plotBoundary`, ST_GeomFromText(?) AND `cityId` = ? AND `plotYMin` <= ? AND `plotYMax` >= ? AND `plotCenter` LIKE ?",
-                    polygonWKT,
-                    city.getCityId(),
-                    yMax,
-                    yMin,
-                    worldName + "%"
-            );
-            return !results.isEmpty();
-        } catch (Exception e) {
-            e.printStackTrace();
+        for (Plot plot : city.getCityPlots()) {
+            if (plot.getPlotCenter().getWorld().equals(world)) {
+                if (plot.getPlotPoints().intersects(polygon)) {
+                    if (plot.getPlotYMin() <= yMax && plot.getPlotYMax() >= yMin) {
+                        return true;
+                    }
+                }
+            }
         }
         return false;
     }
@@ -133,25 +125,21 @@ public class PlotDatabase {
     }
 
     public static Plot[] intersectingPlots(Polygon polygon, int yMin, int yMax, City city, World world) {
-        String worldName = world.getName();
-        try {
-            String polygonWKT = polygon.toText();
-            List<DbRow> results = DB.getResults("SELECT * FROM `mp_plots` WHERE ST_Intersects(`plotBoundary`, ST_GeomFromText(?) AND `cityId` = ? AND `plotYMin` <= ? AND `plotYMax` >= ? AND `plotCenter` LIKE ?",
-                    polygonWKT,
-                    city.getCityId(),
-                    yMax,
-                    yMin,
-                    worldName + "%"
-            );
-            Plot[] plots = new Plot[results.size()];
-            for (int i = 0; i < results.size(); i++) {
-                plots[i] = new Plot(results.get(i));
+        List<Plot> plots = new ArrayList<>();
+        for (Plot plot : city.getCityPlots()) {
+            if (plot.getPlotCenter().getWorld().equals(world)) {
+                if (plot.getPlotPoints().intersects(polygon)) {
+                    if (plot.getPlotYMin() <= yMax && plot.getPlotYMax() >= yMin) {
+                        plots.add(plot);
+                    }
+                }
             }
-            return plots;
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-        return null;
+        if (plots.isEmpty()) {
+            return null;
+        }
+
+        return plots.toArray(new Plot[0]);
     }
 
     public static Plot getCityPlot(City city, Location location) {
@@ -168,32 +156,24 @@ public class PlotDatabase {
         int chunkX = claim.getXPosition();
         int chunkZ = claim.getZPosition();
 
-        // Create a polygon representing the chunk
         GeometryFactory geometryFactory = new GeometryFactory();
         Coordinate[] coordinates = new Coordinate[5];
         coordinates[0] = new Coordinate(chunkX * 16, chunkZ * 16);
         coordinates[1] = new Coordinate((chunkX + 1) * 16, chunkZ * 16);
         coordinates[2] = new Coordinate((chunkX + 1) * 16, (chunkZ + 1) * 16);
         coordinates[3] = new Coordinate(chunkX * 16, (chunkZ + 1) * 16);
-        coordinates[4] = coordinates[0]; // Close the polygon
+        coordinates[4] = coordinates[0];
         Polygon chunkPolygon = geometryFactory.createPolygon(coordinates);
 
-        try {
-            String polygonWKT = chunkPolygon.toText();
-            List<DbRow> results = DB.getResults(
-                    "SELECT COUNT(*) as count FROM `mp_plots` WHERE ST_Contains(ST_GeomFromText(?), ST_Centroid(`plotBoundary`)) AND `plotCenter` LIKE ?;",
-                    polygonWKT,
-                    world.getName() + "%"
-            );
-
-            if (!results.isEmpty()) {
-                int count = results.getFirst().getInt("count");
-                return count > 0;
+        for (Plot plot : claim.getCity().getCityPlots()) {
+            if (!plot.getPlotCenter().getWorld().equals(world)) {
+                continue;
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+            Polygon plotPolygon = plot.getPlotPoints();
+            if (chunkPolygon.intersects(plotPolygon)) {
+                return true;
+            }
         }
-
         return false;
     }
 

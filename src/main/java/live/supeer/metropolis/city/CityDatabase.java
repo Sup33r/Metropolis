@@ -3,7 +3,6 @@ package live.supeer.metropolis.city;
 import co.aikar.idb.DB;
 import co.aikar.idb.DbRow;
 import live.supeer.apied.ApiedAPI;
-import live.supeer.metropolis.Database;
 import live.supeer.metropolis.Leaderboard;
 import live.supeer.metropolis.Metropolis;
 import live.supeer.metropolis.Standing;
@@ -167,20 +166,18 @@ public class CityDatabase {
         return null;
     }
 
-    public static District createDistrict(City city, Polygon districtPoints, String districtName, World world) {
+    public static void createDistrict(City city, Polygon districtPoints, String districtName, World world) {
         try {
-            DB.executeInsert("INSERT INTO `mp_districts` (`districtName`, `cityId`, `world`, `districtPoints`, `districtBoundary`, `contactPlayers`) VALUES (?,?,?,?,?,?)",
+            DB.executeInsert("INSERT INTO `mp_districts` (`districtName`, `cityId`, `world`, `districtPoints`, `contactPlayers`) VALUES (?,?,?,?,?)",
                     districtName,
                     city.getCityId(),
                     world.getName(),
                     LocationUtil.polygonToString(districtPoints),
-                    "ST_GeomFromText('" + districtPoints.toText() + "')",
-                    "NULL");
-            return new District(DB.getFirstRow("SELECT * FROM `mp_districts` WHERE `cityId` = ? AND `districtName` = ?", city.getCityId(), districtName));
+                    null);
+            new District(DB.getFirstRow("SELECT * FROM `mp_districts` WHERE `cityId` = ? AND `districtName` = ?", city.getCityId(), districtName));
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return null;
     }
 
     public static void newCityGo(Location location, String name, City city) {
@@ -858,25 +855,18 @@ public class CityDatabase {
         return result;
     }
 
-    public static District getDistrict(Location location) {
+    public static District getDistrict(City city, Location location) {
         GeometryFactory geometryFactory = new GeometryFactory();
         Point point = geometryFactory.createPoint(new Coordinate(location.getX(), location.getZ()));
-        String worldName = location.getWorld().getName();
-
-        try {
-            DbRow result = DB.getFirstRow(
-                    "SELECT * FROM `mp_districts` WHERE ST_Contains(`districtBoundary`, ST_GeomFromText(?)) AND `world` = ?;",
-                    point.toText()
-                    , worldName
-            );
-
-            if (result != null) {
-                return new District(result);
+        World world = location.getWorld();
+        for (District district : city.getCityDistricts()) {
+            if (!district.getWorld().equals(world)) {
+                continue;
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+            if (district.getDistrictPoints().contains(point)) {
+                return district;
+            }
         }
-
         return null;
     }
 
@@ -928,32 +918,24 @@ public class CityDatabase {
         int chunkX = claim.getXPosition();
         int chunkZ = claim.getZPosition();
 
-        // Create a polygon representing the chunk
         GeometryFactory geometryFactory = new GeometryFactory();
         Coordinate[] coordinates = new Coordinate[5];
         coordinates[0] = new Coordinate(chunkX * 16, chunkZ * 16);
         coordinates[1] = new Coordinate((chunkX + 1) * 16, chunkZ * 16);
         coordinates[2] = new Coordinate((chunkX + 1) * 16, (chunkZ + 1) * 16);
         coordinates[3] = new Coordinate(chunkX * 16, (chunkZ + 1) * 16);
-        coordinates[4] = coordinates[0]; // Close the polygon
+        coordinates[4] = coordinates[0];
         Polygon chunkPolygon = geometryFactory.createPolygon(coordinates);
 
-        try {
-            String polygonWKT = chunkPolygon.toText();
-            List<DbRow> results = DB.getResults(
-                    "SELECT COUNT(*) as count FROM `mp_districts` WHERE ST_Contains(ST_GeomFromText(?), ST_Centroid(`districtBoundary`)) AND `world` = ?;",
-                    polygonWKT,
-                    world.getName()
-            );
-
-            if (!results.isEmpty()) {
-                int count = results.getFirst().getInt("count");
-                return count > 0;
+        for (District district : claim.getCity().getCityDistricts()) {
+            if (!district.getWorld().equals(world)) {
+                continue;
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+            Polygon districtBoundary = district.getDistrictPoints();
+            if (districtBoundary.intersects(chunkPolygon)) {
+                return true;
+            }
         }
-
         return false;
     }
 

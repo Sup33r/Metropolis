@@ -47,8 +47,8 @@ public class Utilities {
                 return null;
             }
 
-            if (flagsRaw.isEmpty() && currentChar == '-'
-                    || flagsRaw.isEmpty() && currentChar == '+') {
+            // Only return null if attempting to remove from empty set
+            if (flagsRaw.isEmpty() && currentChar == '-') {
                 return null;
             }
 
@@ -60,29 +60,18 @@ public class Utilities {
                 continue;
             }
 
-            flagsRaw =
-                    isAdding ? flagsRaw + currentChar : flagsRaw.replace(String.valueOf(currentChar), "");
+            flagsRaw = isAdding ? flagsRaw + currentChar : flagsRaw.replace(String.valueOf(currentChar), "");
         }
 
+        // Remove duplicates
         StringBuilder flagsNew = new StringBuilder();
-
         for (char flag : flagsRaw.toCharArray()) {
-            boolean exists = false;
-
-            for (int j = 0; j < flagsNew.length(); j++) {
-                if (flagsNew.charAt(j) == flag) {
-                    exists = true;
-                    break;
-                }
-            }
-
-            if (!exists) {
+            if (flagsNew.indexOf(String.valueOf(flag)) == -1) {
                 flagsNew.append(flag);
             }
         }
 
         char[] flagsNewArray = flagsNew.toString().toCharArray();
-
         Arrays.sort(flagsOriginal);
         Arrays.sort(flagsNewArray);
 
@@ -95,6 +84,7 @@ public class Utilities {
 
         return flagsNew.toString();
     }
+
     public static String parsePermChange(
             char[] flagsOriginal, String change, Player player, String flagType) {
         if (flagsOriginal == null) {
@@ -511,23 +501,15 @@ public class Utilities {
     public static boolean containsOnlyCompletePlots(Polygon polygon, int yMin, int yMax, City city, World world) {
         Plot[] intersectingPlots = PlotDatabase.intersectingPlots(polygon, yMin, yMax, city, world);
 
-        if (intersectingPlots == null || intersectingPlots.length == 0) {
-            // No intersecting plots, so the condition is satisfied
+        if (intersectingPlots == null) {
             return true;
         }
-
-        GeometryFactory geometryFactory = new GeometryFactory();
-
         for (Plot plot : intersectingPlots) {
             Polygon plotPolygon = plot.getPlotPoints();
-
             if (!polygon.contains(plotPolygon)) {
-                // If any plot is not completely contained, return false
                 return false;
             }
         }
-
-        // All intersecting plots are completely contained
         return true;
     }
 

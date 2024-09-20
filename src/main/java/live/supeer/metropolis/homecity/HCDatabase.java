@@ -2,7 +2,6 @@ package live.supeer.metropolis.homecity;
 
 import co.aikar.idb.DB;
 import co.aikar.idb.DbRow;
-import live.supeer.metropolis.Database;
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.city.CityDatabase;
 
@@ -12,6 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class HCDatabase {
+
     public static void setHomeCity(String uuid, City city) {
         try {
             if (hasHomeCity(uuid)) {
@@ -26,7 +26,7 @@ public class HCDatabase {
 
     public static int getHomeCityToCityId(String uuid) {
         try {
-            var row = DB.getFirstRow("SELECT `cityId` FROM `mp_homecites` WHERE `playerUUID` = ?", uuid);
+            var row = DB.getFirstRow("SELECT `cityId` FROM `mp_homecities` WHERE `playerUUID` = ?", uuid);
             if (row == null || row.isEmpty()) {
                 return -1;
             }

@@ -104,7 +104,7 @@ public class MetropolisListener implements Listener {
             City city = Objects.requireNonNull(CityDatabase.getClaim(player.getLocation().toBlockLocation())).getCity();
             PlayerEnterCityEvent enterCityEvent = new PlayerEnterCityEvent(event.getPlayer(), city);
             Bukkit.getServer().getPluginManager().callEvent(enterCityEvent);
-            District district = CityDatabase.getDistrict(player.getLocation());
+            District district = CityDatabase.getDistrict(city, player.getLocation());
             Plot plot = PlotDatabase.getCityPlot(city, player.getLocation());
             if (district != null) {
                 PlayerEnterDistrictEvent enterDistrictEvent = new PlayerEnterDistrictEvent(event.getPlayer(), district);
@@ -534,7 +534,7 @@ public class MetropolisListener implements Listener {
         if (from.getX() != to.getX() || from.getZ() != to.getZ() || from.getY() != to.getY()) {
             if (Metropolis.playerInCity.containsKey(player.getUniqueId())) {
                 Plot plot = PlotDatabase.getCityPlot(Metropolis.playerInCity.get(player.getUniqueId()), to.toBlockLocation());
-                District district = CityDatabase.getDistrict(to.toBlockLocation());
+                District district = CityDatabase.getDistrict(Metropolis.playerInCity.get(player.getUniqueId()), to.toBlockLocation());
                 if (district == null) {
                     if (Metropolis.playerInDistrict.containsKey(player.getUniqueId())) {
                         PlayerExitDistrictEvent exitDistrictEvent = new PlayerExitDistrictEvent(player, Metropolis.playerInDistrict.get(player.getUniqueId()));
@@ -595,7 +595,7 @@ public class MetropolisListener implements Listener {
         // Check for plot changes
         if (Metropolis.playerInCity.containsKey(playerId)) {
             Plot plot = PlotDatabase.getCityPlot(Metropolis.playerInCity.get(playerId), to);
-            District district = CityDatabase.getDistrict(to);
+            District district = CityDatabase.getDistrict(Metropolis.playerInCity.get(playerId), to);
             if (district == null) {
                 if (Metropolis.playerInDistrict.containsKey(playerId)) {
                     PlayerExitDistrictEvent exitDistrictEvent = new PlayerExitDistrictEvent(player, Metropolis.playerInDistrict.get(playerId));
