@@ -92,9 +92,15 @@ public class CommandPlot extends BaseCommand {
             Metropolis.sendMessage(player, "messages.error.plot.tooSmall");
             return;
         }
-        player.sendMessage(String.valueOf(MetropolisListener.playerYMin.get(player.getUniqueId())));
-        player.sendMessage(String.valueOf(MetropolisListener.playerYMax.get(player.getUniqueId())));
-        if (MetropolisListener.playerYMax.get(player.getUniqueId()) - MetropolisListener.playerYMin.get(player.getUniqueId()) < 3 || !MetropolisListener.playerYMin.containsKey(player.getUniqueId()) || !MetropolisListener.playerYMax.containsKey(player.getUniqueId())) {
+        if (!MetropolisListener.playerYMin.containsKey(player.getUniqueId()) || !MetropolisListener.playerYMax.containsKey(player.getUniqueId())) {
+            Metropolis.sendMessage(player, "messages.error.plot.tooLowY");
+            return;
+        }
+        int yMin = MetropolisListener.playerYMin.get(player.getUniqueId());
+        int yMax = MetropolisListener.playerYMax.get(player.getUniqueId());
+        player.sendMessage(String.valueOf(yMin));
+        player.sendMessage(String.valueOf(yMax));
+        if ((yMax - yMin) < 3) {
             Metropolis.sendMessage(player, "messages.error.plot.tooLowY");
             return;
         }
@@ -120,8 +126,8 @@ public class CommandPlot extends BaseCommand {
                     }
                     if (PlotDatabase.intersectsExistingPlot(
                             regionPolygon,
-                            MetropolisListener.playerYMin.get(player.getUniqueId()),
-                            MetropolisListener.playerYMax.get(player.getUniqueId()),
+                            yMin,
+                            yMax,
                             city, player.getWorld())) {
                         Metropolis.sendMessage(player, "messages.error.plot.intersectsExistingPlot");
                         return;
@@ -132,8 +138,8 @@ public class CommandPlot extends BaseCommand {
                                     regionPolygon,
                                     plotname,
                                     city,
-                                    MetropolisListener.playerYMin.get(player.getUniqueId()),
-                                    MetropolisListener.playerYMax.get(player.getUniqueId()),
+                                    yMin,
+                                    yMax,
                                     player.getWorld());
                     assert plot != null;
                     if (regionPolygon.contains(geometryFactory.createPoint(new Coordinate(player.getLocation().getX(), player.getLocation().getZ())))) {
@@ -149,9 +155,9 @@ public class CommandPlot extends BaseCommand {
                                     + ", \"points\": "
                                     + LocationUtil.parsePoints(locations)
                                     + ", \"ymin\": "
-                                    + MetropolisListener.playerYMin.get(player.getUniqueId())
+                                    + yMin
                                     + ", \"ymax\": "
-                                    + MetropolisListener.playerYMax.get(player.getUniqueId())
+                                    + yMax
                                     + ", \"player\": "
                                     + player.getUniqueId()
                                     + " }");
@@ -922,7 +928,7 @@ public class CommandPlot extends BaseCommand {
                 return;
             }
             if (!Objects.requireNonNull(CityDatabase.memberCityList(mPlayer.getUuid().toString())).contains(plot.getCity())) {
-                if (!plot.getPlotType().equals("vacation")) {
+                if (plot.getPlotType() == null || !plot.getPlotType().equals("vacation")) {
                     Metropolis.sendMessage(
                             player,
                             "messages.error.plot.set.owner.notInCity",

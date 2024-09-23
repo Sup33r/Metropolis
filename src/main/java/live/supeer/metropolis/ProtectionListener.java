@@ -459,6 +459,9 @@ public class ProtectionListener implements Listener {
         if (event.getEntity() instanceof Player) {
             return;
         }
+        if (event.getEntity().getType() == EntityType.FALLING_BLOCK) {
+            return;
+        }
         City city = CityDatabase.getCityByClaim(event.getBlock().getLocation());
         if (city != null) {
             event.setCancelled(true);
