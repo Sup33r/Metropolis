@@ -22,6 +22,7 @@ import java.util.Objects;
 public class CommandHomeCity extends BaseCommand {
 
     @Default
+    @CommandCompletion("@playerCities")
     public static void onHomeCity(Player player, @Optional String cityname) {
         if (!player.hasPermission("metropolis.homecity")) {
             Metropolis.sendMessage(player,"messages.error.permissionDenied");
