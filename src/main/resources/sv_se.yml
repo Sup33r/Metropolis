@@ -41,6 +41,10 @@ messages:
   days:
     yesterday: "i går"
     today: "i dag"
+  sign:
+    edit:
+      waxed: "<red>Skylten är vaxad och kan därför inte redigeras.</red>"
+      success: "<green>Skyltraden har uppdaterats.</green>"
   go:
     notEmpty: "<red>Skylten är inte tom."
     sign:
