@@ -1,6 +1,10 @@
 package live.supeer.metropolis.utils;
 
+import com.github.stefvanschie.inventoryframework.gui.GuiItem;
+import com.github.stefvanschie.inventoryframework.gui.type.AnvilGui;
+import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import fr.mrmicky.fastboard.FastBoard;
+import live.supeer.apied.Apied;
 import live.supeer.apied.ApiedAPI;
 import live.supeer.apied.MPlayer;
 import live.supeer.metropolis.Leaderboard;
@@ -12,9 +16,15 @@ import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.plot.PlotDatabase;
 import live.supeer.metropolis.plot.PlotPerms;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
+import org.bukkit.block.Sign;
+import org.bukkit.block.sign.SignSide;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
@@ -775,5 +785,59 @@ public class Utilities {
         } else {
             return hasPermissionFlags(uuid, city, plot, flag);
         }
+    }
+
+
+    public static void startSignEdit(Player player, int row, SignSide side, Sign sign) {
+        if (sign.isWaxed()) {
+            Metropolis.sendMessage(player, "messages.sign.edit.waxed");
+            return;
+        }
+        Component line = side.line(row - 1);
+        AnvilGui gui = new AnvilGui("Skyltredigering: Rad " + row);
+
+        gui.setCost((short) 0);
+
+        ItemStack paper = new ItemStack(Material.PAPER);
+        ItemMeta paperMeta = paper.getItemMeta();
+
+        if (paperMeta != null) {
+            paperMeta.displayName(line);
+            paper.setItemMeta(paperMeta);
+        }
+
+        GuiItem paperItem = new GuiItem(paper, event -> {
+            event.setCancelled(true);
+        });
+
+        StaticPane pane = new StaticPane(0, 0, 1, 1);
+        pane.addItem(paperItem, 0, 0);
+        gui.getFirstItemComponent().addPane(pane);
+
+        ItemStack confirmStack = new ItemStack(Material.LIME_STAINED_GLASS_PANE);
+        ItemMeta confirmMeta = confirmStack.getItemMeta();
+        confirmMeta.displayName(Component.text("Bekräfta").color(NamedTextColor.GREEN));
+        confirmStack.setItemMeta(confirmMeta);
+
+        GuiItem confirmItem = new GuiItem(confirmStack, event -> {
+            String result = gui.getRenameText();
+            if (!result.isEmpty()) {
+                side.line(row - 1, MiniMessage.miniMessage().deserialize(result));
+                sign.update();
+                Apied.signEdit.remove(player);
+                Metropolis.sendMessage(player, "messages.sign.edit.success");
+            }
+
+            player.closeInventory();
+            event.setCancelled(true);
+        });
+
+        StaticPane confirmPane = new StaticPane(0, 0, 1, 1);
+        confirmPane.addItem(confirmItem, 0, 0);
+        gui.getResultComponent().addPane(confirmPane);
+
+        gui.setOnGlobalClick(event -> event.setCancelled(true));
+
+        gui.show(player);
     }
 }

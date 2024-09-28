@@ -241,6 +241,15 @@ public class MetropolisListener implements Listener {
                     }
                     return;
                 }
+                if (event.getMaterial() == Material.STICK && Apied.signEdit.containsKey(player)) {
+                    event.setCancelled(true);
+                    if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), sign.getLocation(), 'b') && !Metropolis.overrides.contains(player)) {
+                        Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                        return;
+                    }
+                    SignSide playerSide = sign.getSide(sign.getInteractableSideFor(player));
+                    Utilities.startSignEdit(player, Apied.signEdit.get(player), playerSide, sign);
+                }
                 if (ShopManager.getShopFromSign(sign) != null) {
                     ShopManager.handleSignClick(player, sign, sign.getInteractableSideFor(player));
                     event.setCancelled(true);
