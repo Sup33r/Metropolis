@@ -66,7 +66,6 @@ public final class Metropolis extends JavaPlugin {
         manager.registerCommand(new CommandHere());
         manager.registerCommand(new CommandShutdown());
         manager.registerCommand(new CommandMetropolis());
-        this.getServer().getPluginManager().registerEvents(new CommandHomeCity(), this);
         this.getServer().getPluginManager().registerEvents(new MetropolisListener(), this);
         this.getServer().getPluginManager().registerEvents(new CityListener(), this);
         this.getServer().getPluginManager().registerEvents(new ProtectionListener(), this);
