@@ -14,7 +14,10 @@ import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.utils.Utilities;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
+import org.bukkit.block.HangingSign;
 import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
+import org.bukkit.block.sign.SignSide;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -151,9 +154,7 @@ public class MetropolisListener implements Listener {
         if (!event.isCancelled()) {
         Player player = event.getPlayer();
         if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
-
             if (event.getMaterial() == Material.STICK) {
-
                 event.setCancelled(true);
                 savedPlayers.remove(player);
                 savedLocs.remove(player.getUniqueId());
@@ -206,6 +207,40 @@ public class MetropolisListener implements Listener {
                 }
             }
             if (event.getAction() == Action.RIGHT_CLICK_BLOCK && Objects.requireNonNull(event.getClickedBlock()).getState() instanceof Sign sign) {
+                if (event.getMaterial() == Material.STICK && Apied.goSigns.containsKey(player)) {
+                    event.setCancelled(true);
+                    if (isEmptySide(sign.getSide(Side.BACK)) && isEmptySide(sign.getSide(Side.FRONT))) {
+                        if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), sign.getLocation(), 'b') && !Metropolis.overrides.contains(player)) {
+                            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                            return;
+                        }
+                        String name = Apied.goSigns.get(player);
+                        SignSide playerSide = sign.getSide(sign.getInteractableSideFor(player));
+                        if (event.getClickedBlock().getState() instanceof HangingSign) {
+                            if (name.length() > 10) {
+                                name = name.substring(0, 9) + "...";
+                            }
+                            playerSide.line(0, Objects.requireNonNull(Metropolis.getMessageComponent("messages.go.sign.top.hanging", "%go%", Apied.goSigns.get(player))));
+                            playerSide.line(1, Objects.requireNonNull(Metropolis.getMessageComponent("messages.go.sign.middle.hanging")));
+                            playerSide.line(2, Objects.requireNonNull(Metropolis.getMessageComponent("messages.go.sign.bottom", "%name%", name)));
+                        } else {
+                            if (name.length() > 15) {
+                                name = name.substring(0, 14) + "...";
+                            }
+                            playerSide.line(0, Objects.requireNonNull(Metropolis.getMessageComponent("messages.go.sign.top.regular", "%go%", Apied.goSigns.get(player))));
+                            playerSide.line(1, Objects.requireNonNull(Metropolis.getMessageComponent("messages.go.sign.middle.regular")));
+                            playerSide.line(2, Objects.requireNonNull(Metropolis.getMessageComponent("messages.go.sign.bottom", "%name%", name)));
+                        }
+                        sign.setWaxed(true);
+                        sign.update();
+                        Metropolis.sendMessage(player, "messages.go.created", "%name%", Apied.goSigns.get(player));
+                        Apied.goSigns.remove(player);
+                    } else {
+                        Metropolis.sendMessage(player, "messages.go.notEmpty");
+                        return;
+                    }
+                    return;
+                }
                 if (ShopManager.getShopFromSign(sign) != null) {
                     ShopManager.handleSignClick(player, sign, sign.getInteractableSideFor(player));
                     event.setCancelled(true);
@@ -997,5 +1032,14 @@ public class MetropolisListener implements Listener {
         Metropolis.playerInCity.remove(player.getUniqueId());
         Metropolis.playerInPlot.remove(player.getUniqueId());
         Metropolis.playerInDistrict.remove(player.getUniqueId());
+    }
+
+    private static boolean isEmptySide(SignSide side) {
+        for (int i = 0; i < 4; i++) {
+            if (!side.getLine(i).trim().isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
 }

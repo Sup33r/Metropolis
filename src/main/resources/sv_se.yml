@@ -41,6 +41,17 @@ messages:
   days:
     yesterday: "i går"
     today: "i dag"
+  go:
+    notEmpty: "<red>Skylten är inte tom."
+    sign:
+      top:
+        hanging: "<click:run_command:/go %go%><green>Teleporteri</green></click>"
+        regular: "<click:run_command:/go %go%></click>"
+      middle:
+        hanging: "<green>-ng till:</green>"
+        regular: "<green>Teleportering till:</green>"
+      bottom: "<dark_green>%name%</dark_green>"
+    created: "<green>Skylten är nu länkad med teleporteringspunkten <dark_green>%name%</dark_green>."
   invalidNumber: "<red>Det angivna värdet är inte ett giltigt nummer."
   shutdownMessage: "\n<aqua>Servern kommer precis att startas om för underhåll. Vi ses snart igen!\n"
   shutdownMessageCountdown: "\n<aqua>Servern kommer att startas om för underhåll om %time%.\n"

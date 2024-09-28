@@ -1,5 +1,6 @@
 package live.supeer.metropolis.utils;
 
+import live.supeer.apied.ApiedAPI;
 import live.supeer.metropolis.Metropolis;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
@@ -7,6 +8,7 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class TeleportUtil {
     public static List<Player> teleportingPlayers = new ArrayList<>();
@@ -51,6 +53,7 @@ public class TeleportUtil {
             for (Component message : messages) {
                 player.sendMessage(message);
             }
+            Objects.requireNonNull(player.getPlayer()).playerListName(ApiedAPI.getTABPrefix(player.getPlayer(), false));
             Metropolis.afkPlayers.remove(player.getUniqueId());
         }
     }
