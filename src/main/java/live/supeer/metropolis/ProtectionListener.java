@@ -200,10 +200,12 @@ public class ProtectionListener implements Listener {
                     event.setCancelled(true);
                     Metropolis.sendMessage(player, "messages.error.permissionDenied");
                 }
-            } else if (event.getClickedBlock().getState() instanceof Sign) {
-                if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'b') && !Metropolis.overrides.contains(player)) {
-                    event.setCancelled(true);
-                    Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            } else if (event.getClickedBlock().getState() instanceof Sign sign) {
+                if (!sign.isWaxed()) {
+                    if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'b') && !Metropolis.overrides.contains(player)) {
+                        event.setCancelled(true);
+                        Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                    }
                 }
             } else if (Utilities.isBlockContainer(blockType)) {
                 if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'c') && !Metropolis.overrides.contains(player)) {
@@ -439,17 +441,34 @@ public class ProtectionListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
-        if (!(event.getEntity() instanceof Player player)) return;
         if (!(event.getDamager() instanceof Player)) return;
-        City city = CityDatabase.getCityByClaim(player.getLocation().toBlockLocation());
-        if (city != null) {
-            Plot plot = PlotDatabase.getCityPlot(city, player.getLocation().toBlockLocation());
-            if (plot != null) {
-                if (!plot.hasFlag('p')) {
+        if (!(event.getEntity() instanceof Player player)) {
+            if (!(event.getEntity() instanceof Monster)) {
+                City city = CityDatabase.getCityByClaim(event.getEntity().getLocation());
+                if (city != null) {
+                    Plot plot = PlotDatabase.getCityPlot(city, event.getEntity().getLocation());
+                    if (plot != null) {
+                        if (!plot.hasFlag('a')) {
+                            event.setCancelled(true);
+                        }
+                    } else {
+                        if (!city.hasFlag('a')) {
+                            event.setCancelled(true);
+                        }
+                    }
+                }
+            }
+        } else {
+            City city = CityDatabase.getCityByClaim(player.getLocation().toBlockLocation());
+            if (city != null) {
+                Plot plot = PlotDatabase.getCityPlot(city, player.getLocation().toBlockLocation());
+                if (plot != null) {
+                    if (!plot.hasFlag('p')) {
+                        event.setCancelled(true);
+                    }
+                } else {
                     event.setCancelled(true);
                 }
-            } else {
-                event.setCancelled(true);
             }
         }
     }
