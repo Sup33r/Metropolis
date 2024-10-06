@@ -41,7 +41,7 @@ public class CommandPlot extends BaseCommand {
     @CatchUnknown
     public static void onPlot(Player player) {
         if (!player.hasPermission("metropolis.plot")) {
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
             return;
         }
         Metropolis.sendMessage(player, "messages.plot.help.header");
@@ -180,7 +180,7 @@ public class CommandPlot extends BaseCommand {
     @Subcommand("expand")
     public static void onExpand(Player player, String[] args) {
         if (!player.hasPermission("metropolis.plot.expand")) {
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
             return;
         }
         if (!MetropolisListener.playerPolygons.containsKey(player.getUniqueId())) {
@@ -394,9 +394,13 @@ public class CommandPlot extends BaseCommand {
     @Subcommand("info")
     public static void onInfo(Player player) {
         if (!player.hasPermission("metropolis.plot.info")) {
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
             return;
         }
+        sendInfo(player);
+    }
+
+    public static void sendInfo(Player player) {
         Plot plot = Metropolis.playerInPlot.get(player.getUniqueId());
         if (plot == null) {
             Metropolis.sendMessage(player, "messages.error.plot.notInPlot");
@@ -495,7 +499,7 @@ public class CommandPlot extends BaseCommand {
     @CommandCompletion("@players")
     public static void onPlayer(Player player, String playerName) {
         if (!player.hasPermission("metropolis.plot.player")) {
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
             return;
         }
 
@@ -531,7 +535,7 @@ public class CommandPlot extends BaseCommand {
     @Subcommand("tp")
     public static void onTp(Player player, String plotID) {
         if (!player.hasPermission("metropolis.plot.tp")) {
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
             return;
         }
         // For the eventual time when i will add the syntax stuff
@@ -985,7 +989,7 @@ public class CommandPlot extends BaseCommand {
             switch (type) {
                 case "-" -> {
                     if (!player.hasPermission("metropolis.plot.set.type.remove")) {
-                        Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                        Metropolis.sendAccessDenied(player);
                         return;
                     }
                     if (plot.getPlotType() == null) {
@@ -1019,7 +1023,7 @@ public class CommandPlot extends BaseCommand {
                 }
                 case "church" -> {
                     if (!player.hasPermission("metropolis.plot.set.type.church")) {
-                        Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                        Metropolis.sendAccessDenied(player);
                         return;
                     }
                     if (plot.getPlotType() == null) {
@@ -1087,7 +1091,7 @@ public class CommandPlot extends BaseCommand {
                 }
                 case "farm" -> {
                     if (!player.hasPermission("metropolis.plot.set.type.farm")) {
-                        Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                        Metropolis.sendAccessDenied(player);
                         return;
                     }
                     if (plot.getPlotType() == null) {
@@ -1155,7 +1159,7 @@ public class CommandPlot extends BaseCommand {
                 }
                 case "shop" -> {
                     if (!player.hasPermission("metropolis.plot.set.type.shop")) {
-                        Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                        Metropolis.sendAccessDenied(player);
                         return;
                     }
                     if (plot.getPlotType() == null) {
@@ -1223,7 +1227,7 @@ public class CommandPlot extends BaseCommand {
                 }
                 case "vacation" -> {
                     if (!player.hasPermission("metropolis.plot.set.type.vacation")) {
-                        Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                        Metropolis.sendAccessDenied(player);
                         return;
                     }
                     if (plot.getPlotType() == null) {
@@ -1575,7 +1579,7 @@ public class CommandPlot extends BaseCommand {
         @Subcommand("pvp")
         public static void onPvp(Player player) {
             if (!player.hasPermission("metropolis.admin.plot.toggle.pvp")) {
-                Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                Metropolis.sendAccessDenied(player);
                 return;
             }
             Plot plot = Metropolis.playerInPlot.get(player.getUniqueId());
@@ -1924,7 +1928,7 @@ public class CommandPlot extends BaseCommand {
         @Subcommand("keepexp")
         public static void onXp(Player player) {
             if (!player.hasPermission("metropolis.admin.plot.toggle.keepexp")) {
-                Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                Metropolis.sendAccessDenied(player);
                 return;
             }
             Plot plot = Metropolis.playerInPlot.get(player.getUniqueId());
@@ -2009,7 +2013,7 @@ public class CommandPlot extends BaseCommand {
         @Subcommand("keepinv")
         public static void onKeepInv(Player player) {
             if (!player.hasPermission("metropolis.admin.plot.toggle.keepinv")) {
-                Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                Metropolis.sendAccessDenied(player);
                 return;
             }
             Plot plot = Metropolis.playerInPlot.get(player.getUniqueId());
@@ -2094,7 +2098,7 @@ public class CommandPlot extends BaseCommand {
         @Subcommand("lock")
         public static void onLock(Player player) {
             if (!player.hasPermission("metropolis.admin.plot.toggle.lock")) {
-                Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                Metropolis.sendAccessDenied(player);
                 return;
             }
             Plot plot = Metropolis.playerInPlot.get(player.getUniqueId());
@@ -2346,7 +2350,7 @@ public class CommandPlot extends BaseCommand {
     @Subcommand("buy")
     public static void onBuy(Player player) {
         if (!player.hasPermission("metropolis.plot.buy")) {
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
             return;
         }
         Plot plot = Metropolis.playerInPlot.get(player.getUniqueId());
@@ -2433,7 +2437,7 @@ public class CommandPlot extends BaseCommand {
         @Subcommand("new")
         public void onNewCell(Player player) {
             if (!player.hasPermission("metropolis.admin.cell.new")) {
-                Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                Metropolis.sendAccessDenied(player);
                 return;
             }
             Plot plot = Metropolis.playerInPlot.get(player.getUniqueId());
@@ -2457,7 +2461,7 @@ public class CommandPlot extends BaseCommand {
         @Subcommand("cancel")
         public void onCancel(Player player) {
             if (!player.hasPermission("metropolis.admin.cell.cancel")) {
-                Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                Metropolis.sendAccessDenied(player);
                 return;
             }
             Cell cell = MetropolisListener.waitingForSignClick.get(player.getUniqueId());
@@ -2473,7 +2477,7 @@ public class CommandPlot extends BaseCommand {
         @Subcommand("list")
         public void onList(Player player) {
             if (!player.hasPermission("metropolis.admin.cell.list")) {
-                Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                Metropolis.sendAccessDenied(player);
                 return;
             }
             Plot plot = Metropolis.playerInPlot.get(player.getUniqueId());
@@ -2520,7 +2524,7 @@ public class CommandPlot extends BaseCommand {
         @Subcommand("tp")
         public void onTp(Player player, int cellId) {
             if (!player.hasPermission("metropolis.admin.cell.tp")) {
-                Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                Metropolis.sendAccessDenied(player);
                 return;
             }
             Plot plot = Metropolis.playerInPlot.get(player.getUniqueId());
@@ -2551,7 +2555,7 @@ public class CommandPlot extends BaseCommand {
         @Subcommand("update")
         public void onUpdate(Player player, int cellId) {
             if (!player.hasPermission("metropolis.admin.cell.update")) {
-                Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                Metropolis.sendAccessDenied(player);
                 return;
             }
             Plot plot = Metropolis.playerInPlot.get(player.getUniqueId());
@@ -2697,7 +2701,7 @@ public class CommandPlot extends BaseCommand {
         @Subcommand("info")
         public void onInfo(Player player) {
             if (!player.hasPermission("metropolis.plot.leaderboard.info")) {
-                Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                Metropolis.sendAccessDenied(player);
                 return;
             }
             Plot plot = Metropolis.playerInPlot.get(player.getUniqueId());
@@ -2745,7 +2749,7 @@ public class CommandPlot extends BaseCommand {
         @Subcommand("condition list")
         public void onCondition(Player player) {
             if (!player.hasPermission("metropolis.plot.leaderboard.condition.list")) {
-                Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                Metropolis.sendAccessDenied(player);
                 return;
             }
             Plot plot = Metropolis.playerInPlot.get(player.getUniqueId());

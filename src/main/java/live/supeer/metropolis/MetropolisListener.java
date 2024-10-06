@@ -211,7 +211,7 @@ public class MetropolisListener implements Listener {
                     event.setCancelled(true);
                     if (isEmptySide(sign.getSide(Side.BACK)) && isEmptySide(sign.getSide(Side.FRONT))) {
                         if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), sign.getLocation(), 'b') && !Metropolis.overrides.contains(player)) {
-                            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                            Metropolis.sendAccessDenied(player);
                             return;
                         }
                         String name = Apied.goSigns.get(player);
@@ -244,7 +244,7 @@ public class MetropolisListener implements Listener {
                 if (event.getMaterial() == Material.STICK && Apied.signEdit.containsKey(player)) {
                     event.setCancelled(true);
                     if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), sign.getLocation(), 'b') && !Metropolis.overrides.contains(player)) {
-                        Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                        Metropolis.sendAccessDenied(player);
                         return;
                     }
                     SignSide playerSide = sign.getSide(sign.getInteractableSideFor(player));
@@ -391,7 +391,7 @@ public class MetropolisListener implements Listener {
                 if (CommandCity.blockEnabled.contains(player)) {
                     event.setCancelled(true);
                     if (CityDatabase.getClaim(event.getClickedBlock().getLocation()) == null) {
-                        Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                        Metropolis.sendAccessDenied(player);
                         return;
                     }
                     City city = CityDatabase.getCityByClaim(event.getClickedBlock().getLocation());
@@ -514,7 +514,7 @@ public class MetropolisListener implements Listener {
                             Metropolis.sendMessage(player, "messages.chest.open.override", "%owner%", ApiedAPI.getPlayer(chest1.getOwnerUUID()).getName());
                         } else {
                             event.setCancelled(true);
-                            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                            Metropolis.sendAccessDenied(player);
                             }
                         }
                     }
@@ -539,7 +539,6 @@ public class MetropolisListener implements Listener {
 
     @EventHandler
     public void onMove(PlayerMoveEvent event) {
-
         Player player = event.getPlayer();
         Location from = event.getFrom().toBlockLocation();
         Location to = event.getTo().toBlockLocation();
@@ -915,7 +914,7 @@ public class MetropolisListener implements Listener {
                 if (CommandCity.blockEnabled.contains(player)) {
                     event.setCancelled(true);
                     if (CityDatabase.getClaim(event.getBlockPlaced().getLocation()) == null) {
-                        Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                        Metropolis.sendAccessDenied(player);
                         return;
                     }
                     City city = CityDatabase.getCityByClaim(event.getBlockPlaced().getLocation());

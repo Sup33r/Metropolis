@@ -101,6 +101,14 @@ public final class Metropolis extends JavaPlugin {
         }
     }
 
+    public static void sendAccessDenied(@NotNull CommandSender sender) {
+        if (sender instanceof Player player) {
+            player.sendActionBar(Objects.requireNonNull(getMessageComponent("messages.error.permissionDeniedActionBar")));
+        } else {
+            sendMessage(sender, "messages.error.permissionDenied");
+        }
+    }
+
     public static String getMessage(@NotNull String key, String... replacements) {
         String message = languageManager.getValue(key, "sv_se", replacements);
 

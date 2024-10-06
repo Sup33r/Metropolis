@@ -28,7 +28,7 @@ public class CommandMetropolis extends BaseCommand {
         if (player.hasPermission("metropolis.admin")) {
             Metropolis.sendMessage(player, "messages.syntax.admin.all");
         } else {
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
         }
     }
 
@@ -37,7 +37,7 @@ public class CommandMetropolis extends BaseCommand {
         if (player.hasPermission("metropolis.admin.taxcollect")) {
             CityDatabase.collectTaxes();
         } else {
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
         }
     }
 
@@ -46,14 +46,14 @@ public class CommandMetropolis extends BaseCommand {
         if (player.hasPermission("metropolis.admin.rentcollect")) {
             PlotDatabase.collectPlotRents();
         } else {
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
         }
     }
 
     @Subcommand("override|or")
     public void onOverride(Player player) {
         if (!player.hasPermission("metropolis.admin.override")) {
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
             return;
         }
         if (Metropolis.overrides.contains(player)) {
@@ -134,7 +134,7 @@ public class CommandMetropolis extends BaseCommand {
                 }
                 Metropolis.sendMessage(player, "messages.syntax.admin.balance");
             } else {
-                Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                Metropolis.sendAccessDenied(player);
             }
         }
 
@@ -157,7 +157,7 @@ public class CommandMetropolis extends BaseCommand {
                     Database.addLogEntry(city, "{ \"type\": \"city\", \"subtype\": \"toggleTaxExempt\", \"state\": \"true\", \"player\": \"" + player.getUniqueId() + "\" }");
                 }
             } else {
-                Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                Metropolis.sendAccessDenied(player);
             }
         }
 
@@ -166,7 +166,7 @@ public class CommandMetropolis extends BaseCommand {
         public void onNew(Player player, OnlinePlayer target, String cityName) {
             MPlayer mPlayer = ApiedAPI.getPlayer(target.player);
             if (!player.hasPermission("metropolis.admin.city.new")) {
-                Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                Metropolis.sendAccessDenied(player);
                 return;
             }
             if (mPlayer == null) {
@@ -264,7 +264,7 @@ public class CommandMetropolis extends BaseCommand {
         @CommandCompletion("@cityNames")
         public static void onDelete(Player player, String cityName) {
             if (!player.hasPermission("metropolis.admin.city.delete")) {
-                Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                Metropolis.sendAccessDenied(player);
                 return;
             }
             if (CityDatabase.getCity(cityName).isEmpty()) {
@@ -279,7 +279,7 @@ public class CommandMetropolis extends BaseCommand {
         @Private
         public static void onDeleteConfirm(Player player, String cityName) {
             if (!player.hasPermission("metropolis.admin.city.delete")) {
-                Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                Metropolis.sendAccessDenied(player);
                 return;
             }
             live.supeer.metropolis.city.City city = CityDatabase.getCity(cityName).get();
@@ -314,7 +314,7 @@ public class CommandMetropolis extends BaseCommand {
         @CommandCompletion("@players @cityNames")
         public void onJoin(Player player, OnlinePlayer target, String cityName) {
             if (!player.hasPermission("metropolis.admin.city.join")) {
-                Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                Metropolis.sendAccessDenied(player);
                 return;
             }
             if (CityDatabase.getCity(cityName).isEmpty()) {
@@ -364,7 +364,7 @@ public class CommandMetropolis extends BaseCommand {
         @CommandCompletion("@players @cityNames")
         public void onKick(Player player, OnlinePlayer target, String cityName) {
             if (!player.hasPermission("metropolis.admin.city.kick")) {
-                Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                Metropolis.sendAccessDenied(player);
                 return;
             }
             if (CityDatabase.getCity(cityName).isEmpty()) {
@@ -403,7 +403,7 @@ public class CommandMetropolis extends BaseCommand {
         @CommandCompletion("@players @allCityRoles @cityNames")
         public void onRank(Player player, String target, String role, String cityName) {
             if (!player.hasPermission("metropolis.admin.city.rank")) {
-                Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                Metropolis.sendAccessDenied(player);
                 return;
             }
             if (CityDatabase.getCity(cityName).isEmpty()) {
@@ -440,7 +440,7 @@ public class CommandMetropolis extends BaseCommand {
         @CommandCompletion("@cityNames")
         public void onMergeInto(Player player, String cityName) {
             if (!player.hasPermission("metropolis.admin.city.mergeinto")) {
-                Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                Metropolis.sendAccessDenied(player);
                 return;
             }
             live.supeer.metropolis.city.City currentCity = Metropolis.playerInCity.get(player.getUniqueId());
@@ -471,7 +471,7 @@ public class CommandMetropolis extends BaseCommand {
         @CommandCompletion("@players @nothing @cityNames")
         public void onRestore(Player player, String playerName, String price, String cityName) {
             if (!player.hasPermission("metropolis.admin.city.restore")) {
-                Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                Metropolis.sendAccessDenied(player);
                 return;
             }
             if (playerName == null || price == null || cityName == null) {
@@ -560,7 +560,7 @@ public class CommandMetropolis extends BaseCommand {
                     }
                     Metropolis.sendMessage(player, "messages.error.invalidNumber");
                 } else {
-                    Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                    Metropolis.sendAccessDenied(player);
                 }
             }
 
@@ -585,7 +585,7 @@ public class CommandMetropolis extends BaseCommand {
                     }
                     Metropolis.sendMessage(player, "messages.error.invalidNumber");
                 } else {
-                    Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                    Metropolis.sendAccessDenied(player);
                 }
             }
         }

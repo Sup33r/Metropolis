@@ -42,11 +42,11 @@ public class ProtectionListener implements Listener {
         MPlayer mPlayer = ApiedAPI.getPlayer(player);
         if (mPlayer.isBanned()) {
             event.setCancelled(true);
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
         }
         if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), event.getBlock().getLocation(), 'b') && !Metropolis.overrides.contains(player)) {
             event.setCancelled(true);
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
         }
     }
 
@@ -56,11 +56,11 @@ public class ProtectionListener implements Listener {
         MPlayer mPlayer = ApiedAPI.getPlayer(player);
         if (mPlayer.isBanned()) {
             event.setCancelled(true);
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
         }
         if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), event.getBlock().getLocation(), 'b') && !Metropolis.overrides.contains(player)) {
             event.setCancelled(true);
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
         }
     }
 
@@ -69,7 +69,7 @@ public class ProtectionListener implements Listener {
         if (!(event.getRemover() instanceof Player player)) return;
         if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), event.getEntity().getLocation(), 'b') && !Metropolis.overrides.contains(player)) {
             event.setCancelled(true);
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
         }
     }
 
@@ -79,11 +79,11 @@ public class ProtectionListener implements Listener {
         MPlayer mPlayer = ApiedAPI.getPlayer(player);
         if (mPlayer.isBanned()) {
             event.setCancelled(true);
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
         }
         if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), event.getBlockClicked().getRelative(event.getBlockFace()).getLocation(), 'b') && !Metropolis.overrides.contains(player)) {
             event.setCancelled(true);
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
         }
     }
 
@@ -92,7 +92,7 @@ public class ProtectionListener implements Listener {
         Player player = event.getPlayer();
         if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), event.getBlockClicked().getLocation(), 'b') && !Metropolis.overrides.contains(player)) {
             event.setCancelled(true);
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
         }
     }
 
@@ -101,7 +101,7 @@ public class ProtectionListener implements Listener {
         if (!(event.getAttacker() instanceof Player player)) return;
         if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), event.getVehicle().getLocation(), 'b') && !Metropolis.overrides.contains(player)) {
             event.setCancelled(true);
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
         }
     }
 
@@ -111,7 +111,7 @@ public class ProtectionListener implements Listener {
         MPlayer mPlayer = ApiedAPI.getPlayer(player);
         if (mPlayer.isBanned()) {
             event.setCancelled(true);
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
         }
         if (event.getAction() == Action.RIGHT_CLICK_AIR) {
             ItemStack item = event.getItem();
@@ -125,17 +125,17 @@ public class ProtectionListener implements Listener {
                         itemType == Material.DARK_OAK_CHEST_BOAT || itemType == Material.CHERRY_CHEST_BOAT || itemType == Material.MANGROVE_CHEST_BOAT) {
                     if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), player.getLocation().toBlockLocation(), 'b') && !Metropolis.overrides.contains(player)) {
                         event.setCancelled(true);
-                        Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                        Metropolis.sendAccessDenied(player);
                     }
                 } else if (itemType == Material.MAP) {
                     if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), player.getLocation().toBlockLocation(), 'b') && !Metropolis.overrides.contains(player)) {
                         event.setCancelled(true);
-                        Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                        Metropolis.sendAccessDenied(player);
                     }
                 } else if (itemType == Material.ENDER_PEARL || itemType == Material.TRIDENT) {
                     if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), player.getLocation().toBlockLocation(), 'e') && !Metropolis.overrides.contains(player)) {
                         event.setCancelled(true);
-                        Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                        Metropolis.sendAccessDenied(player);
                     }
                 }
             }
@@ -155,117 +155,117 @@ public class ProtectionListener implements Listener {
                         itemType == Material.DARK_OAK_CHEST_BOAT || itemType == Material.CHERRY_CHEST_BOAT || itemType == Material.MANGROVE_CHEST_BOAT) {
                     if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'b') && !Metropolis.overrides.contains(player)) {
                         event.setCancelled(true);
-                        Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                        Metropolis.sendAccessDenied(player);
                     }
                 } else if (itemType == Material.MAP) {
                     if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'b') && !Metropolis.overrides.contains(player)) {
                         event.setCancelled(true);
-                        Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                        Metropolis.sendAccessDenied(player);
                     }
                 } else if (itemType == Material.ENDER_PEARL || itemType == Material.TRIDENT) {
                     if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'e') && !Metropolis.overrides.contains(player)) {
                         event.setCancelled(true);
-                        Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                        Metropolis.sendAccessDenied(player);
                     }
                 }
             }
             if (blockType == Material.ARMOR_STAND) {
                 if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'b') && !Metropolis.overrides.contains(player)) {
                     event.setCancelled(true);
-                    Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                    Metropolis.sendAccessDenied(player);
                 }
             } else if (blockType == Material.REPEATER || blockType == Material.COMPARATOR) {
                 if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'b') && !Metropolis.overrides.contains(player)) {
                     event.setCancelled(true);
-                    Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                    Metropolis.sendAccessDenied(player);
                 }
             } else if (blockType == Material.FLOWER_POT) {
                 if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'b') && !Metropolis.overrides.contains(player)) {
                     event.setCancelled(true);
-                    Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                    Metropolis.sendAccessDenied(player);
                 }
             } else if (blockType == Material.CAKE) {
                 if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'k') && !Metropolis.overrides.contains(player)) {
                     event.setCancelled(true);
-                    Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                    Metropolis.sendAccessDenied(player);
                 }
             } else if (blockType == Material.BEEHIVE || blockType == Material.BEE_NEST) {
                 if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'a') && !Metropolis.overrides.contains(player)) {
                     event.setCancelled(true);
-                    Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                    Metropolis.sendAccessDenied(player);
                 }
 
             } else if (blockType == Material.NOTE_BLOCK) {
                 if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'b') && !Metropolis.overrides.contains(player)) {
                     event.setCancelled(true);
-                    Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                    Metropolis.sendAccessDenied(player);
                 }
             } else if (event.getClickedBlock().getState() instanceof Sign sign) {
                 if (!sign.isWaxed()) {
                     if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'b') && !Metropolis.overrides.contains(player)) {
                         event.setCancelled(true);
-                        Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                        Metropolis.sendAccessDenied(player);
                     }
                 }
             } else if (Utilities.isBlockContainer(blockType)) {
                 if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'c') && !Metropolis.overrides.contains(player)) {
                     event.setCancelled(true);
-                    Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                    Metropolis.sendAccessDenied(player);
                 }
             } else if (blockType == Material.FURNACE || blockType == Material.BLAST_FURNACE || blockType == Material.SMOKER || blockType == Material.CAMPFIRE || blockType == Material.COMPOSTER || blockType == Material.BEACON) {
                 if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'c') && !Metropolis.overrides.contains(player)) {
                     event.setCancelled(true);
-                    Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                    Metropolis.sendAccessDenied(player);
                 }
             } else if (blockType == Material.HOPPER || blockType == Material.DROPPER || blockType == Material.DISPENSER) {
                 if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'c') && !Metropolis.overrides.contains(player)) {
                     event.setCancelled(true);
-                    Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                    Metropolis.sendAccessDenied(player);
                 }
             } else if (blockType == Material.JUKEBOX) {
                 if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'j') && !Metropolis.overrides.contains(player)) {
                     event.setCancelled(true);
-                    Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                    Metropolis.sendAccessDenied(player);
                 }
             } else if (blockType == Material.BREWING_STAND) {
                 if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'c') && !Metropolis.overrides.contains(player)) {
                     event.setCancelled(true);
-                    Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                    Metropolis.sendAccessDenied(player);
                 }
             } else if (blockType == Material.CAULDRON) {
                 if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'c') && !Metropolis.overrides.contains(player)) {
                     event.setCancelled(true);
-                    Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                    Metropolis.sendAccessDenied(player);
                 }
             } else if (blockType == Material.BELL) {
                 if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'b') && !Metropolis.overrides.contains(player)) {
                     event.setCancelled(true);
-                    Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                    Metropolis.sendAccessDenied(player);
                 }
             } else if (blockType == Material.STONE_BUTTON || blockType == Material.POLISHED_BLACKSTONE_BUTTON || blockType == Material.LEVER) {
                 if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 's') && !Metropolis.overrides.contains(player)) {
                     event.setCancelled(true);
-                    Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                    Metropolis.sendAccessDenied(player);
                 }
             } else if (blockType == Material.ANVIL || blockType == Material.CHIPPED_ANVIL || blockType == Material.DAMAGED_ANVIL) {
                 if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'r') && !Metropolis.overrides.contains(player)) {
                     event.setCancelled(true);
-                    Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                    Metropolis.sendAccessDenied(player);
                 }
             } else if (blockType == Material.ACACIA_DOOR || blockType == Material.BIRCH_DOOR || blockType == Material.CRIMSON_DOOR || blockType == Material.DARK_OAK_DOOR || blockType == Material.JUNGLE_DOOR || blockType == Material.OAK_DOOR || blockType == Material.SPRUCE_DOOR || blockType == Material.WARPED_DOOR || blockType == Material.BAMBOO_DOOR || blockType == Material.MANGROVE_DOOR || blockType == Material.CHERRY_DOOR || blockType == Material.COPPER_DOOR || blockType == Material.EXPOSED_COPPER_DOOR || blockType == Material.OXIDIZED_COPPER_DOOR || blockType == Material.WAXED_COPPER_DOOR || blockType == Material.WAXED_EXPOSED_COPPER_DOOR || blockType == Material.WAXED_OXIDIZED_COPPER_DOOR || blockType == Material.WAXED_WEATHERED_COPPER_DOOR || blockType == Material.WEATHERED_COPPER_DOOR) {
                 if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'd') && !Metropolis.overrides.contains(player)) {
                     event.setCancelled(true);
-                    Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                    Metropolis.sendAccessDenied(player);
                 }
             } else if (blockType == Material.ACACIA_FENCE_GATE || blockType == Material.BIRCH_FENCE_GATE || blockType == Material.CRIMSON_FENCE_GATE || blockType == Material.DARK_OAK_FENCE_GATE || blockType == Material.JUNGLE_FENCE_GATE || blockType == Material.OAK_FENCE_GATE || blockType == Material.SPRUCE_FENCE_GATE || blockType == Material.WARPED_FENCE_GATE || blockType == Material.BAMBOO_FENCE_GATE || blockType == Material.MANGROVE_FENCE_GATE || blockType == Material.CHERRY_FENCE_GATE) {
                 if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'b') && !Metropolis.overrides.contains(player)) {
                     event.setCancelled(true);
-                    Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                    Metropolis.sendAccessDenied(player);
                 }
             } else if (blockType == Material.ACACIA_TRAPDOOR || blockType == Material.BIRCH_TRAPDOOR || blockType == Material.CRIMSON_TRAPDOOR || blockType == Material.DARK_OAK_TRAPDOOR || blockType == Material.JUNGLE_TRAPDOOR || blockType == Material.OAK_TRAPDOOR || blockType == Material.SPRUCE_TRAPDOOR || blockType == Material.WARPED_TRAPDOOR || blockType == Material.BAMBOO_TRAPDOOR || blockType == Material.MANGROVE_TRAPDOOR || blockType == Material.CHERRY_TRAPDOOR || blockType == Material.COPPER_TRAPDOOR || blockType == Material.EXPOSED_COPPER_TRAPDOOR || blockType == Material.OXIDIZED_COPPER_TRAPDOOR || blockType == Material.WAXED_COPPER_TRAPDOOR || blockType == Material.WAXED_EXPOSED_COPPER_TRAPDOOR || blockType == Material.WAXED_OXIDIZED_COPPER_TRAPDOOR || blockType == Material.WAXED_WEATHERED_COPPER_TRAPDOOR || blockType == Material.WEATHERED_COPPER_TRAPDOOR) {
                 if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'd') && !Metropolis.overrides.contains(player)) {
                     event.setCancelled(true);
-                    Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                    Metropolis.sendAccessDenied(player);
                 }
             }
         }
@@ -275,12 +275,12 @@ public class ProtectionListener implements Listener {
             if (blockType == Material.FARMLAND) {
                 if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'b') && !Metropolis.overrides.contains(player)) {
                     event.setCancelled(true);
-                    Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                    Metropolis.sendAccessDenied(player);
                 }
             } else if (blockType == Material.TURTLE_EGG) {
                 if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'b') && !Metropolis.overrides.contains(player)) {
                     event.setCancelled(true);
-                    Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                    Metropolis.sendAccessDenied(player);
                 }
             }
         }
@@ -292,7 +292,7 @@ public class ProtectionListener implements Listener {
         Location location = event.getBlock().getLocation();
         if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'b') && !Metropolis.overrides.contains(player)) {
             event.setCancelled(true);
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
         }
     }
 
@@ -302,7 +302,7 @@ public class ProtectionListener implements Listener {
         Location location = event.getHarvestedBlock().getLocation();
         if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'b') && !Metropolis.overrides.contains(player)) {
             event.setCancelled(true);
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
         }
     }
 
@@ -312,7 +312,7 @@ public class ProtectionListener implements Listener {
         Location location = event.getLectern().getLocation();
         if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'b') && !Metropolis.overrides.contains(player)) {
             event.setCancelled(true);
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
         }
     }
 
@@ -324,13 +324,13 @@ public class ProtectionListener implements Listener {
             Player player = event.getPlayer();
             if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), event.getRightClicked().getLocation(), 'a') && !Metropolis.overrides.contains(player)) {
                 event.setCancelled(true);
-                Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                Metropolis.sendAccessDenied(player);
             }
         } else if (event.getRightClicked() instanceof ItemFrame) {
             Player player = event.getPlayer();
             if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), event.getRightClicked().getLocation(), 'f') && !Metropolis.overrides.contains(player)) {
                 event.setCancelled(true);
-                Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                Metropolis.sendAccessDenied(player);
             }
         }
     }
@@ -341,7 +341,7 @@ public class ProtectionListener implements Listener {
         if (!(event.getDamager() instanceof Player player)) return;
         if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), event.getEntity().getLocation(), 'a') && !Metropolis.overrides.contains(player)) {
             event.setCancelled(true);
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
         }
     }
 
@@ -352,7 +352,7 @@ public class ProtectionListener implements Listener {
         if (!(event.getEntity() instanceof Player player)) return;
         if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), event.getTo(), 't') && !Metropolis.overrides.contains(player)) {
             event.setCancelled(true);
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
         }
     }
 
@@ -364,7 +364,7 @@ public class ProtectionListener implements Listener {
         Player player = event.getPlayer();
         if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), event.getTo(), 'e') && !Metropolis.overrides.contains(player)) {
             event.setCancelled(true);
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
         }
     }
 
@@ -375,7 +375,7 @@ public class ProtectionListener implements Listener {
         Player player = event.getPlayer();
         if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), event.getVillager().getLocation(), 'v') && !Metropolis.overrides.contains(player)) {
             event.setCancelled(true);
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
         }
     }
 
@@ -492,7 +492,7 @@ public class ProtectionListener implements Listener {
         MPlayer mPlayer = ApiedAPI.getPlayer(event.getPlayer());
         if (mPlayer.isBanned()) {
             event.setCancelled(true);
-            Metropolis.sendMessage(event.getPlayer(), "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(event.getPlayer());
         }
     }
 
@@ -501,7 +501,7 @@ public class ProtectionListener implements Listener {
         MPlayer mPlayer = ApiedAPI.getPlayer(event.getPlayer());
         if (mPlayer.isBanned()) {
             event.setCancelled(true);
-            Metropolis.sendMessage(event.getPlayer(), "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(event.getPlayer());
         }
     }
 }

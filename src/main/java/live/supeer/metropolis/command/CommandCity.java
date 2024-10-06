@@ -68,23 +68,23 @@ public class CommandCity extends BaseCommand {
     @Default
     public static void onCity(Player player, @Optional String cityName) {
         if (!player.hasPermission("metropolis.city")) {
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
             return;
         }
-        info(player, cityName);
+        sendInfo(player, cityName);
     }
 
     @Subcommand("info")
     @CommandCompletion("@cityNames")
     public static void onInfo(Player player, @Optional String cityName) {
         if (!player.hasPermission("metropolis.city.info")) {
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
             return;
         }
-        info(player, cityName);
+        sendInfo(player, cityName);
     }
 
-    private static void info(Player player , String cityName) {
+    public static void sendInfo(Player player, String cityName) {
         City city;
         if (cityName == null) {
             if (HCDatabase.hasHomeCity(player.getUniqueId().toString())) {
@@ -205,7 +205,7 @@ public class CommandCity extends BaseCommand {
     @Subcommand("bank")
     public static void onBank(Player player, @Optional String[] args) {
         if (!player.hasPermission("metropolis.city.bank")) {
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
             return;
         }
         MPlayer mPlayer = ApiedAPI.getPlayer(player);
@@ -330,7 +330,7 @@ public class CommandCity extends BaseCommand {
     public static void onNew(Player player, String cityName) {
         MPlayer mPlayer = ApiedAPI.getPlayer(player);
         if (!player.hasPermission("metropolis.city.new")) {
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
             return;
         }
         if (CityDatabase.getPlayerCityCount(player.getUniqueId().toString()) >= 3) {
@@ -432,7 +432,7 @@ public class CommandCity extends BaseCommand {
     @Subcommand("claim")
     public static void onClaim(Player player, @Optional String arg) {
         if (!player.hasPermission("metropolis.city.claim")) {
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
             return;
         }
         if (HCDatabase.hasHomeCity(player.getUniqueId().toString())) {
@@ -597,7 +597,7 @@ public class CommandCity extends BaseCommand {
                     "%outpost%",
                     Utilities.formattedMoney(Metropolis.getInstance().getConfig().getInt("settings.city.outpostcost")));
         } else {
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
         }
     }
 
@@ -605,7 +605,7 @@ public class CommandCity extends BaseCommand {
     @CommandCompletion("@cityNames")
     public static void onJoin(Player player, String cityname) {
         if (!player.hasPermission("metropolis.city.join")) {
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
             return;
         }
         if (CityDatabase.getCity(cityname).isEmpty() || cityname == null) {
@@ -784,7 +784,7 @@ public class CommandCity extends BaseCommand {
     @CommandCompletion("@cityGoes @cityGo1 @cityGo2 @nothing")
     public static void onGo(Player player, String[] args) {
         if (!player.hasPermission("metropolis.city.go")) {
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
             return;
         }
         if (HCDatabase.hasHomeCity(player.getUniqueId().toString())
@@ -811,7 +811,7 @@ public class CommandCity extends BaseCommand {
         if (args.length == 0
                 || args.length == 1 && !args[0].replaceAll("[0-9]", "").matches("[^0-9].*")) {
             if (!player.hasPermission("metropolis.city.go.list")) {
-                Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                Metropolis.sendAccessDenied(player);
                 return;
             }
             if (CityDatabase.getCityGoCount(city, role) == 0) {
@@ -877,7 +877,7 @@ public class CommandCity extends BaseCommand {
                 return;
             }
             if (!player.hasPermission("metropolis.city.go.delete")) {
-                Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                Metropolis.sendAccessDenied(player);
                 return;
             }
             if (!CityDatabase.cityGoExists(args[0], city)) {
@@ -1125,7 +1125,7 @@ public class CommandCity extends BaseCommand {
             Metropolis.sendMessage(player, "messages.syntax.city.go");
         } else if (args.length == 1) {
             if (!player.hasPermission("metropolis.city.go.teleport")) {
-                Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                Metropolis.sendAccessDenied(player);
                 return;
             }
             if (!CityDatabase.cityGoExists(args[0], city)) {
@@ -1180,7 +1180,7 @@ public class CommandCity extends BaseCommand {
     @Subcommand("set")
     public static void onSet(Player player) {
         if (!player.hasPermission("metropolis.city.set")) {
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
             return;
         }
         Metropolis.sendMessage(player, "messages.syntax.city.set.enter");
@@ -1537,7 +1537,7 @@ public class CommandCity extends BaseCommand {
     @Subcommand("buy")
     public static void onBuy(Player player) {
         if (player.hasPermission("metropolis.city.buy")) {
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
             return;
         }
         Metropolis.sendMessage(player, "messages.syntax.city.buy.bonus");
@@ -1773,7 +1773,7 @@ public class CommandCity extends BaseCommand {
     @Subcommand("block")
     public void onBlock(Player player, @Optional Integer page) {
         if (!player.hasPermission("metropolis.city.block")) {
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
             return;
         }
         if (getCoreProtect() == null) {
@@ -1963,7 +1963,7 @@ public class CommandCity extends BaseCommand {
     @CommandCompletion("@cityNames")
     public static void onMember(Player player, String cityname) {
         if (!player.hasPermission("metropolis.city.members")) {
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
             return;
         }
         if (CityDatabase.getCity(cityname).isEmpty()) {
@@ -1979,7 +1979,7 @@ public class CommandCity extends BaseCommand {
     @CommandCompletion("@cityNames")
     public static void onOnline(Player player, String cityname) {
         if (!player.hasPermission("metropolis.city.online")) {
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
             return;
         }
         if (CityDatabase.getCity(cityname).isEmpty()) {
@@ -2042,7 +2042,7 @@ public class CommandCity extends BaseCommand {
     @CommandCompletion("@cityNames")
     public static void onSpawn(Player player,@Optional String cityName) {
         if (!player.hasPermission("metropolis.city.spawn")) {
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
             return;
         }
         if (cityName == null) {
@@ -2310,7 +2310,7 @@ public class CommandCity extends BaseCommand {
     @Subcommand("toggle")
     public static void onToggle(Player player) {
         if (!player.hasPermission("metropolis.city.toggle")) {
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
             return;
         }
         Metropolis.sendMessage(player, "messages.syntax.city.toggle.open");
@@ -2405,7 +2405,7 @@ public class CommandCity extends BaseCommand {
     @Subcommand("search")
     public static void onSearch(Player player, @Optional String searchterm) {
         if (!player.hasPermission("metropolis.city.list")) {
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
             return;
         }
         int maxCount = 20;
@@ -2445,7 +2445,7 @@ public class CommandCity extends BaseCommand {
     @Subcommand("map")
     public static void onMap(Player player) {
         if (!player.hasPermission("metropolis.city.map")) {
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
             return;
         }
 
@@ -2467,14 +2467,14 @@ public class CommandCity extends BaseCommand {
     @CommandCompletion("@nothing @range:100-10000")
     public static void onNear(Player player, @Optional Integer blocks) {
         if (!player.hasPermission("metropolis.city.near")) {
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
             return;
         }
 
         int radius = 3000;
         if (blocks != null) {
             if (!player.hasPermission("metropolis.city.near.custom")) {
-                Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                Metropolis.sendAccessDenied(player);
                 return;
             }
             radius = blocks;
@@ -2613,7 +2613,7 @@ public class CommandCity extends BaseCommand {
         @Subcommand("info")
         public static void onInfo(Player player, @Optional String name) {
             if (!player.hasPermission("metropolis.city.district.info")) {
-                Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                Metropolis.sendAccessDenied(player);
                 return;
             }
             City city = Metropolis.playerInCity.get(player.getUniqueId());
@@ -2872,7 +2872,7 @@ public class CommandCity extends BaseCommand {
     @Subcommand("chunk")
     public static void onChunk(Player player) {
         if (!player.hasPermission("metropolis.city.chunk")) {
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
             return;
         }
         int chunkX = player.getChunk().getX();
@@ -2949,7 +2949,7 @@ public class CommandCity extends BaseCommand {
                 }
                 if (argument.startsWith("-")) {
                     if (!player.hasPermission("metropolis.city.twin.remove")) {
-                        Metropolis.sendMessage(player, "messages.error.permissionDenied");
+                        Metropolis.sendAccessDenied(player);
                         return;
                     }
                     if (city.getTwinCities().contains(twinCity)) {
@@ -3063,7 +3063,7 @@ public class CommandCity extends BaseCommand {
     @Subcommand("perm")
     public static void onPerm(Player player, @Optional String subject, @Optional String perm) {
         if (!player.hasPermission("metropolis.city.perm")) {
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
             return;
         }
         City city = Metropolis.playerInCity.get(player.getUniqueId());

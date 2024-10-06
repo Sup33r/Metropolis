@@ -361,7 +361,7 @@ public class Utilities {
     }
     public static City hasCityPermissions(Player player, String permission, Role targetRole) {
         if (!player.hasPermission(permission)) {
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
             return null;
         }
         City city = HCDatabase.getHomeCityToCity(player.getUniqueId().toString());
@@ -384,7 +384,7 @@ public class Utilities {
     }
     public static Plot hasPlotPermissions(Player player, String permission, Role targetRole, boolean isOwner) {
         if (permission != null && !player.hasPermission(permission)) {
-            Metropolis.sendMessage(player, "messages.error.permissionDenied");
+            Metropolis.sendAccessDenied(player);
             return null;
         }
         Plot plot = Metropolis.playerInPlot.get(player.getUniqueId());
@@ -402,15 +402,15 @@ public class Utilities {
                     return plot;
                 }
             }
-            Metropolis.sendMessage(player, "messages.error.plot.permissionDenied");
+            Metropolis.sendMessage(player, "messages.error.city.permissionDenied", "%cityname%", plot.getCity().getCityName());
             return null;
         } else {
             if (role == null) {
-                Metropolis.sendMessage(player, "messages.error.plot.permissionDenied");
+                Metropolis.sendMessage(player, "messages.error.city.permissionDenied", "%cityname%", plot.getCity().getCityName());
                 return null;
             }
             if (role.getPermissionLevel() < targetRole.getPermissionLevel()) {
-                Metropolis.sendMessage(player, "messages.error.plot.permissionDenied");
+                Metropolis.sendMessage(player, "messages.error.city.permissionDenied", "%cityname%", plot.getCity().getCityName());
                 return null;
             }
         }

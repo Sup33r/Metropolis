@@ -41,6 +41,9 @@ messages:
   days:
     yesterday: "i går"
     today: "i dag"
+  here:
+    nature: "<green>Du befinner dig i naturen.</green>\n<green></green>"
+    map: "<hover:show_text:'<#88C6FF>Öppna kartan<reset>'><click:open_url:'https://enserver.se/map/#overworld:%x%:57:%z%:95:0:0:0:0:perspective'><#88C6FF>Klicka för att gå till kartan ➜</#88C6FF></click></hover>"
   sign:
     edit:
       waxed: "<red>Skylten är vaxad och kan därför inte redigeras.</red>"
@@ -233,6 +236,7 @@ messages:
         spawn:
           outsideCity: "<yellow>%cityname% <gray>| <red>Du kan inte sätta en startpunkt utanför staden."
     permissionDenied: "<red>Åtkomst nekad."
+    permissionDeniedActionBar: "<red>Åtkomst nekad 🚫"
     plot:
       leaderboard:
         noConditions: "<red>Det finns inga villkor på topplistan."
