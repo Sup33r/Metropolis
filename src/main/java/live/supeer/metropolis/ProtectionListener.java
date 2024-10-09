@@ -1,5 +1,6 @@
 package live.supeer.metropolis;
 
+import com.destroystokyo.paper.event.entity.PhantomPreSpawnEvent;
 import com.destroystokyo.paper.event.entity.PreCreatureSpawnEvent;
 import io.papermc.paper.event.player.PlayerTradeEvent;
 import live.supeer.apied.ApiedAPI;
@@ -9,7 +10,6 @@ import live.supeer.metropolis.city.CityDatabase;
 import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.plot.PlotDatabase;
 import live.supeer.metropolis.utils.Utilities;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Sign;
@@ -164,6 +164,16 @@ public class ProtectionListener implements Listener {
                     }
                 } else if (itemType == Material.ENDER_PEARL || itemType == Material.TRIDENT) {
                     if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'e') && !Metropolis.overrides.contains(player)) {
+                        event.setCancelled(true);
+                        Metropolis.sendAccessDenied(player);
+                    }
+                } else if (itemType == Material.PAINTING || itemType == Material.ITEM_FRAME || itemType == Material.GLOW_ITEM_FRAME) {
+                    if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'b') && !Metropolis.overrides.contains(player)) {
+                        event.setCancelled(true);
+                        Metropolis.sendAccessDenied(player);
+                    }
+                } else if (itemType == Material.END_CRYSTAL) {
+                    if (!Utilities.hasLocationPermissionFlags(player.getUniqueId(), location, 'b') && !Metropolis.overrides.contains(player)) {
                         event.setCancelled(true);
                         Metropolis.sendAccessDenied(player);
                     }
@@ -443,19 +453,12 @@ public class ProtectionListener implements Listener {
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
         if (!(event.getDamager() instanceof Player)) return;
         if (!(event.getEntity() instanceof Player player)) {
+            if (event.getEntity() instanceof ArmorStand || event.getEntity() instanceof ItemFrame || event.getEntity() instanceof GlowItemFrame) return;
             if (!(event.getEntity() instanceof Monster)) {
-                City city = CityDatabase.getCityByClaim(event.getEntity().getLocation());
-                if (city != null) {
-                    Plot plot = PlotDatabase.getCityPlot(city, event.getEntity().getLocation());
-                    if (plot != null) {
-                        if (!plot.hasFlag('a')) {
-                            event.setCancelled(true);
-                        }
-                    } else {
-                        if (!city.hasFlag('a')) {
-                            event.setCancelled(true);
-                        }
-                    }
+                Player pla = (Player) event.getDamager();
+                if (!Utilities.hasLocationPermissionFlags(pla.getUniqueId(), event.getEntity().getLocation(), 'a')) {
+                    event.setCancelled(true);
+                    Metropolis.sendAccessDenied(pla);
                 }
             }
         } else {
@@ -465,10 +468,22 @@ public class ProtectionListener implements Listener {
                 if (plot != null) {
                     if (!plot.hasFlag('p')) {
                         event.setCancelled(true);
+                        Metropolis.sendAccessDenied(player);
                     }
                 } else {
                     event.setCancelled(true);
+                    Metropolis.sendAccessDenied(player);
                 }
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPhantomPreSpawnEvent(PhantomPreSpawnEvent event) {
+        if (event.getSpawningEntity() instanceof Player player) {
+            City city = CityDatabase.getCityByClaim(player.getLocation().toBlockLocation());
+            if (city != null) {
+                event.setCancelled(true);
             }
         }
     }
