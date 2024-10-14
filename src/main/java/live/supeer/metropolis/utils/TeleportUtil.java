@@ -5,13 +5,14 @@ import live.supeer.metropolis.Metropolis;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class TeleportUtil {
     public static List<Player> teleportingPlayers = new ArrayList<>();
+    public static Map<Player, BukkitTask> teleportingTasks = new HashMap<>();
+    public static Map<Player, Location> startingLocations = new HashMap<>();
     
 
     public static void teleport(Player player, Location location, String name, boolean bypassCooldown) {
@@ -33,7 +34,7 @@ public class TeleportUtil {
         teleportingPlayers.add(player);
         int cooldown = Metropolis.configuration.getTeleportCooldown();
         Metropolis.sendMessage(player, "messages.teleport.started", "%cooldown%", String.valueOf(cooldown));
-        Metropolis.getInstance().getServer().getScheduler().runTaskLater(Metropolis.getInstance(), () -> {
+        BukkitTask task = Metropolis.getInstance().getServer().getScheduler().runTaskLater(Metropolis.getInstance(), () -> {
             if (!teleportingPlayers.contains(player)) {
                 sendAfkMessages(player);
                 Metropolis.sendMessage(player, "messages.teleport.failed");
@@ -44,7 +45,11 @@ public class TeleportUtil {
             player.teleport(location);
             Metropolis.sendMessage(player, "messages.teleport.success", "%name%", name);
             teleportingPlayers.remove(player);
+            teleportingTasks.remove(player);
+            startingLocations.remove(player);
         }, 20L * cooldown);
+        teleportingTasks.put(player, task);
+        startingLocations.put(player, player.getLocation());
     }
 
     public static void sendAfkMessages(Player player) {

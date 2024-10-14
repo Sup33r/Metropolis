@@ -2400,6 +2400,27 @@ public class CommandCity extends BaseCommand {
                 city.setCityFlags(Objects.requireNonNull(Utilities.parseFlagChange(city.getCityFlags(), "+m")));
             }
         }
+
+        @Subcommand("snow")
+        public static void onSnow(Player player) {
+            City city = Utilities.hasCityPermissions(player, "metropolis.city.toggle.snow", Role.VICE_MAYOR);
+            if (city == null) {
+                return;
+            }
+            if (city.isReserve()) {
+                Metropolis.sendMessage(player, "messages.error.city.reserve");
+                return;
+            }
+            if (city.hasFlag('s')) {
+                Metropolis.sendMessage(player, "messages.city.toggle.snow", "%cityname%", city.getCityName());
+                Database.addLogEntry(city, "{ \"type\": \"city\", \"subtype\": \"toggleSnow\", \"state\": \"enabled\", \"player\": \"" + player.getUniqueId() + "\" }");
+                city.setCityFlags(Objects.requireNonNull(Utilities.parseFlagChange(city.getCityFlags(), "-s")));
+            } else {
+                Metropolis.sendMessage(player, "messages.city.toggle.noSnow", "%cityname%", city.getCityName());
+                Database.addLogEntry(city, "{ \"type\": \"city\", \"subtype\": \"toggleSnow\", \"state\": \"disabled\", \"player\": \"" + player.getUniqueId() + "\" }");
+                city.setCityFlags(Objects.requireNonNull(Utilities.parseFlagChange(city.getCityFlags(), "+s")));
+            }
+        }
     }
 
     @Subcommand("search")

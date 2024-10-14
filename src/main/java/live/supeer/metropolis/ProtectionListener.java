@@ -10,6 +10,7 @@ import live.supeer.metropolis.city.CityDatabase;
 import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.plot.PlotDatabase;
 import live.supeer.metropolis.utils.Utilities;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Sign;
@@ -17,10 +18,7 @@ import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockFertilizeEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.*;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityPortalEvent;
@@ -517,6 +515,15 @@ public class ProtectionListener implements Listener {
         if (mPlayer.isBanned()) {
             event.setCancelled(true);
             Metropolis.sendAccessDenied(event.getPlayer());
+        }
+    }
+
+    //SNOW FORMATION CANCELLATION
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onBlockForm(BlockFormEvent event) {
+        City city = CityDatabase.getCityByClaim(event.getBlock().getLocation());
+        if (city != null && city.hasFlag('s') && event.getNewState().getType().equals(Material.SNOW)) {
+            event.setCancelled(true);
         }
     }
 }

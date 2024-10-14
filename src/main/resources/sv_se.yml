@@ -580,6 +580,8 @@ messages:
       closed: "<yellow>%cityname% <gray>| <green>Staden är nu Stängd."
       public: "<yellow>%cityname% <gray>| <green>Staden är nu Offentlig."
       private: "<yellow>%cityname% <gray>| <green>Staden är nu Privat."
+      snow: "<yellow>%cityname% <gray>| <green>Snö är nu påslaget i staden."
+      noSnow: "<yellow>%cityname% <gray>| <green>Snö är nu avstängt i staden."
     roles:
       member: "Medlem"
       inviter: "Inbjudare"
