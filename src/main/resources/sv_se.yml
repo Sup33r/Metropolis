@@ -489,7 +489,7 @@ messages:
       role: "<dark_green>Du är <green>%role%<dark_green> i staden."
       motd: "<dark_green>MOTD: <green>%motd%"
       membersPlots: "<dark_green>Medlemmar: <green>%members%<dark_green>     Tomter: <green>%plots%"
-      mobsAnimals: "<dark_green>Mobs: <green>%mobs%<dark_green>     Djur: <green>%animals%"
+      mobsAnimalsSnow: "<dark_green>Mobs: <green>%mobs%<dark_green>     Djur: <green>%animals%<dark_green>     Snö: <green>%snow%"
       bansTwins: "<dark_green>Bannlysningar: <green>%bans%<dark_green>     Vänorter: <green>%twins%"
       openPublic: "<dark_green>Öppen: <green>%open%<dark_green>     Offentlig: <green>%public%"
       founded: "<dark_green>Grundades: <green>%founded% av %by%"

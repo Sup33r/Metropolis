@@ -152,7 +152,8 @@ public class CommandCity extends BaseCommand {
         Metropolis.sendMessage(player, "messages.city.cityInfo.openPublic", "%open%", cityOpen, "%public%", cityPublic);
         String mobs = city.hasFlag('m') ? Metropolis.getMessage("messages.words.off_state") : Metropolis.getRawMessage("messages.words.red_on");
         String animals = city.hasFlag('a') ? Metropolis.getMessage("messages.words.off_state") : Metropolis.getMessage("messages.words.on_state");
-        Metropolis.sendMessage(player, "messages.city.cityInfo.mobsAnimals", "%mobs%", mobs, "%animals%", animals);
+        String snow = city.hasFlag('s') ? Metropolis.getMessage("messages.words.off_state") : Metropolis.getMessage("messages.words.on_state");
+        Metropolis.sendMessage(player, "messages.city.cityInfo.mobsAnimalsSnow", "%mobs%", mobs, "%animals%", animals, "%snow%", snow);
         Metropolis.sendMessage(player, "messages.city.cityInfo.founded", "%founded%", DateUtil.niceDate(city.getCityCreationDate()), "%by%" , founderName);
         Metropolis.sendMessage(player, "messages.city.cityInfo.balance", "%balance%", Utilities.formattedMoney(CityDatabase.getCityBalance(city)));
         Metropolis.sendMessage(player, "messages.city.cityInfo.tax", "%tax%", String.valueOf(city.getCityTax()), "%payedBy%", Utilities.taxPayedBy(city.getTaxLevel()));
