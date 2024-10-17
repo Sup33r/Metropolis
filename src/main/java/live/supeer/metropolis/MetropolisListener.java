@@ -1,5 +1,6 @@
 package live.supeer.metropolis;
 
+import fr.mrmicky.fastboard.FastBoard;
 import live.supeer.apied.*;
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.city.CityDatabase;
@@ -76,10 +77,14 @@ public class MetropolisListener implements Listener {
 
     public static HashMap<UUID, Cell> waitingForSignClick = new HashMap<>();
 
+    public static final Map<UUID, FastBoard> scoreboards = new HashMap<>();
+
+
     @EventHandler
     public static void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         MPlayer mPlayer = ApiedAPI.getPlayer(player);
+        scoreboards.put(player.getUniqueId(), new FastBoard(player));
         if (mPlayer.isBanned()) {
             if (!JailManager.hasCell(player.getUniqueId().toString())) {
                 Cell cell = JailManager.getRandomEmptyCell();
@@ -142,6 +147,11 @@ public class MetropolisListener implements Listener {
                 }
             }
         }
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        scoreboards.remove(event.getPlayer().getUniqueId());
     }
 
     public static HashMap<UUID, Polygon> playerPolygons = new HashMap<>();
@@ -605,10 +615,10 @@ public class MetropolisListener implements Listener {
     @EventHandler
     public void onTeleport(PlayerTeleportEvent event) {
         Player player = event.getPlayer();
-        Location to = player.getLocation();
+        Location to = event.getTo(); // Use event.getTo() to get the destination location
         UUID playerId = player.getUniqueId();
 
-        if(AutoclaimManager.isAutoclaiming(player)) {
+        if (AutoclaimManager.isAutoclaiming(player)) {
             final String cityname = AutoclaimManager.getAutoclaimInfo(player).getCity().getCityName();
             AutoclaimManager.stopAutoclaim(player);
             Metropolis.sendMessage(player, "messages.city.autoclaim.stopped", "%cityname%", cityname);

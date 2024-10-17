@@ -9,6 +9,7 @@ import live.supeer.apied.ApiedAPI;
 import live.supeer.apied.MPlayer;
 import live.supeer.metropolis.Leaderboard;
 import live.supeer.metropolis.Metropolis;
+import live.supeer.metropolis.MetropolisListener;
 import live.supeer.metropolis.Standing;
 import live.supeer.metropolis.city.*;
 import live.supeer.metropolis.homecity.HCDatabase;
@@ -238,7 +239,9 @@ public class Utilities {
 
     public static void sendCityScoreboard(Player player, City city, Plot plot) {
         District district = Metropolis.playerInDistrict.get(player.getUniqueId());
-        FastBoard board = new FastBoard(player);
+
+        FastBoard board = MetropolisListener.scoreboards.get(player.getUniqueId());
+        board.updateLines();
         int i = 0;
         board.updateTitle(getFormattedTitle(city.getCityName()));
         board.updateLine(i, " ");
