@@ -6,8 +6,8 @@ import java.util.UUID;
 
 @Getter
 public class Standing {
-    private int plotId;
-    private UUID playerUUID;
+    private final int plotId;
+    private final UUID playerUUID;
     private int count;
 
     public Standing(int plotId, UUID playerUUID, int count) {

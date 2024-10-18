@@ -6,7 +6,6 @@ import live.supeer.metropolis.city.Member;
 import live.supeer.metropolis.city.Role;
 import live.supeer.metropolis.homecity.HCDatabase;
 import live.supeer.metropolis.plot.Plot;
-import live.supeer.metropolis.plot.PlotDatabase;
 import live.supeer.metropolis.utils.Utilities;
 import lombok.Setter;
 import org.bukkit.Location;
@@ -76,7 +75,7 @@ public class MetropolisAPI {
         if (role == null) {
             return false;
         }
-        return role.getPermissionLevel() >= role.getPermissionLevel();
+        return role.permissionLevel() >= role.permissionLevel();
     }
 
     public static boolean playerHasLocationPermissionFlags(UUID uuid, Location location, char flag) {

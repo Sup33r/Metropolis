@@ -1,6 +1,5 @@
 package live.supeer.metropolis;
 
-import live.supeer.apied.ApiedAPI;
 import live.supeer.metropolis.city.*;
 import live.supeer.metropolis.event.*;
 import live.supeer.metropolis.plot.Plot;
@@ -11,7 +10,6 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDeathEvent;
 
 import java.util.Objects;
 
@@ -108,7 +106,7 @@ public class CityListener implements Listener {
                                 + LocationUtil.formatChunk(
                                 claim.getClaimWorld().getName(), claim.getXPosition(), claim.getZPosition())
                                 + ", \"player\": "
-                                + player.getUniqueId().toString()
+                                + player.getUniqueId()
                                 + " }");
                 CityDatabase.removeCityBalance(city, Metropolis.configuration.getCityClaimCost());
                 AutoclaimManager.decrementAutoclaimCount(player);

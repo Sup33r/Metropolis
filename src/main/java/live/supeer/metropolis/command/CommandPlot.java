@@ -23,7 +23,6 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
-import org.jetbrains.annotations.NotNull;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
@@ -465,7 +464,7 @@ public class CommandPlot extends BaseCommand {
                     "%z%",
                     String.valueOf(plot.getPlotCenter().getBlockZ()));
         }
-        if (!player.hasPermission("metropolis.plot.info.coordinates") && role != null && role.getPermissionLevel() >= Role.ASSISTANT.getPermissionLevel()) {
+        if (!player.hasPermission("metropolis.plot.info.coordinates") && role != null && role.permissionLevel() >= Role.ASSISTANT.permissionLevel()) {
             Metropolis.sendMessage(
                     player,
                     "messages.plot.list.middle",

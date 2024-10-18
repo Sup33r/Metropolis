@@ -2,7 +2,6 @@ package live.supeer.metropolis.city;
 
 import co.aikar.idb.DB;
 import co.aikar.idb.DbRow;
-import live.supeer.metropolis.Metropolis;
 import lombok.Getter;
 
 @Getter

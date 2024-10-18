@@ -138,7 +138,7 @@ public class CommandCity extends BaseCommand {
 
         Metropolis.sendMessage(player, "messages.city.cityInfo.header", "%cityname%", city.getCityName(), "%claims%", String.valueOf(city.getCityClaims()), "%maxclaims%", String.valueOf(((city.getCityMembers().size() * 20) + city.getBonusClaims())), "%bonus%", String.valueOf(city.getBonusClaims()));
         if (role != null) {
-            Metropolis.sendMessage(player, "messages.city.cityInfo.role", "%role%", Objects.requireNonNull(Metropolis.getMessage("messages.city.roles." + role.getRoleName())).toLowerCase());
+            Metropolis.sendMessage(player, "messages.city.cityInfo.role", "%role%", Objects.requireNonNull(Metropolis.getMessage("messages.city.roles." + role.roleName())).toLowerCase());
         }
         if (city.getMotdMessage() != null)  {
             Metropolis.sendMessage(player, "messages.city.cityInfo.motd", "%motd%", city.getMotdMessage());
@@ -2514,8 +2514,8 @@ public class CommandCity extends BaseCommand {
         StringBuilder cityList = new StringBuilder();
         for (int i = 0; i < nearbyCities.size(); i++) {
             CityDistance cityDistance = nearbyCities.get(i);
-            City city = cityDistance.getCity();
-            int distance = cityDistance.getDistance();
+            City city = cityDistance.city();
+            int distance = cityDistance.distance();
             String set = distance + "m";
             if (inCity != null && inCity.equals(city)) {
                 set = Metropolis.getMessage("messages.words.here");
@@ -3034,7 +3034,7 @@ public class CommandCity extends BaseCommand {
             Metropolis.sendMessage(player, "messages.error.city.kick.notInCity", "%cityname%", city.getCityName());
             return;
         }
-        if (targetRole.getPermissionLevel() >= role.getPermissionLevel()) {
+        if (targetRole.permissionLevel() >= role.permissionLevel()) {
             Metropolis.sendMessage(player, "messages.error.city.kick.cannotKickHigherRole", "%cityname%", city.getCityName());
             return;
         }

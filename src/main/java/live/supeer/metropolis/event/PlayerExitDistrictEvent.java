@@ -1,7 +1,6 @@
 package live.supeer.metropolis.event;
 
 import live.supeer.metropolis.city.District;
-import live.supeer.metropolis.plot.Plot;
 import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;

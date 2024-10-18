@@ -17,7 +17,6 @@ import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.plot.PlotDatabase;
 import live.supeer.metropolis.plot.PlotPerms;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
@@ -27,7 +26,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
-import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
 
 import java.text.NumberFormat;
@@ -239,8 +237,10 @@ public class Utilities {
 
     public static void sendCityScoreboard(Player player, City city, Plot plot) {
         District district = Metropolis.playerInDistrict.get(player.getUniqueId());
-
         FastBoard board = MetropolisListener.scoreboards.get(player.getUniqueId());
+        if (board == null) {
+            return;
+        }
         board.updateLines();
         int i = 0;
         board.updateTitle(getFormattedTitle(city.getCityName()));
@@ -348,7 +348,11 @@ public class Utilities {
     }
 
     public static void sendNatureScoreboard(Player player) {
-        FastBoard board = new FastBoard(player);
+        FastBoard board = MetropolisListener.scoreboards.get(player.getUniqueId());
+        if (board == null) {
+            return;
+        }
+        board.updateLines();
         board.updateTitle(Metropolis.getMessage("messages.city.scoreboard.nature"));
         board.updateLine(0, Metropolis.getMessage("messages.city.scoreboard.pvp_on"));
     }
@@ -378,7 +382,7 @@ public class Utilities {
                 Metropolis.sendMessage(player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
                 return null;
             }
-            if (role.getPermissionLevel() < targetRole.getPermissionLevel()) {
+            if (role.permissionLevel() < targetRole.permissionLevel()) {
                 Metropolis.sendMessage(player, "messages.error.city.permissionDenied", "%cityname%", city.getCityName());
                 return null;
             }
@@ -401,7 +405,7 @@ public class Utilities {
                 return plot;
             }
             if (role != null && targetRole != null) {
-                if (role.getPermissionLevel() > targetRole.getPermissionLevel()) {
+                if (role.permissionLevel() > targetRole.permissionLevel()) {
                     return plot;
                 }
             }
@@ -412,7 +416,7 @@ public class Utilities {
                 Metropolis.sendMessage(player, "messages.error.city.permissionDenied", "%cityname%", plot.getCity().getCityName());
                 return null;
             }
-            if (role.getPermissionLevel() < targetRole.getPermissionLevel()) {
+            if (role.permissionLevel() < targetRole.permissionLevel()) {
                 Metropolis.sendMessage(player, "messages.error.city.permissionDenied", "%cityname%", plot.getCity().getCityName());
                 return null;
             }
@@ -486,7 +490,7 @@ public class Utilities {
     public static String offlinePlayerListToString(List<OfflinePlayer> players) {
         StringBuilder playerString = new StringBuilder();
         for (OfflinePlayer player : players) {
-            playerString.append(player.getUniqueId().toString()).append(",");
+            playerString.append(player.getUniqueId()).append(",");
         }
         return playerString.toString();
     }
@@ -546,11 +550,11 @@ public class Utilities {
         List<CityDistance> nearbyCities = CityDatabase.getCitiesWithinRadius(chunkCenter, Math.max(minChunkDistance, minSpawnDistance));
 
         for (CityDistance cityDistance : nearbyCities) {
-            City existingCity = cityDistance.getCity();
+            City existingCity = cityDistance.city();
             if (existingCity == null || existingCity.equals(city)) {
                 continue;
             }
-            int distance = cityDistance.getDistance();
+            int distance = cityDistance.distance();
 
             if (city == null) {
                 if (distance < minSpawnDistance) {
@@ -579,20 +583,18 @@ public class Utilities {
     }
 
     public static String taxPayedBy(String role) {
-        switch (role) {
-            case "mayor":
-                return Metropolis.getMessage("messages.city.cityInfo.roles.mayor") + ", " + Metropolis.getMessage("messages.city.cityInfo.roles.vicemayor") + ", " + Metropolis.getMessage("messages.city.cityInfo.roles.assistant") + ", " + Metropolis.getMessage("messages.city.cityInfo.roles.inviter") + " " + Metropolis.getMessage("messages.words.and") + " " + Metropolis.getMessage("messages.city.cityInfo.roles.member");
-            case "vicemayor":
-                return Metropolis.getMessage("messages.city.cityInfo.roles.vicemayor") + ", " + Metropolis.getMessage("messages.city.cityInfo.roles.assistant") + ", " + Metropolis.getMessage("messages.city.cityInfo.roles.inviter") + " " + Metropolis.getMessage("messages.words.and") + " " + Metropolis.getMessage("messages.city.cityInfo.roles.member");
-            case "assistant":
-                return Metropolis.getMessage("messages.city.cityInfo.roles.assistant") + ", " + Metropolis.getMessage("messages.city.cityInfo.roles.inviter") + " " + Metropolis.getMessage("messages.words.and") + " " + Metropolis.getMessage("messages.city.cityInfo.roles.member");
-            case "inviter":
-                return Metropolis.getMessage("messages.city.cityInfo.roles.inviter") + " " + Metropolis.getMessage("messages.words.and") + " " + Metropolis.getMessage("messages.city.cityInfo.roles.member");
-            case "none":
-                return Metropolis.getMessage("messages.city.cityInfo.roles.none");
-            default:
-                return Metropolis.getMessage("messages.city.cityInfo.roles.member");
-        }
+        return switch (role) {
+            case "mayor" ->
+                    Metropolis.getMessage("messages.city.cityInfo.roles.mayor") + ", " + Metropolis.getMessage("messages.city.cityInfo.roles.vicemayor") + ", " + Metropolis.getMessage("messages.city.cityInfo.roles.assistant") + ", " + Metropolis.getMessage("messages.city.cityInfo.roles.inviter") + " " + Metropolis.getMessage("messages.words.and") + " " + Metropolis.getMessage("messages.city.cityInfo.roles.member");
+            case "vicemayor" ->
+                    Metropolis.getMessage("messages.city.cityInfo.roles.vicemayor") + ", " + Metropolis.getMessage("messages.city.cityInfo.roles.assistant") + ", " + Metropolis.getMessage("messages.city.cityInfo.roles.inviter") + " " + Metropolis.getMessage("messages.words.and") + " " + Metropolis.getMessage("messages.city.cityInfo.roles.member");
+            case "assistant" ->
+                    Metropolis.getMessage("messages.city.cityInfo.roles.assistant") + ", " + Metropolis.getMessage("messages.city.cityInfo.roles.inviter") + " " + Metropolis.getMessage("messages.words.and") + " " + Metropolis.getMessage("messages.city.cityInfo.roles.member");
+            case "inviter" ->
+                    Metropolis.getMessage("messages.city.cityInfo.roles.inviter") + " " + Metropolis.getMessage("messages.words.and") + " " + Metropolis.getMessage("messages.city.cityInfo.roles.member");
+            case "none" -> Metropolis.getMessage("messages.city.cityInfo.roles.none");
+            default -> Metropolis.getMessage("messages.city.cityInfo.roles.member");
+        };
     }
 
     public static String formatStringList(List<String> items) {
@@ -603,7 +605,7 @@ public class Utilities {
         int size = items.size();
 
         if (size == 1) {
-            return items.get(0);
+            return items.getFirst();
         }
 
         if (size == 2) {
@@ -809,9 +811,7 @@ public class Utilities {
             paper.setItemMeta(paperMeta);
         }
 
-        GuiItem paperItem = new GuiItem(paper, event -> {
-            event.setCancelled(true);
-        });
+        GuiItem paperItem = new GuiItem(paper, event -> event.setCancelled(true));
 
         StaticPane pane = new StaticPane(0, 0, 1, 1);
         pane.addItem(paperItem, 0, 0);

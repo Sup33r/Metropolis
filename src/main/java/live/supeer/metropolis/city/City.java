@@ -382,7 +382,7 @@ public class City {
                 }
 
                 // Check if the member should pay tax based on their role
-                if (memberRole.getPermissionLevel() >= cityRole.getPermissionLevel()) {
+                if (memberRole.permissionLevel() >= cityRole.permissionLevel()) {
                     double taxRate = cityTax / 100.0; // Convert percentage to decimal
 
                     // Reduce tax rate for members in multiple cities

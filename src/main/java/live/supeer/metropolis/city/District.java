@@ -3,15 +3,12 @@ package live.supeer.metropolis.city;
 import co.aikar.idb.DB;
 import co.aikar.idb.DbRow;
 import live.supeer.apied.MPlayer;
-import live.supeer.metropolis.Database;
 import live.supeer.metropolis.Metropolis;
 import live.supeer.metropolis.utils.LocationUtil;
 import live.supeer.metropolis.utils.Utilities;
 import lombok.Getter;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
 
 import java.util.ArrayList;
@@ -20,7 +17,6 @@ import java.util.UUID;
 
 @Getter
 public class District {
-    private static final GeometryFactory geometryFactory = new GeometryFactory();
     private final String districtName;
     private final City city;
     private List<UUID> contactplayers;

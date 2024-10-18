@@ -4,9 +4,6 @@ import co.aikar.idb.DbRow;
 import live.supeer.metropolis.Metropolis;
 import lombok.Getter;
 import org.bukkit.World;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
 
 @Getter
 public class Claim {

@@ -432,7 +432,7 @@ public class CommandMetropolis extends BaseCommand {
             }
             CityDatabase.setCityRole(city, mPlayer.getUuid().toString(), newRole);
             Database.addLogEntry(city, "{ \"type\": \"rank\", \"subtype\": \"change\", \"from\": \"" + oldRole + "\", \"to\": \"" + newRole + "\", \"issuer\": \"" + player.getUniqueId() + "\", \"player\": \"" + mPlayer.getUuid() + "\" }");
-            Metropolis.sendMessage(player, "messages.city.admin.rank.success", "%cityname%", city.getCityName(), "%player%", mPlayer.getName(), "%role%", newRole.getRoleName());
+            Metropolis.sendMessage(player, "messages.city.admin.rank.success", "%cityname%", city.getCityName(), "%player%", mPlayer.getName(), "%role%", newRole.roleName());
 
         }
 
@@ -518,7 +518,7 @@ public class CommandMetropolis extends BaseCommand {
                         Database.addLogEntry(
                                 city,
                                 "{ \"type\": \"rank\", \"subtype\": \"change\", \"from\": "
-                                        + role.getRoleName()
+                                        + role.roleName()
                                         + ", \"to\": "
                                         + "mayor"
                                         + ", \"player\": "

@@ -139,7 +139,7 @@ public class CityDatabase {
                     player.getUniqueId().toString(),
                     city.getCityId(),
                     cityName,
-                    Role.MEMBER.getRoleName(),
+                    Role.MEMBER.roleName(),
                     DateUtil.getTimestamp());
             city.addCityMember(new Member(DB.getFirstRow("SELECT * FROM `mp_members` WHERE `cityId` = ? AND `playerUUID` = ?", city.getCityId(), player.getUniqueId().toString())));
             HCDatabase.setHomeCity(player.getUniqueId().toString(), city);
@@ -493,7 +493,7 @@ public class CityDatabase {
 
     public static void setCityRole(City city, String playerUUID, Role role) {
         try {
-            DB.executeUpdate("UPDATE `mp_members` SET `cityRole` = ? WHERE `playerUUID` = ? AND `cityId` = ?", role.getRoleName(), playerUUID, city.getCityId());
+            DB.executeUpdate("UPDATE `mp_members` SET `cityRole` = ? WHERE `playerUUID` = ? AND `cityId` = ?", role.roleName(), playerUUID, city.getCityId());
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -846,7 +846,7 @@ public class CityDatabase {
             }
 
             // Sort results by distance
-            result.sort(Comparator.comparingInt(CityDistance::getDistance));
+            result.sort(Comparator.comparingInt(CityDistance::distance));
 
         } catch (SQLException e) {
             e.printStackTrace();

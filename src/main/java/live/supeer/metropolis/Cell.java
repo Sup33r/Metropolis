@@ -5,16 +5,14 @@ import co.aikar.idb.DbRow;
 import live.supeer.metropolis.plot.Plot;
 import live.supeer.metropolis.plot.PlotDatabase;
 import live.supeer.metropolis.utils.LocationUtil;
-import live.supeer.metropolis.utils.Utilities;
 import lombok.Getter;
-import lombok.Setter;
 import org.bukkit.Location;
 import org.bukkit.block.sign.Side;
 
 @Getter
 public class Cell {
-    private int cellId;
-    private Plot jailPlot;
+    private final int cellId;
+    private final Plot jailPlot;
     private Location location;
     private String prisonerUUID;
     private Location signLocation;

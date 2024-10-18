@@ -1,7 +1,12 @@
 package live.supeer.metropolis;
 
 import fr.mrmicky.fastboard.FastBoard;
-import live.supeer.apied.*;
+import live.supeer.apied.Apied;
+import live.supeer.apied.ApiedAPI;
+import live.supeer.apied.ChestManager;
+import live.supeer.apied.MPlayer;
+import live.supeer.apied.MPlayerManager;
+import live.supeer.apied.ShopManager;
 import live.supeer.metropolis.city.City;
 import live.supeer.metropolis.city.CityDatabase;
 import live.supeer.metropolis.city.District;
@@ -193,7 +198,7 @@ public class MetropolisListener implements Listener {
                 assert block != null;
                 if (block.getState() instanceof Sign sign) {
                     event.setCancelled(true);
-                    ChestShop shop = ShopManager.getShopFromSign(sign);
+                    live.supeer.apied.ChestShop shop = ShopManager.getShopFromSign(sign);
                     if (ShopManager.isShopEventCounting(player.getUniqueId())) {
                         ShopManager.handleSignModify(player, sign);
                         return;
@@ -410,7 +415,7 @@ public class MetropolisListener implements Listener {
                     assert role != null;
                     Plot plot = PlotDatabase.getCityPlot(city, player.getLocation());
                     if (plot != null) {
-                        if (plot.getPlotOwnerUUID().equals(player.getUniqueId().toString()) || role.getPermissionLevel() > Role.ASSISTANT.getPermissionLevel()) {
+                        if (plot.getPlotOwnerUUID().equals(player.getUniqueId().toString()) || role.permissionLevel() > Role.ASSISTANT.permissionLevel()) {
                             coreProtectInteractCheck(player, event);
                         } else {
                             Metropolis.sendMessage(
@@ -933,7 +938,7 @@ public class MetropolisListener implements Listener {
                     assert role != null;
                     Plot plot = PlotDatabase.getCityPlot(city, player.getLocation());
                     if (plot != null) {
-                        if (plot.getPlotOwnerUUID().equals(player.getUniqueId().toString()) || role.getPermissionLevel() > Role.ASSISTANT.getPermissionLevel()) {
+                        if (plot.getPlotOwnerUUID().equals(player.getUniqueId().toString()) || role.permissionLevel() > Role.ASSISTANT.permissionLevel()) {
                             coreProtectPlaceCheck(player, event);
                         } else {
                             Metropolis.sendMessage(

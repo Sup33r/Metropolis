@@ -269,9 +269,7 @@ public final class Metropolis extends JavaPlugin {
 
         long initialDelay = nextRun.getTimeInMillis() - now.getTimeInMillis();
 
-        getServer().getScheduler().runTaskTimer(this, () -> {
-            getServer().getScheduler().runTask(this, PlotDatabase::collectPlotRents);
-        }, initialDelay / 50, 7 * 24 * 60 * 60 * 20); // Convert to ticks (20 ticks = 1 second)
+        getServer().getScheduler().runTaskTimer(this, () -> getServer().getScheduler().runTask(this, PlotDatabase::collectPlotRents), initialDelay / 50, 7 * 24 * 60 * 60 * 20); // Convert to ticks (20 ticks = 1 second)
     }
 
     public void scheduleDailyTaxCollection() {
@@ -288,9 +286,7 @@ public final class Metropolis extends JavaPlugin {
 
         long initialDelay = nextRun.getTimeInMillis() - now.getTimeInMillis();
 
-        getServer().getScheduler().runTaskTimer(this, () -> {
-            getServer().getScheduler().runTask(this, CityDatabase::collectTaxes);
-        }, initialDelay / 50, 24 * 60 * 60 * 20); // Convert to ticks (20 ticks = 1 second)
+        getServer().getScheduler().runTaskTimer(this, () -> getServer().getScheduler().runTask(this, CityDatabase::collectTaxes), initialDelay / 50, 24 * 60 * 60 * 20); // Convert to ticks (20 ticks = 1 second)
     }
 
     public void scheduleUnban(ExpiringBan expiringBan) {
