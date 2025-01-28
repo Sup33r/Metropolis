@@ -12,6 +12,7 @@ import live.supeer.metropolis.plot.PlotDatabase;
 import live.supeer.metropolis.utils.Utilities;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.BlockType;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -321,6 +322,7 @@ public class ProtectionListener implements Listener {
             event.setCancelled(true);
             Metropolis.sendAccessDenied(player);
         }
+        
     }
 
     //EVENTS WITH THE FLAG 'a' (ANIMAL)
